@@ -29,6 +29,14 @@ function clamp(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, value));
 }
 
+/**
+ * Une équipe est identifiée par ses 5 héros, indépendamment de leur ordre.
+ * Le tri permet également de regrouper plusieurs combats avec la même équipe.
+ */
+function teamKey(ids: string[]): string {
+  return uniqueIds(ids).sort().join("|");
+}
+
 // ============================================================
 // UTILISATION DES HÉROS
 // ============================================================
@@ -152,13 +160,10 @@ export function heroStatScore(hero: Hero): number {
   const { hp, atk, matk, def, mdef } = hero.stats;
 
   const totalAttack = atk + matk;
-
   const totalDefense = def + mdef;
 
   const hpScore = hp / 1000;
-
   const attackScore = totalAttack / 100;
-
   const defenseScore = totalDefense / 10;
 
   return hpScore + attackScore + defenseScore;
@@ -173,7 +178,6 @@ export function scoreHero(
   usage: Record<string, HeroUsage>
 ): HeroScore {
   const usageScore = heroUsageScore(hero.id, usage);
-
   const statScore = heroStatScore(hero);
 
   return {
@@ -211,7 +215,6 @@ export function evaluateTeamHistory(
 
   for (const combat of combats) {
     const historicalTeam = new Set(combat.my_heroes ?? []);
-
     const matches = team.every((heroId) => historicalTeam.has(heroId));
 
     if (!matches) continue;
@@ -243,11 +246,9 @@ export function evaluateTeam(
   usage: Record<string, HeroUsage>
 ): TeamEvaluation {
   const teamIds = team.map((hero) => hero.id);
-
   const history = evaluateTeamHistory(teamIds, combats);
 
   const usageValues = team.map((hero) => heroUsageScore(hero.id, usage));
-
   const statValues = team.map((hero) => heroStatScore(hero));
 
   const usageScore =
@@ -298,43 +299,85 @@ function isSameEnemyTeam(
   enemyIds: string[],
   combatEnemyIds: string[]
 ): boolean {
-  const enemy = new Set(uniqueIds(enemyIds));
-
-  const combatEnemy = uniqueIds(combatEnemyIds);
-
-  if (enemy.size !== combatEnemy.length) {
-    return false;
-  }
-
-  return combatEnemy.every((heroId) => enemy.has(heroId));
+  return teamKey(enemyIds) === teamKey(combatEnemyIds);
 }
 
 // ============================================================
 // MEILLEURE ÉQUIPE HISTORIQUE
 // ============================================================
 
+/**
+ * Cherche les équipes gagnantes exactes contre la même composition ennemie.
+ *
+ * Important : plusieurs équipes peuvent avoir gagné contre les mêmes 5 ennemis.
+ * On les regroupe donc par composition avant de choisir la meilleure.
+ *
+ * Priorité :
+ *   1. nombre de victoires avec cette équipe contre ces ennemis
+ *   2. taux de victoire de cette équipe contre ces ennemis
+ *   3. nombre total de combats avec cette équipe contre ces ennemis
+ *   4. score global (usage + statistiques) comme départageur
+ */
 export function findBestHistoricalTeam(
   enemyIds: string[],
   combats: Combat[],
   heroes: Hero[]
 ): Hero[] | null {
-  let bestTeam: Hero[] | null = null;
-
-  let bestScore = -Infinity;
-
-  const usage = calculateHeroUsage(combats, heroes);
+  const candidates = new Map<
+    string,
+    {
+      heroIds: string[];
+      wins: number;
+      losses: number;
+    }
+  >();
 
   for (const combat of combats) {
     if (!isSameEnemyTeam(enemyIds, combat.enemy_heroes ?? [])) {
       continue;
     }
 
-    // On ne veut que les victoires.
-    if (!combat.won) {
+    const heroIds = uniqueIds(combat.my_heroes ?? []);
+
+    if (heroIds.length !== TEAM_SIZE) {
       continue;
     }
 
-    const team = uniqueIds(combat.my_heroes ?? [])
+    const key = teamKey(heroIds);
+    let candidate = candidates.get(key);
+
+    if (!candidate) {
+      candidate = {
+        heroIds,
+        wins: 0,
+        losses: 0,
+      };
+      candidates.set(key, candidate);
+    }
+
+    if (combat.won) {
+      candidate.wins += 1;
+    } else {
+      candidate.losses += 1;
+    }
+  }
+
+  const winningCandidates = [...candidates.values()].filter(
+    (candidate) => candidate.wins > 0
+  );
+
+  if (winningCandidates.length === 0) {
+    return null;
+  }
+
+  const usage = calculateHeroUsage(combats, heroes);
+
+  let bestTeam: Hero[] | null = null;
+  let bestCandidate: (typeof winningCandidates)[number] | null = null;
+  let bestEvaluation: TeamEvaluation | null = null;
+
+  for (const candidate of winningCandidates) {
+    const team = candidate.heroIds
       .map((id) => heroes.find((hero) => hero.id === id))
       .filter((hero): hero is Hero => Boolean(hero));
 
@@ -342,11 +385,35 @@ export function findBestHistoricalTeam(
       continue;
     }
 
+    const battles = candidate.wins + candidate.losses;
+    const winRate = calculateWinRate(candidate.wins, battles);
     const evaluation = evaluateTeam(team, combats, usage);
 
-    if (evaluation.score > bestScore) {
-      bestScore = evaluation.score;
-
+    if (!bestCandidate ||
+      candidate.wins > bestCandidate.wins ||
+      (candidate.wins === bestCandidate.wins &&
+        winRate >
+          calculateWinRate(
+            bestCandidate.wins,
+            bestCandidate.wins + bestCandidate.losses
+          )) ||
+      (candidate.wins === bestCandidate.wins &&
+        winRate ===
+          calculateWinRate(
+            bestCandidate.wins,
+            bestCandidate.wins + bestCandidate.losses
+          ) &&
+        battles > bestCandidate.wins + bestCandidate.losses) ||
+      (candidate.wins === bestCandidate.wins &&
+        winRate ===
+          calculateWinRate(
+            bestCandidate.wins,
+            bestCandidate.wins + bestCandidate.losses
+          ) &&
+        battles === bestCandidate.wins + bestCandidate.losses &&
+        evaluation.score > (bestEvaluation?.score ?? -Infinity))) {
+      bestCandidate = candidate;
+      bestEvaluation = evaluation;
       bestTeam = team;
     }
   }
@@ -430,15 +497,8 @@ function counterHeroScore(
   >
 ): number {
   const general = heroUsageScore(hero.id, usage);
-
   const stats = heroStatScore(hero);
-
   const counter = counterUsage[hero.id];
-
-  // ----------------------------------------------------------
-  // Le comportement du héros contre cette composition
-  // est beaucoup plus important que ses statistiques brutes.
-  // ----------------------------------------------------------
 
   let counterScore = 0;
 
@@ -458,29 +518,20 @@ export function recommendTeam(
   heroes: Hero[],
   combats: Combat[]
 ): Hero[] {
-  // ----------------------------------------------------------
-  // 1. Sécurité
-  // ----------------------------------------------------------
-
   if (enemyIds.length === 0) {
     return [];
   }
 
   const enemySet = new Set(enemyIds);
 
-  // ----------------------------------------------------------
-  // 2. Équipe historique gagnante exacte
-  // ----------------------------------------------------------
-
+  // Une victoire historique exacte est prioritaire.
+  // findBestHistoricalTeam regroupe maintenant les différentes équipes
+  // gagnantes contre cette même composition ennemie.
   const historicalTeam = findBestHistoricalTeam(enemyIds, combats, heroes);
 
   if (historicalTeam && historicalTeam.length === TEAM_SIZE) {
     return historicalTeam;
   }
-
-  // ----------------------------------------------------------
-  // 3. Héros disponibles
-  // ----------------------------------------------------------
 
   const availableHeroes = heroes.filter((hero) => !enemySet.has(hero.id));
 
@@ -488,17 +539,8 @@ export function recommendTeam(
     return availableHeroes;
   }
 
-  // ----------------------------------------------------------
-  // 4. Données historiques
-  // ----------------------------------------------------------
-
   const usage = calculateHeroUsage(combats, heroes);
-
   const counterUsage = calculateCounterUsage(enemyIds, combats);
-
-  // ----------------------------------------------------------
-  // 5. Classer les candidats
-  // ----------------------------------------------------------
 
   const ranked = availableHeroes
     .map((hero) => ({
@@ -508,16 +550,6 @@ export function recommendTeam(
     .sort(
       (a, b) => b.score - a.score || a.hero.name.localeCompare(b.hero.name)
     );
-
-  // ----------------------------------------------------------
-  // 6. Construction progressive
-  //
-  // On ne prend PAS simplement les 5 premiers.
-  //
-  // On pénalise les répétitions de classe afin d'éviter
-  // qu'un classement individuel transforme automatiquement
-  // l'équipe en 5 STR / 5 AGI / 5 INT.
-  // ----------------------------------------------------------
 
   const recommended: Hero[] = [];
 
@@ -529,22 +561,11 @@ export function recommendTeam(
 
   while (recommended.length < TEAM_SIZE && ranked.length > 0) {
     let bestIndex = -1;
-
     let bestAdjustedScore = -Infinity;
 
     for (let i = 0; i < ranked.length; i++) {
       const candidate = ranked[i];
-
       const currentCount = classCounts[candidate.hero.cls] ?? 0;
-
-      // ------------------------------------------------------
-      // Pénalité progressive de classe.
-      //
-      // 1er héros : aucune pénalité
-      // 2e héros : légère pénalité
-      // 3e héros : forte pénalité
-      // 4e/5e : très forte pénalité
-      // ------------------------------------------------------
 
       let classPenalty = 0;
 
@@ -564,7 +585,6 @@ export function recommendTeam(
 
       if (adjustedScore > bestAdjustedScore) {
         bestAdjustedScore = adjustedScore;
-
         bestIndex = i;
       }
     }
@@ -576,7 +596,6 @@ export function recommendTeam(
     const selected = ranked.splice(bestIndex, 1)[0].hero;
 
     recommended.push(selected);
-
     classCounts[selected.cls] = (classCounts[selected.cls] ?? 0) + 1;
   }
 
