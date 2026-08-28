@@ -31,7 +31,6 @@ export default function HeroCard({
       ].join(" ")}
     >
       <div className="flex min-h-[180px] flex-col">
-
         {/* ====================================================
             NOM + PSEUDO
             ==================================================== */}
@@ -68,7 +67,6 @@ export default function HeroCard({
             IMAGE + STATISTIQUES
             ==================================================== */}
         <div className="flex flex-1 items-center px-2 pb-2 pt-2">
-
           {/* IMAGE */}
           <div className="flex w-[42%] shrink-0 items-center justify-center">
             <img
@@ -122,13 +120,7 @@ export default function HeroCard({
 // LIGNE D'UNE STATISTIQUE
 // ============================================================
 
-function StatLine({
-  label,
-  value,
-}: {
-  label: string;
-  value: number;
-}) {
+function StatLine({ label, value }: { label: string; value: number }) {
   return (
     <div className="flex items-center justify-between gap-2">
       <span className="text-[10px] font-semibold tracking-wide text-slate-400">

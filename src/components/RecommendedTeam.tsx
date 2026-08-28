@@ -20,13 +20,9 @@ export default function RecommendedTeam({
 
       <div className="mb-4 flex items-center justify-between gap-3">
         <div>
-          <h2 className="text-base font-bold text-white">
-            Équipe recommandée
-          </h2>
+          <h2 className="text-base font-bold text-white">Équipe recommandée</h2>
 
-          <p className="mt-0.5 text-xs text-slate-500">
-            {heroes.length}/5
-          </p>
+          <p className="mt-0.5 text-xs text-slate-500">{heroes.length}/5</p>
         </div>
 
         {score !== undefined && (
@@ -58,11 +54,7 @@ export default function RecommendedTeam({
               hero={hero}
               selected
               selectionOrder={index + 1}
-              onClick={
-                onHeroClick
-                  ? () => onHeroClick(hero)
-                  : undefined
-              }
+              onClick={onHeroClick ? () => onHeroClick(hero) : undefined}
             />
           ))}
         </div>

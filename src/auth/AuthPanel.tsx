@@ -4,34 +4,22 @@ import { useEffect, useState } from "react";
 
 import type { Session } from "@supabase/supabase-js";
 
-import {
-  getSession,
-  signIn,
-  signOut,
-  onAuthStateChange,
-} from "./auth";
+import { getSession, signIn, signOut, onAuthStateChange } from "./auth";
 
 export default function AuthPanel() {
-  const [session, setSession] =
-    useState<Session | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
 
-  const [showLogin, setShowLogin] =
-    useState(false);
+  const [showLogin, setShowLogin] = useState(false);
 
-  const [email, setEmail] =
-    useState("");
+  const [email, setEmail] = useState("");
 
-  const [password, setPassword] =
-    useState("");
+  const [password, setPassword] = useState("");
 
-  const [loading, setLoading] =
-    useState(true);
+  const [loading, setLoading] = useState(true);
 
-  const [submitting, setSubmitting] =
-    useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
-  const [error, setError] =
-    useState("");
+  const [error, setError] = useState("");
 
   // ============================================================
   // SESSION
@@ -42,17 +30,13 @@ export default function AuthPanel() {
 
     async function loadSession() {
       try {
-        const currentSession =
-          await getSession();
+        const currentSession = await getSession();
 
         if (mounted) {
           setSession(currentSession);
         }
       } catch (error) {
-        console.error(
-          "Impossible de récupérer la session :",
-          error
-        );
+        console.error("Impossible de récupérer la session :", error);
       } finally {
         if (mounted) {
           setLoading(false);
@@ -64,11 +48,9 @@ export default function AuthPanel() {
 
     const {
       data: { subscription },
-    } = onAuthStateChange(
-      (currentSession) => {
-        setSession(currentSession);
-      }
-    );
+    } = onAuthStateChange((currentSession) => {
+      setSession(currentSession);
+    });
 
     return () => {
       mounted = false;
@@ -80,32 +62,22 @@ export default function AuthPanel() {
   // CONNEXION
   // ============================================================
 
-  async function handleSignIn(
-    event: React.FormEvent<HTMLFormElement>
-  ) {
+  async function handleSignIn(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     setError("");
     setSubmitting(true);
 
     try {
-      await signIn(
-        email.trim(),
-        password
-      );
+      await signIn(email.trim(), password);
 
       setPassword("");
       setShowLogin(false);
     } catch (error) {
-      console.error(
-        "Erreur de connexion :",
-        error
-      );
+      console.error("Erreur de connexion :", error);
 
       setError(
-        error instanceof Error
-          ? error.message
-          : "Connexion impossible."
+        error instanceof Error ? error.message : "Connexion impossible."
       );
     } finally {
       setSubmitting(false);
@@ -123,15 +95,10 @@ export default function AuthPanel() {
     try {
       await signOut();
     } catch (error) {
-      console.error(
-        "Erreur de déconnexion :",
-        error
-      );
+      console.error("Erreur de déconnexion :", error);
 
       setError(
-        error instanceof Error
-          ? error.message
-          : "Déconnexion impossible."
+        error instanceof Error ? error.message : "Déconnexion impossible."
       );
     } finally {
       setSubmitting(false);
@@ -143,8 +110,7 @@ export default function AuthPanel() {
   // ============================================================
 
   function getUserName() {
-    const metadata =
-      session?.user?.user_metadata;
+    const metadata = session?.user?.user_metadata;
 
     return (
       metadata?.display_name ||
@@ -180,9 +146,7 @@ export default function AuthPanel() {
           disabled={submitting}
           className="rounded-md border border-slate-700 bg-slate-900 px-2.5 py-1.5 text-[11px] font-bold text-slate-400 transition hover:border-red-400/50 hover:text-red-300 disabled:opacity-50"
         >
-          {submitting
-            ? "..."
-            : "Déconnexion"}
+          {submitting ? "..." : "Déconnexion"}
         </button>
       </div>
     );
@@ -219,9 +183,7 @@ export default function AuthPanel() {
       <input
         type="email"
         value={email}
-        onChange={(event) =>
-          setEmail(event.target.value)
-        }
+        onChange={(event) => setEmail(event.target.value)}
         placeholder="Email"
         autoComplete="email"
         className="w-40 rounded-md border border-slate-700 bg-slate-950 px-2.5 py-1.5 text-xs text-white outline-none placeholder:text-slate-600 focus:border-sky-400"
@@ -231,9 +193,7 @@ export default function AuthPanel() {
       <input
         type="password"
         value={password}
-        onChange={(event) =>
-          setPassword(event.target.value)
-        }
+        onChange={(event) => setPassword(event.target.value)}
         placeholder="Mot de passe"
         autoComplete="current-password"
         className="w-32 rounded-md border border-slate-700 bg-slate-950 px-2.5 py-1.5 text-xs text-white outline-none placeholder:text-slate-600 focus:border-sky-400"
@@ -259,11 +219,7 @@ export default function AuthPanel() {
         ✕
       </button>
 
-      {error && (
-        <span className="text-[10px] text-red-400">
-          {error}
-        </span>
-      )}
+      {error && <span className="text-[10px] text-red-400">{error}</span>}
     </form>
   );
 }

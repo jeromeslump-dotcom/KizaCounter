@@ -1,9 +1,4 @@
-import type {
-  Combat,
-  Hero,
-  HeroClassFilter,
-  HeroSort,
-} from "../types";
+import type { Combat, Hero, HeroClassFilter, HeroSort } from "../types";
 
 import CompactTeam from "./CompactTeam";
 import CombatForm from "./CombatForm";
@@ -66,15 +61,12 @@ export default function CounterModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-2 backdrop-blur-sm sm:p-4">
-
       <div className="flex max-h-[96vh] w-full max-w-6xl flex-col overflow-hidden rounded-2xl border border-slate-700 bg-slate-900 shadow-2xl">
-
         {/* ==================================================
             HEADER MODALE
             ================================================== */}
 
         <div className="flex items-center justify-between border-b border-slate-700 px-4 py-3 sm:px-5 sm:py-4">
-
           <div>
             <h2 className="text-lg font-black text-white sm:text-xl">
               ⚔️ Contre recommandée
@@ -93,7 +85,6 @@ export default function CounterModal({
           >
             ✕
           </button>
-
         </div>
 
         {/* ==================================================
@@ -101,7 +92,6 @@ export default function CounterModal({
             ================================================== */}
 
         <div className="overflow-y-auto p-3 sm:p-5">
-
           {/* ==================================================
               ENNEMIS
               ================================================== */}
@@ -131,13 +121,11 @@ export default function CounterModal({
 
           {recommendedTeam.length > 0 && (
             <div className="mt-4 rounded-xl border border-sky-500/20 bg-sky-500/5 p-2 sm:p-3">
-
               <div className="mb-2 whitespace-nowrap text-[10px] font-bold uppercase tracking-wide text-sky-300 sm:text-xs">
                 Recommandation initiale
               </div>
 
               <div className="grid grid-cols-5 gap-1.5 sm:gap-2">
-
                 {recommendedTeam.map((hero) => (
                   <button
                     key={hero.id}
@@ -151,12 +139,9 @@ export default function CounterModal({
                         : "border-slate-700 bg-slate-950 text-slate-400",
                     ].join(" ")}
                   >
-                    <span className="block truncate">
-                      {hero.name}
-                    </span>
+                    <span className="block truncate">{hero.name}</span>
                   </button>
                 ))}
-
               </div>
             </div>
           )}
@@ -166,13 +151,7 @@ export default function CounterModal({
               ================================================== */}
 
           <div className="mt-4">
-
-            <CombatForm
-              enemies={enemies}
-              myHeroes={team}
-              onSave={onSave}
-            />
-
+            <CombatForm enemies={enemies} myHeroes={team} onSave={onSave} />
           </div>
 
           {/* ==================================================
@@ -180,10 +159,8 @@ export default function CounterModal({
               ================================================== */}
 
           <div className="mt-5">
-
             <div className="mb-3 text-sm font-bold text-slate-200">
-              Roster — cliquez sur un héros pour l'ajouter
-              ou le retirer
+              Roster — cliquez sur un héros pour l'ajouter ou le retirer
             </div>
 
             <HeroGrid
@@ -199,9 +176,7 @@ export default function CounterModal({
               onSortChange={onSortChange}
               onHeroClick={onHeroClick}
             />
-
           </div>
-
         </div>
       </div>
     </div>

@@ -88,34 +88,28 @@ export default function EnemyPanel({
             ))}
           </div>
         )
-      ) : (
-        /* ====================================================
+      ) : /* ====================================================
            MODE DÉTAILLÉ
            ==================================================== */
 
-        heroes.length === 0 ? (
-          <div className="rounded-lg border border-dashed border-slate-700 bg-slate-950/50 p-6 text-center">
-            <p className="text-sm text-slate-500">
-              Sélectionnez jusqu'à {maxHeroes} héros ennemis.
-            </p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 gap-3">
-            {heroes.map((hero, index) => (
-              <HeroCard
-                key={hero.id}
-                hero={hero}
-                selected
-                selectionOrder={index + 1}
-                onClick={
-                  onHeroClick
-                    ? () => onHeroClick(hero)
-                    : undefined
-                }
-              />
-            ))}
-          </div>
-        )
+      heroes.length === 0 ? (
+        <div className="rounded-lg border border-dashed border-slate-700 bg-slate-950/50 p-6 text-center">
+          <p className="text-sm text-slate-500">
+            Sélectionnez jusqu'à {maxHeroes} héros ennemis.
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 gap-3">
+          {heroes.map((hero, index) => (
+            <HeroCard
+              key={hero.id}
+              hero={hero}
+              selected
+              selectionOrder={index + 1}
+              onClick={onHeroClick ? () => onHeroClick(hero) : undefined}
+            />
+          ))}
+        </div>
       )}
     </section>
   );

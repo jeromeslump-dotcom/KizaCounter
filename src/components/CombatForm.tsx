@@ -22,10 +22,7 @@ export default function CombatForm({
   async function handleResult(won: boolean) {
     if (saving) return;
 
-    if (
-      enemies.length === 0 ||
-      myHeroes.length === 0
-    ) {
+    if (enemies.length === 0 || myHeroes.length === 0) {
       return;
     }
 
@@ -33,12 +30,8 @@ export default function CombatForm({
 
     try {
       await onSave({
-        enemy_heroes: enemies.map(
-          (hero) => hero.id
-        ),
-        my_heroes: myHeroes.map(
-          (hero) => hero.id
-        ),
+        enemy_heroes: enemies.map((hero) => hero.id),
+        my_heroes: myHeroes.map((hero) => hero.id),
         won,
       });
     } finally {
@@ -48,7 +41,6 @@ export default function CombatForm({
 
   return (
     <section className="w-full rounded-xl border border-slate-700 bg-slate-900/80 p-4">
-
       {/* ======================================================
           TITRE
           ====================================================== */}
@@ -64,7 +56,6 @@ export default function CombatForm({
           ====================================================== */}
 
       <div className="grid grid-cols-2 gap-2">
-
         {/* VICTOIRE */}
 
         <button
@@ -112,7 +103,6 @@ export default function CombatForm({
         >
           👎 Défaite
         </button>
-
       </div>
 
       {/* ======================================================
@@ -139,7 +129,6 @@ export default function CombatForm({
           Enregistrement...
         </p>
       )}
-
     </section>
   );
 }

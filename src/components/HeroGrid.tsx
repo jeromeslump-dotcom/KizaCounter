@@ -1,13 +1,8 @@
-
 // src/components/HeroGrid.tsx
 
 import { useMemo } from "react";
 
-import type {
-  Hero,
-  HeroClassFilter,
-  HeroSort,
-} from "../types";
+import type { Hero, HeroClassFilter, HeroSort } from "../types";
 
 import HeroCard from "./HeroCard";
 import { filterAndSortHeroes } from "../utils/heroRanking";
@@ -33,13 +28,9 @@ interface HeroGridProps {
 
   onQueryChange: (query: string) => void;
 
-  onClassChange: (
-    cls: HeroClassFilter
-  ) => void;
+  onClassChange: (cls: HeroClassFilter) => void;
 
-  onSortChange: (
-    sort: HeroSort
-  ) => void;
+  onSortChange: (sort: HeroSort) => void;
 
   onHeroClick: (hero: Hero) => void;
 }
@@ -66,31 +57,18 @@ export default function HeroGrid({
   // ==========================================================
 
   const filteredHeroes = useMemo(() => {
-    return filterAndSortHeroes(
-      heroes,
-      {
-        enabledHeroIds,
+    return filterAndSortHeroes(heroes, {
+      enabledHeroIds,
 
-        activeClass:
-          activeClass === "ALL"
-            ? "All"
-            : activeClass,
+      activeClass: activeClass === "ALL" ? "All" : activeClass,
 
-        query,
+      query,
 
-        sortBy,
+      sortBy,
 
-        usage,
-      }
-    );
-  }, [
-    heroes,
-    enabledHeroIds,
-    activeClass,
-    query,
-    sortBy,
-    usage,
-  ]);
+      usage,
+    });
+  }, [heroes, enabledHeroIds, activeClass, query, sortBy, usage]);
 
   // ==========================================================
   // RENDER
@@ -98,15 +76,12 @@ export default function HeroGrid({
 
   return (
     <section className="w-full">
-
       {/* ======================================================
           FILTRES
           ====================================================== */}
 
       <div className="mb-3 rounded-xl border border-slate-700 bg-slate-900/80 p-2 sm:mb-4 sm:p-3">
-
         <div className="flex flex-col gap-2 sm:gap-3">
-
           {/* ==================================================
               RECHERCHE
               ================================================== */}
@@ -114,9 +89,7 @@ export default function HeroGrid({
           <input
             type="text"
             value={query}
-            onChange={(event) =>
-              onQueryChange(event.target.value)
-            }
+            onChange={(event) => onQueryChange(event.target.value)}
             placeholder="🔍 Rechercher un héros ou un pseudo..."
             className="h-9 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 text-xs text-white outline-none transition placeholder:text-slate-500 focus:border-sky-400 sm:h-auto sm:py-2 sm:text-sm"
           />
@@ -126,13 +99,11 @@ export default function HeroGrid({
               ================================================== */}
 
           <div className="grid grid-cols-2 gap-2 sm:gap-3">
-
             {/* =================================================
                 CLASSE
                 ================================================= */}
 
             <div className="flex flex-col gap-0.5">
-
               <label className="px-1 text-[9px] font-bold uppercase tracking-wide text-slate-500 sm:text-[11px] sm:text-slate-400">
                 Classe
               </label>
@@ -140,29 +111,18 @@ export default function HeroGrid({
               <select
                 value={activeClass}
                 onChange={(event) =>
-                  onClassChange(
-                    event.target.value as HeroClassFilter
-                  )
+                  onClassChange(event.target.value as HeroClassFilter)
                 }
                 className="h-8 w-full rounded-lg border border-slate-700 bg-slate-950 px-2 text-xs font-semibold text-white outline-none transition focus:border-sky-400 sm:h-auto sm:px-3 sm:py-2 sm:text-sm"
               >
-                <option value="ALL">
-                  Toutes
-                </option>
+                <option value="ALL">Toutes</option>
 
-                <option value="STR">
-                  STR
-                </option>
+                <option value="STR">STR</option>
 
-                <option value="AGI">
-                  AGI
-                </option>
+                <option value="AGI">AGI</option>
 
-                <option value="INT">
-                  INT
-                </option>
+                <option value="INT">INT</option>
               </select>
-
             </div>
 
             {/* =================================================
@@ -170,7 +130,6 @@ export default function HeroGrid({
                 ================================================= */}
 
             <div className="flex flex-col gap-0.5">
-
               <label className="px-1 text-[9px] font-bold uppercase tracking-wide text-slate-500 sm:text-[11px] sm:text-slate-400">
                 Trier par
               </label>
@@ -178,51 +137,29 @@ export default function HeroGrid({
               <select
                 value={sortBy}
                 onChange={(event) =>
-                  onSortChange(
-                    event.target.value as HeroSort
-                  )
+                  onSortChange(event.target.value as HeroSort)
                 }
                 className="h-8 w-full rounded-lg border border-slate-700 bg-slate-950 px-2 text-xs text-white outline-none transition focus:border-sky-400 sm:h-auto sm:px-3 sm:py-2 sm:text-sm"
               >
-                <option value="played">
-                  Joué
-                </option>
+                <option value="played">Joué</option>
 
-                <option value="hp">
-                  PV
-                </option>
+                <option value="hp">PV</option>
 
-                <option value="atk">
-                  ATK
-                </option>
+                <option value="atk">ATK</option>
 
-                <option value="matk">
-                  MATK
-                </option>
+                <option value="matk">MATK</option>
 
-                <option value="totalAtk">
-                  ATK totale
-                </option>
+                <option value="totalAtk">ATK totale</option>
 
-                <option value="def">
-                  DEF
-                </option>
+                <option value="def">DEF</option>
 
-                <option value="mdef">
-                  MDEF
-                </option>
+                <option value="mdef">MDEF</option>
 
-                <option value="totalDef">
-                  DEF totale
-                </option>
+                <option value="totalDef">DEF totale</option>
               </select>
-
             </div>
-
           </div>
-
         </div>
-
       </div>
 
       {/* ======================================================
@@ -230,18 +167,12 @@ export default function HeroGrid({
           ====================================================== */}
 
       <div className="mb-3 flex items-center justify-between">
-
-        <span className="text-sm font-semibold text-slate-300">
-          Héros
-        </span>
+        <span className="text-sm font-semibold text-slate-300">Héros</span>
 
         <span className="text-xs text-slate-500">
           {filteredHeroes.length} résultat
-          {filteredHeroes.length !== 1
-            ? "s"
-            : ""}
+          {filteredHeroes.length !== 1 ? "s" : ""}
         </span>
-
       </div>
 
       {/* ======================================================
@@ -249,47 +180,28 @@ export default function HeroGrid({
           ====================================================== */}
 
       {filteredHeroes.length === 0 ? (
-
         <div className="rounded-xl border border-dashed border-slate-700 bg-slate-900/50 p-8 text-center">
-
-          <p className="text-sm text-slate-400">
-            Aucun héros trouvé.
-          </p>
-
+          <p className="text-sm text-slate-400">Aucun héros trouvé.</p>
         </div>
-
       ) : (
-
         <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 2xl:grid-cols-5">
-
           {filteredHeroes.map((hero) => {
-
-            const selectionIndex =
-              selectedIds.indexOf(hero.id);
+            const selectionIndex = selectedIds.indexOf(hero.id);
 
             return (
               <HeroCard
                 key={hero.id}
                 hero={hero}
-                selected={
-                  selectionIndex !== -1
-                }
+                selected={selectionIndex !== -1}
                 selectionOrder={
-                  selectionIndex !== -1
-                    ? selectionIndex + 1
-                    : undefined
+                  selectionIndex !== -1 ? selectionIndex + 1 : undefined
                 }
-                onClick={() =>
-                  onHeroClick(hero)
-                }
+                onClick={() => onHeroClick(hero)}
               />
             );
           })}
-
         </div>
-
       )}
-
     </section>
   );
 }

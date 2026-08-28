@@ -1,7 +1,5 @@
 // src/auth/auth.ts
 
-
-
 import { supabase } from "../storage/supabase";
 
 import type { Session } from "@supabase/supabase-js";
@@ -17,10 +15,7 @@ export async function getSession(): Promise<Session | null> {
   } = await supabase.auth.getSession();
 
   if (error) {
-    console.error(
-      "Erreur récupération session Supabase :",
-      error
-    );
+    console.error("Erreur récupération session Supabase :", error);
 
     throw error;
   }
@@ -36,17 +31,13 @@ export async function signIn(
   email: string,
   password: string
 ): Promise<Session> {
-  const { data, error } =
-    await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
 
   if (error) {
-    console.error(
-      "Erreur connexion Supabase :",
-      error
-    );
+    console.error("Erreur connexion Supabase :", error);
 
     throw error;
   }
@@ -65,14 +56,10 @@ export async function signIn(
 // ============================================================
 
 export async function signOut(): Promise<void> {
-  const { error } =
-    await supabase.auth.signOut();
+  const { error } = await supabase.auth.signOut();
 
   if (error) {
-    console.error(
-      "Erreur déconnexion Supabase :",
-      error
-    );
+    console.error("Erreur déconnexion Supabase :", error);
 
     throw error;
   }
@@ -82,14 +69,8 @@ export async function signOut(): Promise<void> {
 // ÉCOUTER LES CHANGEMENTS DE SESSION
 // ============================================================
 
-export function onAuthStateChange(
-  callback: (
-    session: Session | null
-  ) => void
-) {
-  return supabase.auth.onAuthStateChange(
-    (_event, session) => {
-      callback(session);
-    }
-  );
+export function onAuthStateChange(callback: (session: Session | null) => void) {
+  return supabase.auth.onAuthStateChange((_event, session) => {
+    callback(session);
+  });
 }

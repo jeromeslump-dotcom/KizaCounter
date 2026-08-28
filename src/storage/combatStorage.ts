@@ -19,10 +19,7 @@ export async function loadCombats(): Promise<Combat[]> {
     });
 
   if (error) {
-    console.error(
-      "Erreur chargement combats :",
-      error
-    );
+    console.error("Erreur chargement combats :", error);
 
     throw error;
   }
@@ -37,7 +34,6 @@ export async function loadCombats(): Promise<Combat[]> {
 export async function addCombat(
   combat: Omit<Combat, "id" | "created_at">
 ): Promise<Combat> {
-
   // ----------------------------------------------------------
   // Vérifier la session
   // ----------------------------------------------------------
@@ -48,10 +44,7 @@ export async function addCombat(
   } = await supabase.auth.getUser();
 
   if (userError) {
-    console.error(
-      "Erreur récupération utilisateur Supabase :",
-      userError
-    );
+    console.error("Erreur récupération utilisateur Supabase :", userError);
 
     throw userError;
   }
@@ -91,10 +84,7 @@ export async function addCombat(
     .single();
 
   if (error) {
-    console.error(
-      "Erreur ajout combat :",
-      error
-    );
+    console.error("Erreur ajout combat :", error);
 
     throw error;
   }
@@ -106,19 +96,11 @@ export async function addCombat(
 // SUPPRIMER UN COMBAT
 // ============================================================
 
-export async function deleteCombat(
-  combatId: string
-): Promise<void> {
-  const { error } = await supabase
-    .from("combats")
-    .delete()
-    .eq("id", combatId);
+export async function deleteCombat(combatId: string): Promise<void> {
+  const { error } = await supabase.from("combats").delete().eq("id", combatId);
 
   if (error) {
-    console.error(
-      "Erreur suppression combat :",
-      error
-    );
+    console.error("Erreur suppression combat :", error);
 
     throw error;
   }

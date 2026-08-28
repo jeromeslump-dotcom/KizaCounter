@@ -34,9 +34,7 @@ export default function TeamPanel({
 
       {heroes.length === 0 ? (
         <div className="rounded-lg border border-dashed border-slate-700 bg-slate-950/50 p-6 text-center">
-          <p className="text-sm text-slate-500">
-            {emptyMessage}
-          </p>
+          <p className="text-sm text-slate-500">{emptyMessage}</p>
         </div>
       ) : (
         /* ====================================================
@@ -53,15 +51,9 @@ export default function TeamPanel({
                 hero={hero}
                 selected={selectedIndex !== -1}
                 selectionOrder={
-                  selectedIndex !== -1
-                    ? selectedIndex + 1
-                    : index + 1
+                  selectedIndex !== -1 ? selectedIndex + 1 : index + 1
                 }
-                onClick={
-                  onHeroClick
-                    ? () => onHeroClick(hero)
-                    : undefined
-                }
+                onClick={onHeroClick ? () => onHeroClick(hero) : undefined}
               />
             );
           })}

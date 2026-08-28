@@ -25,11 +25,7 @@ function uniqueIds(ids: string[]): string[] {
   return [...new Set(ids)];
 }
 
-function clamp(
-  value: number,
-  min: number,
-  max: number
-): number {
+function clamp(value: number, min: number, max: number): number {
   return Math.max(min, Math.min(max, value));
 }
 
@@ -76,10 +72,7 @@ export function calculateHeroUsage(
   }
 
   for (const entry of Object.values(usage)) {
-    entry.winRate =
-      entry.total > 0
-        ? (entry.wins / entry.total) * 100
-        : 0;
+    entry.winRate = entry.total > 0 ? (entry.wins / entry.total) * 100 : 0;
   }
 
   return usage;
@@ -89,10 +82,7 @@ export function calculateHeroUsage(
 // TAUX DE VICTOIRE
 // ============================================================
 
-export function calculateWinRate(
-  wins: number,
-  total: number
-): number {
+export function calculateWinRate(wins: number, total: number): number {
   if (total <= 0) return 0;
 
   return (wins / total) * 100;
@@ -124,15 +114,12 @@ export function coverageReport(
     }
   }
 
-  const covered = team.filter((heroId) =>
-    used.has(heroId)
-  ).length;
+  const covered = team.filter((heroId) => used.has(heroId)).length;
 
   return {
     covered,
     total: team.length,
-    percentage:
-      (covered / team.length) * 100,
+    percentage: (covered / team.length) * 100,
   };
 }
 
@@ -152,53 +139,29 @@ export function heroUsageScore(
 
   const winRateScore = entry.winRate;
 
-  const experienceBonus = Math.min(
-    entry.total * 2,
-    20
-  );
+  const experienceBonus = Math.min(entry.total * 2, 20);
 
-  return clamp(
-    winRateScore + experienceBonus,
-    0,
-    120
-  );
+  return clamp(winRateScore + experienceBonus, 0, 120);
 }
 
 // ============================================================
 // SCORE STATISTIQUE D'UN HÉROS
 // ============================================================
 
-export function heroStatScore(
-  hero: Hero
-): number {
-  const {
-    hp,
-    atk,
-    matk,
-    def,
-    mdef,
-  } = hero.stats;
+export function heroStatScore(hero: Hero): number {
+  const { hp, atk, matk, def, mdef } = hero.stats;
 
-  const totalAttack =
-    atk + matk;
+  const totalAttack = atk + matk;
 
-  const totalDefense =
-    def + mdef;
+  const totalDefense = def + mdef;
 
-  const hpScore =
-    hp / 1000;
+  const hpScore = hp / 1000;
 
-  const attackScore =
-    totalAttack / 100;
+  const attackScore = totalAttack / 100;
 
-  const defenseScore =
-    totalDefense / 10;
+  const defenseScore = totalDefense / 10;
 
-  return (
-    hpScore +
-    attackScore +
-    defenseScore
-  );
+  return hpScore + attackScore + defenseScore;
 }
 
 // ============================================================
@@ -209,20 +172,13 @@ export function scoreHero(
   hero: Hero,
   usage: Record<string, HeroUsage>
 ): HeroScore {
-  const usageScore =
-    heroUsageScore(
-      hero.id,
-      usage
-    );
+  const usageScore = heroUsageScore(hero.id, usage);
 
-  const statScore =
-    heroStatScore(hero);
+  const statScore = heroStatScore(hero);
 
   return {
     heroId: hero.id,
-    score:
-      usageScore +
-      statScore,
+    score: usageScore + statScore,
   };
 }
 
@@ -239,8 +195,7 @@ export function evaluateTeamHistory(
   battles: number;
   winRate: number;
 } {
-  const team =
-    uniqueIds(teamIds);
+  const team = uniqueIds(teamIds);
 
   if (team.length === 0) {
     return {
@@ -255,15 +210,9 @@ export function evaluateTeamHistory(
   let losses = 0;
 
   for (const combat of combats) {
-    const historicalTeam =
-      new Set(
-        combat.my_heroes ?? []
-      );
+    const historicalTeam = new Set(combat.my_heroes ?? []);
 
-    const matches =
-      team.every((heroId) =>
-        historicalTeam.has(heroId)
-      );
+    const matches = team.every((heroId) => historicalTeam.has(heroId));
 
     if (!matches) continue;
 
@@ -274,18 +223,13 @@ export function evaluateTeamHistory(
     }
   }
 
-  const battles =
-    wins + losses;
+  const battles = wins + losses;
 
   return {
     wins,
     losses,
     battles,
-    winRate:
-      calculateWinRate(
-        wins,
-        battles
-      ),
+    winRate: calculateWinRate(wins, battles),
   };
 }
 
@@ -298,65 +242,32 @@ export function evaluateTeam(
   combats: Combat[],
   usage: Record<string, HeroUsage>
 ): TeamEvaluation {
-  const teamIds =
-    team.map(
-      (hero) => hero.id
-    );
+  const teamIds = team.map((hero) => hero.id);
 
-  const history =
-    evaluateTeamHistory(
-      teamIds,
-      combats
-    );
+  const history = evaluateTeamHistory(teamIds, combats);
 
-  const usageValues =
-    team.map((hero) =>
-      heroUsageScore(
-        hero.id,
-        usage
-      )
-    );
+  const usageValues = team.map((hero) => heroUsageScore(hero.id, usage));
 
-  const statValues =
-    team.map((hero) =>
-      heroStatScore(hero)
-    );
+  const statValues = team.map((hero) => heroStatScore(hero));
 
   const usageScore =
     usageValues.length > 0
-      ? usageValues.reduce(
-          (sum, value) =>
-            sum + value,
-          0
-        ) /
-        usageValues.length
+      ? usageValues.reduce((sum, value) => sum + value, 0) / usageValues.length
       : 0;
 
   const statScore =
     statValues.length > 0
-      ? statValues.reduce(
-          (sum, value) =>
-            sum + value,
-          0
-        ) /
-        statValues.length
+      ? statValues.reduce((sum, value) => sum + value, 0) / statValues.length
       : 0;
 
-  const score =
-    history.winRate * 2 +
-    usageScore * 0.5 +
-    statScore;
+  const score = history.winRate * 2 + usageScore * 0.5 + statScore;
 
   return {
     score,
-    historicalWins:
-      history.wins,
-    historicalLosses:
-      history.losses,
-    historicalBattles:
-      history.battles,
-    historicalWinRate:
-      history.winRate,
+    historicalWins: history.wins,
+    historicalLosses: history.losses,
+    historicalBattles: history.battles,
+    historicalWinRate: history.winRate,
     usageScore,
     statScore,
   };
@@ -371,20 +282,11 @@ export function scoreTeam(
   combats: Combat[],
   usage: Record<string, HeroUsage>
 ): TeamScore {
-  const evaluation =
-    evaluateTeam(
-      team,
-      combats,
-      usage
-    );
+  const evaluation = evaluateTeam(team, combats, usage);
 
   return {
-    heroIds:
-      team.map(
-        (hero) => hero.id
-      ),
-    score:
-      evaluation.score,
+    heroIds: team.map((hero) => hero.id),
+    score: evaluation.score,
   };
 }
 
@@ -396,27 +298,15 @@ function isSameEnemyTeam(
   enemyIds: string[],
   combatEnemyIds: string[]
 ): boolean {
-  const enemy =
-    new Set(
-      uniqueIds(enemyIds)
-    );
+  const enemy = new Set(uniqueIds(enemyIds));
 
-  const combatEnemy =
-    uniqueIds(
-      combatEnemyIds
-    );
+  const combatEnemy = uniqueIds(combatEnemyIds);
 
-  if (
-    enemy.size !==
-    combatEnemy.length
-  ) {
+  if (enemy.size !== combatEnemy.length) {
     return false;
   }
 
-  return combatEnemy.every(
-    (heroId) =>
-      enemy.has(heroId)
-  );
+  return combatEnemy.every((heroId) => enemy.has(heroId));
 }
 
 // ============================================================
@@ -428,26 +318,14 @@ export function findBestHistoricalTeam(
   combats: Combat[],
   heroes: Hero[]
 ): Hero[] | null {
-  let bestTeam:
-    | Hero[]
-    | null = null;
+  let bestTeam: Hero[] | null = null;
 
-  let bestScore =
-    -Infinity;
+  let bestScore = -Infinity;
 
-  const usage =
-    calculateHeroUsage(
-      combats,
-      heroes
-    );
+  const usage = calculateHeroUsage(combats, heroes);
 
   for (const combat of combats) {
-    if (
-      !isSameEnemyTeam(
-        enemyIds,
-        combat.enemy_heroes ?? []
-      )
-    ) {
+    if (!isSameEnemyTeam(enemyIds, combat.enemy_heroes ?? [])) {
       continue;
     }
 
@@ -456,46 +334,20 @@ export function findBestHistoricalTeam(
       continue;
     }
 
-    const team =
-      uniqueIds(
-        combat.my_heroes ?? []
-      )
-        .map((id) =>
-          heroes.find(
-            (hero) =>
-              hero.id === id
-          )
-        )
-        .filter(
-          (
-            hero
-          ): hero is Hero =>
-            Boolean(hero)
-        );
+    const team = uniqueIds(combat.my_heroes ?? [])
+      .map((id) => heroes.find((hero) => hero.id === id))
+      .filter((hero): hero is Hero => Boolean(hero));
 
-    if (
-      team.length !==
-      TEAM_SIZE
-    ) {
+    if (team.length !== TEAM_SIZE) {
       continue;
     }
 
-    const evaluation =
-      evaluateTeam(
-        team,
-        combats,
-        usage
-      );
+    const evaluation = evaluateTeam(team, combats, usage);
 
-    if (
-      evaluation.score >
-      bestScore
-    ) {
-      bestScore =
-        evaluation.score;
+    if (evaluation.score > bestScore) {
+      bestScore = evaluation.score;
 
-      bestTeam =
-        team;
+      bestTeam = team;
     }
   }
 
@@ -529,17 +381,11 @@ function calculateCounterUsage(
   > = {};
 
   for (const combat of combats) {
-    if (
-      !isSameEnemyTeam(
-        enemyIds,
-        combat.enemy_heroes ?? []
-      )
-    ) {
+    if (!isSameEnemyTeam(enemyIds, combat.enemy_heroes ?? [])) {
       continue;
     }
 
-    for (const heroId of
-      combat.my_heroes ?? []) {
+    for (const heroId of combat.my_heroes ?? []) {
       if (!result[heroId]) {
         result[heroId] = {
           wins: 0,
@@ -559,14 +405,8 @@ function calculateCounterUsage(
     }
   }
 
-  for (const entry of
-    Object.values(result)) {
-    entry.winRate =
-      entry.total > 0
-        ? (entry.wins /
-            entry.total) *
-          100
-        : 0;
+  for (const entry of Object.values(result)) {
+    entry.winRate = entry.total > 0 ? (entry.wins / entry.total) * 100 : 0;
   }
 
   return result;
@@ -589,19 +429,11 @@ function counterHeroScore(
     }
   >
 ): number {
-  const general =
-    heroUsageScore(
-      hero.id,
-      usage
-    );
+  const general = heroUsageScore(hero.id, usage);
 
-  const stats =
-    heroStatScore(hero);
+  const stats = heroStatScore(hero);
 
-  const counter =
-    counterUsage[
-      hero.id
-    ];
+  const counter = counterUsage[hero.id];
 
   // ----------------------------------------------------------
   // Le comportement du héros contre cette composition
@@ -611,19 +443,10 @@ function counterHeroScore(
   let counterScore = 0;
 
   if (counter) {
-    counterScore =
-      counter.winRate * 2 +
-      Math.min(
-        counter.total * 3,
-        15
-      );
+    counterScore = counter.winRate * 2 + Math.min(counter.total * 3, 15);
   }
 
-  return (
-    counterScore +
-    general * 0.25 +
-    stats * 0.15
-  );
+  return counterScore + general * 0.25 + stats * 0.15;
 }
 
 // ============================================================
@@ -639,31 +462,19 @@ export function recommendTeam(
   // 1. Sécurité
   // ----------------------------------------------------------
 
-  if (
-    enemyIds.length === 0
-  ) {
+  if (enemyIds.length === 0) {
     return [];
   }
 
-  const enemySet =
-    new Set(enemyIds);
+  const enemySet = new Set(enemyIds);
 
   // ----------------------------------------------------------
   // 2. Équipe historique gagnante exacte
   // ----------------------------------------------------------
 
-  const historicalTeam =
-    findBestHistoricalTeam(
-      enemyIds,
-      combats,
-      heroes
-    );
+  const historicalTeam = findBestHistoricalTeam(enemyIds, combats, heroes);
 
-  if (
-    historicalTeam &&
-    historicalTeam.length ===
-      TEAM_SIZE
-  ) {
+  if (historicalTeam && historicalTeam.length === TEAM_SIZE) {
     return historicalTeam;
   }
 
@@ -671,18 +482,9 @@ export function recommendTeam(
   // 3. Héros disponibles
   // ----------------------------------------------------------
 
-  const availableHeroes =
-    heroes.filter(
-      (hero) =>
-        !enemySet.has(
-          hero.id
-        )
-    );
+  const availableHeroes = heroes.filter((hero) => !enemySet.has(hero.id));
 
-  if (
-    availableHeroes.length <=
-    TEAM_SIZE
-  ) {
+  if (availableHeroes.length <= TEAM_SIZE) {
     return availableHeroes;
   }
 
@@ -690,41 +492,22 @@ export function recommendTeam(
   // 4. Données historiques
   // ----------------------------------------------------------
 
-  const usage =
-    calculateHeroUsage(
-      combats,
-      heroes
-    );
+  const usage = calculateHeroUsage(combats, heroes);
 
-  const counterUsage =
-    calculateCounterUsage(
-      enemyIds,
-      combats
-    );
+  const counterUsage = calculateCounterUsage(enemyIds, combats);
 
   // ----------------------------------------------------------
   // 5. Classer les candidats
   // ----------------------------------------------------------
 
-  const ranked =
-    availableHeroes
-      .map((hero) => ({
-        hero,
-        score:
-          counterHeroScore(
-            hero,
-            usage,
-            counterUsage
-          ),
-      }))
-      .sort(
-        (a, b) =>
-          b.score -
-            a.score ||
-          a.hero.name.localeCompare(
-            b.hero.name
-          )
-      );
+  const ranked = availableHeroes
+    .map((hero) => ({
+      hero,
+      score: counterHeroScore(hero, usage, counterUsage),
+    }))
+    .sort(
+      (a, b) => b.score - a.score || a.hero.name.localeCompare(b.hero.name)
+    );
 
   // ----------------------------------------------------------
   // 6. Construction progressive
@@ -736,39 +519,23 @@ export function recommendTeam(
   // l'équipe en 5 STR / 5 AGI / 5 INT.
   // ----------------------------------------------------------
 
-  const recommended:
-    Hero[] = [];
+  const recommended: Hero[] = [];
 
-  const classCounts:
-    Record<string, number> = {
-      STR: 0,
-      AGI: 0,
-      INT: 0,
-    };
+  const classCounts: Record<string, number> = {
+    STR: 0,
+    AGI: 0,
+    INT: 0,
+  };
 
-  while (
-    recommended.length <
-      TEAM_SIZE &&
-    ranked.length > 0
-  ) {
-    let bestIndex =
-      -1;
+  while (recommended.length < TEAM_SIZE && ranked.length > 0) {
+    let bestIndex = -1;
 
-    let bestAdjustedScore =
-      -Infinity;
+    let bestAdjustedScore = -Infinity;
 
-    for (
-      let i = 0;
-      i < ranked.length;
-      i++
-    ) {
-      const candidate =
-        ranked[i];
+    for (let i = 0; i < ranked.length; i++) {
+      const candidate = ranked[i];
 
-      const currentCount =
-        classCounts[
-          candidate.hero.cls
-        ] ?? 0;
+      const currentCount = classCounts[candidate.hero.cls] ?? 0;
 
       // ------------------------------------------------------
       // Pénalité progressive de classe.
@@ -779,69 +546,38 @@ export function recommendTeam(
       // 4e/5e : très forte pénalité
       // ------------------------------------------------------
 
-      let classPenalty =
-        0;
+      let classPenalty = 0;
 
-      if (
-        currentCount >= 1
-      ) {
-        classPenalty +=
-          8 *
-          currentCount;
+      if (currentCount >= 1) {
+        classPenalty += 8 * currentCount;
       }
 
-      if (
-        currentCount >= 2
-      ) {
-        classPenalty +=
-          20;
+      if (currentCount >= 2) {
+        classPenalty += 20;
       }
 
-      if (
-        currentCount >= 3
-      ) {
-        classPenalty +=
-          40;
+      if (currentCount >= 3) {
+        classPenalty += 40;
       }
 
-      const adjustedScore =
-        candidate.score -
-        classPenalty;
+      const adjustedScore = candidate.score - classPenalty;
 
-      if (
-        adjustedScore >
-        bestAdjustedScore
-      ) {
-        bestAdjustedScore =
-          adjustedScore;
+      if (adjustedScore > bestAdjustedScore) {
+        bestAdjustedScore = adjustedScore;
 
-        bestIndex =
-          i;
+        bestIndex = i;
       }
     }
 
-    if (
-      bestIndex < 0
-    ) {
+    if (bestIndex < 0) {
       break;
     }
 
-    const selected =
-      ranked.splice(
-        bestIndex,
-        1
-      )[0].hero;
+    const selected = ranked.splice(bestIndex, 1)[0].hero;
 
-    recommended.push(
-      selected
-    );
+    recommended.push(selected);
 
-    classCounts[
-      selected.cls
-    ] =
-      (classCounts[
-        selected.cls
-      ] ?? 0) + 1;
+    classCounts[selected.cls] = (classCounts[selected.cls] ?? 0) + 1;
   }
 
   return recommended;
@@ -851,26 +587,10 @@ export function recommendTeam(
 // TRI DES HÉROS PAR SCORE
 // ============================================================
 
-export function rankHeroes(
-  heroes: Hero[],
-  combats: Combat[]
-): HeroScore[] {
-  const usage =
-    calculateHeroUsage(
-      combats,
-      heroes
-    );
+export function rankHeroes(heroes: Hero[], combats: Combat[]): HeroScore[] {
+  const usage = calculateHeroUsage(combats, heroes);
 
   return heroes
-    .map((hero) =>
-      scoreHero(
-        hero,
-        usage
-      )
-    )
-    .sort(
-      (a, b) =>
-        b.score -
-        a.score
-    );
+    .map((hero) => scoreHero(hero, usage))
+    .sort((a, b) => b.score - a.score);
 }

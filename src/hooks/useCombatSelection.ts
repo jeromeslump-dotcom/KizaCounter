@@ -31,15 +31,13 @@ export default function useCombatSelection({
   // MODALE CONTRE
   // ============================================================
 
-  const [showCounterModal, setShowCounterModal] =
-    useState(false);
+  const [showCounterModal, setShowCounterModal] = useState(false);
 
   // ============================================================
   // RECOMMANDATION INITIALE
   // ============================================================
 
-  const [recommendedIds, setRecommendedIds] =
-    useState<string[]>([]);
+  const [recommendedIds, setRecommendedIds] = useState<string[]>([]);
 
   // ============================================================
   // HÉROS ENNEMIS
@@ -48,13 +46,8 @@ export default function useCombatSelection({
   const enemies = useMemo(
     () =>
       enemyIds
-        .map((id) =>
-          heroes.find((hero) => hero.id === id)
-        )
-        .filter(
-          (hero): hero is Hero =>
-            Boolean(hero)
-        ),
+        .map((id) => heroes.find((hero) => hero.id === id))
+        .filter((hero): hero is Hero => Boolean(hero)),
     [enemyIds, heroes]
   );
 
@@ -65,13 +58,8 @@ export default function useCombatSelection({
   const team = useMemo(
     () =>
       teamIds
-        .map((id) =>
-          heroes.find((hero) => hero.id === id)
-        )
-        .filter(
-          (hero): hero is Hero =>
-            Boolean(hero)
-        ),
+        .map((id) => heroes.find((hero) => hero.id === id))
+        .filter((hero): hero is Hero => Boolean(hero)),
     [teamIds, heroes]
   );
 
@@ -85,13 +73,8 @@ export default function useCombatSelection({
     }
 
     return recommendedIds
-      .map((id) =>
-        heroes.find((hero) => hero.id === id)
-      )
-      .filter(
-        (hero): hero is Hero =>
-          Boolean(hero)
-      );
+      .map((id) => heroes.find((hero) => hero.id === id))
+      .filter((hero): hero is Hero => Boolean(hero));
   }, [recommendedIds, heroes]);
 
   // ============================================================
@@ -99,15 +82,9 @@ export default function useCombatSelection({
   // ============================================================
 
   function openCounterModal(enemyTeamIds: string[]) {
-    const recommendation = recommendTeam(
-      enemyTeamIds,
-      heroes,
-      combats
-    );
+    const recommendation = recommendTeam(enemyTeamIds, heroes, combats);
 
-    const ids = recommendation.map(
-      (hero) => hero.id
-    );
+    const ids = recommendation.map((hero) => hero.id);
 
     setRecommendedIds(ids);
     setTeamIds(ids);
@@ -122,9 +99,7 @@ export default function useCombatSelection({
     setEnemyIds((current) => {
       // Retirer le héros
       if (current.includes(hero.id)) {
-        return current.filter(
-          (id) => id !== hero.id
-        );
+        return current.filter((id) => id !== hero.id);
       }
 
       // Maximum 5 ennemis
@@ -159,9 +134,7 @@ export default function useCombatSelection({
     setTeamIds((current) => {
       // Retirer le héros
       if (current.includes(hero.id)) {
-        return current.filter(
-          (id) => id !== hero.id
-        );
+        return current.filter((id) => id !== hero.id);
       }
 
       // Maximum 5 héros
@@ -187,9 +160,7 @@ export default function useCombatSelection({
       // Si le héros est déjà dans l'équipe :
       // on le retire.
       if (current.includes(hero.id)) {
-        return current.filter(
-          (id) => id !== hero.id
-        );
+        return current.filter((id) => id !== hero.id);
       }
 
       // Impossible de sélectionner un ennemi.

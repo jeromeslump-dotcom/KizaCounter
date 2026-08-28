@@ -1,15 +1,10 @@
-
 // src/App.tsx
 
 import { useEffect, useMemo, useState } from "react";
 
 import { HEROES } from "./data/heroes";
 
-import type {
-  Combat,
-  HeroClassFilter,
-  HeroSort,
-} from "./types";
+import type { Combat, HeroClassFilter, HeroSort } from "./types";
 
 import HeroGrid from "./components/HeroGrid";
 import EnemyPanel from "./components/EnemyPanel";
@@ -18,15 +13,9 @@ import AuthPanel from "./auth/AuthPanel";
 
 import useCombatSelection from "./hooks/useCombatSelection";
 
-import {
-  addCombat,
-  loadCombats,
-} from "./storage/combatStorage";
+import { addCombat, loadCombats } from "./storage/combatStorage";
 
-import {
-  getSession,
-  onAuthStateChange,
-} from "./auth/auth";
+import { getSession, onAuthStateChange } from "./auth/auth";
 
 const TEAM_SIZE = 5;
 
@@ -41,8 +30,7 @@ export default function App() {
   // AUTH
   // ============================================================
 
-  const [isAuthenticated, setIsAuthenticated] =
-    useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   // ============================================================
   // SÉLECTION DU COMBAT
@@ -68,13 +56,11 @@ export default function App() {
   // FILTRES DU ROSTER
   // ============================================================
 
-  const [activeClass, setActiveClass] =
-    useState<HeroClassFilter>("ALL");
+  const [activeClass, setActiveClass] = useState<HeroClassFilter>("ALL");
 
   const [query, setQuery] = useState("");
 
-  const [sortBy, setSortBy] =
-    useState<HeroSort>("played");
+  const [sortBy, setSortBy] = useState<HeroSort>("played");
 
   // ============================================================
   // AUTH + CHARGEMENT DES COMBATS
@@ -124,10 +110,7 @@ export default function App() {
           );
         }
       } catch (error) {
-        console.error(
-          "Impossible de récupérer la session :",
-          error
-        );
+        console.error("Impossible de récupérer la session :", error);
 
         if (mounted) {
           setIsAuthenticated(false);
@@ -195,8 +178,7 @@ export default function App() {
 
     for (const combat of combats) {
       for (const heroId of combat.my_heroes ?? []) {
-        usage[heroId] =
-          (usage[heroId] ?? 0) + 1;
+        usage[heroId] = (usage[heroId] ?? 0) + 1;
       }
     }
 
@@ -216,32 +198,21 @@ export default function App() {
   // ENREGISTREMENT WIN / LOSE
   // ============================================================
 
-  async function handleSaveCombat(
-    combat: Combat
-  ) {
+  async function handleSaveCombat(combat: Combat) {
     // Sécurité côté interface.
     // Supabase/RLS reste la vraie protection.
     if (!isAuthenticated) {
-      throw new Error(
-        "Vous devez être connecté pour enregistrer un combat."
-      );
+      throw new Error("Vous devez être connecté pour enregistrer un combat.");
     }
 
     try {
-      const savedCombat =
-        await addCombat(combat);
+      const savedCombat = await addCombat(combat);
 
-      setCombats((current) => [
-        savedCombat,
-        ...current,
-      ]);
+      setCombats((current) => [savedCombat, ...current]);
 
       resetCombat();
     } catch (error) {
-      console.error(
-        "Impossible d'enregistrer le combat :",
-        error
-      );
+      console.error("Impossible d'enregistrer le combat :", error);
 
       throw error;
     }
@@ -254,14 +225,12 @@ export default function App() {
   return (
     <main className="min-h-screen bg-slate-950 text-white">
       <div className="mx-auto w-full max-w-[1800px] px-4 py-6 sm:px-6 lg:px-8">
-
         {/* ======================================================
             HEADER
             ====================================================== */}
 
         <header className="mb-4 sm:mb-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-
             <div>
               <h1 className="text-xl font-black tracking-tight sm:text-2xl">
                 Lords Mobile Counter
@@ -272,13 +241,12 @@ export default function App() {
               </p>
 
               <p className="mt-1 hidden text-sm text-slate-400 sm:block">
-                Sélectionnez les héros ennemis pour trouver
-                la meilleure contre-équipe.
+                Sélectionnez les héros ennemis pour trouver la meilleure
+                contre-équipe.
               </p>
             </div>
 
             <AuthPanel />
-
           </div>
         </header>
 
@@ -343,4 +311,3 @@ export default function App() {
     </main>
   );
 }
-
