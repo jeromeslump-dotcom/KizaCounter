@@ -1,0 +1,12 @@
+node_modules/
+dist/
+.env
+.env.*
+!.env.example
+*.local
+
+node_modules/
+dist/
+*.tsbuildinfo
+vite.config.js
+vite.config.d.ts
