@@ -1,5 +1,7 @@
 import type { Hero } from "../types";
 
+import SelectionOrderBadge from "./SelectionOrderBadge";
+
 interface CompactTeamProps {
   title: string;
   heroes: Hero[];
@@ -34,7 +36,6 @@ export default function CompactTeam({
         <div className="grid grid-cols-5 gap-1.5 sm:gap-2">
           {heroes.map((hero, index) => {
             const selectedIndex = selectedIds.indexOf(hero.id);
-
             const order = selectedIndex !== -1 ? selectedIndex + 1 : index + 1;
 
             return (
@@ -63,37 +64,9 @@ export default function CompactTeam({
                     loading="lazy"
                   />
 
-                  {/* ==================================================
-                      BADGE ORDRE
-                      Téléphone : très petit
-                      PC       : taille normale
-                      ================================================== */}
-                  <div
-                    className="
-                      absolute left-0.5 top-0.5
-                      flex h-3 w-3
-                      items-center justify-center
-                      rounded-full
-                      border border-white/90
-                      bg-amber-500
-                      text-[5px] font-black leading-none
-                      text-slate-950
-                      shadow
-
-                      sm:left-1 sm:top-1
-                      sm:h-5 sm:w-5
-                      sm:text-[10px]
-                    "
-                  >
-                    {order}
-                  </div>
+                  <SelectionOrderBadge order={order} />
                 </div>
 
-                {/* ==================================================
-                    NOM
-                    Téléphone : petit
-                    PC       : plus gros
-                    ================================================== */}
                 <div
                   className="
                     truncate px-1 py-1
