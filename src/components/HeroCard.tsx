@@ -4,16 +4,6 @@ import type { Hero } from "../types";
 
 import SelectionOrderBadge from "./SelectionOrderBadge";
 
-// ============================================================
-// PAPIER PEINT DES CARTES SELON LA CLASSE
-// ============================================================
-
-const CLASS_GRADIENT: Record<Hero["cls"], string> = {
-  STR: "from-rose-900/60 via-red-950/30 to-slate-950/90",
-  AGI: "from-emerald-900/60 via-green-950/30 to-slate-950/90",
-  INT: "from-sky-900/60 via-blue-950/30 to-slate-950/90",
-};
-
 interface HeroCardProps {
   hero: Hero;
   selected?: boolean;
@@ -44,14 +34,9 @@ export default function HeroCard({
     >
       {/* ====================================================
           PAPIER PEINT — COULEUR SELON LA CLASSE
-          STR = ROUGE / AGI = VERT / INT = BLEU
           ==================================================== */}
       <div
-        className={[
-          "pointer-events-none absolute inset-0",
-          "bg-gradient-to-br",
-          CLASS_GRADIENT[hero.cls],
-        ].join(" ")}
+        className={`pointer-events-none absolute inset-0 hero-card-wallpaper-${hero.cls.toLowerCase()}`}
       />
 
       <div className="relative z-10 flex min-h-[180px] flex-col">
