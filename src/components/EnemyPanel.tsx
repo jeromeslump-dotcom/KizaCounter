@@ -48,7 +48,7 @@ export default function EnemyPanel({
                 key={hero.id}
                 type="button"
                 onClick={() => onHeroClick?.(hero)}
-                className="ui-card group relative w-[calc((100%-1.5rem)/4)] min-w-0 max-w-[220px] overflow-hidden rounded-xl border transition hover:border-red-400 sm:w-[180px]"
+                className="ui-card ui-hover-red group relative w-[calc((100%-1.5rem)/4)] min-w-0 max-w-[220px] overflow-hidden rounded-xl border transition sm:w-[180px]"
                 title={`Retirer ${hero.name}`}
               >
                 <div className="relative z-10 aspect-square w-full overflow-hidden">
