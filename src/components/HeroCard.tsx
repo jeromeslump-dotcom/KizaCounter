@@ -1,3 +1,4 @@
+
 // src/components/HeroCard.tsx
 
 import type { Hero } from "../types";
@@ -18,6 +19,10 @@ export default function HeroCard({
   onClick,
 }: HeroCardProps) {
   const { stats } = hero;
+
+  // Le roster affiche toujours le full body.
+  // Les portraits restent utilisés dans CompactTeam après sélection.
+  const rosterImage = `/heroes/${hero.id}.png`;
 
   return (
     <button
@@ -63,7 +68,7 @@ export default function HeroCard({
         <div className="flex flex-1 items-center px-2 pb-2 pt-2">
           <div className="flex w-[42%] shrink-0 items-center justify-center">
             <img
-              src={hero.img}
+              src={rosterImage}
               alt={hero.name}
               className="h-auto max-h-[125px] w-full object-contain"
               loading="lazy"
@@ -98,3 +103,4 @@ function StatLine({ label, value }: { label: string; value: number }) {
     </div>
   );
 }
+
