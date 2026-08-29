@@ -34,10 +34,6 @@ select {
 }
 
 @layer components {
-  /* ============================================================
-     PAPIER PEINT DES CARTES HÉROS
-     ============================================================ */
-
   .hero-card-wallpaper-str {
     background: linear-gradient(to bottom right, rgb(136 19 55 / 0.6), rgb(69 10 10 / 0.3), rgb(2 6 23 / 0.9));
   }
@@ -49,10 +45,6 @@ select {
   .hero-card-wallpaper-int {
     background: linear-gradient(to bottom right, rgb(7 89 133 / 0.6), rgb(23 37 84 / 0.3), rgb(2 6 23 / 0.9));
   }
-
-  /* ============================================================
-     PALETTE COMMUNE UI
-     ============================================================ */
 
   .app-shell {
     background: rgb(2 6 23);
@@ -108,46 +100,23 @@ select {
     border-color: rgb(56 189 248);
   }
 
-  .ui-text-primary {
-    color: white;
-  }
+  .ui-text-primary { color: white; }
+  .ui-text-secondary { color: rgb(148 163 184); }
+  .ui-text-muted { color: rgb(100 116 139); }
+  .ui-text-soft { color: rgb(203 213 225); }
+  .ui-stat-value { color: rgb(241 245 249); }
 
-  .ui-text-secondary {
-    color: rgb(148 163 184);
-  }
-
-  .ui-text-muted {
-    color: rgb(100 116 139);
-  }
-
-  .ui-text-soft {
-    color: rgb(203 213 225);
-  }
-
-  .ui-stat-value {
-    color: rgb(241 245 249);
-  }
-
-  .ui-divider {
-    border-color: rgb(51 65 85);
-  }
+  .ui-divider { border-color: rgb(51 65 85); }
 
   .ui-link-sky:hover {
     color: rgb(125 211 252);
     border-color: rgb(56 189 248 / 0.5);
   }
 
-  .ui-hover-sky:hover {
-    border-color: rgb(56 189 248 / 0.7);
-  }
+  .ui-muted-hover:hover { color: rgb(203 213 225); }
 
-  .ui-hover-red:hover {
-    border-color: rgb(248 113 113);
-  }
-
-  /* ============================================================
-     CLASSE HÉROS
-     ============================================================ */
+  .ui-hover-sky:hover { border-color: rgb(56 189 248 / 0.7); }
+  .ui-hover-red:hover { border-color: rgb(248 113 113); }
 
   .hero-class-str {
     border-color: rgb(251 113 133 / 0.4);
@@ -178,10 +147,6 @@ select {
     box-shadow: 0 0 0 2px rgb(251 191 36 / 0.4);
   }
 
-  /* ============================================================
-     HERO GRID
-     ============================================================ */
-
   .hero-grid-panel {
     border-color: rgb(51 65 85);
     background: rgb(15 23 42 / 0.8);
@@ -194,36 +159,21 @@ select {
     color: white;
   }
 
-  .hero-grid-input::placeholder {
-    color: rgb(100 116 139);
-  }
+  .hero-grid-input::placeholder { color: rgb(100 116 139); }
 
   .hero-grid-input:focus,
-  .hero-grid-select:focus {
-    border-color: rgb(56 189 248);
-  }
+  .hero-grid-select:focus { border-color: rgb(56 189 248); }
 
   .hero-grid-label,
-  .hero-grid-result-count {
-    color: rgb(100 116 139);
-  }
-
-  .hero-grid-title {
-    color: rgb(203 213 225);
-  }
+  .hero-grid-result-count { color: rgb(100 116 139); }
+  .hero-grid-title { color: rgb(203 213 225); }
 
   .hero-grid-empty {
     border-color: rgb(51 65 85);
     background: rgb(15 23 42 / 0.5);
   }
 
-  .hero-grid-empty-text {
-    color: rgb(148 163 184);
-  }
-
-  /* ============================================================
-     ACTIONS / RÉSULTATS
-     ============================================================ */
+  .hero-grid-empty-text { color: rgb(148 163 184); }
 
   .ui-action {
     border-color: rgb(51 65 85);
@@ -234,23 +184,6 @@ select {
   .ui-action:hover {
     border-color: rgb(100 116 139);
     color: white;
-  }
-
-  .ui-danger:hover {
-    border-color: rgb(248 113 113 / 0.5);
-    color: rgb(252 165 165);
-  }
-
-  .ui-success {
-    border-color: rgb(52 211 153 / 0.5);
-    background: rgb(16 185 129 / 0.15);
-    color: rgb(110 231 183);
-  }
-
-  .ui-success:hover {
-    border-color: rgb(52 211 153);
-    background: rgb(16 185 129 / 0.25);
-    color: rgb(167 243 208);
   }
 
   .ui-danger {
@@ -265,15 +198,25 @@ select {
     color: rgb(254 202 202);
   }
 
+  .ui-success {
+    border-color: rgb(52 211 153 / 0.5);
+    background: rgb(16 185 129 / 0.15);
+    color: rgb(110 231 183);
+  }
+
+  .ui-success:hover {
+    border-color: rgb(52 211 153);
+    background: rgb(16 185 129 / 0.25);
+    color: rgb(167 243 208);
+  }
+
   .ui-sky {
     border-color: rgb(56 189 248 / 0.4);
     background: rgb(14 165 233 / 0.1);
     color: rgb(186 230 253);
   }
 
-  .ui-sky:hover {
-    border-color: rgb(56 189 248 / 0.7);
-  }
+  .ui-sky:hover { border-color: rgb(56 189 248 / 0.7); }
 
   .ui-score {
     border-color: rgb(251 191 36 / 0.3);
@@ -281,16 +224,12 @@ select {
     color: rgb(252 211 77);
   }
 
-  .ui-modal-overlay {
-    background: rgb(0 0 0 / 0.7);
-  }
+  .ui-modal-overlay { background: rgb(0 0 0 / 0.7); }
 
   .ui-modal {
     border-color: rgb(51 65 85);
     background: rgb(15 23 42);
   }
 
-  .ui-error {
-    color: rgb(248 113 113);
-  }
+  .ui-error { color: rgb(248 113 113); }
 }
