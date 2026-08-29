@@ -123,22 +123,22 @@ export default function CounterModal({
         </div>
 
         <div className="overflow-y-auto p-3 sm:p-5">
-          <CompactTeam
-            title={`Ennemis (${enemies.length}/5)`}
-            heroes={enemies}
-            selectedIds={enemies.map(
-              (hero) => hero.id
-            )}
-            enemy
-          />
+  <CompactTeam
+  title={`Ennemis (${enemies.length}/5)`}
+  heroes={enemies}
+  selectedIds={enemies.map((hero) => hero.id)}
+  enemy
+  compactPortrait
+/>
 
           <div className="mt-4">
-            <CompactTeam
-              title={`Votre équipe (${team.length}/5)`}
-              heroes={team}
-              selectedIds={teamIds}
-              onHeroClick={onHeroClick}
-            />
+<CompactTeam
+  title={`Votre équipe (${team.length}/5)`}
+  heroes={team}
+  selectedIds={teamIds}
+  onHeroClick={onHeroClick}
+  compactPortrait
+/>
           </div>
 
           {recommendedTeam.length > 0 && (
