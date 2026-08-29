@@ -1,4 +1,3 @@
-
 import type { Hero } from "../types";
 
 import SelectionOrderBadge from "./SelectionOrderBadge";
@@ -19,19 +18,14 @@ export default function CompactTeam({
   onHeroClick,
 }: CompactTeamProps) {
   return (
-    <section
-      className={[
-        "w-full rounded-xl border bg-slate-900/80 p-3",
-        enemy ? "border-red-500/20" : "border-slate-700",
-      ].join(" ")}
-    >
+    <section className="ui-panel w-full rounded-xl border p-3">
       <div className="mb-3 flex items-center justify-between">
-        <h3 className="text-sm font-bold text-white sm:text-base">{title}</h3>
+        <h3 className="ui-text-primary text-sm font-bold sm:text-base">{title}</h3>
       </div>
 
       {heroes.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-slate-700 bg-slate-950/50 p-4 text-center">
-          <p className="text-xs text-slate-500">Aucun héros sélectionné.</p>
+        <div className="ui-panel-empty rounded-lg border border-dashed p-4 text-center">
+          <p className="ui-text-muted text-xs">Aucun héros sélectionné.</p>
         </div>
       ) : (
         <div className="grid grid-cols-5 gap-1.5 sm:gap-2">
@@ -47,19 +41,12 @@ export default function CompactTeam({
                 disabled={!onHeroClick}
                 onClick={() => onHeroClick?.(hero)}
                 className={[
-                  "group relative min-w-0 overflow-hidden rounded-lg border bg-slate-950 transition",
-                  isSelected
-                    ? "border-amber-400 ring-1 ring-amber-400/40"
-                    : enemy
-                      ? "border-red-500/20"
-                      : "border-slate-700",
-                  onHeroClick
-                    ? "cursor-pointer hover:border-sky-400/70"
-                    : "cursor-default",
+                  "ui-card ui-card-hover group relative min-w-0 overflow-hidden rounded-lg border transition",
+                  isSelected ? "hero-card-selected" : "",
+                  onHeroClick ? "cursor-pointer hover:border-sky-400/70" : "cursor-default",
                 ].join(" ")}
               >
-                {/* IMAGE */}
-                <div className="aspect-square w-full overflow-hidden bg-slate-950">
+                <div className="ui-card aspect-square w-full overflow-hidden">
                   <img
                     src={hero.img}
                     alt={hero.name}
@@ -68,15 +55,14 @@ export default function CompactTeam({
                   />
                 </div>
 
-                {/* NOM + ORDRE */}
-                <div className="flex min-w-0 items-center justify-center gap-1 px-1 py-1">
-                  {isSelected && (
-                    <SelectionOrderBadge order={order} />
-                  )}
+                <span
+                  className="selection-order-badge absolute left-1 top-1 z-20 flex h-5 w-5 items-center justify-center rounded-full border text-[10px] font-black leading-none shadow sm:left-2 sm:top-2 sm:h-7 sm:w-7 sm:border-2 sm:text-sm"
+                >
+                  {index + 1}
+                </span>
 
-                  <span className="min-w-0 truncate text-center text-[9px] font-bold leading-tight text-white sm:text-xs">
-                    {hero.name}
-                  </span>
+                <div className="ui-divider ui-text-primary relative z-10 truncate border-t px-1 py-1 text-center text-[9px] font-bold leading-tight sm:text-xs">
+                  {hero.name}
                 </div>
               </button>
             );
