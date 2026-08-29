@@ -70,13 +70,17 @@ export default function HeroCard({
             ==================================================== */}
         <div className="flex flex-1 items-center px-2 pb-2 pt-2">
           {/* IMAGE */}
-          <div className="flex w-[42%] shrink-0 items-center justify-center">
+          <div className="relative flex w-[42%] shrink-0 items-center justify-center">
             <img
               src={hero.img}
               alt={hero.name}
               className="h-auto max-h-[125px] w-full object-contain"
               loading="lazy"
             />
+
+            {selected && selectionOrder !== undefined && (
+              <SelectionOrderBadge order={selectionOrder} position="left" />
+            )}
           </div>
 
           {/* STATISTIQUES */}
@@ -91,13 +95,6 @@ export default function HeroCard({
           </div>
         </div>
       </div>
-
-      {/* ======================================================
-          NUMÉRO DE SÉLECTION
-          ====================================================== */}
-      {selected && selectionOrder !== undefined && (
-        <SelectionOrderBadge order={selectionOrder} />
-      )}
     </button>
   );
 }
