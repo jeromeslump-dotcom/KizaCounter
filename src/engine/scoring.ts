@@ -11,6 +11,11 @@ import type {
   TeamScore,
 } from "../types";
 
+import {
+  CORE4_CONFIG,
+  core4ReplacementScore,
+} from "./historicalCore4";
+
 // ============================================================
 // CONSTANTES
 // ============================================================
@@ -612,7 +617,34 @@ export function recommendTeam(
         classPenalty += 40;
       }
 
-      const adjustedScore = candidate.score - classPenalty;
+      // --------------------------------------------------------
+      // CORE 4 + 1
+      // --------------------------------------------------------
+      //
+      // Le système historique Core 4 reste indépendant du scoring
+      // général. Il n'intervient qu'au moment de choisir le 5e héros.
+      //
+      // Le Core est normalisé par historicalCore4.ts : l'ordre des
+      // quatre héros ne joue donc aucun rôle.
+      //
+      // Le poids est volontairement séparé afin de pouvoir augmenter,
+      // diminuer ou désactiver facilement l'influence de ce système.
+      let core4Bonus = 0;
+
+      if (recommended.length === TEAM_SIZE - 1) {
+        const coreIds = recommended.map((hero) => hero.id);
+
+        core4Bonus =
+          core4ReplacementScore(
+            enemyIds,
+            coreIds,
+            candidate.hero.id,
+            combats
+          ) * CORE4_CONFIG.weight;
+      }
+
+      const adjustedScore =
+        candidate.score - classPenalty + core4Bonus;
 
       if (adjustedScore > bestAdjustedScore) {
         bestAdjustedScore = adjustedScore;
