@@ -2,6 +2,8 @@
 
 import type { Hero } from "../types";
 
+import SelectionOrderBadge from "./SelectionOrderBadge";
+
 interface HeroCardProps {
   hero: Hero;
   selected?: boolean;
@@ -94,23 +96,7 @@ export default function HeroCard({
           NUMÉRO DE SÉLECTION
           ====================================================== */}
       {selected && selectionOrder !== undefined && (
-        <div
-          className="
-            absolute left-1 top-1
-            flex h-3 w-3 items-center justify-center
-            rounded-full border border-white/70
-            bg-amber-500
-            text-[5px] font-black leading-none text-slate-950
-            shadow-sm
-
-            sm:left-2 sm:top-2
-            sm:h-7 sm:w-7
-            sm:border-2
-            sm:text-sm
-          "
-        >
-          {selectionOrder}
-        </div>
+        <SelectionOrderBadge order={selectionOrder} />
       )}
     </button>
   );
