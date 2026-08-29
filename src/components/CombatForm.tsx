@@ -5,9 +5,7 @@ import type { Hero, Combat } from "../types";
 interface CombatFormProps {
   enemies: Hero[];
   myHeroes: Hero[];
-
   onSave: (combat: Combat) => Promise<void> | void;
-
   onClose?: () => void;
 }
 
@@ -21,10 +19,7 @@ export default function CombatForm({
 
   async function handleResult(won: boolean) {
     if (saving) return;
-
-    if (enemies.length === 0 || myHeroes.length === 0) {
-      return;
-    }
+    if (enemies.length === 0 || myHeroes.length === 0) return;
 
     setSaving(true);
 
@@ -40,92 +35,46 @@ export default function CombatForm({
   }
 
   return (
-    <section className="w-full rounded-xl border border-slate-700 bg-slate-900/80 p-4">
-      {/* ======================================================
-          TITRE
-          ====================================================== */}
-
+    <section className="ui-panel w-full rounded-xl border p-4">
       <div className="mb-3">
-        <h2 className="text-sm font-bold text-white sm:text-base">
+        <h2 className="ui-text-primary text-sm font-bold sm:text-base">
           Résultat du combat
         </h2>
       </div>
 
-      {/* ======================================================
-          RÉSULTAT
-          ====================================================== */}
-
       <div className="grid grid-cols-2 gap-2">
-        {/* VICTOIRE */}
-
         <button
           type="button"
           disabled={saving}
           onClick={() => handleResult(true)}
-          className="
-            rounded-lg
-            border border-emerald-400/50
-            bg-emerald-500/15
-            px-3 py-3
-            text-sm font-bold
-            text-emerald-300
-            transition
-            hover:border-emerald-400
-            hover:bg-emerald-500/25
-            hover:text-emerald-200
-            disabled:cursor-not-allowed
-            disabled:opacity-50
-          "
+          className="ui-success rounded-lg border px-3 py-3 text-sm font-bold transition disabled:cursor-not-allowed disabled:opacity-50"
         >
           👍 Victoire
         </button>
-
-        {/* DÉFAITE */}
 
         <button
           type="button"
           disabled={saving}
           onClick={() => handleResult(false)}
-          className="
-            rounded-lg
-            border border-red-400/50
-            bg-red-500/15
-            px-3 py-3
-            text-sm font-bold
-            text-red-300
-            transition
-            hover:border-red-400
-            hover:bg-red-500/25
-            hover:text-red-200
-            disabled:cursor-not-allowed
-            disabled:opacity-50
-          "
+          className="ui-danger rounded-lg border px-3 py-3 text-sm font-bold transition disabled:cursor-not-allowed disabled:opacity-50"
         >
           👎 Défaite
         </button>
       </div>
-
-      {/* ======================================================
-          ANNULER
-          ====================================================== */}
 
       {onClose && (
         <button
           type="button"
           disabled={saving}
           onClick={onClose}
-          className="mt-2 w-full rounded-lg border border-slate-700 bg-slate-950 px-4 py-2 text-sm font-semibold text-slate-300 transition hover:border-slate-500 hover:text-white disabled:opacity-50"
+          className="ui-action mt-2 w-full rounded-lg border px-4 py-2 text-sm font-semibold transition disabled:opacity-50"
         >
           Annuler
         </button>
       )}
 
-      {/* ======================================================
-          ENREGISTREMENT
-          ====================================================== */}
-
       {saving && (
-        <p className="mt-2 text-center text-[10px] text-slate-500">
+        <p className="ui-text-muted mt-2 text-center text-[10px]">
           Enregistrement...
         </p>
       )}
