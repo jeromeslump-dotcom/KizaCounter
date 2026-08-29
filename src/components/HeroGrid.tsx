@@ -59,13 +59,9 @@ export default function HeroGrid({
   const filteredHeroes = useMemo(() => {
     return filterAndSortHeroes(heroes, {
       enabledHeroIds,
-
       activeClass: activeClass === "ALL" ? "All" : activeClass,
-
       query,
-
       sortBy,
-
       usage,
     });
   }, [heroes, enabledHeroIds, activeClass, query, sortBy, usage]);
@@ -80,7 +76,7 @@ export default function HeroGrid({
           FILTRES
           ====================================================== */}
 
-      <div className="mb-3 rounded-xl border border-slate-700 bg-slate-900/80 p-2 sm:mb-4 sm:p-3">
+      <div className="hero-grid-panel mb-3 rounded-xl border p-2 sm:mb-4 sm:p-3">
         <div className="flex flex-col gap-2 sm:gap-3">
           {/* ==================================================
               RECHERCHE
@@ -91,7 +87,7 @@ export default function HeroGrid({
             value={query}
             onChange={(event) => onQueryChange(event.target.value)}
             placeholder="🔍 Rechercher un héros ou un pseudo..."
-            className="h-9 w-full rounded-lg border border-slate-700 bg-slate-950 px-3 text-xs text-white outline-none transition placeholder:text-slate-500 focus:border-sky-400 sm:h-auto sm:py-2 sm:text-sm"
+            className="hero-grid-input h-9 w-full rounded-lg border px-3 text-xs outline-none transition sm:h-auto sm:py-2 sm:text-sm"
           />
 
           {/* ==================================================
@@ -104,7 +100,7 @@ export default function HeroGrid({
                 ================================================= */}
 
             <div className="flex flex-col gap-0.5">
-              <label className="px-1 text-[9px] font-bold uppercase tracking-wide text-slate-500 sm:text-[11px] sm:text-slate-400">
+              <label className="hero-grid-label px-1 text-[9px] font-bold uppercase tracking-wide sm:text-[11px]">
                 Classe
               </label>
 
@@ -113,14 +109,11 @@ export default function HeroGrid({
                 onChange={(event) =>
                   onClassChange(event.target.value as HeroClassFilter)
                 }
-                className="h-8 w-full rounded-lg border border-slate-700 bg-slate-950 px-2 text-xs font-semibold text-white outline-none transition focus:border-sky-400 sm:h-auto sm:px-3 sm:py-2 sm:text-sm"
+                className="hero-grid-select h-8 w-full rounded-lg border px-2 text-xs font-semibold outline-none transition sm:h-auto sm:px-3 sm:py-2 sm:text-sm"
               >
                 <option value="ALL">Toutes</option>
-
                 <option value="STR">STR</option>
-
                 <option value="AGI">AGI</option>
-
                 <option value="INT">INT</option>
               </select>
             </div>
@@ -130,7 +123,7 @@ export default function HeroGrid({
                 ================================================= */}
 
             <div className="flex flex-col gap-0.5">
-              <label className="px-1 text-[9px] font-bold uppercase tracking-wide text-slate-500 sm:text-[11px] sm:text-slate-400">
+              <label className="hero-grid-label px-1 text-[9px] font-bold uppercase tracking-wide sm:text-[11px]">
                 Trier par
               </label>
 
@@ -139,22 +132,15 @@ export default function HeroGrid({
                 onChange={(event) =>
                   onSortChange(event.target.value as HeroSort)
                 }
-                className="h-8 w-full rounded-lg border border-slate-700 bg-slate-950 px-2 text-xs text-white outline-none transition focus:border-sky-400 sm:h-auto sm:px-3 sm:py-2 sm:text-sm"
+                className="hero-grid-select h-8 w-full rounded-lg border px-2 text-xs outline-none transition sm:h-auto sm:px-3 sm:py-2 sm:text-sm"
               >
                 <option value="played">Joué</option>
-
                 <option value="hp">PV</option>
-
                 <option value="atk">ATK</option>
-
                 <option value="matk">MATK</option>
-
                 <option value="totalAtk">ATK totale</option>
-
                 <option value="def">DEF</option>
-
                 <option value="mdef">MDEF</option>
-
                 <option value="totalDef">DEF totale</option>
               </select>
             </div>
@@ -167,9 +153,9 @@ export default function HeroGrid({
           ====================================================== */}
 
       <div className="mb-3 flex items-center justify-between">
-        <span className="text-sm font-semibold text-slate-300">Héros</span>
+        <span className="hero-grid-title text-sm font-semibold">Héros</span>
 
-        <span className="text-xs text-slate-500">
+        <span className="hero-grid-result-count text-xs">
           {filteredHeroes.length} résultat
           {filteredHeroes.length !== 1 ? "s" : ""}
         </span>
@@ -180,8 +166,8 @@ export default function HeroGrid({
           ====================================================== */}
 
       {filteredHeroes.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-slate-700 bg-slate-900/50 p-8 text-center">
-          <p className="text-sm text-slate-400">Aucun héros trouvé.</p>
+        <div className="hero-grid-empty rounded-xl border border-dashed p-8 text-center">
+          <p className="hero-grid-empty-text text-sm">Aucun héros trouvé.</p>
         </div>
       ) : (
         <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 2xl:grid-cols-5">
