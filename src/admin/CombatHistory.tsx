@@ -136,7 +136,7 @@ export default function CombatHistory({
         <img
           src={hero.img}
           alt={hero.name}
-          className="h-11 w-11 rounded-lg border ui-divider object-cover shadow-sm"
+          className="h-[62px] w-[62px] rounded-lg border ui-divider object-cover shadow-sm"
         />
         <span className="ui-text-secondary max-w-[68px] truncate text-center text-[9px] font-semibold leading-tight">
           {hero.name}
