@@ -1,9 +1,7 @@
 // src/auth/AuthPanel.tsx
 
 import { useEffect, useState } from "react";
-
 import type { Session } from "@supabase/supabase-js";
-
 import AdminPanel from "../admin/AdminPanel";
 import CombatHistory from "../admin/CombatHistory";
 import EncounteredTeams from "../admin/EncounteredTeams";
@@ -34,16 +32,10 @@ export default function AuthPanel() {
     async function loadSession() {
       try {
         const currentSession = await getSession();
-
         if (!mounted) return;
-
         setSession(currentSession);
-
         const currentProfile = await getCurrentUserProfile(currentSession);
-
-        if (mounted) {
-          setProfile(currentProfile);
-        }
+        if (mounted) setProfile(currentProfile);
       } catch (error) {
         console.error("Impossible de récupérer la session :", error);
       } finally {
@@ -61,11 +53,8 @@ export default function AuthPanel() {
       setShowUserManagement(false);
       setShowEncounteredTeams(false);
       setShowCombatHistory(false);
-
       void getCurrentUserProfile(currentSession).then((currentProfile) => {
-        if (mounted) {
-          setProfile(currentProfile);
-        }
+        if (mounted) setProfile(currentProfile);
       });
     });
 
@@ -79,7 +68,6 @@ export default function AuthPanel() {
     event.preventDefault();
     setError("");
     setSubmitting(true);
-
     try {
       await signIn(email.trim(), password);
       setPassword("");
@@ -92,14 +80,24 @@ export default function AuthPanel() {
     }
   }
 
-  async function handleSignOut() {
-    setSubmitting(true);
-    setError("");
+  function closeAdminArea() {
     setShowAdminPanel(false);
     setShowUserManagement(false);
     setShowEncounteredTeams(false);
     setShowCombatHistory(false);
+  }
 
+  function backToAdminPanel() {
+    setShowUserManagement(false);
+    setShowEncounteredTeams(false);
+    setShowCombatHistory(false);
+    setShowAdminPanel(true);
+  }
+
+  async function handleSignOut() {
+    setSubmitting(true);
+    setError("");
+    closeAdminArea();
     try {
       await signOut();
     } catch (error) {
@@ -115,7 +113,6 @@ export default function AuthPanel() {
     setShowUserManagement(false);
     setShowEncounteredTeams(false);
     setShowCombatHistory(true);
-
     try {
       const history = await loadCombats();
       setAdminCombats(history);
@@ -127,7 +124,6 @@ export default function AuthPanel() {
 
   function getUserName() {
     const metadata = session?.user?.user_metadata;
-
     return (
       profile?.display_name ||
       metadata?.display_name ||
@@ -157,9 +153,7 @@ export default function AuthPanel() {
               👤 {getUserName()}
             </button>
           ) : (
-            <span className="ui-text-soft text-xs font-bold">
-              👤 {getUserName()}
-            </span>
+            <span className="ui-text-soft text-xs font-bold">👤 {getUserName()}</span>
           )}
 
           <button
@@ -176,7 +170,7 @@ export default function AuthPanel() {
           <>
             <AdminPanel
               open={showAdminPanel}
-              onClose={() => setShowAdminPanel(false)}
+              onClose={closeAdminArea}
               onUserManagement={() => {
                 setShowAdminPanel(false);
                 setShowUserManagement(true);
@@ -190,27 +184,21 @@ export default function AuthPanel() {
 
             <UserManagement
               open={showUserManagement}
-              onClose={() => {
-                setShowUserManagement(false);
-                setShowAdminPanel(true);
-              }}
+              onClose={closeAdminArea}
+              onBack={backToAdminPanel}
             />
 
             <EncounteredTeams
               open={showEncounteredTeams}
-              onClose={() => {
-                setShowEncounteredTeams(false);
-                setShowAdminPanel(true);
-              }}
+              onClose={closeAdminArea}
+              onBack={backToAdminPanel}
             />
 
             <CombatHistory
               open={showCombatHistory}
               combats={adminCombats}
-              onClose={() => {
-                setShowCombatHistory(false);
-                setShowAdminPanel(true);
-              }}
+              onClose={closeAdminArea}
+              onBack={backToAdminPanel}
             />
           </>
         )}
@@ -247,7 +235,6 @@ export default function AuthPanel() {
         className="ui-input w-40 rounded-md border px-2.5 py-1.5 text-xs outline-none sm:text-xs"
         required
       />
-
       <input
         type="password"
         value={password}
@@ -257,7 +244,6 @@ export default function AuthPanel() {
         className="ui-input w-32 rounded-md border px-2.5 py-1.5 text-xs outline-none sm:text-xs"
         required
       />
-
       <button
         type="submit"
         disabled={submitting}
@@ -265,7 +251,6 @@ export default function AuthPanel() {
       >
         {submitting ? "..." : "OK"}
       </button>
-
       <button
         type="button"
         onClick={() => {
@@ -276,7 +261,6 @@ export default function AuthPanel() {
       >
         ✕
       </button>
-
       {error && <span className="ui-error text-[10px]">{error}</span>}
     </form>
   );
