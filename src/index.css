@@ -38,413 +38,127 @@ select {
    ============================================================ */
 
 .hero-card-wallpaper-str {
-  background:
-    radial-gradient(
-      circle at 20% 20%,
-      rgb(127 29 29 / 0.55),
-      transparent 55%
-    ),
-    linear-gradient(
-      135deg,
-      rgb(30 10 20 / 0.95),
-      rgb(7 12 25 / 0.96)
-    );
+  background: radial-gradient(circle at 20% 20%, rgb(127 29 29 / 0.55), transparent 55%), linear-gradient(135deg, rgb(30 10 20 / 0.95), rgb(7 12 25 / 0.96));
 }
 
 .hero-card-wallpaper-agi {
-  background:
-    radial-gradient(
-      circle at 20% 20%,
-      rgb(6 95 70 / 0.5),
-      transparent 55%
-    ),
-    linear-gradient(
-      135deg,
-      rgb(6 30 30 / 0.95),
-      rgb(7 12 25 / 0.96)
-    );
+  background: radial-gradient(circle at 20% 20%, rgb(6 95 70 / 0.5), transparent 55%), linear-gradient(135deg, rgb(6 30 30 / 0.95), rgb(7 12 25 / 0.96));
 }
 
 .hero-card-wallpaper-int {
-  background:
-    radial-gradient(
-      circle at 20% 20%,
-      rgb(7 89 133 / 0.55),
-      transparent 55%
-    ),
-    linear-gradient(
-      135deg,
-      rgb(7 25 45 / 0.95),
-      rgb(7 12 25 / 0.96)
-    );
+  background: radial-gradient(circle at 20% 20%, rgb(7 89 133 / 0.55), transparent 55%), linear-gradient(135deg, rgb(7 25 45 / 0.95), rgb(7 12 25 / 0.96));
 }
 
 /* ============================================================
    COULEURS DES CLASSES
    ============================================================ */
 
-.hero-class-str {
-  border-color: rgb(251 113 133 / 0.4);
-  background: rgb(244 63 94 / 0.1);
-  color: rgb(253 164 175);
-}
-
-.hero-class-agi {
-  border-color: rgb(52 211 153 / 0.4);
-  background: rgb(16 185 129 / 0.1);
-  color: rgb(110 231 183);
-}
-
-.hero-class-int {
-  border-color: rgb(56 189 248 / 0.4);
-  background: rgb(14 165 233 / 0.1);
-  color: rgb(125 211 252);
-}
+.hero-class-str { border-color: rgb(251 113 133 / 0.4); background: rgb(244 63 94 / 0.1); color: rgb(253 164 175); }
+.hero-class-agi { border-color: rgb(52 211 153 / 0.4); background: rgb(16 185 129 / 0.1); color: rgb(110 231 183); }
+.hero-class-int { border-color: rgb(56 189 248 / 0.4); background: rgb(14 165 233 / 0.1); color: rgb(125 211 252); }
 
 /* ============================================================
    THEME GLOBAL
-   BLEU NUIT + NOIR + OR
    ============================================================ */
 
 @layer components {
-  .app-shell {
-    background:
-      radial-gradient(
-        circle at 50% -20%,
-        rgb(30 58 138 / 0.16),
-        transparent 45%
-      ),
-      #030712;
-    color: white;
-  }
+  .app-shell { background: radial-gradient(circle at 50% -20%, rgb(30 58 138 / 0.16), transparent 45%), #030712; color: white; }
+  .ui-panel { border-color: rgb(30 41 59); background: rgb(8 15 30 / 0.92); }
+  .ui-panel-alt { border-color: rgb(30 41 59); background: rgb(7 12 25); }
+  .ui-panel-empty { border-color: rgb(30 41 59); background: rgb(3 7 18 / 0.7); }
+  .ui-card { border-color: rgb(30 41 59); background: rgb(3 7 18 / 0.9); }
+  .ui-card-hover:hover { border-color: rgb(71 85 105); }
+  .hero-card-base { border-color: rgb(30 41 59); background: rgb(7 12 25 / 0.96); color: white; }
+  .hero-card-hover:hover { border-color: rgb(71 85 105); background: rgb(10 18 35); }
+  .hero-card-selected { border-color: rgb(251 191 36); box-shadow: 0 0 0 2px rgb(251 191 36 / 0.35), 0 0 22px rgb(245 158 11 / 0.12); }
+  .ui-input { border-color: rgb(30 41 59); background: rgb(3 7 18); color: white; }
+  .ui-input::placeholder { color: rgb(100 116 139); }
+  .ui-input:focus { border-color: rgb(245 158 11 / 0.7); box-shadow: 0 0 0 1px rgb(245 158 11 / 0.15); }
+  .ui-text-primary { color: white; }
+  .ui-text-secondary { color: rgb(148 163 184); }
+  .ui-text-muted { color: rgb(100 116 139); }
+  .ui-text-soft { color: rgb(203 213 225); }
+  .ui-stat-value { color: rgb(241 245 249); }
+  .ui-divider { border-color: rgb(30 41 59); }
+  .ui-link-sky:hover { color: rgb(125 211 252); border-color: rgb(56 189 248 / 0.5); }
+  .ui-muted-hover:hover { color: rgb(226 232 240); }
+  .ui-hover-sky:hover { border-color: rgb(56 189 248 / 0.7); }
+  .ui-hover-red:hover { border-color: rgb(248 113 113); }
+  .selection-order-badge { background: rgb(245 158 11); color: rgb(3 7 18); border-color: rgb(255 255 255 / 0.9); box-shadow: 0 0 10px rgb(245 158 11 / 0.25); }
+  .hero-grid-panel { border-color: rgb(30 41 59); background: rgb(8 15 30 / 0.92); }
+  .hero-grid-input, .hero-grid-select { border-color: rgb(30 41 59); background: rgb(3 7 18); color: white; }
+  .hero-grid-input::placeholder { color: rgb(100 116 139); }
+  .hero-grid-input:focus, .hero-grid-select:focus { border-color: rgb(245 158 11 / 0.7); }
+  .hero-grid-label, .hero-grid-result-count { color: rgb(100 116 139); }
+  .hero-grid-title { color: rgb(226 232 240); }
+  .hero-grid-empty { border-color: rgb(30 41 59); background: rgb(7 12 25 / 0.7); }
+  .hero-grid-empty-text { color: rgb(148 163 184); }
+  .ui-action { border-color: rgb(30 41 59); background: rgb(3 7 18); color: rgb(203 213 225); }
+  .ui-action:hover { border-color: rgb(245 158 11 / 0.6); color: rgb(252 211 77); background: rgb(15 23 42); }
+  .ui-danger { border-color: rgb(248 113 113 / 0.4); background: rgb(127 29 29 / 0.18); color: rgb(252 165 165); }
+  .ui-danger:hover { border-color: rgb(248 113 113); background: rgb(127 29 29 / 0.3); color: rgb(254 202 202); }
+  .ui-success { border-color: rgb(52 211 153 / 0.4); background: rgb(6 78 59 / 0.2); color: rgb(110 231 183); }
+  .ui-success:hover { border-color: rgb(52 211 153); background: rgb(6 78 59 / 0.3); color: rgb(167 243 208); }
+  .ui-sky { border-color: rgb(56 189 248 / 0.35); background: rgb(7 89 133 / 0.12); color: rgb(186 230 253); }
+  .ui-sky:hover { border-color: rgb(56 189 248 / 0.7); }
+  .ui-score { border-color: rgb(245 158 11 / 0.35); background: rgb(245 158 11 / 0.1); color: rgb(252 211 77); }
+  .ui-modal-overlay { background: rgb(0 0 0 / 0.78); }
+  .ui-modal { border-color: rgb(30 41 59); background: rgb(7 12 25); }
+  .ui-error { color: rgb(248 113 113); }
 
   /* ----------------------------------------------------------
-     PANNEAUX
+     GESTION DES UTILISATEURS
+     Palette cohérente avec les héros : bleu nuit + or + accents
      ---------------------------------------------------------- */
-
-  .ui-panel {
-    border-color: rgb(30 41 59);
-    background: rgb(8 15 30 / 0.92);
+  .user-management-modal {
+    background: radial-gradient(circle at 15% 0%, rgb(30 64 175 / 0.12), transparent 38%), rgb(7 12 25);
   }
 
-  .ui-panel-alt {
-    border-color: rgb(30 41 59);
-    background: rgb(7 12 25);
-  }
-
-  .ui-panel-empty {
-    border-color: rgb(30 41 59);
-    background: rgb(3 7 18 / 0.7);
-  }
-
-  /* ----------------------------------------------------------
-     CARTES
-     ---------------------------------------------------------- */
-
-  .ui-card {
-    border-color: rgb(30 41 59);
+  .user-management-search {
     background: rgb(3 7 18 / 0.9);
   }
 
-  .ui-card-hover:hover {
+  .user-management-card {
+    border-color: rgb(30 41 59);
+    background: linear-gradient(135deg, rgb(15 23 42 / 0.82), rgb(7 12 25 / 0.96));
+    box-shadow: 0 8px 24px rgb(0 0 0 / 0.16);
+    transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+  }
+
+  .user-management-card:hover {
     border-color: rgb(71 85 105);
+    background: linear-gradient(135deg, rgb(20 32 55 / 0.92), rgb(8 15 30 / 0.98));
+    box-shadow: 0 10px 28px rgb(0 0 0 / 0.22);
+    transform: translateY(-1px);
   }
 
-  /* ----------------------------------------------------------
-     HERO CARDS
-     ---------------------------------------------------------- */
+  .user-management-card.is-active { border-left: 3px solid rgb(52 211 153 / 0.7); }
+  .user-management-card.is-inactive { border-left: 3px solid rgb(100 116 139 / 0.45); opacity: 0.82; }
 
-  .hero-card-base {
-    border-color: rgb(30 41 59);
-    background: rgb(7 12 25 / 0.96);
-    color: white;
-  }
-
-  .hero-card-hover:hover {
-    border-color: rgb(71 85 105);
-    background: rgb(10 18 35);
-  }
-
-  .hero-card-selected {
-    border-color: rgb(251 191 36);
-    box-shadow:
-      0 0 0 2px rgb(251 191 36 / 0.35),
-      0 0 22px rgb(245 158 11 / 0.12);
-  }
-
-  /* ----------------------------------------------------------
-     INPUTS
-     ---------------------------------------------------------- */
-
-  .ui-input {
-    border-color: rgb(30 41 59);
-    background: rgb(3 7 18);
-    color: white;
-  }
-
-  .ui-input::placeholder {
-    color: rgb(100 116 139);
-  }
-
-  .ui-input:focus {
-    border-color: rgb(245 158 11 / 0.7);
-    box-shadow: 0 0 0 1px rgb(245 158 11 / 0.15);
-  }
-
-  /* ----------------------------------------------------------
-     TEXTES
-     ---------------------------------------------------------- */
-
-  .ui-text-primary {
-    color: white;
-  }
-
-  .ui-text-secondary {
-    color: rgb(148 163 184);
-  }
-
-  .ui-text-muted {
-    color: rgb(100 116 139);
-  }
-
-  .ui-text-soft {
-    color: rgb(203 213 225);
-  }
-
-  .ui-stat-value {
-    color: rgb(241 245 249);
-  }
-
-  /* ----------------------------------------------------------
-     SÉPARATEURS
-     ---------------------------------------------------------- */
-
-  .ui-divider {
-    border-color: rgb(30 41 59);
-  }
-
-  /* ----------------------------------------------------------
-     LIENS / HOVER
-     ---------------------------------------------------------- */
-
-  .ui-link-sky:hover {
-    color: rgb(125 211 252);
-    border-color: rgb(56 189 248 / 0.5);
-  }
-
-  .ui-muted-hover:hover {
-    color: rgb(226 232 240);
-  }
-
-  .ui-hover-sky:hover {
-    border-color: rgb(56 189 248 / 0.7);
-  }
-
-  .ui-hover-red:hover {
-    border-color: rgb(248 113 113);
-  }
-
-  /* ----------------------------------------------------------
-     NUMÉRO DE SÉLECTION
-     ---------------------------------------------------------- */
-
-  .selection-order-badge {
-    background: rgb(245 158 11);
-    color: rgb(3 7 18);
-    border-color: rgb(255 255 255 / 0.9);
-    box-shadow: 0 0 10px rgb(245 158 11 / 0.25);
-  }
-
-  /* ----------------------------------------------------------
-     HERO GRID
-     ---------------------------------------------------------- */
-
-  .hero-grid-panel {
-    border-color: rgb(30 41 59);
-    background: rgb(8 15 30 / 0.92);
-  }
-
-  .hero-grid-input,
-  .hero-grid-select {
-    border-color: rgb(30 41 59);
-    background: rgb(3 7 18);
-    color: white;
-  }
-
-  .hero-grid-input::placeholder {
-    color: rgb(100 116 139);
-  }
-
-  .hero-grid-input:focus,
-  .hero-grid-select:focus {
-    border-color: rgb(245 158 11 / 0.7);
-  }
-
-  .hero-grid-label,
-  .hero-grid-result-count {
-    color: rgb(100 116 139);
-  }
-
-  .hero-grid-title {
-    color: rgb(226 232 240);
-  }
-
-  .hero-grid-empty {
-    border-color: rgb(30 41 59);
-    background: rgb(7 12 25 / 0.7);
-  }
-
-  .hero-grid-empty-text {
-    color: rgb(148 163 184);
-  }
-
-  /* ----------------------------------------------------------
-     BOUTONS
-     ---------------------------------------------------------- */
-
-  .ui-action {
-    border-color: rgb(30 41 59);
-    background: rgb(3 7 18);
-    color: rgb(203 213 225);
-  }
-
-  .ui-action:hover {
-    border-color: rgb(245 158 11 / 0.6);
-    color: rgb(252 211 77);
-    background: rgb(15 23 42);
-  }
-
-  /* ----------------------------------------------------------
-     DANGER
-     ---------------------------------------------------------- */
-
-  .ui-danger {
-    border-color: rgb(248 113 113 / 0.4);
-    background: rgb(127 29 29 / 0.18);
-    color: rgb(252 165 165);
-  }
-
-  .ui-danger:hover {
-    border-color: rgb(248 113 113);
-    background: rgb(127 29 29 / 0.3);
-    color: rgb(254 202 202);
-  }
-
-  /* ----------------------------------------------------------
-     SUCCESS
-     ---------------------------------------------------------- */
-
-  .ui-success {
-    border-color: rgb(52 211 153 / 0.4);
-    background: rgb(6 78 59 / 0.2);
+  .user-management-status.is-active {
+    border-color: rgb(52 211 153 / 0.35);
+    background: rgb(16 185 129 / 0.1);
     color: rgb(110 231 183);
   }
 
-  .ui-success:hover {
-    border-color: rgb(52 211 153);
-    background: rgb(6 78 59 / 0.3);
-    color: rgb(167 243 208);
+  .user-management-status.is-inactive {
+    border-color: rgb(100 116 139 / 0.3);
+    background: rgb(100 116 139 / 0.08);
+    color: rgb(148 163 184);
   }
 
-  /* ----------------------------------------------------------
-     BLEU
-     ---------------------------------------------------------- */
-
-  .ui-sky {
-    border-color: rgb(56 189 248 / 0.35);
-    background: rgb(7 89 133 / 0.12);
-    color: rgb(186 230 253);
-  }
-
-  .ui-sky:hover {
-    border-color: rgb(56 189 248 / 0.7);
-  }
-
-  /* ----------------------------------------------------------
-     OR / SCORE
-     ---------------------------------------------------------- */
-
-  .ui-score {
-    border-color: rgb(245 158 11 / 0.35);
-    background: rgb(245 158 11 / 0.1);
-    color: rgb(252 211 77);
-  }
-
-  /* ----------------------------------------------------------
-     MODALES
-     ---------------------------------------------------------- */
-
-  .ui-modal-overlay {
-    background: rgb(0 0 0 / 0.78);
-  }
-
-  .ui-modal {
-    border-color: rgb(30 41 59);
-    background: rgb(7 12 25);
-  }
-
-  /* ----------------------------------------------------------
-     ERREURS
-     ---------------------------------------------------------- */
-
-  .ui-error {
-    color: rgb(248 113 113);
-  }
+  .user-management-role { background: rgb(3 7 18 / 0.9); }
+  .user-management-role:focus { border-color: rgb(245 158 11 / 0.7); box-shadow: 0 0 0 1px rgb(245 158 11 / 0.12); }
+  .user-management-save:hover { border-color: rgb(245 158 11 / 0.7); }
 }
 
 /* ============================================================
    RECOMMANDATIONS D'ÉQUIPE — A / B
    ============================================================ */
 
-.ui-recommendations {
-  background: transparent;
-  border-color: var(--ui-border);
-}
-
-.ui-recommendation-team {
-  display: block;
-  width: 100%;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  color: inherit;
-  text-align: left;
-  cursor: pointer;
-}
-
-.ui-recommendation-hero {
-  display: block;
-  min-width: 0;
-  overflow: hidden;
-  border: 1px solid var(--ui-border);
-  border-radius: 0.5rem;
-  padding: 0.5rem 0.25rem;
-  color: var(--ui-text-primary);
-  background: transparent;
-  font-size: 0.75rem;
-  font-weight: 600;
-  line-height: 1.25;
-  text-align: center;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  transition:
-    border-color 0.2s ease,
-    background-color 0.2s ease,
-    color 0.2s ease;
-}
-
-.ui-recommendation-team:hover .ui-recommendation-hero {
-  border-color: var(--ui-gold);
-  background: var(--ui-gold-soft);
-}
-
-.ui-recommendation-selected .ui-recommendation-hero {
-  border-color: var(--ui-gold);
-  background: var(--ui-gold-soft);
-  color: var(--ui-gold);
-}
-
-.ui-recommendation-team:focus-visible {
-  outline: 2px solid var(--ui-gold);
-  outline-offset: 2px;
-}
+.ui-recommendations { background: transparent; border-color: var(--ui-border); }
+.ui-recommendation-team { display: block; width: 100%; padding: 0; border: 0; background: transparent; color: inherit; text-align: left; cursor: pointer; }
+.ui-recommendation-hero { display: block; min-width: 0; overflow: hidden; border: 1px solid var(--ui-border); border-radius: 0.5rem; padding: 0.5rem 0.25rem; color: var(--ui-text-primary); background: transparent; font-size: 0.75rem; font-weight: 600; line-height: 1.25; text-align: center; white-space: nowrap; text-overflow: ellipsis; transition: border-color 0.2s ease, background-color 0.2s ease, color 0.2s ease; }
+.ui-recommendation-team:hover .ui-recommendation-hero { border-color: var(--ui-gold); background: var(--ui-gold-soft); }
+.ui-recommendation-selected .ui-recommendation-hero { border-color: var(--ui-gold); background: var(--ui-gold-soft); color: var(--ui-gold); }
+.ui-recommendation-team:focus-visible { outline: 2px solid var(--ui-gold); outline-offset: 2px; }
