@@ -112,7 +112,7 @@ export default function UserManagement({
 
   return (
     <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/75 p-3 backdrop-blur-sm sm:p-4">
-      <div className="ui-modal flex max-h-[92vh] w-full max-w-3xl flex-col overflow-hidden rounded-3xl border shadow-2xl">
+      <div className="ui-modal user-management-modal flex max-h-[92vh] w-full max-w-3xl flex-col overflow-hidden rounded-3xl border shadow-2xl">
         <div className="flex items-start justify-between gap-4 border-b ui-divider p-4 sm:p-6">
           <div>
             <h2 className="ui-text-primary text-xl font-black">
@@ -138,7 +138,7 @@ export default function UserManagement({
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Rechercher un utilisateur..."
-            className="hero-grid-input mb-4 w-full rounded-lg border px-3 py-2 text-sm outline-none"
+            className="hero-grid-input user-management-search mb-4 w-full rounded-lg border px-3 py-2 text-sm outline-none"
           />
 
           {error && (
@@ -158,14 +158,29 @@ export default function UserManagement({
                 const changed = selectedRole !== user.role;
 
                 return (
-                  <div key={user.id} className="rounded-2xl border ui-divider p-4">
-                    <div className="mb-3">
-                      <div className="ui-text-primary font-bold">
-                        {user.display_name}
+                  <div
+                    key={user.id}
+                    className={`user-management-card rounded-2xl border p-4 ${
+                      user.active ? "is-active" : "is-inactive"
+                    }`}
+                  >
+                    <div className="mb-3 flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <div className="ui-text-primary font-bold">
+                          {user.display_name}
+                        </div>
+                        <div className="ui-text-secondary mt-1 text-xs">
+                          Rôle actuel : {ROLE_LABELS[user.role] ?? user.role}
+                        </div>
                       </div>
-                      <div className="ui-text-secondary mt-1 text-xs">
-                        Rôle actuel : {ROLE_LABELS[user.role] ?? user.role}
-                      </div>
+
+                      <span
+                        className={`user-management-status shrink-0 rounded-full border px-2.5 py-1 text-[10px] font-black uppercase tracking-wide ${
+                          user.active ? "is-active" : "is-inactive"
+                        }`}
+                      >
+                        {user.active ? "Actif" : "Inactif"}
+                      </span>
                     </div>
 
                     <div className="flex flex-wrap items-center gap-3">
@@ -177,7 +192,7 @@ export default function UserManagement({
                             [user.id]: event.target.value as UserRole,
                           }))
                         }
-                        className="ui-input min-w-[180px] rounded-lg border px-3 py-2 text-xs font-bold outline-none"
+                        className="ui-input user-management-role min-w-[180px] rounded-lg border px-3 py-2 text-xs font-bold outline-none"
                         aria-label={`Rôle de ${user.display_name}`}
                       >
                         {ROLE_OPTIONS.map((role) => (
@@ -191,7 +206,7 @@ export default function UserManagement({
                         type="button"
                         disabled={!changed || savingId === user.id}
                         onClick={() => saveRole(user)}
-                        className="ui-action ml-auto rounded-lg border px-3 py-1.5 text-xs font-bold transition disabled:cursor-not-allowed disabled:opacity-40"
+                        className="ui-action user-management-save ml-auto rounded-lg border px-3 py-1.5 text-xs font-bold transition disabled:cursor-not-allowed disabled:opacity-40"
                       >
                         {savingId === user.id ? "Enregistrement..." : "Enregistrer"}
                       </button>
