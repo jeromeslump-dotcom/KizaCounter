@@ -309,14 +309,30 @@ function isSameEnemyTeam(
 /**
  * Cherche les équipes gagnantes exactes contre la même composition ennemie.
  *
- * Important : plusieurs équipes peuvent avoir gagné contre les mêmes 5 ennemis.
- * On les regroupe donc par composition avant de choisir la meilleure.
+ * Plusieurs équipes peuvent avoir gagné contre les mêmes 5 ennemis.
+ * Elles sont donc regroupées par composition avant de choisir la meilleure.
  *
  * Priorité :
- *   1. nombre de victoires avec cette équipe contre ces ennemis
- *   2. taux de victoire de cette équipe contre ces ennemis
- *   3. nombre total de combats avec cette équipe contre ces ennemis
- *   4. score global (usage + statistiques) comme départageur
+ *   1. fiabilité du taux de victoire
+ *   2. nombre total de combats
+ *   3. nombre de victoires
+ *   4. score global (usage + statistiques)
+ *   5. clé d'équipe pour un départage stable
+ *
+ * La fiabilité tient compte du volume de données :
+ *
+ *   confiance = min(combats / 10, 1)
+ *   fiabilité = winRate × (0.35 + 0.65 × confiance)
+ *
+ * Ainsi :
+ *   1-0  → 35 %
+ *   2-0  → 48 %
+ *   4-0  → 61 %
+ *   5-0  → 67,5 %
+ *   10-0 → 100 %
+ *   10-2 → 83,3 %
+ *   20-5 → 80 %
+ *   5-5  → 50 %
  */
 export function findBestHistoricalTeam(
   enemyIds: string[],
@@ -352,6 +368,7 @@ export function findBestHistoricalTeam(
         wins: 0,
         losses: 0,
       };
+
       candidates.set(key, candidate);
     }
 
@@ -375,6 +392,8 @@ export function findBestHistoricalTeam(
   let bestTeam: Hero[] | null = null;
   let bestCandidate: (typeof winningCandidates)[number] | null = null;
   let bestEvaluation: TeamEvaluation | null = null;
+  let bestReliability = -Infinity;
+  let bestBattles = -Infinity;
 
   for (const candidate of winningCandidates) {
     const team = candidate.heroIds
@@ -387,40 +406,45 @@ export function findBestHistoricalTeam(
 
     const battles = candidate.wins + candidate.losses;
     const winRate = calculateWinRate(candidate.wins, battles);
-    const evaluation = evaluateTeam(team, combats, usage);
 
-    if (!bestCandidate ||
-      candidate.wins > bestCandidate.wins ||
-      (candidate.wins === bestCandidate.wins &&
-        winRate >
-          calculateWinRate(
-            bestCandidate.wins,
-            bestCandidate.wins + bestCandidate.losses
-          )) ||
-      (candidate.wins === bestCandidate.wins &&
-        winRate ===
-          calculateWinRate(
-            bestCandidate.wins,
-            bestCandidate.wins + bestCandidate.losses
-          ) &&
-        battles > bestCandidate.wins + bestCandidate.losses) ||
-      (candidate.wins === bestCandidate.wins &&
-        winRate ===
-          calculateWinRate(
-            bestCandidate.wins,
-            bestCandidate.wins + bestCandidate.losses
-          ) &&
-        battles === bestCandidate.wins + bestCandidate.losses &&
-        evaluation.score > (bestEvaluation?.score ?? -Infinity))) {
+    // Plus une équipe possède de combats, plus son taux de victoire
+    // est considéré comme fiable, jusqu'à 10 combats.
+    const confidence = Math.min(battles / 10, 1);
+
+    const reliability = winRate * (0.35 + 0.65 * confidence);
+
+    const evaluation = evaluateTeam(team, combats, usage);
+    const currentTeamKey = teamKey(candidate.heroIds);
+    const bestTeamKey = bestCandidate ? teamKey(bestCandidate.heroIds) : "";
+
+    const isBetter =
+      !bestCandidate ||
+      reliability > bestReliability ||
+      (reliability === bestReliability && battles > bestBattles) ||
+      (reliability === bestReliability &&
+        battles === bestBattles &&
+        candidate.wins > bestCandidate.wins) ||
+      (reliability === bestReliability &&
+        battles === bestBattles &&
+        candidate.wins === bestCandidate.wins &&
+        evaluation.score > (bestEvaluation?.score ?? -Infinity)) ||
+      (reliability === bestReliability &&
+        battles === bestBattles &&
+        candidate.wins === bestCandidate.wins &&
+        evaluation.score === (bestEvaluation?.score ?? -Infinity) &&
+        currentTeamKey < bestTeamKey);
+
+    if (isBetter) {
       bestCandidate = candidate;
       bestEvaluation = evaluation;
       bestTeam = team;
+      bestReliability = reliability;
+      bestBattles = battles;
     }
   }
 
   return bestTeam;
 }
-
 // ============================================================
 // SCORE HISTORIQUE CONTRE LES ENNEMIS
 // ============================================================
