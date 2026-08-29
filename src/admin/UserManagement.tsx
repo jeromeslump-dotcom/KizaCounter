@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { supabase } from "../auth/auth";
+import { supabase } from "../storage/supabase";
 
 export type UserRole = "user" | "contributor" | "admin";
 
