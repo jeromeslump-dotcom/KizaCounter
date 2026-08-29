@@ -5,13 +5,22 @@ import { useEffect, useState } from "react";
 import type { Session } from "@supabase/supabase-js";
 
 import AdminPanel from "../admin/AdminPanel";
+import CombatHistory from "../admin/CombatHistory";
+import EncounteredTeams from "../admin/EncounteredTeams";
+import UserManagement from "../admin/UserManagement";
 import { getCurrentUserProfile, type UserProfile } from "../admin/adminAccess";
+import type { Combat } from "../types";
+import { loadCombats } from "../storage/combatStorage";
 import { getSession, signIn, signOut, onAuthStateChange } from "./auth";
 
 export default function AuthPanel() {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [showAdminPanel, setShowAdminPanel] = useState(false);
+  const [showUserManagement, setShowUserManagement] = useState(false);
+  const [showEncounteredTeams, setShowEncounteredTeams] = useState(false);
+  const [showCombatHistory, setShowCombatHistory] = useState(false);
+  const [adminCombats, setAdminCombats] = useState<Combat[]>([]);
   const [showLogin, setShowLogin] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -49,6 +58,9 @@ export default function AuthPanel() {
     } = onAuthStateChange((currentSession) => {
       setSession(currentSession);
       setShowAdminPanel(false);
+      setShowUserManagement(false);
+      setShowEncounteredTeams(false);
+      setShowCombatHistory(false);
 
       void getCurrentUserProfile(currentSession).then((currentProfile) => {
         if (mounted) {
@@ -84,6 +96,9 @@ export default function AuthPanel() {
     setSubmitting(true);
     setError("");
     setShowAdminPanel(false);
+    setShowUserManagement(false);
+    setShowEncounteredTeams(false);
+    setShowCombatHistory(false);
 
     try {
       await signOut();
@@ -92,6 +107,21 @@ export default function AuthPanel() {
       setError(error instanceof Error ? error.message : "Déconnexion impossible.");
     } finally {
       setSubmitting(false);
+    }
+  }
+
+  async function openCombatHistory() {
+    setShowAdminPanel(false);
+    setShowUserManagement(false);
+    setShowEncounteredTeams(false);
+    setShowCombatHistory(true);
+
+    try {
+      const history = await loadCombats();
+      setAdminCombats(history);
+    } catch (error) {
+      console.error("Impossible de charger l'historique des combats :", error);
+      setAdminCombats([]);
     }
   }
 
@@ -143,13 +173,46 @@ export default function AuthPanel() {
         </div>
 
         {isAdmin && (
-          <AdminPanel
-            open={showAdminPanel}
-            onClose={() => setShowAdminPanel(false)}
-            onUserManagement={() => setShowAdminPanel(false)}
-            onEncounteredTeams={() => setShowAdminPanel(false)}
-            onCombatHistory={() => setShowAdminPanel(false)}
-          />
+          <>
+            <AdminPanel
+              open={showAdminPanel}
+              onClose={() => setShowAdminPanel(false)}
+              onUserManagement={() => {
+                setShowAdminPanel(false);
+                setShowUserManagement(true);
+              }}
+              onEncounteredTeams={() => {
+                setShowAdminPanel(false);
+                setShowEncounteredTeams(true);
+              }}
+              onCombatHistory={openCombatHistory}
+            />
+
+            <UserManagement
+              open={showUserManagement}
+              onClose={() => {
+                setShowUserManagement(false);
+                setShowAdminPanel(true);
+              }}
+            />
+
+            <EncounteredTeams
+              open={showEncounteredTeams}
+              onClose={() => {
+                setShowEncounteredTeams(false);
+                setShowAdminPanel(true);
+              }}
+            />
+
+            <CombatHistory
+              open={showCombatHistory}
+              combats={adminCombats}
+              onClose={() => {
+                setShowCombatHistory(false);
+                setShowAdminPanel(true);
+              }}
+            />
+          </>
         )}
       </>
     );
