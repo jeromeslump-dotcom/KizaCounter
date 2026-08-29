@@ -49,4 +49,58 @@ select {
   .hero-card-wallpaper-int {
     background: linear-gradient(to bottom right, rgb(7 89 133 / 0.6), rgb(23 37 84 / 0.3), rgb(2 6 23 / 0.9));
   }
+
+  /* ==========================================================
+     PALETTE UI — HERO GRID
+     ========================================================== */
+
+  .hero-grid-panel {
+    border-color: rgb(51 65 85);
+    background: rgb(15 23 42 / 0.8);
+  }
+
+  .hero-grid-input,
+  .hero-grid-select {
+    border-color: rgb(51 65 85);
+    background: rgb(2 6 23);
+    color: white;
+  }
+
+  .hero-grid-input::placeholder {
+    color: rgb(100 116 139);
+  }
+
+  .hero-grid-input:focus,
+  .hero-grid-select:focus {
+    border-color: rgb(56 189 248);
+  }
+
+  .hero-grid-label {
+    color: rgb(100 116 139);
+  }
+
+  .hero-grid-title {
+    color: rgb(203 213 225);
+  }
+
+  .hero-grid-result-count {
+    color: rgb(100 116 139);
+  }
+
+  .hero-grid-empty {
+    border-color: rgb(51 65 85);
+    background: rgb(15 23 42 / 0.5);
+  }
+
+  .hero-grid-empty-text {
+    color: rgb(148 163 184);
+  }
+
+  /* ==========================================================
+     PALETTE UI — ENEMY PANEL
+     ========================================================== */
+
+  .enemy-panel-shell {
+    border-color: rgb(51 65 85);
+  }
 }
