@@ -1,11 +1,6 @@
-import type {
-  Combat,
-  Hero,
-  HeroClassFilter,
-  HeroSort,
-} from "../types";
+import type { Combat, Hero, HeroClassFilter, HeroSort } from "../types";
 
-import { getTeamHistoryStats } from "../engine/teamStats";
+import { getMatchupHistoryStats } from "../engine/teamStats";
 
 import CompactTeam from "./CompactTeam";
 import CombatForm from "./CombatForm";
@@ -60,14 +55,16 @@ export default function CounterModal({
 }: CounterModalProps) {
   if (!open) return null;
 
-  const recommendedIds = recommendedTeam.map(
-    (hero) => hero.id
-  );
+  const enemyIds = enemies.map((hero) => hero.id);
 
-  const history = getTeamHistoryStats(
-    recommendedIds,
-    combats
-  );
+  const recommendedIds = recommendedTeam.map((hero) => hero.id);
+
+  // ============================================================
+  // HISTORIQUE RECOMMANDATION A
+  // Même équipe + mêmes 5 ennemis
+  // ============================================================
+
+  const history = getMatchupHistoryStats(enemyIds, recommendedIds, combats);
 
   const historyLabel =
     history.battles === 0
@@ -78,11 +75,15 @@ export default function CounterModal({
           }`
         : `${Math.round(history.winRate)} %`;
 
-  const alternativeIds = alternativeTeam.map(
-    (hero) => hero.id
-  );
+  const alternativeIds = alternativeTeam.map((hero) => hero.id);
 
-  const alternativeHistory = getTeamHistoryStats(
+  // ============================================================
+  // HISTORIQUE RECOMMANDATION B
+  // Même équipe + mêmes 5 ennemis
+  // ============================================================
+
+  const alternativeHistory = getMatchupHistoryStats(
+    enemyIds,
     alternativeIds,
     combats
   );
@@ -93,9 +94,7 @@ export default function CounterModal({
       : isAuthenticated
         ? `${Math.round(alternativeHistory.winRate)} % · ${
             alternativeHistory.battles
-          } combat${
-            alternativeHistory.battles > 1 ? "s" : ""
-          }`
+          } combat${alternativeHistory.battles > 1 ? "s" : ""}`
         : `${Math.round(alternativeHistory.winRate)} %`;
 
   return (
@@ -123,22 +122,22 @@ export default function CounterModal({
         </div>
 
         <div className="overflow-y-auto p-3 sm:p-5">
-  <CompactTeam
-  title={`Ennemis (${enemies.length}/5)`}
-  heroes={enemies}
-  selectedIds={enemies.map((hero) => hero.id)}
-  enemy
-  compactPortrait
-/>
+          <CompactTeam
+            title={`Ennemis (${enemies.length}/5)`}
+            heroes={enemies}
+            selectedIds={enemies.map((hero) => hero.id)}
+            enemy
+            compactPortrait
+          />
 
           <div className="mt-4">
-<CompactTeam
-  title={`Votre équipe (${team.length}/5)`}
-  heroes={team}
-  selectedIds={teamIds}
-  onHeroClick={onHeroClick}
-  compactPortrait
-/>
+            <CompactTeam
+              title={`Votre équipe (${team.length}/5)`}
+              heroes={team}
+              selectedIds={teamIds}
+              onHeroClick={onHeroClick}
+              compactPortrait
+            />
           </div>
 
           {recommendedTeam.length > 0 && (
@@ -149,14 +148,10 @@ export default function CounterModal({
 
               <button
                 type="button"
-                onClick={() =>
-                  onSelectRecommendedTeam(recommendedIds)
-                }
+                onClick={() => onSelectRecommendedTeam(recommendedIds)}
                 className={[
                   "ui-recommendation-team",
-                  recommendedIds.every((id) =>
-                    teamIds.includes(id)
-                  )
+                  recommendedIds.every((id) => teamIds.includes(id))
                     ? "ui-recommendation-selected"
                     : "",
                 ].join(" ")}
@@ -173,10 +168,7 @@ export default function CounterModal({
 
                 <div className="grid grid-cols-5 gap-1.5 sm:gap-2">
                   {recommendedTeam.map((hero) => (
-                    <span
-                      key={hero.id}
-                      className="ui-recommendation-hero"
-                    >
+                    <span key={hero.id} className="ui-recommendation-hero">
                       {hero.name}
                     </span>
                   ))}
@@ -191,14 +183,10 @@ export default function CounterModal({
                 <div className="mt-3 border-t ui-divider pt-3">
                   <button
                     type="button"
-                    onClick={() =>
-                      onSelectRecommendedTeam(alternativeIds)
-                    }
+                    onClick={() => onSelectRecommendedTeam(alternativeIds)}
                     className={[
                       "ui-recommendation-team",
-                      alternativeIds.every((id) =>
-                        teamIds.includes(id)
-                      )
+                      alternativeIds.every((id) => teamIds.includes(id))
                         ? "ui-recommendation-selected"
                         : "",
                     ].join(" ")}
@@ -215,10 +203,7 @@ export default function CounterModal({
 
                     <div className="grid grid-cols-5 gap-1.5 sm:gap-2">
                       {alternativeTeam.map((hero) => (
-                        <span
-                          key={hero.id}
-                          className="ui-recommendation-hero"
-                        >
+                        <span key={hero.id} className="ui-recommendation-hero">
                           {hero.name}
                         </span>
                       ))}
@@ -230,11 +215,7 @@ export default function CounterModal({
           )}
 
           <div className="mt-4">
-            <CombatForm
-              enemies={enemies}
-              myHeroes={team}
-              onSave={onSave}
-            />
+            <CombatForm enemies={enemies} myHeroes={team} onSave={onSave} />
           </div>
 
           <div className="mt-5">

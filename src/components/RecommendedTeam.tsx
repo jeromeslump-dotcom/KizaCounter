@@ -16,7 +16,9 @@ export default function RecommendedTeam({
     <section className="ui-panel w-full rounded-xl border p-4">
       <div className="mb-4 flex items-center justify-between gap-3">
         <div>
-          <h2 className="ui-text-primary text-base font-bold">Équipe recommandée</h2>
+          <h2 className="ui-text-primary text-base font-bold">
+            Équipe recommandée
+          </h2>
           <p className="ui-text-muted mt-0.5 text-xs">{heroes.length}/5</p>
         </div>
 

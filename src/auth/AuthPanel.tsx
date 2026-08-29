@@ -54,7 +54,9 @@ export default function AuthPanel() {
       setShowLogin(false);
     } catch (error) {
       console.error("Erreur de connexion :", error);
-      setError(error instanceof Error ? error.message : "Connexion impossible.");
+      setError(
+        error instanceof Error ? error.message : "Connexion impossible."
+      );
     } finally {
       setSubmitting(false);
     }
@@ -68,7 +70,9 @@ export default function AuthPanel() {
       await signOut();
     } catch (error) {
       console.error("Erreur de déconnexion :", error);
-      setError(error instanceof Error ? error.message : "Déconnexion impossible.");
+      setError(
+        error instanceof Error ? error.message : "Déconnexion impossible."
+      );
     } finally {
       setSubmitting(false);
     }
@@ -90,7 +94,9 @@ export default function AuthPanel() {
   if (session?.user) {
     return (
       <div className="flex items-center gap-2">
-        <span className="ui-text-soft text-xs font-bold">👤 {getUserName()}</span>
+        <span className="ui-text-soft text-xs font-bold">
+          👤 {getUserName()}
+        </span>
         <button
           type="button"
           onClick={handleSignOut}

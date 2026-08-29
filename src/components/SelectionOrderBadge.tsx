@@ -1,4 +1,3 @@
-
 interface SelectionOrderBadgeProps {
   order: number;
 }

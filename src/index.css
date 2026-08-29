@@ -39,44 +39,20 @@ select {
 
 .hero-card-wallpaper-str {
   background:
-    radial-gradient(
-      circle at 20% 20%,
-      rgb(127 29 29 / 0.55),
-      transparent 55%
-    ),
-    linear-gradient(
-      135deg,
-      rgb(30 10 20 / 0.95),
-      rgb(7 12 25 / 0.96)
-    );
+    radial-gradient(circle at 20% 20%, rgb(127 29 29 / 0.55), transparent 55%),
+    linear-gradient(135deg, rgb(30 10 20 / 0.95), rgb(7 12 25 / 0.96));
 }
 
 .hero-card-wallpaper-agi {
   background:
-    radial-gradient(
-      circle at 20% 20%,
-      rgb(6 95 70 / 0.5),
-      transparent 55%
-    ),
-    linear-gradient(
-      135deg,
-      rgb(6 30 30 / 0.95),
-      rgb(7 12 25 / 0.96)
-    );
+    radial-gradient(circle at 20% 20%, rgb(6 95 70 / 0.5), transparent 55%),
+    linear-gradient(135deg, rgb(6 30 30 / 0.95), rgb(7 12 25 / 0.96));
 }
 
 .hero-card-wallpaper-int {
   background:
-    radial-gradient(
-      circle at 20% 20%,
-      rgb(7 89 133 / 0.55),
-      transparent 55%
-    ),
-    linear-gradient(
-      135deg,
-      rgb(7 25 45 / 0.95),
-      rgb(7 12 25 / 0.96)
-    );
+    radial-gradient(circle at 20% 20%, rgb(7 89 133 / 0.55), transparent 55%),
+    linear-gradient(135deg, rgb(7 25 45 / 0.95), rgb(7 12 25 / 0.96));
 }
 
 /* ============================================================

@@ -11,10 +11,7 @@ import type {
   TeamScore,
 } from "../types";
 
-import {
-  CORE4_CONFIG,
-  core4ReplacementScore,
-} from "./historicalCore4";
+import { CORE4_CONFIG, core4ReplacementScore } from "./historicalCore4";
 
 // ============================================================
 // CONSTANTES
@@ -635,16 +632,11 @@ export function recommendTeam(
         const coreIds = recommended.map((hero) => hero.id);
 
         core4Bonus =
-          core4ReplacementScore(
-            enemyIds,
-            coreIds,
-            candidate.hero.id,
-            combats
-          ) * CORE4_CONFIG.weight;
+          core4ReplacementScore(enemyIds, coreIds, candidate.hero.id, combats) *
+          CORE4_CONFIG.weight;
       }
 
-      const adjustedScore =
-        candidate.score - classPenalty + core4Bonus;
+      const adjustedScore = candidate.score - classPenalty + core4Bonus;
 
       if (adjustedScore > bestAdjustedScore) {
         bestAdjustedScore = adjustedScore;
@@ -687,9 +679,7 @@ export function recommendAlternativeTeam(
   const enemySet = new Set(enemyIds);
   const primarySet = new Set(primaryTeam.map((hero) => hero.id));
 
-  const availableHeroes = heroes.filter(
-    (hero) => !enemySet.has(hero.id)
-  );
+  const availableHeroes = heroes.filter((hero) => !enemySet.has(hero.id));
 
   if (availableHeroes.length <= TEAM_SIZE) {
     return availableHeroes;
@@ -715,10 +705,7 @@ export function recommendAlternativeTeam(
       const explorationBonus = primarySet.has(hero.id) ? -18 : 8;
 
       const score =
-        stats * 1.35 +
-        counterScore +
-        general * 0.1 +
-        explorationBonus;
+        stats * 1.35 + counterScore + general * 0.1 + explorationBonus;
 
       return {
         hero,
@@ -726,9 +713,7 @@ export function recommendAlternativeTeam(
       };
     })
     .sort(
-      (a, b) =>
-        b.score - a.score ||
-        a.hero.name.localeCompare(b.hero.name)
+      (a, b) => b.score - a.score || a.hero.name.localeCompare(b.hero.name)
     );
 
   const alternative: Hero[] = [];
@@ -739,17 +724,13 @@ export function recommendAlternativeTeam(
     INT: 0,
   };
 
-  while (
-    alternative.length < TEAM_SIZE &&
-    ranked.length > 0
-  ) {
+  while (alternative.length < TEAM_SIZE && ranked.length > 0) {
     let bestIndex = -1;
     let bestAdjustedScore = -Infinity;
 
     for (let i = 0; i < ranked.length; i++) {
       const candidate = ranked[i];
-      const currentCount =
-        classCounts[candidate.hero.cls] ?? 0;
+      const currentCount = classCounts[candidate.hero.cls] ?? 0;
 
       let classPenalty = 0;
 
@@ -765,8 +746,7 @@ export function recommendAlternativeTeam(
         classPenalty += 40;
       }
 
-      const adjustedScore =
-        candidate.score - classPenalty;
+      const adjustedScore = candidate.score - classPenalty;
 
       if (adjustedScore > bestAdjustedScore) {
         bestAdjustedScore = adjustedScore;
@@ -781,8 +761,7 @@ export function recommendAlternativeTeam(
     const selected = ranked.splice(bestIndex, 1)[0].hero;
 
     alternative.push(selected);
-    classCounts[selected.cls] =
-      (classCounts[selected.cls] ?? 0) + 1;
+    classCounts[selected.cls] = (classCounts[selected.cls] ?? 0) + 1;
   }
 
   return alternative;

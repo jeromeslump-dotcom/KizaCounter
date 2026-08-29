@@ -25,19 +25,17 @@ export default function App() {
     enemies,
     team,
     recommendedTeam,
-	alternativeTeam,
-	selectRecommendedTeam,
+    alternativeTeam,
+    selectRecommendedTeam,
     toggleEnemy,
     selectCounterHero,
     clearEnemies,
     resetCombat,
   } = useCombatSelection({ heroes: HEROES, combats });
 
-  const [activeClass, setActiveClass] =
-    useState<HeroClassFilter>("ALL");
+  const [activeClass, setActiveClass] = useState<HeroClassFilter>("ALL");
   const [query, setQuery] = useState("");
-  const [sortBy, setSortBy] =
-    useState<HeroSort>("played");
+  const [sortBy, setSortBy] = useState<HeroSort>("played");
 
   useEffect(() => {
     let mounted = true;
@@ -69,10 +67,7 @@ export default function App() {
           );
         }
       } catch (error) {
-        console.error(
-          "Impossible de récupérer la session :",
-          error
-        );
+        console.error("Impossible de récupérer la session :", error);
 
         if (mounted) {
           setIsAuthenticated(false);
@@ -135,25 +130,17 @@ export default function App() {
 
   async function handleSaveCombat(combat: Combat) {
     if (!isAuthenticated) {
-      throw new Error(
-        "Vous devez être connecté pour enregistrer un combat."
-      );
+      throw new Error("Vous devez être connecté pour enregistrer un combat.");
     }
 
     try {
       const savedCombat = await addCombat(combat);
 
-      setCombats((current) => [
-        savedCombat,
-        ...current,
-      ]);
+      setCombats((current) => [savedCombat, ...current]);
 
       resetCombat();
     } catch (error) {
-      console.error(
-        "Impossible d'enregistrer le combat :",
-        error
-      );
+      console.error("Impossible d'enregistrer le combat :", error);
 
       throw error;
     }
@@ -215,8 +202,8 @@ export default function App() {
         enemies={enemies}
         team={team}
         recommendedTeam={recommendedTeam}
-		alternativeTeam={alternativeTeam}
-		onSelectRecommendedTeam={selectRecommendedTeam}
+        alternativeTeam={alternativeTeam}
+        onSelectRecommendedTeam={selectRecommendedTeam}
         teamIds={teamIds}
         heroes={HEROES}
         enabledHeroIds={enabledHeroIds}

@@ -1,12 +1,8 @@
-
 import { useEffect, useMemo, useState } from "react";
 
 import type { Combat, Hero } from "../types";
 
-import {
-  recommendTeam,
-  recommendAlternativeTeam,
-} from "../engine/scoring";
+import { recommendTeam, recommendAlternativeTeam } from "../engine/scoring";
 
 const TEAM_SIZE = 5;
 
@@ -101,11 +97,7 @@ export default function useCombatSelection({
   // ============================================================
 
   function openCounterModal(enemyTeamIds: string[]) {
-    const recommendation = recommendTeam(
-      enemyTeamIds,
-      heroes,
-      combats
-    );
+    const recommendation = recommendTeam(enemyTeamIds, heroes, combats);
 
     const alternative = recommendAlternativeTeam(
       enemyTeamIds,
@@ -115,9 +107,7 @@ export default function useCombatSelection({
     );
 
     const ids = recommendation.map((hero) => hero.id);
-    const alternativeTeamIds = alternative.map(
-      (hero) => hero.id
-    );
+    const alternativeTeamIds = alternative.map((hero) => hero.id);
 
     setRecommendedIds(ids);
     setAlternativeIds(alternativeTeamIds);
@@ -285,4 +275,3 @@ export default function useCombatSelection({
     openCounterModal,
   };
 }
-
