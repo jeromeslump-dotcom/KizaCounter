@@ -13,40 +13,27 @@ export default function RecommendedTeam({
   onHeroClick,
 }: RecommendedTeamProps) {
   return (
-    <section className="w-full rounded-xl border border-amber-400/20 bg-slate-900/80 p-4">
-      {/* ======================================================
-          EN-TÊTE
-          ====================================================== */}
-
+    <section className="ui-panel w-full rounded-xl border p-4">
       <div className="mb-4 flex items-center justify-between gap-3">
         <div>
-          <h2 className="text-base font-bold text-white">Équipe recommandée</h2>
-
-          <p className="mt-0.5 text-xs text-slate-500">{heroes.length}/5</p>
+          <h2 className="ui-text-primary text-base font-bold">Équipe recommandée</h2>
+          <p className="ui-text-muted mt-0.5 text-xs">{heroes.length}/5</p>
         </div>
 
         {score !== undefined && (
-          <div className="rounded-lg border border-amber-400/30 bg-amber-400/10 px-3 py-1.5 text-xs font-bold text-amber-300">
+          <div className="ui-score rounded-lg border px-3 py-1.5 text-xs font-bold">
             Score : {score.toFixed(1)}
           </div>
         )}
       </div>
 
-      {/* ======================================================
-          AUCUNE RECOMMANDATION
-          ====================================================== */}
-
       {heroes.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-slate-700 bg-slate-950/50 p-6 text-center">
-          <p className="text-sm text-slate-500">
+        <div className="ui-panel-empty rounded-lg border border-dashed p-6 text-center">
+          <p className="ui-text-muted text-sm">
             Aucune équipe recommandée pour le moment.
           </p>
         </div>
       ) : (
-        /* ====================================================
-           CARTES DES HÉROS
-           ==================================================== */
-
         <div className="grid grid-cols-1 gap-3">
           {heroes.map((hero, index) => (
             <HeroCard
