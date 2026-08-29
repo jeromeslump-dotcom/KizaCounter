@@ -13,6 +13,7 @@ interface UserProfile {
 interface UserManagementProps {
   open: boolean;
   onClose: () => void;
+  onBack: () => void;
 }
 
 const ROLE_LABELS: Record<UserRole, string> = {
@@ -21,7 +22,13 @@ const ROLE_LABELS: Record<UserRole, string> = {
   admin: "Administrateur",
 };
 
-export default function UserManagement({ open, onClose }: UserManagementProps) {
+const ROLE_OPTIONS: UserRole[] = ["user", "contributor", "admin"];
+
+export default function UserManagement({
+  open,
+  onClose,
+  onBack,
+}: UserManagementProps) {
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [draftRoles, setDraftRoles] = useState<Record<string, UserRole>>({});
   const [query, setQuery] = useState("");
@@ -104,13 +111,18 @@ export default function UserManagement({ open, onClose }: UserManagementProps) {
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/75 p-3 backdrop-blur-sm sm:p-4">
+    <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/75 p-3 backdrop-blur-sm sm:p-4">
       <div className="ui-modal flex max-h-[92vh] w-full max-w-3xl flex-col overflow-hidden rounded-3xl border shadow-2xl">
         <div className="flex items-start justify-between gap-4 border-b ui-divider p-4 sm:p-6">
           <div>
-            <h2 className="ui-text-primary text-xl font-black">Gestion des utilisateurs</h2>
-            <p className="ui-text-secondary mt-1 text-sm">Gestion des rôles utilisateurs</p>
+            <h2 className="ui-text-primary text-xl font-black">
+              Gestion des utilisateurs
+            </h2>
+            <p className="ui-text-secondary mt-1 text-sm">
+              Gestion des rôles utilisateurs
+            </p>
           </div>
+
           <button
             type="button"
             onClick={onClose}
@@ -136,7 +148,9 @@ export default function UserManagement({ open, onClose }: UserManagementProps) {
           )}
 
           {loading ? (
-            <p className="ui-text-soft py-10 text-center text-sm">Chargement...</p>
+            <p className="ui-text-soft py-10 text-center text-sm">
+              Chargement...
+            </p>
           ) : (
             <div className="space-y-3">
               {filteredUsers.map((user) => {
@@ -154,30 +168,30 @@ export default function UserManagement({ open, onClose }: UserManagementProps) {
                       </div>
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-3 text-xs">
-                      {(["user", "contributor", "admin"] as UserRole[]).map((role) => (
-                        <label key={role} className="ui-text-secondary inline-flex cursor-pointer items-center gap-1.5">
-                          <input
-                            type="radio"
-                            name={`role-${user.id}`}
-                            value={role}
-                            checked={selectedRole === role}
-                            onChange={() =>
-                              setDraftRoles((current) => ({
-                                ...current,
-                                [user.id]: role,
-                              }))
-                            }
-                          />
-                          {ROLE_LABELS[role]}
-                        </label>
-                      ))}
+                    <div className="flex flex-wrap items-center gap-3">
+                      <select
+                        value={selectedRole}
+                        onChange={(event) =>
+                          setDraftRoles((current) => ({
+                            ...current,
+                            [user.id]: event.target.value as UserRole,
+                          }))
+                        }
+                        className="ui-input min-w-[180px] rounded-lg border px-3 py-2 text-xs font-bold outline-none"
+                        aria-label={`Rôle de ${user.display_name}`}
+                      >
+                        {ROLE_OPTIONS.map((role) => (
+                          <option key={role} value={role}>
+                            {ROLE_LABELS[role]}
+                          </option>
+                        ))}
+                      </select>
 
                       <button
                         type="button"
                         disabled={!changed || savingId === user.id}
                         onClick={() => saveRole(user)}
-                        className="ui-action ml-auto rounded-lg border px-3 py-1.5 font-bold transition disabled:cursor-not-allowed disabled:opacity-40"
+                        className="ui-action ml-auto rounded-lg border px-3 py-1.5 text-xs font-bold transition disabled:cursor-not-allowed disabled:opacity-40"
                       >
                         {savingId === user.id ? "Enregistrement..." : "Enregistrer"}
                       </button>
@@ -199,12 +213,13 @@ export default function UserManagement({ open, onClose }: UserManagementProps) {
           <span className="ui-text-soft text-xs">
             {users.length} utilisateurs
           </span>
+
           <button
             type="button"
-            onClick={onClose}
+            onClick={onBack}
             className="ui-action rounded-lg border px-4 py-2 text-xs font-bold transition"
           >
-            Fermer
+            Retour au Admin Panel
           </button>
         </div>
       </div>
