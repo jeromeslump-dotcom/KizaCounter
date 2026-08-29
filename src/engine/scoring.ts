@@ -626,6 +626,133 @@ export function recommendTeam(
   return recommended;
 }
 
+
+// ============================================================
+// RECOMMANDATION ALTERNATIVE
+// ============================================================
+//
+// Variante volontairement différente de recommendTeam().
+// Elle favorise davantage les statistiques et l'exploration,
+// tout en évitant de reprendre les héros de la recommandation A.
+// ============================================================
+
+export function recommendAlternativeTeam(
+  enemyIds: string[],
+  heroes: Hero[],
+  combats: Combat[],
+  primaryTeam: Hero[] = []
+): Hero[] {
+  if (enemyIds.length === 0) {
+    return [];
+  }
+
+  const enemySet = new Set(enemyIds);
+  const primarySet = new Set(primaryTeam.map((hero) => hero.id));
+
+  const availableHeroes = heroes.filter(
+    (hero) => !enemySet.has(hero.id)
+  );
+
+  if (availableHeroes.length <= TEAM_SIZE) {
+    return availableHeroes;
+  }
+
+  const usage = calculateHeroUsage(combats, heroes);
+  const counterUsage = calculateCounterUsage(enemyIds, combats);
+
+  const ranked = availableHeroes
+    .map((hero) => {
+      const general = heroUsageScore(hero.id, usage);
+      const stats = heroStatScore(hero);
+      const counter = counterUsage[hero.id];
+
+      const counterScore = counter
+        ? counter.winRate * 1.2 + Math.min(counter.total * 2, 10)
+        : 0;
+
+      // B :
+      // - davantage de poids sur les statistiques
+      // - historique spécifique moins dominant
+      // - bonus aux héros qui n'étaient pas dans A
+      const explorationBonus = primarySet.has(hero.id) ? -18 : 8;
+
+      const score =
+        stats * 1.35 +
+        counterScore +
+        general * 0.1 +
+        explorationBonus;
+
+      return {
+        hero,
+        score,
+      };
+    })
+    .sort(
+      (a, b) =>
+        b.score - a.score ||
+        a.hero.name.localeCompare(b.hero.name)
+    );
+
+  const alternative: Hero[] = [];
+
+  const classCounts: Record<string, number> = {
+    STR: 0,
+    AGI: 0,
+    INT: 0,
+  };
+
+  while (
+    alternative.length < TEAM_SIZE &&
+    ranked.length > 0
+  ) {
+    let bestIndex = -1;
+    let bestAdjustedScore = -Infinity;
+
+    for (let i = 0; i < ranked.length; i++) {
+      const candidate = ranked[i];
+      const currentCount =
+        classCounts[candidate.hero.cls] ?? 0;
+
+      let classPenalty = 0;
+
+      if (currentCount >= 1) {
+        classPenalty += 8 * currentCount;
+      }
+
+      if (currentCount >= 2) {
+        classPenalty += 20;
+      }
+
+      if (currentCount >= 3) {
+        classPenalty += 40;
+      }
+
+      const adjustedScore =
+        candidate.score - classPenalty;
+
+      if (adjustedScore > bestAdjustedScore) {
+        bestAdjustedScore = adjustedScore;
+        bestIndex = i;
+      }
+    }
+
+    if (bestIndex < 0) {
+      break;
+    }
+
+    const selected = ranked.splice(bestIndex, 1)[0].hero;
+
+    alternative.push(selected);
+    classCounts[selected.cls] =
+      (classCounts[selected.cls] ?? 0) + 1;
+  }
+
+  return alternative;
+}
+
+
+
+
 // ============================================================
 // TRI DES HÉROS PAR SCORE
 // ============================================================

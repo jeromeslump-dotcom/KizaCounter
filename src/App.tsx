@@ -25,15 +25,19 @@ export default function App() {
     enemies,
     team,
     recommendedTeam,
+	alternativeTeam,
+	selectRecommendedTeam,
     toggleEnemy,
     selectCounterHero,
     clearEnemies,
     resetCombat,
   } = useCombatSelection({ heroes: HEROES, combats });
 
-  const [activeClass, setActiveClass] = useState<HeroClassFilter>("ALL");
+  const [activeClass, setActiveClass] =
+    useState<HeroClassFilter>("ALL");
   const [query, setQuery] = useState("");
-  const [sortBy, setSortBy] = useState<HeroSort>("played");
+  const [sortBy, setSortBy] =
+    useState<HeroSort>("played");
 
   useEffect(() => {
     let mounted = true;
@@ -41,6 +45,7 @@ export default function App() {
     async function initialize() {
       try {
         const session = await getSession();
+
         if (!mounted) return;
 
         const authenticated = Boolean(session);
@@ -53,7 +58,10 @@ export default function App() {
 
         try {
           const history = await loadCombats();
-          if (mounted) setCombats(history);
+
+          if (mounted) {
+            setCombats(history);
+          }
         } catch (error) {
           console.error(
             "Impossible de charger l'historique des combats :",
@@ -61,7 +69,11 @@ export default function App() {
           );
         }
       } catch (error) {
-        console.error("Impossible de récupérer la session :", error);
+        console.error(
+          "Impossible de récupérer la session :",
+          error
+        );
+
         if (mounted) {
           setIsAuthenticated(false);
           setCombats([]);
@@ -86,7 +98,9 @@ export default function App() {
 
       loadCombats()
         .then((history) => {
-          if (mounted) setCombats(history);
+          if (mounted) {
+            setCombats(history);
+          }
         })
         .catch((error) => {
           console.error(
@@ -121,15 +135,26 @@ export default function App() {
 
   async function handleSaveCombat(combat: Combat) {
     if (!isAuthenticated) {
-      throw new Error("Vous devez être connecté pour enregistrer un combat.");
+      throw new Error(
+        "Vous devez être connecté pour enregistrer un combat."
+      );
     }
 
     try {
       const savedCombat = await addCombat(combat);
-      setCombats((current) => [savedCombat, ...current]);
+
+      setCombats((current) => [
+        savedCombat,
+        ...current,
+      ]);
+
       resetCombat();
     } catch (error) {
-      console.error("Impossible d'enregistrer le combat :", error);
+      console.error(
+        "Impossible d'enregistrer le combat :",
+        error
+      );
+
       throw error;
     }
   }
@@ -143,14 +168,17 @@ export default function App() {
               <h1 className="ui-text-primary text-xl font-black tracking-tight sm:text-2xl">
                 Lords Mobile Counter
               </h1>
+
               <p className="ui-text-muted mt-0.5 text-[11px] font-semibold sm:hidden">
                 By Kikoine
               </p>
+
               <p className="ui-text-secondary mt-1 hidden text-sm sm:block">
                 Sélectionnez les héros ennemis pour trouver la meilleure
                 contre-équipe.
               </p>
             </div>
+
             <AuthPanel />
           </div>
         </header>
@@ -187,6 +215,8 @@ export default function App() {
         enemies={enemies}
         team={team}
         recommendedTeam={recommendedTeam}
+		alternativeTeam={alternativeTeam}
+		onSelectRecommendedTeam={selectRecommendedTeam}
         teamIds={teamIds}
         heroes={HEROES}
         enabledHeroIds={enabledHeroIds}
@@ -194,6 +224,8 @@ export default function App() {
         query={query}
         sortBy={sortBy}
         usage={heroUsage}
+        combats={combats}
+        isAuthenticated={isAuthenticated}
         onClose={resetCombat}
         onHeroClick={selectCounterHero}
         onQueryChange={setQuery}
