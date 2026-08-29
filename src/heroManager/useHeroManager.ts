@@ -1,37 +1,90 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { HEROES } from "../data/heroes";
+import { supabase } from "../storage/supabase";
 import {
   loadHeroPreferences,
   saveHeroPreferences,
 } from "./heroPreferences";
 
+const ALL_HERO_IDS = new Set(HEROES.map((hero) => hero.id));
+
 export default function useHeroManager() {
   const [enabledHeroIds, setEnabledHeroIds] = useState<Set<string>>(
-    () => new Set(HEROES.map((hero) => hero.id))
+    () => new Set(ALL_HERO_IDS)
   );
+  const [userId, setUserId] = useState<string | null>(null);
   const [loaded, setLoaded] = useState(false);
+  const [preferencesReady, setPreferencesReady] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
 
-    loadHeroPreferences().then((ids) => {
+    async function loadForUser(nextUserId: string | null) {
+      setLoaded(false);
+      setPreferencesReady(false);
+      setUserId(nextUserId);
+
+      try {
+        const ids = await loadHeroPreferences(nextUserId);
+
+        if (cancelled) return;
+
+        setEnabledHeroIds(ids);
+        setPreferencesReady(true);
+      } catch (error) {
+        console.error(
+          "Impossible de charger les préférences héros :",
+          error
+        );
+
+        if (cancelled) return;
+
+        // En cas d'erreur Supabase, on ne réutilise jamais la sélection
+        // d'un autre utilisateur et on n'autorise pas une sauvegarde.
+        setEnabledHeroIds(new Set(ALL_HERO_IDS));
+      } finally {
+        if (!cancelled) {
+          setLoaded(true);
+        }
+      }
+    }
+
+    supabase.auth
+      .getUser()
+      .then(({ data: { user } }) => {
+        if (!cancelled) {
+          void loadForUser(user?.id ?? null);
+        }
+      })
+      .catch((error) => {
+        console.error("Impossible de récupérer l'utilisateur :", error);
+        if (!cancelled) {
+          void loadForUser(null);
+        }
+      });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
       if (cancelled) return;
 
-      setEnabledHeroIds(ids);
-      setLoaded(true);
+      void loadForUser(session?.user.id ?? null);
     });
 
     return () => {
       cancelled = true;
+      subscription.unsubscribe();
     };
   }, []);
 
   useEffect(() => {
-    if (!loaded) return;
+    if (!loaded || !preferencesReady || !userId) return;
 
-    void saveHeroPreferences(enabledHeroIds);
-  }, [enabledHeroIds, loaded]);
+    void saveHeroPreferences(userId, enabledHeroIds).catch((error) => {
+      console.error("Impossible de sauvegarder les préférences héros :", error);
+    });
+  }, [enabledHeroIds, loaded, preferencesReady, userId]);
 
   const toggleHero = useCallback((heroId: string) => {
     setEnabledHeroIds((current) => {
@@ -48,7 +101,7 @@ export default function useHeroManager() {
   }, []);
 
   const enableAll = useCallback(() => {
-    setEnabledHeroIds(new Set(HEROES.map((hero) => hero.id)));
+    setEnabledHeroIds(new Set(ALL_HERO_IDS));
   }, []);
 
   const disableAll = useCallback(() => {
