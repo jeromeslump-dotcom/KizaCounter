@@ -48,7 +48,7 @@ export default function useCombatSelection({
         .map((id) => heroes.find((hero) => hero.id === id))
         .filter(
           (hero): hero is Hero =>
-            Boolean(hero) && enabledHeroIds.has(hero.id)
+            hero !== undefined && enabledHeroIds.has(hero.id)
         ),
     [recommendedIds, heroes, enabledHeroIds]
   );
@@ -59,7 +59,7 @@ export default function useCombatSelection({
         .map((id) => heroes.find((hero) => hero.id === id))
         .filter(
           (hero): hero is Hero =>
-            Boolean(hero) && enabledHeroIds.has(hero.id)
+            hero !== undefined && enabledHeroIds.has(hero.id)
         ),
     [alternativeIds, heroes, enabledHeroIds]
   );
