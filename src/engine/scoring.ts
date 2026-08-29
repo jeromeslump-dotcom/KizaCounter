@@ -16,6 +16,7 @@ import type {
 // ============================================================
 
 const TEAM_SIZE = 5;
+const MIN_HISTORICAL_RELIABILITY = 60;
 
 // ============================================================
 // OUTILS
@@ -333,6 +334,9 @@ function isSameEnemyTeam(
  *   10-2 → 83,3 %
  *   20-5 → 80 %
  *   5-5  → 50 %
+ *
+ * Une victoire isolée ne suffit donc plus à imposer automatiquement
+ * une équipe historique comme recommandation.
  */
 export function findBestHistoricalTeam(
   enemyIds: string[],
@@ -443,8 +447,11 @@ export function findBestHistoricalTeam(
     }
   }
 
-  return bestTeam;
+  return bestTeam && bestReliability >= MIN_HISTORICAL_RELIABILITY
+    ? bestTeam
+    : null;
 }
+
 // ============================================================
 // SCORE HISTORIQUE CONTRE LES ENNEMIS
 // ============================================================
@@ -548,9 +555,9 @@ export function recommendTeam(
 
   const enemySet = new Set(enemyIds);
 
-  // Une victoire historique exacte est prioritaire.
-  // findBestHistoricalTeam regroupe maintenant les différentes équipes
-  // gagnantes contre cette même composition ennemie.
+  // Une équipe historique exacte n'est utilisée automatiquement que si
+  // son historique présente une fiabilité suffisante. Une victoire isolée
+  // laisse donc le moteur général comparer les autres possibilités.
   const historicalTeam = findBestHistoricalTeam(enemyIds, combats, heroes);
 
   if (historicalTeam && historicalTeam.length === TEAM_SIZE) {
@@ -625,7 +632,6 @@ export function recommendTeam(
 
   return recommended;
 }
-
 
 // ============================================================
 // RECOMMANDATION ALTERNATIVE
@@ -749,9 +755,6 @@ export function recommendAlternativeTeam(
 
   return alternative;
 }
-
-
-
 
 // ============================================================
 // TRI DES HÉROS PAR SCORE
