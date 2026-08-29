@@ -1,7 +1,5 @@
-
 import type { Hero } from "../types";
 import HeroCard from "./HeroCard";
-
 
 interface EnemyPanelProps {
   heroes: Hero[];
@@ -19,7 +17,7 @@ export default function EnemyPanel({
   compact = false,
 }: EnemyPanelProps) {
   return (
-    <section className="w-full rounded-xl border border-red-500/20 bg-slate-900/80 p-4">
+    <section className="enemy-panel-shell w-full rounded-xl border bg-slate-900/80 p-4">
       {/* ======================================================
           EN-TÊTE
           ====================================================== */}
@@ -61,8 +59,6 @@ export default function EnemyPanel({
                 className="group relative w-[calc((100%-1.5rem)/4)] min-w-0 max-w-[220px] overflow-hidden rounded-xl border border-slate-700 bg-slate-950 transition hover:border-red-400"
                 title={`Retirer ${hero.name}`}
               >
-
-
                 {/* IMAGE */}
                 <div className="relative z-10 aspect-square w-full overflow-hidden">
                   <img
