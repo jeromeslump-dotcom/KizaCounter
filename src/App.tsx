@@ -11,12 +11,24 @@ import AuthPanel from "./auth/AuthPanel";
 import useCombatSelection from "./hooks/useCombatSelection";
 import { addCombat, loadCombats } from "./storage/combatStorage";
 import { getSession, onAuthStateChange } from "./auth/auth";
+import HeroManager from "./heroManager/HeroManager";
+import useHeroManager from "./heroManager/useHeroManager";
 
 const TEAM_SIZE = 5;
 
 export default function App() {
   const [combats, setCombats] = useState<Combat[]>([]);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [showHeroManager, setShowHeroManager] = useState(false);
+
+  const {
+    enabledHeroIds,
+    activeCount,
+    totalCount,
+    toggleHero,
+    enableAll,
+    disableAll,
+  } = useHeroManager();
 
   const {
     enemyIds,
@@ -25,19 +37,22 @@ export default function App() {
     enemies,
     team,
     recommendedTeam,
-	alternativeTeam,
-	selectRecommendedTeam,
+    alternativeTeam,
+    selectRecommendedTeam,
     toggleEnemy,
     selectCounterHero,
     clearEnemies,
     resetCombat,
-  } = useCombatSelection({ heroes: HEROES, combats });
+  } = useCombatSelection({
+    heroes: HEROES,
+    combats,
+    enabledHeroIds,
+  });
 
   const [activeClass, setActiveClass] =
     useState<HeroClassFilter>("ALL");
   const [query, setQuery] = useState("");
-  const [sortBy, setSortBy] =
-    useState<HeroSort>("played");
+  const [sortBy, setSortBy] = useState<HeroSort>("played");
 
   useEffect(() => {
     let mounted = true;
@@ -128,11 +143,6 @@ export default function App() {
     return usage;
   }, [combats]);
 
-  const enabledHeroIds = useMemo(
-    () => new Set(HEROES.map((hero) => hero.id)),
-    []
-  );
-
   async function handleSaveCombat(combat: Combat) {
     if (!isAuthenticated) {
       throw new Error(
@@ -143,11 +153,7 @@ export default function App() {
     try {
       const savedCombat = await addCombat(combat);
 
-      setCombats((current) => [
-        savedCombat,
-        ...current,
-      ]);
-
+      setCombats((current) => [savedCombat, ...current]);
       resetCombat();
     } catch (error) {
       console.error(
@@ -161,6 +167,17 @@ export default function App() {
 
   return (
     <main className="app-shell min-h-screen">
+      <HeroManager
+        open={showHeroManager}
+        enabledHeroIds={enabledHeroIds}
+        activeCount={activeCount}
+        totalCount={totalCount}
+        onToggleHero={toggleHero}
+        onEnableAll={enableAll}
+        onDisableAll={disableAll}
+        onClose={() => setShowHeroManager(false)}
+      />
+
       <div className="mx-auto w-full max-w-[1800px] px-4 py-6 sm:px-6 lg:px-8">
         <header className="mb-4 sm:mb-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
@@ -179,7 +196,17 @@ export default function App() {
               </p>
             </div>
 
-            <AuthPanel />
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setShowHeroManager(true)}
+                className="ui-action rounded-lg border px-3 py-2 text-xs font-bold transition"
+              >
+                ⚙️ Gérer les héros
+              </button>
+
+              <AuthPanel />
+            </div>
           </div>
         </header>
 
@@ -215,8 +242,8 @@ export default function App() {
         enemies={enemies}
         team={team}
         recommendedTeam={recommendedTeam}
-		alternativeTeam={alternativeTeam}
-		onSelectRecommendedTeam={selectRecommendedTeam}
+        alternativeTeam={alternativeTeam}
+        onSelectRecommendedTeam={selectRecommendedTeam}
         teamIds={teamIds}
         heroes={HEROES}
         enabledHeroIds={enabledHeroIds}

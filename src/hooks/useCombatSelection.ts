@@ -1,4 +1,3 @@
-
 import { useEffect, useMemo, useState } from "react";
 
 import type { Combat, Hero } from "../types";
@@ -13,40 +12,19 @@ const TEAM_SIZE = 5;
 interface UseCombatSelectionProps {
   heroes: Hero[];
   combats: Combat[];
+  enabledHeroIds: Set<string>;
 }
 
 export default function useCombatSelection({
   heroes,
   combats,
+  enabledHeroIds,
 }: UseCombatSelectionProps) {
-  // ============================================================
-  // ENNEMIS
-  // ============================================================
-
   const [enemyIds, setEnemyIds] = useState<string[]>([]);
-
-  // ============================================================
-  // MON ÉQUIPE
-  // ============================================================
-
   const [teamIds, setTeamIds] = useState<string[]>([]);
-
-  // ============================================================
-  // MODALE CONTRE
-  // ============================================================
-
   const [showCounterModal, setShowCounterModal] = useState(false);
-
-  // ============================================================
-  // RECOMMANDATIONS
-  // ============================================================
-
   const [recommendedIds, setRecommendedIds] = useState<string[]>([]);
   const [alternativeIds, setAlternativeIds] = useState<string[]>([]);
-
-  // ============================================================
-  // HÉROS ENNEMIS
-  // ============================================================
 
   const enemies = useMemo(
     () =>
@@ -56,10 +34,6 @@ export default function useCombatSelection({
     [enemyIds, heroes]
   );
 
-  // ============================================================
-  // MON ÉQUIPE
-  // ============================================================
-
   const team = useMemo(
     () =>
       teamIds
@@ -68,186 +42,116 @@ export default function useCombatSelection({
     [teamIds, heroes]
   );
 
-  // ============================================================
-  // RECOMMANDATION A
-  // ============================================================
+  const recommendedTeam = useMemo(
+    () =>
+      recommendedIds
+        .map((id) => heroes.find((hero) => hero.id === id))
+        .filter(
+          (hero): hero is Hero =>
+            Boolean(hero) && enabledHeroIds.has(hero.id)
+        ),
+    [recommendedIds, heroes, enabledHeroIds]
+  );
 
-  const recommendedTeam = useMemo(() => {
-    if (recommendedIds.length === 0) {
-      return [];
-    }
-
-    return recommendedIds
-      .map((id) => heroes.find((hero) => hero.id === id))
-      .filter((hero): hero is Hero => Boolean(hero));
-  }, [recommendedIds, heroes]);
-
-  // ============================================================
-  // RECOMMANDATION B
-  // ============================================================
-
-  const alternativeTeam = useMemo(() => {
-    if (alternativeIds.length === 0) {
-      return [];
-    }
-
-    return alternativeIds
-      .map((id) => heroes.find((hero) => hero.id === id))
-      .filter((hero): hero is Hero => Boolean(hero));
-  }, [alternativeIds, heroes]);
-
-  // ============================================================
-  // OUVRIR LA MODALE AVEC LES RECOMMANDATIONS
-  // ============================================================
+  const alternativeTeam = useMemo(
+    () =>
+      alternativeIds
+        .map((id) => heroes.find((hero) => hero.id === id))
+        .filter(
+          (hero): hero is Hero =>
+            Boolean(hero) && enabledHeroIds.has(hero.id)
+        ),
+    [alternativeIds, heroes, enabledHeroIds]
+  );
 
   function openCounterModal(enemyTeamIds: string[]) {
+    const availableHeroes = heroes.filter((hero) =>
+      enabledHeroIds.has(hero.id)
+    );
+
     const recommendation = recommendTeam(
       enemyTeamIds,
-      heroes,
+      availableHeroes,
       combats
     );
 
     const alternative = recommendAlternativeTeam(
       enemyTeamIds,
-      heroes,
+      availableHeroes,
       combats,
       recommendation
     );
 
     const ids = recommendation.map((hero) => hero.id);
-    const alternativeTeamIds = alternative.map(
-      (hero) => hero.id
-    );
+    const alternativeTeamIds = alternative.map((hero) => hero.id);
 
     setRecommendedIds(ids);
     setAlternativeIds(alternativeTeamIds);
-
-    // A reste sélectionnée par défaut.
     setTeamIds(ids);
-
     setShowCounterModal(true);
   }
 
-  // ============================================================
-  // OUVERTURE AUTOMATIQUE AU 5e ENNEMI
-  // ============================================================
-  //
-  // L'ouverture de la modale est maintenant déclenchée par
-  // l'état enemyIds, et non depuis le setter de setEnemyIds.
-  //
-
   useEffect(() => {
-    if (enemyIds.length !== TEAM_SIZE) {
-      return;
-    }
+    if (enemyIds.length !== TEAM_SIZE) return;
 
     openCounterModal(enemyIds);
-  }, [enemyIds]);
-
-  // ============================================================
-  // CHOISIR UNE RECOMMANDATION
-  // ============================================================
+  }, [enemyIds, enabledHeroIds]);
 
   function selectRecommendedTeam(ids: string[]) {
     const validIds = ids
-      .filter((id) => !enemyIds.includes(id))
+      .filter(
+        (id) =>
+          !enemyIds.includes(id) && enabledHeroIds.has(id)
+      )
       .slice(0, TEAM_SIZE);
 
     setTeamIds(validIds);
   }
 
-  // ============================================================
-  // SÉLECTION ENNEMI
-  // ============================================================
-
   function toggleEnemy(hero: Hero) {
     setEnemyIds((current) => {
-      // Retirer le héros.
       if (current.includes(hero.id)) {
         return current.filter((id) => id !== hero.id);
       }
 
-      // Maximum 5 ennemis.
-      if (current.length >= TEAM_SIZE) {
-        return current;
-      }
+      if (current.length >= TEAM_SIZE) return current;
+      if (teamIds.includes(hero.id)) return current;
 
-      // Impossible d'avoir le même héros
-      // dans les deux équipes.
-      if (teamIds.includes(hero.id)) {
-        return current;
-      }
-
-      // Ajouter simplement le héros.
-      // L'ouverture de la modale est gérée
-      // par le useEffect ci-dessus.
       return [...current, hero.id];
     });
   }
-
-  // ============================================================
-  // AJOUT / RETRAIT DANS MON ÉQUIPE
-  // ============================================================
 
   function toggleTeam(hero: Hero) {
     setTeamIds((current) => {
-      // Retirer le héros.
       if (current.includes(hero.id)) {
         return current.filter((id) => id !== hero.id);
       }
 
-      // Maximum 5 héros.
-      if (current.length >= TEAM_SIZE) {
-        return current;
-      }
-
-      // Un ennemi ne peut pas être sélectionné.
-      if (enemyIds.includes(hero.id)) {
-        return current;
-      }
+      if (current.length >= TEAM_SIZE) return current;
+      if (enemyIds.includes(hero.id)) return current;
+      if (!enabledHeroIds.has(hero.id)) return current;
 
       return [...current, hero.id];
     });
   }
-
-  // ============================================================
-  // SÉLECTION DANS LA MODALE
-  // ============================================================
 
   function selectCounterHero(hero: Hero) {
     setTeamIds((current) => {
-      // Si le héros est déjà dans l'équipe :
-      // on le retire.
       if (current.includes(hero.id)) {
         return current.filter((id) => id !== hero.id);
       }
 
-      // Impossible de sélectionner un ennemi.
-      if (enemyIds.includes(hero.id)) {
-        return current;
-      }
-
-      // Équipe complète :
-      // on ne remplace pas automatiquement.
-      if (current.length >= TEAM_SIZE) {
-        return current;
-      }
+      if (enemyIds.includes(hero.id)) return current;
+      if (current.length >= TEAM_SIZE) return current;
+      if (!enabledHeroIds.has(hero.id)) return current;
 
       return [...current, hero.id];
     });
   }
-
-  // ============================================================
-  // EFFACER LES ENNEMIS
-  // ============================================================
 
   function clearEnemies() {
     setEnemyIds([]);
   }
-
-  // ============================================================
-  // FERMER / RESETTER LA MODALE
-  // ============================================================
 
   function resetCombat() {
     setShowCounterModal(false);
@@ -257,32 +161,22 @@ export default function useCombatSelection({
     setAlternativeIds([]);
   }
 
-  // ============================================================
-  // RETOUR
-  // ============================================================
-
   return {
     enemyIds,
     teamIds,
-
     showCounterModal,
-
     recommendedIds,
     alternativeIds,
-
     enemies,
     team,
     recommendedTeam,
     alternativeTeam,
-
     toggleEnemy,
     toggleTeam,
     selectCounterHero,
     selectRecommendedTeam,
-
     clearEnemies,
     resetCombat,
     openCounterModal,
   };
 }
-
