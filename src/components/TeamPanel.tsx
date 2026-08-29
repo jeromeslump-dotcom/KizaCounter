@@ -17,30 +17,18 @@ export default function TeamPanel({
   onHeroClick,
 }: TeamPanelProps) {
   return (
-    <section className="w-full rounded-xl border border-slate-700 bg-slate-900/80 p-4">
-      {/* ======================================================
-          TITRE
-          ====================================================== */}
-
+    <section className="ui-panel w-full rounded-xl border p-4">
       <div className="mb-4 flex min-h-[24px] items-center">
-        <h2 className="text-base font-bold text-white">
+        <h2 className="ui-text-primary text-base font-bold">
           {title} ({heroes.length}/5)
         </h2>
       </div>
 
-      {/* ======================================================
-          ÉQUIPE VIDE
-          ====================================================== */}
-
       {heroes.length === 0 ? (
-        <div className="rounded-lg border border-dashed border-slate-700 bg-slate-950/50 p-6 text-center">
-          <p className="text-sm text-slate-500">{emptyMessage}</p>
+        <div className="ui-panel-empty rounded-lg border border-dashed p-6 text-center">
+          <p className="ui-text-muted text-sm">{emptyMessage}</p>
         </div>
       ) : (
-        /* ====================================================
-           CARTES
-           ==================================================== */
-
         <div className="grid grid-cols-1 gap-3">
           {heroes.map((hero, index) => {
             const selectedIndex = selectedIds.indexOf(hero.id);
