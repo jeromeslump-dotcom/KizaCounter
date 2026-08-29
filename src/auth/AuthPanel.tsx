@@ -4,10 +4,14 @@ import { useEffect, useState } from "react";
 
 import type { Session } from "@supabase/supabase-js";
 
+import AdminPanel from "../admin/AdminPanel";
+import { getCurrentUserProfile, type UserProfile } from "../admin/adminAccess";
 import { getSession, signIn, signOut, onAuthStateChange } from "./auth";
 
 export default function AuthPanel() {
   const [session, setSession] = useState<Session | null>(null);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [showAdminPanel, setShowAdminPanel] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -21,7 +25,16 @@ export default function AuthPanel() {
     async function loadSession() {
       try {
         const currentSession = await getSession();
-        if (mounted) setSession(currentSession);
+
+        if (!mounted) return;
+
+        setSession(currentSession);
+
+        const currentProfile = await getCurrentUserProfile(currentSession);
+
+        if (mounted) {
+          setProfile(currentProfile);
+        }
       } catch (error) {
         console.error("Impossible de récupérer la session :", error);
       } finally {
@@ -35,6 +48,13 @@ export default function AuthPanel() {
       data: { subscription },
     } = onAuthStateChange((currentSession) => {
       setSession(currentSession);
+      setShowAdminPanel(false);
+
+      void getCurrentUserProfile(currentSession).then((currentProfile) => {
+        if (mounted) {
+          setProfile(currentProfile);
+        }
+      });
     });
 
     return () => {
@@ -63,6 +83,7 @@ export default function AuthPanel() {
   async function handleSignOut() {
     setSubmitting(true);
     setError("");
+    setShowAdminPanel(false);
 
     try {
       await signOut();
@@ -76,7 +97,9 @@ export default function AuthPanel() {
 
   function getUserName() {
     const metadata = session?.user?.user_metadata;
+
     return (
+      profile?.display_name ||
       metadata?.display_name ||
       metadata?.username ||
       metadata?.name ||
@@ -85,21 +108,50 @@ export default function AuthPanel() {
     );
   }
 
+  const isAdmin = profile?.role === "admin" && profile.active;
+
   if (loading) return null;
 
   if (session?.user) {
     return (
-      <div className="flex items-center gap-2">
-        <span className="ui-text-soft text-xs font-bold">👤 {getUserName()}</span>
-        <button
-          type="button"
-          onClick={handleSignOut}
-          disabled={submitting}
-          className="ui-action ui-danger rounded-md border px-2.5 py-1.5 text-[11px] font-bold transition disabled:opacity-50"
-        >
-          {submitting ? "..." : "Déconnexion"}
-        </button>
-      </div>
+      <>
+        <div className="flex items-center gap-2">
+          {isAdmin ? (
+            <button
+              type="button"
+              onClick={() => setShowAdminPanel(true)}
+              className="ui-action rounded-md border px-2.5 py-1.5 text-xs font-bold transition"
+              aria-haspopup="dialog"
+              aria-expanded={showAdminPanel}
+            >
+              👤 {getUserName()}
+            </button>
+          ) : (
+            <span className="ui-text-soft text-xs font-bold">
+              👤 {getUserName()}
+            </span>
+          )}
+
+          <button
+            type="button"
+            onClick={handleSignOut}
+            disabled={submitting}
+            className="ui-action ui-danger rounded-md border px-2.5 py-1.5 text-[11px] font-bold transition disabled:opacity-50"
+          >
+            {submitting ? "..." : "Déconnexion"}
+          </button>
+        </div>
+
+        {isAdmin && (
+          <AdminPanel
+            open={showAdminPanel}
+            onClose={() => setShowAdminPanel(false)}
+            onUserManagement={() => setShowAdminPanel(false)}
+            onEncounteredTeams={() => setShowAdminPanel(false)}
+            onCombatHistory={() => setShowAdminPanel(false)}
+          />
+        )}
+      </>
     );
   }
 
