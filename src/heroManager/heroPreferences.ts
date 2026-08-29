@@ -1,8 +1,6 @@
 import { HEROES } from "../data/heroes";
 import { supabase } from "../storage/supabase";
 
-const STORAGE_KEY = "kiza-counter-enabled-hero-ids";
-
 function allHeroIds(): string[] {
   return HEROES.map((hero) => hero.id);
 }
@@ -17,96 +15,54 @@ function normalizeIds(value: unknown): string[] {
   );
 }
 
-function readLocal(): string[] | null {
-  if (typeof window === "undefined") return null;
-
-  try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
-    if (!raw) return null;
-
-    const parsed = JSON.parse(raw);
-    const ids = normalizeIds(parsed);
-
-    return ids.length > 0 ? ids : [];
-  } catch {
-    return null;
+export async function loadHeroPreferences(
+  userId: string | null
+): Promise<Set<string>> {
+  if (!userId) {
+    return new Set(allHeroIds());
   }
-}
 
-function writeLocal(enabledIds: string[]): void {
-  if (typeof window === "undefined") return;
+  const { data, error } = await supabase
+    .from("hero_settings")
+    .select("excluded_hero_ids")
+    .eq("user_id", userId)
+    .maybeSingle();
 
-  try {
-    window.localStorage.setItem(
-      STORAGE_KEY,
-      JSON.stringify(normalizeIds(enabledIds))
+  if (error) {
+    throw new Error(
+      `Impossible de charger les préférences héros : ${error.message}`
     );
-  } catch {
-    // Le stockage local reste optionnel.
-  }
-}
-
-export async function loadHeroPreferences(): Promise<Set<string>> {
-  const localIds = readLocal();
-
-  try {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (user) {
-      const { data, error } = await supabase
-        .from("hero_settings")
-        .select("excluded_hero_ids")
-        .eq("user_id", user.id)
-        .maybeSingle();
-
-      if (!error && data) {
-        const disabledIds = normalizeIds(data.excluded_hero_ids);
-        const disabled = new Set(disabledIds);
-        const enabled = allHeroIds().filter((id) => !disabled.has(id));
-
-        writeLocal(enabled);
-        return new Set(enabled);
-      }
-    }
-  } catch (error) {
-    console.warn("Préférences héros Supabase indisponibles :", error);
   }
 
-  return new Set(localIds ?? allHeroIds());
+  if (!data) {
+    return new Set(allHeroIds());
+  }
+
+  const disabledIds = normalizeIds(data.excluded_hero_ids);
+  const disabled = new Set(disabledIds);
+  const enabled = allHeroIds().filter((id) => !disabled.has(id));
+
+  return new Set(enabled);
 }
 
 export async function saveHeroPreferences(
+  userId: string,
   enabledIds: Set<string>
 ): Promise<void> {
   const enabled = normalizeIds([...enabledIds]);
   const disabled = allHeroIds().filter((id) => !enabled.includes(id));
 
-  writeLocal(enabled);
+  const { error } = await supabase.from("hero_settings").upsert(
+    {
+      user_id: userId,
+      excluded_hero_ids: disabled,
+    },
+    { onConflict: "user_id" }
+  );
 
-  try {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) return;
-
-    const { error } = await supabase.from("hero_settings").upsert(
-      {
-        user_id: user.id,
-        excluded_hero_ids: disabled,
-      },
-      { onConflict: "user_id" }
+  if (error) {
+    throw new Error(
+      `Impossible de sauvegarder les préférences héros : ${error.message}`
     );
-
-    if (error) {
-      console.warn(
-        "Préférences héros non sauvegardées dans Supabase :",
-        error
-      );
-    }
-  } catch (error) {
-    console.warn("Erreur sauvegarde préférences héros :", error);
   }
 }
