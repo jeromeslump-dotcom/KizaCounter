@@ -481,7 +481,7 @@ export const HEROES: Hero[] = [
     name: "Watcher",
     alias: "Deeproot",
     cls: "STR",
-    img: "/heroes/watchman.png",
+    img: "/heroes_portrait/watchman.png",
     stats: { hp: 37172, atk: 930, matk: 494, def: 555, mdef: 505 },
   },
   {
