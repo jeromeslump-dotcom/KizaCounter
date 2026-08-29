@@ -3,13 +3,18 @@
 import { useEffect, useMemo, useState } from "react";
 
 import { HEROES } from "./data/heroes";
-import type { Combat, HeroClassFilter, HeroSort } from "./types";
+import type { Combat, HeroClassFilter, HeroPreferences, HeroSort } from "./types";
 import HeroGrid from "./components/HeroGrid";
 import EnemyPanel from "./components/EnemyPanel";
 import CounterModal from "./components/CounterModal";
+import HeroManager from "./components/HeroManager";
 import AuthPanel from "./auth/AuthPanel";
 import useCombatSelection from "./hooks/useCombatSelection";
 import { addCombat, loadCombats } from "./storage/combatStorage";
+import {
+  loadHeroPreferences,
+  saveHeroPreferences,
+} from "./storage/heroPreferences";
 import { getSession, onAuthStateChange } from "./auth/auth";
 
 const TEAM_SIZE = 5;
@@ -17,6 +22,20 @@ const TEAM_SIZE = 5;
 export default function App() {
   const [combats, setCombats] = useState<Combat[]>([]);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [heroPreferences, setHeroPreferences] = useState<HeroPreferences>(
+    () => loadHeroPreferences(HEROES.map((hero) => hero.id))
+  );
+  const [showHeroManager, setShowHeroManager] = useState(false);
+
+  const enabledHeroIds = useMemo(
+    () =>
+      new Set(
+        HEROES.filter((hero) => heroPreferences[hero.id] !== false).map(
+          (hero) => hero.id
+        )
+      ),
+    [heroPreferences]
+  );
 
   const {
     enemyIds,
@@ -31,7 +50,11 @@ export default function App() {
     selectCounterHero,
     clearEnemies,
     resetCombat,
-  } = useCombatSelection({ heroes: HEROES, combats });
+  } = useCombatSelection({
+    heroes: HEROES,
+    combats,
+    enabledHeroIds,
+  });
 
   const [activeClass, setActiveClass] = useState<HeroClassFilter>("ALL");
   const [query, setQuery] = useState("");
@@ -123,14 +146,32 @@ export default function App() {
     return usage;
   }, [combats]);
 
-  const enabledHeroIds = useMemo(
-    () => new Set(HEROES.map((hero) => hero.id)),
-    []
-  );
+  function toggleHeroEnabled(heroId: string) {
+    setHeroPreferences((current) => ({
+      ...current,
+      [heroId]: current[heroId] === false,
+    }));
+  }
+
+  function enableAllHeroes() {
+    setHeroPreferences(
+      Object.fromEntries(HEROES.map((hero) => [hero.id, true]))
+    );
+  }
+
+  function disableAllHeroes() {
+    setHeroPreferences(
+      Object.fromEntries(HEROES.map((hero) => [hero.id, false]))
+    );
+  }
+
+  function saveHeroRoster() {
+    saveHeroPreferences(heroPreferences);
+  }
 
   async function handleSaveCombat(combat: Combat) {
     if (!isAuthenticated) {
-      throw new Error("Vous devez être connecté pour enregistrer un combat.");
+      throw new Error("Vous devez être connecté pour enregistrer le combat.");
     }
 
     try {
@@ -166,7 +207,17 @@ export default function App() {
               </p>
             </div>
 
-            <AuthPanel />
+            <div className="flex flex-wrap items-center justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setShowHeroManager(true)}
+                className="ui-action ui-score rounded-lg border px-3 py-2 text-xs font-bold transition"
+              >
+                ⚙️ Gérer les héros
+              </button>
+
+              <AuthPanel />
+            </div>
           </div>
         </header>
 
@@ -219,6 +270,17 @@ export default function App() {
         onClassChange={setActiveClass}
         onSortChange={setSortBy}
         onSave={handleSaveCombat}
+      />
+
+      <HeroManager
+        open={showHeroManager}
+        heroes={HEROES}
+        enabledHeroIds={enabledHeroIds}
+        onToggleHero={toggleHeroEnabled}
+        onEnableAll={enableAllHeroes}
+        onDisableAll={disableAllHeroes}
+        onSave={saveHeroRoster}
+        onClose={() => setShowHeroManager(false)}
       />
     </main>
   );
