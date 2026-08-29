@@ -111,7 +111,7 @@ export default function AuthPanel() {
           setError("");
           setShowLogin(true);
         }}
-        className="ui-action rounded-md border px-3 py-1.5 text-xs font-bold transition hover:border-sky-400/50 hover:text-sky-300"
+        className="ui-action ui-link-sky rounded-md border px-3 py-1.5 text-xs font-bold transition"
       >
         Connexion
       </button>
@@ -157,7 +157,7 @@ export default function AuthPanel() {
           setShowLogin(false);
           setError("");
         }}
-        className="ui-text-muted px-2 py-1.5 text-xs hover:text-slate-300"
+        className="ui-text-muted px-2 py-1.5 text-xs ui-muted-hover"
       >
         ✕
       </button>
