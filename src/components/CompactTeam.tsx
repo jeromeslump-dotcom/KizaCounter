@@ -1,3 +1,4 @@
+
 import type { Hero } from "../types";
 
 import SelectionOrderBadge from "./SelectionOrderBadge";
@@ -36,7 +37,8 @@ export default function CompactTeam({
         <div className="grid grid-cols-5 gap-1.5 sm:gap-2">
           {heroes.map((hero, index) => {
             const selectedIndex = selectedIds.indexOf(hero.id);
-            const order = selectedIndex !== -1 ? selectedIndex + 1 : index + 1;
+            const isSelected = selectedIndex !== -1;
+            const order = isSelected ? selectedIndex + 1 : index + 1;
 
             return (
               <button
@@ -46,7 +48,7 @@ export default function CompactTeam({
                 onClick={() => onHeroClick?.(hero)}
                 className={[
                   "group relative min-w-0 overflow-hidden rounded-lg border bg-slate-950 transition",
-                  selectedIndex !== -1
+                  isSelected
                     ? "border-amber-400 ring-1 ring-amber-400/40"
                     : enemy
                       ? "border-red-500/20"
@@ -56,26 +58,25 @@ export default function CompactTeam({
                     : "cursor-default",
                 ].join(" ")}
               >
-                <div className="relative aspect-square w-full overflow-hidden bg-slate-950">
+                {/* IMAGE */}
+                <div className="aspect-square w-full overflow-hidden bg-slate-950">
                   <img
                     src={hero.img}
                     alt={hero.name}
                     className="h-full w-full object-contain"
                     loading="lazy"
                   />
-
-                  <SelectionOrderBadge order={order} />
                 </div>
 
-                <div
-                  className="
-                    truncate px-1 py-1
-                    text-center
-                    text-[9px] font-bold leading-tight text-white
-                    sm:text-xs
-                  "
-                >
-                  {hero.name}
+                {/* NOM + ORDRE */}
+                <div className="flex min-w-0 items-center justify-center gap-1 px-1 py-1">
+                  {isSelected && (
+                    <SelectionOrderBadge order={order} />
+                  )}
+
+                  <span className="min-w-0 truncate text-center text-[9px] font-bold leading-tight text-white sm:text-xs">
+                    {hero.name}
+                  </span>
                 </div>
               </button>
             );

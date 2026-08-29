@@ -1,3 +1,4 @@
+
 import type { Combat, Hero, HeroClassFilter, HeroSort } from "../types";
 
 import CompactTeam from "./CompactTeam";
@@ -99,6 +100,7 @@ export default function CounterModal({
           <CompactTeam
             title={`Ennemis (${enemies.length}/5)`}
             heroes={enemies}
+            selectedIds={enemies.map((hero) => hero.id)}
             enemy
           />
 

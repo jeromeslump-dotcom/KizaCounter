@@ -1,5 +1,7 @@
+
 import type { Hero } from "../types";
 import HeroCard from "./HeroCard";
+
 
 interface EnemyPanelProps {
   heroes: Hero[];
@@ -50,40 +52,50 @@ export default function EnemyPanel({
             </p>
           </div>
         ) : (
-          <div className="flex items-center justify-center gap-3">
+          <div className="flex flex-wrap justify-center gap-2">
             {heroes.map((hero, index) => (
               <button
                 key={hero.id}
                 type="button"
                 onClick={() => onHeroClick?.(hero)}
-                className="group relative"
+                className="group relative w-[calc((100%-1.5rem)/4)] min-w-0 max-w-[220px] overflow-hidden rounded-xl border border-slate-700 bg-slate-950 transition hover:border-red-400"
                 title={`Retirer ${hero.name}`}
               >
-                <img
-                  src={hero.img}
-                  alt={hero.name}
-                  className="h-20 w-20 rounded-xl border border-slate-700 object-cover transition group-hover:border-red-400 group-hover:brightness-75"
-                />
+
+
+                {/* IMAGE */}
+                <div className="relative z-10 aspect-square w-full overflow-hidden">
+                  <img
+                    src={hero.img}
+                    alt={hero.name}
+                    className="h-full w-full object-contain transition group-hover:brightness-75"
+                    loading="lazy"
+                  />
+                </div>
 
                 {/* NUMÉRO DE SÉLECTION */}
                 <span
                   className="
-                    absolute -right-0.5 -top-0.5
-                    flex h-3 w-3 items-center justify-center
+                    absolute left-1 top-1 z-20
+                    flex h-5 w-5 items-center justify-center
                     rounded-full
-                    border border-white/70
+                    border border-white/90
                     bg-amber-500
-                    text-[5px] font-black leading-none text-slate-950
-                    shadow-sm
-
-                    sm:-right-1 sm:-top-1
-                    sm:h-5 sm:w-5
-                    sm:border
-                    sm:text-[10px]
+                    text-[10px] font-black leading-none text-slate-950
+                    shadow
+                    sm:left-2 sm:top-2
+                    sm:h-7 sm:w-7
+                    sm:border-2
+                    sm:text-sm
                   "
                 >
                   {index + 1}
                 </span>
+
+                {/* NOM */}
+                <div className="relative z-10 truncate border-t border-slate-700 px-1.5 py-1.5 text-center text-[9px] font-bold leading-tight text-white sm:text-xs">
+                  {hero.name}
+                </div>
               </button>
             ))}
           </div>

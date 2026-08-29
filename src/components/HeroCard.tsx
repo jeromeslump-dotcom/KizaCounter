@@ -4,6 +4,16 @@ import type { Hero } from "../types";
 
 import SelectionOrderBadge from "./SelectionOrderBadge";
 
+// ============================================================
+// PAPIER PEINT DES CARTES SELON LA CLASSE
+// ============================================================
+
+const CLASS_GRADIENT: Record<Hero["cls"], string> = {
+  STR: "from-rose-900/60 via-red-950/30 to-slate-950/90",
+  AGI: "from-emerald-900/60 via-green-950/30 to-slate-950/90",
+  INT: "from-sky-900/60 via-blue-950/30 to-slate-950/90",
+};
+
 interface HeroCardProps {
   hero: Hero;
   selected?: boolean;
@@ -32,9 +42,21 @@ export default function HeroCard({
           : "border-slate-700",
       ].join(" ")}
     >
-      <div className="flex min-h-[180px] flex-col">
+      {/* ====================================================
+          PAPIER PEINT — COULEUR SELON LA CLASSE
+          STR = ROUGE / AGI = VERT / INT = BLEU
+          ==================================================== */}
+      <div
+        className={[
+          "pointer-events-none absolute inset-0",
+          "bg-gradient-to-br",
+          CLASS_GRADIENT[hero.cls],
+        ].join(" ")}
+      />
+
+      <div className="relative z-10 flex min-h-[180px] flex-col">
         {/* ====================================================
-            NOM + PSEUDO
+            NOM + PSEUDO + CLASSE + ORDRE
             ==================================================== */}
         <div className="flex items-start justify-between gap-2 px-3 pt-3">
           <div className="min-w-0">
@@ -49,20 +71,26 @@ export default function HeroCard({
             )}
           </div>
 
-          {/* CLASSE */}
-          <span
-            className={[
-              "shrink-0 rounded-md border px-1.5 py-0.5",
-              "text-[10px] font-bold tracking-wide",
-              hero.cls === "STR"
-                ? "border-rose-400/40 bg-rose-500/10 text-rose-300"
-                : hero.cls === "AGI"
-                  ? "border-emerald-400/40 bg-emerald-500/10 text-emerald-300"
-                  : "border-sky-400/40 bg-sky-500/10 text-sky-300",
-            ].join(" ")}
-          >
-            {hero.cls}
-          </span>
+          {/* CLASSE + ORDRE */}
+          <div className="flex shrink-0 items-center gap-2">
+            {selected && selectionOrder !== undefined && (
+              <SelectionOrderBadge order={selectionOrder} />
+            )}
+
+            <span
+              className={[
+                "rounded-md border px-1.5 py-0.5",
+                "text-[10px] font-bold tracking-wide",
+                hero.cls === "STR"
+                  ? "border-rose-400/40 bg-rose-500/10 text-rose-300"
+                  : hero.cls === "AGI"
+                    ? "border-emerald-400/40 bg-emerald-500/10 text-emerald-300"
+                    : "border-sky-400/40 bg-sky-500/10 text-sky-300",
+              ].join(" ")}
+            >
+              {hero.cls}
+            </span>
+          </div>
         </div>
 
         {/* ====================================================
@@ -70,17 +98,13 @@ export default function HeroCard({
             ==================================================== */}
         <div className="flex flex-1 items-center px-2 pb-2 pt-2">
           {/* IMAGE */}
-          <div className="relative flex w-[42%] shrink-0 items-center justify-center">
+          <div className="flex w-[42%] shrink-0 items-center justify-center">
             <img
               src={hero.img}
               alt={hero.name}
               className="h-auto max-h-[125px] w-full object-contain"
               loading="lazy"
             />
-
-            {selected && selectionOrder !== undefined && (
-              <SelectionOrderBadge order={selectionOrder} position="left" />
-            )}
           </div>
 
           {/* STATISTIQUES */}
