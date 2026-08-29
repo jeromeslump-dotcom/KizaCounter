@@ -24,65 +24,43 @@ export default function HeroCard({
       type="button"
       onClick={onClick}
       className={[
-        "relative w-full overflow-hidden rounded-xl border",
-        "bg-slate-900/90 text-left transition-all duration-200",
-        "hover:-translate-y-0.5 hover:border-slate-500 hover:bg-slate-800",
-        selected
-          ? "border-amber-400 ring-2 ring-amber-400/40"
-          : "border-slate-700",
+        "hero-card-base relative w-full overflow-hidden rounded-xl border text-left transition-all duration-200",
+        "hover:-translate-y-0.5 hero-card-hover",
+        selected ? "hero-card-selected" : "",
       ].join(" ")}
     >
-      {/* ====================================================
-          PAPIER PEINT — COULEUR SELON LA CLASSE
-          ==================================================== */}
       <div
         className={`pointer-events-none absolute inset-0 hero-card-wallpaper-${hero.cls.toLowerCase()}`}
       />
 
       <div className="relative z-10 flex min-h-[180px] flex-col">
-        {/* ====================================================
-            NOM + PSEUDO + CLASSE + ORDRE
-            ==================================================== */}
         <div className="flex items-start justify-between gap-2 px-3 pt-3">
           <div className="min-w-0">
-            <h3 className="truncate text-sm font-bold text-white sm:text-lg">
+            <h3 className="ui-text-primary truncate text-sm font-bold sm:text-lg">
               {hero.name}
             </h3>
 
             {hero.alias && (
-              <div className="mt-0.5 truncate text-xs text-slate-400 sm:text-sm">
+              <div className="ui-text-secondary mt-0.5 truncate text-xs sm:text-sm">
                 {hero.alias}
               </div>
             )}
           </div>
 
-          {/* CLASSE + ORDRE */}
           <div className="flex shrink-0 items-center gap-2">
             {selected && selectionOrder !== undefined && (
               <SelectionOrderBadge order={selectionOrder} />
             )}
 
             <span
-              className={[
-                "rounded-md border px-1.5 py-0.5",
-                "text-[10px] font-bold tracking-wide",
-                hero.cls === "STR"
-                  ? "border-rose-400/40 bg-rose-500/10 text-rose-300"
-                  : hero.cls === "AGI"
-                    ? "border-emerald-400/40 bg-emerald-500/10 text-emerald-300"
-                    : "border-sky-400/40 bg-sky-500/10 text-sky-300",
-              ].join(" ")}
+              className={`rounded-md border px-1.5 py-0.5 text-[10px] font-bold tracking-wide hero-class-${hero.cls.toLowerCase()}`}
             >
               {hero.cls}
             </span>
           </div>
         </div>
 
-        {/* ====================================================
-            IMAGE + STATISTIQUES
-            ==================================================== */}
         <div className="flex flex-1 items-center px-2 pb-2 pt-2">
-          {/* IMAGE */}
           <div className="flex w-[42%] shrink-0 items-center justify-center">
             <img
               src={hero.img}
@@ -92,8 +70,7 @@ export default function HeroCard({
             />
           </div>
 
-          {/* STATISTIQUES */}
-          <div className="min-w-0 flex-1 rounded-lg border border-slate-700 bg-slate-950/70 p-2">
+          <div className="ui-card min-w-0 flex-1 rounded-lg border p-2">
             <div className="space-y-1">
               <StatLine label="PV" value={stats.hp} />
               <StatLine label="ATK" value={stats.atk} />
@@ -108,18 +85,14 @@ export default function HeroCard({
   );
 }
 
-// ============================================================
-// LIGNE D'UNE STATISTIQUE
-// ============================================================
-
 function StatLine({ label, value }: { label: string; value: number }) {
   return (
     <div className="flex items-center justify-between gap-2">
-      <span className="text-[10px] font-semibold tracking-wide text-slate-400">
+      <span className="ui-text-muted text-[10px] font-semibold tracking-wide">
         {label}
       </span>
 
-      <span className="text-xs font-bold tabular-nums text-slate-100">
+      <span className="ui-stat-value text-xs font-bold tabular-nums">
         {value.toLocaleString("fr-FR")}
       </span>
     </div>
