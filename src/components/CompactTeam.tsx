@@ -1,4 +1,3 @@
-
 import type { Hero } from "../types";
 
 interface CompactTeamProps {
@@ -28,15 +27,17 @@ export default function CompactTeam({
 
       {heroes.length === 0 ? (
         <div className="ui-panel-empty rounded-lg border border-dashed p-4 text-center">
-          <p className="ui-text-muted text-xs">
-            Aucun héros sélectionné.
-          </p>
+          <p className="ui-text-muted text-xs">Aucun héros sélectionné.</p>
         </div>
       ) : (
         <div className="grid grid-cols-5 gap-2 sm:gap-3">
           {heroes.map((hero, index) => {
             const selectedIndex = selectedIds.indexOf(hero.id);
             const isSelected = selectedIndex !== -1;
+
+            const imageSrc = compactPortrait
+              ? `/heroes_portrait/${hero.id}.png`
+              : hero.img;
 
             return (
               <button
@@ -50,14 +51,9 @@ export default function CompactTeam({
                   onHeroClick ? "cursor-pointer" : "cursor-default",
                 ].join(" ")}
               >
-                <div
-                  className={[
-                    "relative aspect-square w-full overflow-hidden",
-                    compactPortrait ? "compact-team-portrait" : "",
-                  ].join(" ")}
-                >
+                <div className="relative aspect-square w-full overflow-hidden">
                   <img
-                    src={hero.img}
+                    src={imageSrc}
                     alt={hero.name}
                     className="h-full w-full object-contain"
                     loading="lazy"
@@ -79,4 +75,3 @@ export default function CompactTeam({
     </section>
   );
 }
-
