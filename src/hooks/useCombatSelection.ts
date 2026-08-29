@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 import type { Combat, Hero } from "../types";
 
@@ -26,6 +26,16 @@ export default function useCombatSelection({
   const [recommendedIds, setRecommendedIds] = useState<string[]>([]);
   const [alternativeIds, setAlternativeIds] = useState<string[]>([]);
 
+  /*
+   * Permet d'éviter de rouvrir plusieurs fois la fenêtre
+   * tant que la même équipe ennemie reste à 5 héros.
+   */
+  const openedEnemyKeyRef = useRef<string | null>(null);
+
+  // ==========================================================
+  // ENNEMIS
+  // ==========================================================
+
   const enemies = useMemo(
     () =>
       enemyIds
@@ -34,6 +44,10 @@ export default function useCombatSelection({
     [enemyIds, heroes]
   );
 
+  // ==========================================================
+  // ÉQUIPE DU JOUEUR
+  // ==========================================================
+
   const team = useMemo(
     () =>
       teamIds
@@ -41,6 +55,10 @@ export default function useCombatSelection({
         .filter((hero): hero is Hero => Boolean(hero)),
     [teamIds, heroes]
   );
+
+  // ==========================================================
+  // RECOMMANDATION
+  // ==========================================================
 
   const recommendedTeam = useMemo(
     () =>
@@ -64,6 +82,10 @@ export default function useCombatSelection({
     [alternativeIds, heroes, enabledHeroIds]
   );
 
+  // ==========================================================
+  // OUVERTURE DE LA FENÊTRE DE CONTRE
+  // ==========================================================
+
   function openCounterModal(enemyTeamIds: string[]) {
     const availableHeroes = heroes.filter((hero) =>
       enabledHeroIds.has(hero.id)
@@ -83,7 +105,9 @@ export default function useCombatSelection({
     );
 
     const ids = recommendation.map((hero) => hero.id);
-    const alternativeTeamIds = alternative.map((hero) => hero.id);
+    const alternativeTeamIds = alternative.map(
+      (hero) => hero.id
+    );
 
     setRecommendedIds(ids);
     setAlternativeIds(alternativeTeamIds);
@@ -91,22 +115,50 @@ export default function useCombatSelection({
     setShowCounterModal(true);
   }
 
+  // ==========================================================
+  // OUVERTURE AUTOMATIQUE À 5 ENNEMIS
+  // ==========================================================
+
   useEffect(() => {
-    if (enemyIds.length !== TEAM_SIZE) return;
+    if (enemyIds.length !== TEAM_SIZE) {
+      /*
+       * Dès qu'on repasse sous 5, on autorise une nouvelle
+       * ouverture pour le prochain combat.
+       */
+      openedEnemyKeyRef.current = null;
+      return;
+    }
+
+    const enemyKey = [...enemyIds].sort().join("|");
+
+    /*
+     * Si cette même composition a déjà déclenché la fenêtre,
+     * on ne la rouvre pas à chaque render.
+     */
+    if (openedEnemyKeyRef.current === enemyKey) {
+      return;
+    }
+
+    openedEnemyKeyRef.current = enemyKey;
 
     openCounterModal(enemyIds);
-  }, [enemyIds, enabledHeroIds]);
+  }, [enemyIds]);
+
+  // ==========================================================
+  // SÉLECTION D'UNE RECOMMANDATION
+  // ==========================================================
 
   function selectRecommendedTeam(ids: string[]) {
     const validIds = ids
-      .filter(
-        (id) =>
-          !enemyIds.includes(id) && enabledHeroIds.has(id)
-      )
+      .filter((id) => enabledHeroIds.has(id))
       .slice(0, TEAM_SIZE);
 
     setTeamIds(validIds);
   }
+
+  // ==========================================================
+  // SÉLECTION DES ENNEMIS
+  // ==========================================================
 
   function toggleEnemy(hero: Hero) {
     setEnemyIds((current) => {
@@ -114,12 +166,27 @@ export default function useCombatSelection({
         return current.filter((id) => id !== hero.id);
       }
 
-      if (current.length >= TEAM_SIZE) return current;
-      if (teamIds.includes(hero.id)) return current;
+      if (current.length >= TEAM_SIZE) {
+        return current;
+      }
 
+      /*
+       * IMPORTANT :
+       * Un héros ennemi peut parfaitement être présent
+       * dans notre propre équipe.
+       *
+       * Il n'existe aucune règle empêchant :
+       *
+       * Ennemi : Rose Knight
+       * Notre équipe : Rose Knight
+       */
       return [...current, hero.id];
     });
   }
+
+  // ==========================================================
+  // SÉLECTION DE NOTRE ÉQUIPE
+  // ==========================================================
 
   function toggleTeam(hero: Hero) {
     setTeamIds((current) => {
@@ -127,13 +194,26 @@ export default function useCombatSelection({
         return current.filter((id) => id !== hero.id);
       }
 
-      if (current.length >= TEAM_SIZE) return current;
-      if (enemyIds.includes(hero.id)) return current;
-      if (!enabledHeroIds.has(hero.id)) return current;
+      if (current.length >= TEAM_SIZE) {
+        return current;
+      }
 
+      if (!enabledHeroIds.has(hero.id)) {
+        return current;
+      }
+
+      /*
+       * IMPORTANT :
+       * On ne bloque PAS un héros simplement parce qu'il
+       * est également présent chez l'ennemi.
+       */
       return [...current, hero.id];
     });
   }
+
+  // ==========================================================
+  // SÉLECTION DE NOTRE ÉQUIPE DEPUIS LA GRILLE
+  // ==========================================================
 
   function selectCounterHero(hero: Hero) {
     setTeamIds((current) => {
@@ -141,13 +221,26 @@ export default function useCombatSelection({
         return current.filter((id) => id !== hero.id);
       }
 
-      if (enemyIds.includes(hero.id)) return current;
-      if (current.length >= TEAM_SIZE) return current;
-      if (!enabledHeroIds.has(hero.id)) return current;
+      if (current.length >= TEAM_SIZE) {
+        return current;
+      }
 
+      if (!enabledHeroIds.has(hero.id)) {
+        return current;
+      }
+
+      /*
+       * Aucun blocage lié à enemyIds.
+       *
+       * Le même héros peut être sélectionné des deux côtés.
+       */
       return [...current, hero.id];
     });
   }
+
+  // ==========================================================
+  // RESET
+  // ==========================================================
 
   function clearEnemies() {
     setEnemyIds([]);
@@ -159,22 +252,37 @@ export default function useCombatSelection({
     setTeamIds([]);
     setRecommendedIds([]);
     setAlternativeIds([]);
+
+    /*
+     * Autorise immédiatement la prochaine composition
+     * ennemie à déclencher une nouvelle fenêtre.
+     */
+    openedEnemyKeyRef.current = null;
   }
+
+  // ==========================================================
+  // RETOUR
+  // ==========================================================
 
   return {
     enemyIds,
     teamIds,
     showCounterModal,
+
     recommendedIds,
     alternativeIds,
+
     enemies,
     team,
+
     recommendedTeam,
     alternativeTeam,
+
     toggleEnemy,
     toggleTeam,
     selectCounterHero,
     selectRecommendedTeam,
+
     clearEnemies,
     resetCombat,
     openCounterModal,
