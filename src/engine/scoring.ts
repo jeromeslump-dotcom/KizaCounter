@@ -510,7 +510,8 @@ export function recommendTeam(
             combats
           );
 
-          const finalScore = candidate.score + historicalScore * CORE4_CONFIG.weight;
+          const finalScore =
+            candidate.score + historicalScore * CORE4_CONFIG.weight;
 
           if (
             finalScore > bestReplacementScore ||
