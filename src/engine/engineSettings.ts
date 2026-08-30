@@ -34,10 +34,6 @@ export interface EngineSettings {
     core4MinBattles: number;
     core4MinReplacementBattles: number;
     core4ConfidenceBattles: number;
-
-    teamAClassPenaltyFirst: number;
-    teamAClassPenaltySecond: number;
-    teamAClassPenaltyThird: number;
   };
 }
 
@@ -77,10 +73,6 @@ export const DEFAULT_ENGINE_SETTINGS: EngineSettings = {
     core4MinBattles: 2,
     core4MinReplacementBattles: 1,
     core4ConfidenceBattles: 4,
-
-    teamAClassPenaltyFirst: 8,
-    teamAClassPenaltySecond: 20,
-    teamAClassPenaltyThird: 40,
   },
 };
 
@@ -176,11 +168,5 @@ export const ENGINE_SETTING_LIMITS = {
     step: 0.05,
     unit: "%",
     multiplier: 100,
-  },
-  classPenalty: {
-    min: 0,
-    max: 100,
-    step: 1,
-    unit: "pt",
   },
 } as const;
