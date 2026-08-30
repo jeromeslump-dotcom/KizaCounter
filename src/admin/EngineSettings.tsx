@@ -94,39 +94,109 @@ function ImportantSettingRow({
 
 interface AdvancedSettingRowProps {
   label: string;
-  value: number;
+  icon?: string;
+  valueA?: number;
+  valueB?: number;
   min: number;
   max: number;
   step: number;
   unit: string;
-  onChange: (value: number) => void;
+  onChangeA?: (value: number) => void;
+  onChangeB?: (value: number) => void;
+  globalValue?: number;
+  onChangeGlobal?: (value: number) => void;
 }
 
 function AdvancedSettingRow({
   label,
-  value,
+  icon = "⚙️",
+  valueA,
+  valueB,
   min,
   max,
   step,
   unit,
-  onChange,
+  onChangeA,
+  onChangeB,
+  globalValue,
+  onChangeGlobal,
 }: AdvancedSettingRowProps) {
+  const hasA = valueA !== undefined && onChangeA;
+  const hasB = valueB !== undefined && onChangeB;
+  const hasGlobal = globalValue !== undefined && onChangeGlobal;
+
   return (
-    <div className="grid grid-cols-[minmax(0,1fr)_minmax(120px,150px)_auto] items-center gap-3 py-2">
-      <label className="ui-text-secondary text-xs font-semibold">{label}</label>
-      <input
-        aria-label={label}
-        type="range"
-        min={min}
-        max={max}
-        step={step}
-        value={value}
-        onChange={(event) => onChange(Number(event.target.value))}
-        className="w-full accent-current"
-      />
-      <span className="ui-text-primary w-28 text-right text-xs font-black">
-        {formatNumber(value)} {unit} <span className="ui-text-muted font-normal">/ {formatNumber(max)}</span>
-      </span>
+    <div className="grid grid-cols-[minmax(0,1fr)_minmax(150px,190px)_minmax(0,1fr)] items-center gap-3 border-b ui-divider py-3 last:border-b-0">
+      <div className="min-w-0">
+        {hasA ? (
+          <div className="flex items-center gap-2">
+            <input
+              aria-label={`${label} — Équipe A`}
+              type="range"
+              min={min}
+              max={max}
+              step={step}
+              value={valueA}
+              onChange={(event) => onChangeA?.(Number(event.target.value))}
+              className="w-full accent-current"
+            />
+            <span className="ui-text-primary w-24 shrink-0 text-right text-[11px] font-black">
+              {formatNumber(valueA)} {unit}
+            </span>
+          </div>
+        ) : (
+          <span className="ui-text-muted block text-center text-xs font-semibold">—</span>
+        )}
+      </div>
+
+      <div className="min-w-0 text-center">
+        <div className="ui-text-primary text-xs font-black sm:text-sm">
+          {icon} {label}
+        </div>
+        {hasGlobal ? (
+          <div className="mt-1 flex items-center justify-center gap-2">
+            <input
+              aria-label={label}
+              type="range"
+              min={min}
+              max={max}
+              step={step}
+              value={globalValue}
+              onChange={(event) => onChangeGlobal?.(Number(event.target.value))}
+              className="w-full max-w-[120px] accent-current"
+            />
+            <span className="ui-text-primary w-24 shrink-0 text-right text-[11px] font-black">
+              {formatNumber(globalValue)} {unit}
+            </span>
+          </div>
+        ) : (
+          <div className="ui-text-muted mt-0.5 text-[10px] font-semibold">
+            {formatNumber(min)} {unit} → {formatNumber(max)} {unit}
+          </div>
+        )}
+      </div>
+
+      <div className="min-w-0">
+        {hasB ? (
+          <div className="flex items-center gap-2">
+            <span className="ui-text-primary w-24 shrink-0 text-[11px] font-black">
+              {formatNumber(valueB)} {unit}
+            </span>
+            <input
+              aria-label={`${label} — Équipe B`}
+              type="range"
+              min={min}
+              max={max}
+              step={step}
+              value={valueB}
+              onChange={(event) => onChangeB?.(Number(event.target.value))}
+              className="w-full accent-current"
+            />
+          </div>
+        ) : (
+          <span className="ui-text-muted block text-center text-xs font-semibold">—</span>
+        )}
+      </div>
     </div>
   );
 }
@@ -192,6 +262,16 @@ export default function EngineSettings({
       ...current,
       [team === "A" ? "teamA" : "teamB"]: {
         ...(team === "A" ? current.teamA : current.teamB),
+        [key]: value,
+      },
+    }));
+  }
+
+  function updateAdvanced(key: keyof EngineSettings["advanced"], value: number) {
+    updateSetting((current) => ({
+      ...current,
+      advanced: {
+        ...current.advanced,
         [key]: value,
       },
     }));
@@ -285,351 +365,211 @@ export default function EngineSettings({
           </button>
 
           {showAdvanced && (
-            <div className="ui-panel-alt mt-3 rounded-2xl border p-4 sm:p-5">
-              <h3 className="ui-text-primary mb-3 text-sm font-black">
-                Utilisation générale
-              </h3>
+            <div className="ui-panel-alt mt-3 rounded-2xl border px-4 sm:px-5">
               <AdvancedSettingRow
+                icon="🧠"
                 label="Bonus expérience par combat"
-                value={advanced.heroUsageExperiencePerBattle}
+                globalValue={advanced.heroUsageExperiencePerBattle}
                 min={limits.experiencePerBattle.min}
                 max={limits.experiencePerBattle.max}
                 step={limits.experiencePerBattle.step}
                 unit="pt/combat"
-                onChange={(value) =>
-                  updateSetting((current) => ({
-                    ...current,
-                    advanced: {
-                      ...current.advanced,
-                      heroUsageExperiencePerBattle: value,
-                    },
-                  }))
+                onChangeGlobal={(value) =>
+                  updateAdvanced("heroUsageExperiencePerBattle", value)
                 }
               />
               <AdvancedSettingRow
+                icon="🔒"
                 label="Plafond du bonus expérience"
-                value={advanced.heroUsageExperienceCap}
+                globalValue={advanced.heroUsageExperienceCap}
                 min={0}
                 max={50}
                 step={1}
                 unit="pt"
-                onChange={(value) =>
-                  updateSetting((current) => ({
-                    ...current,
-                    advanced: {
-                      ...current.advanced,
-                      heroUsageExperienceCap: value,
-                    },
-                  }))
+                onChangeGlobal={(value) =>
+                  updateAdvanced("heroUsageExperienceCap", value)
                 }
               />
               <AdvancedSettingRow
+                icon="📈"
                 label="Plafond du score d'utilisation"
-                value={advanced.heroUsageScoreCap}
+                globalValue={advanced.heroUsageScoreCap}
                 min={0}
                 max={200}
                 step={5}
                 unit="pt"
-                onChange={(value) =>
-                  updateSetting((current) => ({
-                    ...current,
-                    advanced: {
-                      ...current.advanced,
-                      heroUsageScoreCap: value,
-                    },
-                  }))
+                onChangeGlobal={(value) =>
+                  updateAdvanced("heroUsageScoreCap", value)
                 }
               />
 
-              <h3 className="ui-text-primary mb-3 mt-6 text-sm font-black">
-                Historique spécifique — Équipe A
-              </h3>
               <AdvancedSettingRow
-                label="Multiplicateur winrate spécifique"
-                value={advanced.teamACounterWinRateMultiplier}
+                icon="🎯"
+                label="Multiplicateur winrate"
+                valueA={advanced.teamACounterWinRateMultiplier}
+                valueB={advanced.teamBCounterWinRateMultiplier}
                 min={0}
                 max={3}
                 step={0.1}
                 unit="×"
-                onChange={(value) =>
-                  updateSetting((current) => ({
-                    ...current,
-                    advanced: {
-                      ...current.advanced,
-                      teamACounterWinRateMultiplier: value,
-                    },
-                  }))
+                onChangeA={(value) =>
+                  updateAdvanced("teamACounterWinRateMultiplier", value)
+                }
+                onChangeB={(value) =>
+                  updateAdvanced("teamBCounterWinRateMultiplier", value)
                 }
               />
               <AdvancedSettingRow
-                label="Bonus par combat spécifique"
-                value={advanced.teamACounterExperiencePerBattle}
+                icon="🎯"
+                label="Bonus par combat"
+                valueA={advanced.teamACounterExperiencePerBattle}
+                valueB={advanced.teamBCounterExperiencePerBattle}
                 min={0}
                 max={5}
                 step={0.5}
                 unit="pt/combat"
-                onChange={(value) =>
-                  updateSetting((current) => ({
-                    ...current,
-                    advanced: {
-                      ...current.advanced,
-                      teamACounterExperiencePerBattle: value,
-                    },
-                  }))
+                onChangeA={(value) =>
+                  updateAdvanced("teamACounterExperiencePerBattle", value)
+                }
+                onChangeB={(value) =>
+                  updateAdvanced("teamBCounterExperiencePerBattle", value)
                 }
               />
               <AdvancedSettingRow
-                label="Plafond bonus spécifique"
-                value={advanced.teamACounterExperienceCap}
+                icon="🎯"
+                label="Plafond bonus"
+                valueA={advanced.teamACounterExperienceCap}
+                valueB={advanced.teamBCounterExperienceCap}
                 min={0}
                 max={50}
                 step={1}
                 unit="pt"
-                onChange={(value) =>
-                  updateSetting((current) => ({
-                    ...current,
-                    advanced: {
-                      ...current.advanced,
-                      teamACounterExperienceCap: value,
-                    },
-                  }))
+                onChangeA={(value) =>
+                  updateAdvanced("teamACounterExperienceCap", value)
+                }
+                onChangeB={(value) =>
+                  updateAdvanced("teamBCounterExperienceCap", value)
                 }
               />
 
-              <h3 className="ui-text-primary mb-3 mt-6 text-sm font-black">
-                Historique spécifique — Équipe B
-              </h3>
               <AdvancedSettingRow
-                label="Multiplicateur winrate spécifique"
-                value={advanced.teamBCounterWinRateMultiplier}
-                min={0}
-                max={3}
-                step={0.1}
-                unit="×"
-                onChange={(value) =>
-                  updateSetting((current) => ({
-                    ...current,
-                    advanced: {
-                      ...current.advanced,
-                      teamBCounterWinRateMultiplier: value,
-                    },
-                  }))
-                }
-              />
-              <AdvancedSettingRow
-                label="Bonus par combat spécifique"
-                value={advanced.teamBCounterExperiencePerBattle}
-                min={0}
-                max={5}
-                step={0.5}
-                unit="pt/combat"
-                onChange={(value) =>
-                  updateSetting((current) => ({
-                    ...current,
-                    advanced: {
-                      ...current.advanced,
-                      teamBCounterExperiencePerBattle: value,
-                    },
-                  }))
-                }
-              />
-              <AdvancedSettingRow
-                label="Plafond bonus spécifique"
-                value={advanced.teamBCounterExperienceCap}
-                min={0}
-                max={50}
-                step={1}
-                unit="pt"
-                onChange={(value) =>
-                  updateSetting((current) => ({
-                    ...current,
-                    advanced: {
-                      ...current.advanced,
-                      teamBCounterExperienceCap: value,
-                    },
-                  }))
-                }
-              />
-
-              <h3 className="ui-text-primary mb-3 mt-6 text-sm font-black">
-                Fiabilité historique — Équipe A
-              </h3>
-              <AdvancedSettingRow
+                icon="🛡️"
                 label="Seuil minimum de fiabilité"
-                value={advanced.teamAHistoricalReliabilityMin}
+                valueA={advanced.teamAHistoricalReliabilityMin}
                 min={0}
                 max={100}
                 step={5}
                 unit="%"
-                onChange={(value) =>
-                  updateSetting((current) => ({
-                    ...current,
-                    advanced: {
-                      ...current.advanced,
-                      teamAHistoricalReliabilityMin: value,
-                    },
-                  }))
+                onChangeA={(value) =>
+                  updateAdvanced("teamAHistoricalReliabilityMin", value)
                 }
               />
               <AdvancedSettingRow
+                icon="🛡️"
                 label="Combats pour confiance maximale"
-                value={advanced.teamAHistoricalConfidenceBattles}
+                valueA={advanced.teamAHistoricalConfidenceBattles}
                 min={1}
                 max={20}
                 step={1}
                 unit="combats"
-                onChange={(value) =>
-                  updateSetting((current) => ({
-                    ...current,
-                    advanced: {
-                      ...current.advanced,
-                      teamAHistoricalConfidenceBattles: value,
-                    },
-                  }))
+                onChangeA={(value) =>
+                  updateAdvanced("teamAHistoricalConfidenceBattles", value)
                 }
               />
               <AdvancedSettingRow
+                icon="🛡️"
                 label="Base de fiabilité"
-                value={advanced.teamAHistoricalReliabilityBase}
+                valueA={advanced.teamAHistoricalReliabilityBase}
                 min={0}
                 max={1}
                 step={0.05}
                 unit="×"
-                onChange={(value) =>
-                  updateSetting((current) => ({
-                    ...current,
-                    advanced: {
-                      ...current.advanced,
-                      teamAHistoricalReliabilityBase: value,
-                    },
-                  }))
+                onChangeA={(value) =>
+                  updateAdvanced("teamAHistoricalReliabilityBase", value)
                 }
               />
               <AdvancedSettingRow
+                icon="🛡️"
                 label="Poids de la confiance"
-                value={advanced.teamAHistoricalReliabilityConfidenceWeight}
+                valueA={advanced.teamAHistoricalReliabilityConfidenceWeight}
                 min={0}
                 max={1}
                 step={0.05}
                 unit="×"
-                onChange={(value) =>
-                  updateSetting((current) => ({
-                    ...current,
-                    advanced: {
-                      ...current.advanced,
-                      teamAHistoricalReliabilityConfidenceWeight: value,
-                    },
-                  }))
+                onChangeA={(value) =>
+                  updateAdvanced("teamAHistoricalReliabilityConfidenceWeight", value)
                 }
               />
 
-              <h3 className="ui-text-primary mb-3 mt-6 text-sm font-black">
-                Core4 historique
-              </h3>
               <AdvancedSettingRow
+                icon="🧩"
                 label="Combats minimum pour valider un Core4"
-                value={advanced.core4MinBattles}
+                globalValue={advanced.core4MinBattles}
                 min={1}
                 max={20}
                 step={1}
                 unit="combats"
-                onChange={(value) =>
-                  updateSetting((current) => ({
-                    ...current,
-                    advanced: {
-                      ...current.advanced,
-                      core4MinBattles: value,
-                    },
-                  }))
-                }
+                onChangeGlobal={(value) => updateAdvanced("core4MinBattles", value)}
               />
               <AdvancedSettingRow
+                icon="🧩"
                 label="Combats minimum pour un remplacement"
-                value={advanced.core4MinReplacementBattles}
+                globalValue={advanced.core4MinReplacementBattles}
                 min={1}
                 max={20}
                 step={1}
                 unit="combats"
-                onChange={(value) =>
-                  updateSetting((current) => ({
-                    ...current,
-                    advanced: {
-                      ...current.advanced,
-                      core4MinReplacementBattles: value,
-                    },
-                  }))
+                onChangeGlobal={(value) =>
+                  updateAdvanced("core4MinReplacementBattles", value)
                 }
               />
               <AdvancedSettingRow
+                icon="🧩"
                 label="Combats pour confiance maximale Core4"
-                value={advanced.core4ConfidenceBattles}
+                globalValue={advanced.core4ConfidenceBattles}
                 min={1}
                 max={20}
                 step={1}
                 unit="combats"
-                onChange={(value) =>
-                  updateSetting((current) => ({
-                    ...current,
-                    advanced: {
-                      ...current.advanced,
-                      core4ConfidenceBattles: value,
-                    },
-                  }))
+                onChangeGlobal={(value) =>
+                  updateAdvanced("core4ConfidenceBattles", value)
                 }
               />
 
-              <h3 className="ui-text-primary mb-3 mt-6 text-sm font-black">
-                Pénalités de classe — Équipe A
-              </h3>
               <AdvancedSettingRow
+                icon="⚖️"
                 label="1er héros supplémentaire de même classe"
-                value={advanced.teamAClassPenaltyFirst}
+                valueA={advanced.teamAClassPenaltyFirst}
                 min={0}
                 max={100}
                 step={1}
                 unit="pt"
-                onChange={(value) =>
-                  updateSetting((current) => ({
-                    ...current,
-                    advanced: {
-                      ...current.advanced,
-                      teamAClassPenaltyFirst: value,
-                    },
-                  }))
+                onChangeA={(value) =>
+                  updateAdvanced("teamAClassPenaltyFirst", value)
                 }
               />
               <AdvancedSettingRow
+                icon="⚖️"
                 label="À partir du 3e héros de même classe"
-                value={advanced.teamAClassPenaltySecond}
+                valueA={advanced.teamAClassPenaltySecond}
                 min={0}
                 max={100}
                 step={1}
                 unit="pt"
-                onChange={(value) =>
-                  updateSetting((current) => ({
-                    ...current,
-                    advanced: {
-                      ...current.advanced,
-                      teamAClassPenaltySecond: value,
-                    },
-                  }))
+                onChangeA={(value) =>
+                  updateAdvanced("teamAClassPenaltySecond", value)
                 }
               />
               <AdvancedSettingRow
+                icon="⚖️"
                 label="À partir du 4e héros de même classe"
-                value={advanced.teamAClassPenaltyThird}
+                valueA={advanced.teamAClassPenaltyThird}
                 min={0}
                 max={100}
                 step={1}
                 unit="pt"
-                onChange={(value) =>
-                  updateSetting((current) => ({
-                    ...current,
-                    advanced: {
-                      ...current.advanced,
-                      teamAClassPenaltyThird: value,
-                    },
-                  }))
+                onChangeA={(value) =>
+                  updateAdvanced("teamAClassPenaltyThird", value)
                 }
               />
             </div>
