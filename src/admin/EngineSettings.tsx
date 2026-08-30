@@ -147,7 +147,6 @@ export default function EngineSettings({ open, onClose, onBack }: EngineSettings
       { icon: "🎯", title: "Historique spécifique", a: "specificHistoryWeight" as const, b: "specificHistoryWeight" as const },
       { icon: "🧩", title: "Core4 historique", a: "core4Weight" as const, b: "core4Weight" as const },
       { icon: "📊", title: "Winrate général", a: "generalWinRateWeight" as const, b: "generalWinRateWeight" as const },
-      { icon: "📈", title: "Stats", a: "statsWeight" as const, b: "statsWeight" as const },
     ],
     []
   );
