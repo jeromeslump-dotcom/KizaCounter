@@ -1,4 +1,5 @@
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
+import EngineSettings from "./EngineSettings";
 
 interface AdminPanelProps {
   open: boolean;
@@ -6,7 +7,6 @@ interface AdminPanelProps {
   onUserManagement: () => void;
   onEncounteredTeams: () => void;
   onCombatHistory: () => void;
-  onEngineSettings: () => void;
 }
 
 interface AdminActionProps {
@@ -53,9 +53,20 @@ export default function AdminPanel({
   onUserManagement,
   onEncounteredTeams,
   onCombatHistory,
-  onEngineSettings,
 }: AdminPanelProps) {
+  const [showEngineSettings, setShowEngineSettings] = useState(false);
+
   if (!open) return null;
+
+  if (showEngineSettings) {
+    return (
+      <EngineSettings
+        open
+        onClose={() => setShowEngineSettings(false)}
+        onBack={() => setShowEngineSettings(false)}
+      />
+    );
+  }
 
   return (
     <div
@@ -120,7 +131,7 @@ export default function AdminPanel({
             icon="⚙️"
             title="Réglages du moteur"
             description="Configurer les paramètres du moteur de recommandation"
-            onClick={onEngineSettings}
+            onClick={() => setShowEngineSettings(true)}
           />
         </div>
 
