@@ -71,9 +71,9 @@ export default function EngineSettings({
 
             <button
               type="button"
-              onClick={onBack}
+              onClick={onClose}
               className="ui-action flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border text-lg transition"
-              aria-label="Retour au Admin Panel"
+              aria-label="Fermer les réglages du moteur"
             >
               ✕
             </button>
