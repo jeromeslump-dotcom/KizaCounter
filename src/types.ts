@@ -54,13 +54,34 @@ export interface RecommendedTeam {
 }
 
 // ============================================================
-// COUVERTURE
+// COUVERTURE HISTORIQUE
 // ============================================================
 
+export interface CoverageHeroStats {
+  heroId: string;
+  wins: number;
+  losses: number;
+  battles: number;
+  winRate: number;
+  confidence: number;
+  score: number;
+}
+
 export interface CoverageReport {
+  /** Composition ennemie complète analysée. */
+  enemyIds: string[];
+
+  /** Nombre de héros candidats disposant d'un historique gagnant. */
   covered: number;
+
+  /** Nombre total de héros candidats analysés. */
   total: number;
+
+  /** Pourcentage de héros candidats couverts. */
   percentage: number;
+
+  /** Héros classés par efficacité historique contre cette composition. */
+  heroes: CoverageHeroStats[];
 }
 
 // ============================================================
