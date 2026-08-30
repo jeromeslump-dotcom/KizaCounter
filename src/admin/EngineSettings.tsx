@@ -88,20 +88,13 @@ export default function EngineSettings({
           />
         </div>
 
-        <footer className="flex justify-between border-t ui-divider px-4 py-3 sm:px-5 sm:py-4">
+        <footer className="flex justify-start border-t ui-divider px-4 py-3 sm:px-5 sm:py-4">
           <button
             type="button"
             onClick={onBack}
             className="ui-action rounded-lg border px-4 py-2 text-xs font-bold transition"
           >
-            ← Retour
-          </button>
-          <button
-            type="button"
-            onClick={onClose}
-            className="ui-action rounded-lg border px-4 py-2 text-xs font-bold transition"
-          >
-            Fermer
+            ← Retour au Admin Panel
           </button>
         </footer>
       </section>
