@@ -565,30 +565,29 @@ export function recommendTeam(
 // RECOMMANDATION ALTERNATIVE — ANALYSE INDÉPENDANTE
 // ============================================================
 //
-// Cette équipe ne cherche PAS à être différente de l'équipe A.
-// Elle utilise simplement des pondérations différentes afin de
-// donner davantage de poids aux performances générales et aux stats.
+// L'équipe B est indépendante de l'équipe A.
+// primaryTeam est conservé uniquement pour compatibilité avec l'appelant.
+// Il n'est pas utilisé pour modifier le classement.
 //
-// Hiérarchie voulue :
+// Pondérations explicites de B :
 //   Historique spécifique : moyen
 //   Core4 historique      : faible / moyen
 //   Winrate général       : fort
 //   Stats                 : fort
-//   Diversité             : faible, sous forme de bonus uniquement
+//   Diversité             : 0
 //
-// Un héros de l'équipe A reste donc totalement éligible.
+// Aucune contrainte de classe ou de différence avec l'équipe A n'est appliquée.
 // ============================================================
 
 export function recommendAlternativeTeam(
   enemyIds: string[],
   heroes: Hero[],
   combats: Combat[],
-  primaryTeam: Hero[] = []
+  _primaryTeam: Hero[] = []
 ): Hero[] {
   if (enemyIds.length === 0) return [];
 
   const enemySet = new Set(enemyIds);
-  const primarySet = new Set(primaryTeam.map((hero) => hero.id));
   const availableHeroes = heroes.filter((hero) => !enemySet.has(hero.id));
 
   if (availableHeroes.length <= TEAM_SIZE) return availableHeroes;
@@ -597,21 +596,14 @@ export function recommendAlternativeTeam(
   const counterUsage = calculateCounterUsage(enemyIds, combats);
   const bestCore4 = findBestCore4(enemyIds, combats);
   const bestCore4Ids = new Set(bestCore4?.coreIds ?? []);
-  const bestCore4Key = bestCore4 ? teamKey(bestCore4.coreIds) : "";
 
   const ranked = availableHeroes
     .map((hero) => {
-      // 1) Historique spécifique : MOYEN
-      // Même logique que le moteur historique, mais moins dominante.
       const counter = counterUsage[hero.id];
       const counterScore = counter
         ? counter.winRate * 1.2 + Math.min(counter.total * 2, 10)
         : 0;
 
-      // 2) Core4 historique : FAIBLE / MOYEN
-      // Un héros du meilleur Core4 reçoit le niveau de confiance du Core.
-      // Pour un héros extérieur au Core4, on regarde son éventuel score
-      // comme remplaçant de ce Core4. Rien n'est interdit ni exclu.
       let core4Score = 0;
       if (bestCore4) {
         if (bestCore4Ids.has(hero.id)) {
@@ -627,34 +619,20 @@ export function recommendAlternativeTeam(
         }
       }
 
-      // 3) Winrate général : FORT
       const general = heroUsageScore(hero.id, usage);
-
-      // 4) Stats : FORT
       const stats = heroStatScore(hero);
 
-      // 5) Diversité : FAIBLE
-      // Bonus positif uniquement : jamais de malus pour reprendre un héros de A.
-      const diversityBonus = primarySet.has(hero.id) ? 0 : 2;
-
-      // Pondérations de l'équipe B.
-      // Les valeurs sont volontairement différentes de l'équipe A.
       const score =
         counterScore * 0.85 +
         core4Score * 0.35 +
         general * 1.15 +
-        stats * 2.5 +
-        diversityBonus;
+        stats * 2.5;
 
       return {
         hero,
         score,
-        counterScore,
-        core4Score,
         general,
         stats,
-        diversityBonus,
-        core4Key: bestCore4Key,
       };
     })
     .sort(
@@ -665,38 +643,7 @@ export function recommendAlternativeTeam(
         a.hero.name.localeCompare(b.hero.name)
     );
 
-  const alternative: Hero[] = [];
-  const classCounts: Record<string, number> = { STR: 0, AGI: 0, INT: 0 };
-
-  while (alternative.length < TEAM_SIZE && ranked.length > 0) {
-    let bestIndex = -1;
-    let bestAdjustedScore = -Infinity;
-
-    for (let i = 0; i < ranked.length; i++) {
-      const candidate = ranked[i];
-      const currentCount = classCounts[candidate.hero.cls] ?? 0;
-      let classPenalty = 0;
-
-      if (currentCount >= 1) classPenalty += 8 * currentCount;
-      if (currentCount >= 2) classPenalty += 20;
-      if (currentCount >= 3) classPenalty += 40;
-
-      const adjustedScore = candidate.score - classPenalty;
-
-      if (adjustedScore > bestAdjustedScore) {
-        bestAdjustedScore = adjustedScore;
-        bestIndex = i;
-      }
-    }
-
-    if (bestIndex < 0) break;
-
-    const selected = ranked.splice(bestIndex, 1)[0].hero;
-    alternative.push(selected);
-    classCounts[selected.cls] = (classCounts[selected.cls] ?? 0) + 1;
-  }
-
-  return alternative;
+  return ranked.slice(0, TEAM_SIZE).map((candidate) => candidate.hero);
 }
 
 export function rankHeroes(heroes: Hero[], combats: Combat[]): HeroScore[] {
