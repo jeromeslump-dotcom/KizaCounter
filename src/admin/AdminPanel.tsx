@@ -6,6 +6,7 @@ interface AdminPanelProps {
   onUserManagement: () => void;
   onEncounteredTeams: () => void;
   onCombatHistory: () => void;
+  onEngineSettings: () => void;
 }
 
 interface AdminActionProps {
@@ -52,6 +53,7 @@ export default function AdminPanel({
   onUserManagement,
   onEncounteredTeams,
   onCombatHistory,
+  onEngineSettings,
 }: AdminPanelProps) {
   if (!open) return null;
 
@@ -112,6 +114,13 @@ export default function AdminPanel({
             icon="📜"
             title="Historique des combats"
             onClick={onCombatHistory}
+          />
+
+          <AdminAction
+            icon="⚙️"
+            title="Réglages du moteur"
+            description="Configurer les paramètres du moteur de recommandation"
+            onClick={onEngineSettings}
           />
         </div>
 
