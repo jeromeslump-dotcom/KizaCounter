@@ -15,12 +15,7 @@ interface AdminActionProps {
   onClick: () => void;
 }
 
-function AdminAction({
-  icon,
-  title,
-  description,
-  onClick,
-}: AdminActionProps) {
+function AdminAction({ icon, title, description, onClick }: AdminActionProps) {
   return (
     <button
       type="button"

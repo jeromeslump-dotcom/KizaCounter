@@ -543,5 +543,3 @@ export const CLASS_TEXT: Record<HeroClass, string> = {
 export function formatStat(n: number): string {
   return n.toLocaleString("fr-FR");
 }
-
-

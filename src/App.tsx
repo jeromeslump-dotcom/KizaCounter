@@ -49,8 +49,7 @@ export default function App() {
     enabledHeroIds,
   });
 
-  const [activeClass, setActiveClass] =
-    useState<HeroClassFilter>("ALL");
+  const [activeClass, setActiveClass] = useState<HeroClassFilter>("ALL");
   const [query, setQuery] = useState("");
   const [sortBy, setSortBy] = useState<HeroSort>("played");
 
@@ -84,10 +83,7 @@ export default function App() {
           );
         }
       } catch (error) {
-        console.error(
-          "Impossible de récupérer la session :",
-          error
-        );
+        console.error("Impossible de récupérer la session :", error);
 
         if (mounted) {
           setIsAuthenticated(false);
@@ -145,9 +141,7 @@ export default function App() {
 
   async function handleSaveCombat(combat: Combat) {
     if (!isAuthenticated) {
-      throw new Error(
-        "Vous devez être connecté pour enregistrer un combat."
-      );
+      throw new Error("Vous devez être connecté pour enregistrer un combat.");
     }
 
     try {
@@ -156,10 +150,7 @@ export default function App() {
       setCombats((current) => [savedCombat, ...current]);
       resetCombat();
     } catch (error) {
-      console.error(
-        "Impossible d'enregistrer le combat :",
-        error
-      );
+      console.error("Impossible d'enregistrer le combat :", error);
 
       throw error;
     }

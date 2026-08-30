@@ -156,10 +156,7 @@ export function coverageReport(
   };
 
   // heroId -> Core4 key -> statistiques du remplacement.
-  const byHeroAndCore = new Map<
-    string,
-    Map<string, ReplacementStats>
-  >();
+  const byHeroAndCore = new Map<string, Map<string, ReplacementStats>>();
 
   // Seuls les combats contre la composition ennemie COMPLETE comptent.
   for (const combat of combats) {
@@ -485,9 +482,18 @@ export function findBestHistoricalTeam(
       !bestCandidate ||
       reliability > bestReliability ||
       (reliability === bestReliability && battles > bestBattles) ||
-      (reliability === bestReliability && battles === bestBattles && candidate.wins > bestCandidate.wins) ||
-      (reliability === bestReliability && battles === bestBattles && candidate.wins === bestCandidate.wins && evaluation.score > (bestEvaluation?.score ?? -Infinity)) ||
-      (reliability === bestReliability && battles === bestBattles && candidate.wins === bestCandidate.wins && evaluation.score === (bestEvaluation?.score ?? -Infinity) && currentTeamKey < bestTeamKey);
+      (reliability === bestReliability &&
+        battles === bestBattles &&
+        candidate.wins > bestCandidate.wins) ||
+      (reliability === bestReliability &&
+        battles === bestBattles &&
+        candidate.wins === bestCandidate.wins &&
+        evaluation.score > (bestEvaluation?.score ?? -Infinity)) ||
+      (reliability === bestReliability &&
+        battles === bestBattles &&
+        candidate.wins === bestCandidate.wins &&
+        evaluation.score === (bestEvaluation?.score ?? -Infinity) &&
+        currentTeamKey < bestTeamKey);
 
     if (isBetter) {
       bestCandidate = candidate;
@@ -510,8 +516,14 @@ export function findBestHistoricalTeam(
 function calculateCounterUsage(
   enemyIds: string[],
   combats: Combat[]
-): Record<string, { wins: number; losses: number; total: number; winRate: number }> {
-  const result: Record<string, { wins: number; losses: number; total: number; winRate: number }> = {};
+): Record<
+  string,
+  { wins: number; losses: number; total: number; winRate: number }
+> {
+  const result: Record<
+    string,
+    { wins: number; losses: number; total: number; winRate: number }
+  > = {};
 
   for (const combat of combats) {
     if (!isSameEnemyTeam(enemyIds, combat.enemy_heroes ?? [])) continue;
@@ -541,7 +553,10 @@ function calculateCounterUsage(
 function counterHeroScore(
   hero: Hero,
   usage: Record<string, HeroUsage>,
-  counterUsage: Record<string, { wins: number; losses: number; total: number; winRate: number }>
+  counterUsage: Record<
+    string,
+    { wins: number; losses: number; total: number; winRate: number }
+  >
 ): number {
   const general = heroUsageScore(hero.id, usage);
   const stats = heroStatScore(hero);
@@ -580,8 +595,13 @@ export function recommendTeam(
   const counterUsage = calculateCounterUsage(enemyIds, combats);
 
   const ranked = availableHeroes
-    .map((hero) => ({ hero, score: counterHeroScore(hero, usage, counterUsage) }))
-    .sort((a, b) => b.score - a.score || a.hero.name.localeCompare(b.hero.name));
+    .map((hero) => ({
+      hero,
+      score: counterHeroScore(hero, usage, counterUsage),
+    }))
+    .sort(
+      (a, b) => b.score - a.score || a.hero.name.localeCompare(b.hero.name)
+    );
 
   const recommended: Hero[] = [];
   const classCounts: Record<string, number> = { STR: 0, AGI: 0, INT: 0 };
@@ -599,7 +619,10 @@ export function recommendTeam(
 
     if (core4Heroes.length === 4) {
       for (const hero of core4Heroes) {
-        if (!enemySet.has(hero.id) && !recommended.some((selected) => selected.id === hero.id)) {
+        if (
+          !enemySet.has(hero.id) &&
+          !recommended.some((selected) => selected.id === hero.id)
+        ) {
           recommended.push(hero);
           classCounts[hero.cls] = (classCounts[hero.cls] ?? 0) + 1;
         }
@@ -621,12 +644,14 @@ export function recommendTeam(
             combats
           );
 
-          const finalScore = candidate.score + historicalScore * CORE4_CONFIG.weight;
+          const finalScore =
+            candidate.score + historicalScore * CORE4_CONFIG.weight;
 
           if (
             finalScore > bestReplacementScore ||
             (finalScore === bestReplacementScore &&
-              (!bestReplacement || candidate.hero.name.localeCompare(bestReplacement.name) < 0))
+              (!bestReplacement ||
+                candidate.hero.name.localeCompare(bestReplacement.name) < 0))
           ) {
             bestReplacementScore = finalScore;
             bestReplacement = candidate.hero;
@@ -701,12 +726,17 @@ export function recommendAlternativeTeam(
       const general = heroUsageScore(hero.id, usage);
       const stats = heroStatScore(hero);
       const counter = counterUsage[hero.id];
-      const counterScore = counter ? counter.winRate * 1.2 + Math.min(counter.total * 2, 10) : 0;
+      const counterScore = counter
+        ? counter.winRate * 1.2 + Math.min(counter.total * 2, 10)
+        : 0;
       const explorationBonus = primarySet.has(hero.id) ? -18 : 8;
-      const score = stats * 1.35 + counterScore + general * 0.1 + explorationBonus;
+      const score =
+        stats * 1.35 + counterScore + general * 0.1 + explorationBonus;
       return { hero, score };
     })
-    .sort((a, b) => b.score - a.score || a.hero.name.localeCompare(b.hero.name));
+    .sort(
+      (a, b) => b.score - a.score || a.hero.name.localeCompare(b.hero.name)
+    );
 
   const alternative: Hero[] = [];
   const classCounts: Record<string, number> = { STR: 0, AGI: 0, INT: 0 };

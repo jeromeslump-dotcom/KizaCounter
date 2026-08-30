@@ -53,7 +53,10 @@ export default function EncounteredTeams({
         const history = await loadCombats();
         if (mounted) setCombats(history);
       } catch (loadError) {
-        console.error("Impossible de charger les équipes rencontrées :", loadError);
+        console.error(
+          "Impossible de charger les équipes rencontrées :",
+          loadError
+        );
         if (mounted) setError("Impossible de charger les équipes rencontrées.");
       } finally {
         if (mounted) setLoading(false);
@@ -130,14 +133,18 @@ export default function EncounteredTeams({
         <header className="border-b ui-divider p-5 sm:p-6">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <h2 id="encountered-teams-title" className="ui-text-primary text-xl font-black">
+              <h2
+                id="encountered-teams-title"
+                className="ui-text-primary text-xl font-black"
+              >
                 ⚔️ Équipes rencontrées
               </h2>
               <p className="ui-text-secondary mt-1 text-xs sm:text-sm">
                 Compositions ennemies classées selon leur difficulté
               </p>
               <p className="ui-text-soft mt-1 text-[11px]">
-                Minimum {MIN_COMBATS} combats pour apparaître dans le classement.
+                Minimum {MIN_COMBATS} combats pour apparaître dans le
+                classement.
               </p>
             </div>
 
@@ -171,7 +178,10 @@ export default function EncounteredTeams({
                 const lossPercentage = team.lossRate * 100;
 
                 return (
-                  <article key={teamKey(team.heroIds)} className="ui-action rounded-2xl border p-4">
+                  <article
+                    key={teamKey(team.heroIds)}
+                    className="ui-action rounded-2xl border p-4"
+                  >
                     <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                       <div className="flex min-w-0 items-center gap-3">
                         <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border ui-divider text-sm font-black">
@@ -183,12 +193,23 @@ export default function EncounteredTeams({
                             const hero = getHero(heroId);
 
                             return (
-                              <div key={heroId} className="flex min-w-0 flex-col items-center gap-1.5" title={hero?.name ?? heroId}>
+                              <div
+                                key={heroId}
+                                className="flex min-w-0 flex-col items-center gap-1.5"
+                                title={hero?.name ?? heroId}
+                              >
                                 <div className="h-14 w-14 overflow-hidden rounded-lg border ui-divider sm:h-16 sm:w-16">
                                   {hero ? (
-                                    <img src={hero.img} alt={hero.name} loading="lazy" className="h-full w-full object-cover" />
+                                    <img
+                                      src={hero.img}
+                                      alt={hero.name}
+                                      loading="lazy"
+                                      className="h-full w-full object-cover"
+                                    />
                                   ) : (
-                                    <div className="ui-text-soft flex h-full w-full items-center justify-center text-[9px]">?</div>
+                                    <div className="ui-text-soft flex h-full w-full items-center justify-center text-[9px]">
+                                      ?
+                                    </div>
                                   )}
                                 </div>
                                 <span className="ui-text-primary max-w-20 truncate text-center text-[10px] font-bold sm:text-[11px]">
@@ -203,19 +224,27 @@ export default function EncounteredTeams({
                       <div className="grid grid-cols-2 gap-x-5 gap-y-2 border-t ui-divider pt-3 text-xs sm:grid-cols-4 lg:min-w-[390px] lg:border-t-0 lg:border-l lg:pl-5 lg:pt-0">
                         <div>
                           <div className="ui-text-soft">Combats</div>
-                          <div className="ui-text-primary mt-0.5 font-black">{team.total}</div>
+                          <div className="ui-text-primary mt-0.5 font-black">
+                            {team.total}
+                          </div>
                         </div>
                         <div>
                           <div className="ui-text-soft">Défaites</div>
-                          <div className="ui-text-primary mt-0.5 font-black">{team.losses}</div>
+                          <div className="ui-text-primary mt-0.5 font-black">
+                            {team.losses}
+                          </div>
                         </div>
                         <div>
                           <div className="ui-text-soft">Défaites</div>
-                          <div className="mt-0.5 font-black text-red-400">{lossPercentage.toFixed(1)}%</div>
+                          <div className="mt-0.5 font-black text-red-400">
+                            {lossPercentage.toFixed(1)}%
+                          </div>
                         </div>
                         <div>
                           <div className="ui-text-soft">Score</div>
-                          <div className="ui-text-primary mt-0.5 font-black">{team.score.toFixed(3)}</div>
+                          <div className="ui-text-primary mt-0.5 font-black">
+                            {team.score.toFixed(3)}
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -228,9 +257,14 @@ export default function EncounteredTeams({
 
         <footer className="flex items-center justify-between gap-3 border-t ui-divider px-4 py-3 sm:px-5 sm:py-4">
           <span className="ui-text-soft text-xs">
-            {rankedTeams.length} équipe{rankedTeams.length > 1 ? "s" : ""} différente{rankedTeams.length > 1 ? "s" : ""}
+            {rankedTeams.length} équipe{rankedTeams.length > 1 ? "s" : ""}{" "}
+            différente{rankedTeams.length > 1 ? "s" : ""}
           </span>
-          <button type="button" onClick={onBack} className="ui-action rounded-lg border px-4 py-2 text-xs font-bold transition">
+          <button
+            type="button"
+            onClick={onBack}
+            className="ui-action rounded-lg border px-4 py-2 text-xs font-bold transition"
+          >
             Retour au Admin Panel
           </button>
         </footer>

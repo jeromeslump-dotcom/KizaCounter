@@ -219,10 +219,13 @@ export default function CombatHistory({
 
                       <div className="ui-text-soft mt-1 text-[10px]">
                         {combat.created_at
-                          ? new Date(combat.created_at).toLocaleString("fr-FR", {
-                              dateStyle: "short",
-                              timeStyle: "short",
-                            })
+                          ? new Date(combat.created_at).toLocaleString(
+                              "fr-FR",
+                              {
+                                dateStyle: "short",
+                                timeStyle: "short",
+                              }
+                            )
                           : "Date inconnue"}
                       </div>
                     </div>

@@ -53,16 +53,14 @@ export default function EnemyPanel({
               >
                 <div className="relative z-10 aspect-square w-full overflow-hidden">
                   <img
-  src={`/heroes_portrait/${hero.id}.png`}
-  alt={hero.name}
-  className="h-full w-full object-contain transition group-hover:brightness-75"
-  loading="lazy"
-/>
+                    src={`/heroes_portrait/${hero.id}.png`}
+                    alt={hero.name}
+                    className="h-full w-full object-contain transition group-hover:brightness-75"
+                    loading="lazy"
+                  />
                 </div>
 
-                <span
-                  className="selection-order-badge absolute left-1 top-1 z-20 flex h-5 w-5 items-center justify-center rounded-full border text-[10px] font-black leading-none shadow sm:left-2 sm:top-2 sm:h-7 sm:w-7 sm:border-2 sm:text-sm"
-                >
+                <span className="selection-order-badge absolute left-1 top-1 z-20 flex h-5 w-5 items-center justify-center rounded-full border text-[10px] font-black leading-none shadow sm:left-2 sm:top-2 sm:h-7 sm:w-7 sm:border-2 sm:text-sm">
                   {index + 1}
                 </span>
 

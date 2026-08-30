@@ -1,4 +1,3 @@
-
 // src/components/HeroCard.tsx
 
 import type { Hero } from "../types";
@@ -103,4 +102,3 @@ function StatLine({ label, value }: { label: string; value: number }) {
     </div>
   );
 }
-

@@ -2,10 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 import type { Combat, Hero } from "../types";
 
-import {
-  recommendTeam,
-  recommendAlternativeTeam,
-} from "../engine/scoring";
+import { recommendTeam, recommendAlternativeTeam } from "../engine/scoring";
 
 const TEAM_SIZE = 5;
 
@@ -105,9 +102,7 @@ export default function useCombatSelection({
     );
 
     const ids = recommendation.map((hero) => hero.id);
-    const alternativeTeamIds = alternative.map(
-      (hero) => hero.id
-    );
+    const alternativeTeamIds = alternative.map((hero) => hero.id);
 
     setRecommendedIds(ids);
     setAlternativeIds(alternativeTeamIds);

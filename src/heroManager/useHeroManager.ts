@@ -2,10 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { HEROES } from "../data/heroes";
 import { supabase } from "../storage/supabase";
-import {
-  loadHeroPreferences,
-  saveHeroPreferences,
-} from "./heroPreferences";
+import { loadHeroPreferences, saveHeroPreferences } from "./heroPreferences";
 
 const ALL_HERO_IDS = new Set(HEROES.map((hero) => hero.id));
 
@@ -33,10 +30,7 @@ export default function useHeroManager() {
         setEnabledHeroIds(ids);
         setPreferencesReady(true);
       } catch (error) {
-        console.error(
-          "Impossible de charger les préférences héros :",
-          error
-        );
+        console.error("Impossible de charger les préférences héros :", error);
 
         if (cancelled) return;
 

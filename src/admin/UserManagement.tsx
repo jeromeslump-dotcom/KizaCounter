@@ -101,9 +101,7 @@ export default function UserManagement({
     }
 
     setUsers((current) =>
-      current.map((item) =>
-        item.id === user.id ? { ...item, role } : item
-      )
+      current.map((item) => (item.id === user.id ? { ...item, role } : item))
     );
     setSavingId(null);
   }
@@ -208,7 +206,9 @@ export default function UserManagement({
                         onClick={() => saveRole(user)}
                         className="ui-action user-management-save ml-auto rounded-lg border px-3 py-1.5 text-xs font-bold transition disabled:cursor-not-allowed disabled:opacity-40"
                       >
-                        {savingId === user.id ? "Enregistrement..." : "Enregistrer"}
+                        {savingId === user.id
+                          ? "Enregistrement..."
+                          : "Enregistrer"}
                       </button>
                     </div>
                   </div>
