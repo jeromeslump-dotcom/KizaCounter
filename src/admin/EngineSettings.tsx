@@ -46,46 +46,20 @@ function ImportantSettingRow({
     <div className="grid grid-cols-[minmax(0,1fr)_minmax(150px,190px)_minmax(0,1fr)] items-center gap-3 border-b ui-divider py-4 last:border-b-0">
       <div className="min-w-0">
         <div className="flex items-center gap-2">
-          <input
-            aria-label={`${title} — Équipe A`}
-            type="range"
-            min={limits.min}
-            max={limits.max}
-            step={limits.step}
-            value={valueA}
-            onChange={(event) => onChangeA(Number(event.target.value))}
-            className="w-full accent-current"
-          />
-          <span className="ui-text-primary w-14 text-right text-xs font-black">
-            {formatWeight(valueA)}
-          </span>
+          <input aria-label={`${title} — Équipe A`} type="range" min={limits.min} max={limits.max} step={limits.step} value={valueA} onChange={(event) => onChangeA(Number(event.target.value))} className="w-full accent-current" />
+          <span className="ui-text-primary w-14 text-right text-xs font-black">{formatWeight(valueA)}</span>
         </div>
       </div>
 
       <div className="min-w-0 text-center">
-        <div className="ui-text-primary text-xs font-black sm:text-sm">
-          {icon} {title}
-        </div>
-        <div className="ui-text-muted mt-0.5 text-[10px] font-semibold">
-          0 % → {formatWeight(limits.max)}
-        </div>
+        <div className="ui-text-primary text-xs font-black sm:text-sm">{icon} {title}</div>
+        <div className="ui-text-muted mt-0.5 text-[10px] font-semibold">0 % → {formatWeight(limits.max)}</div>
       </div>
 
       <div className="min-w-0">
         <div className="flex items-center gap-2">
-          <span className="ui-text-primary w-14 text-xs font-black">
-            {formatWeight(valueB)}
-          </span>
-          <input
-            aria-label={`${title} — Équipe B`}
-            type="range"
-            min={limits.min}
-            max={limits.max}
-            step={limits.step}
-            value={valueB}
-            onChange={(event) => onChangeB(Number(event.target.value))}
-            className="w-full accent-current"
-          />
+          <span className="ui-text-primary w-14 text-xs font-black">{formatWeight(valueB)}</span>
+          <input aria-label={`${title} — Équipe B`} type="range" min={limits.min} max={limits.max} step={limits.step} value={valueB} onChange={(event) => onChangeB(Number(event.target.value))} className="w-full accent-current" />
         </div>
       </div>
     </div>
@@ -130,19 +104,8 @@ function AdvancedSettingRow({
       <div className="min-w-0">
         {hasA ? (
           <div className="flex items-center gap-2">
-            <input
-              aria-label={`${label} — Équipe A`}
-              type="range"
-              min={min}
-              max={max}
-              step={step}
-              value={valueA}
-              onChange={(event) => onChangeA?.(Number(event.target.value))}
-              className="w-full accent-current"
-            />
-            <span className="ui-text-primary w-24 shrink-0 text-right text-[11px] font-black">
-              {formatNumber(valueA)} {unit}
-            </span>
+            <input aria-label={`${label} — Équipe A`} type="range" min={min} max={max} step={step} value={valueA} onChange={(event) => onChangeA?.(Number(event.target.value))} className="w-full accent-current" />
+            <span className="ui-text-primary w-24 shrink-0 text-right text-[11px] font-black">{formatNumber(valueA)} {unit}</span>
           </div>
         ) : (
           <span className="ui-text-muted block text-center text-xs font-semibold">—</span>
@@ -150,48 +113,22 @@ function AdvancedSettingRow({
       </div>
 
       <div className="min-w-0 text-center">
-        <div className="ui-text-primary text-xs font-black sm:text-sm">
-          {icon} {label}
-        </div>
+        <div className="ui-text-primary text-xs font-black sm:text-sm">{icon} {label}</div>
         {hasGlobal ? (
           <div className="mt-1 flex items-center justify-center gap-2">
-            <input
-              aria-label={label}
-              type="range"
-              min={min}
-              max={max}
-              step={step}
-              value={globalValue}
-              onChange={(event) => onChangeGlobal?.(Number(event.target.value))}
-              className="w-full max-w-[120px] accent-current"
-            />
-            <span className="ui-text-primary w-24 shrink-0 text-right text-[11px] font-black">
-              {formatNumber(globalValue)} {unit}
-            </span>
+            <input aria-label={label} type="range" min={min} max={max} step={step} value={globalValue} onChange={(event) => onChangeGlobal?.(Number(event.target.value))} className="w-full max-w-[120px] accent-current" />
+            <span className="ui-text-primary w-24 shrink-0 text-right text-[11px] font-black">{formatNumber(globalValue)} {unit}</span>
           </div>
         ) : (
-          <div className="ui-text-muted mt-0.5 text-[10px] font-semibold">
-            {formatNumber(min)} {unit} → {formatNumber(max)} {unit}
-          </div>
+          <div className="ui-text-muted mt-0.5 text-[10px] font-semibold">{formatNumber(min)} {unit} → {formatNumber(max)} {unit}</div>
         )}
       </div>
 
       <div className="min-w-0">
         {hasB ? (
           <div className="flex items-center gap-2">
-            <span className="ui-text-primary w-24 shrink-0 text-[11px] font-black">
-              {formatNumber(valueB)} {unit}
-            </span>
-            <input
-              aria-label={`${label} — Équipe B`}
-              type="range"
-              min={min}
-              max={max}
-              step={step}
-              value={valueB}
-              onChange={(event) => onChangeB?.(Number(event.target.value))}
-              className="w-full accent-current"
-            />
+            <span className="ui-text-primary w-24 shrink-0 text-[11px] font-black">{formatNumber(valueB)} {unit}</span>
+            <input aria-label={`${label} — Équipe B`} type="range" min={min} max={max} step={step} value={valueB} onChange={(event) => onChangeB?.(Number(event.target.value))} className="w-full accent-current" />
           </div>
         ) : (
           <span className="ui-text-muted block text-center text-xs font-semibold">—</span>
@@ -201,14 +138,8 @@ function AdvancedSettingRow({
   );
 }
 
-export default function EngineSettings({
-  open,
-  onClose,
-  onBack,
-}: EngineSettingsProps) {
-  const [settings, setSettings] = useState<EngineSettings>(() =>
-    getEngineSettings()
-  );
+export default function EngineSettings({ open, onClose, onBack }: EngineSettingsProps) {
+  const [settings, setSettings] = useState<EngineSettings>(() => getEngineSettings());
   const [showAdvanced, setShowAdvanced] = useState(false);
 
   const importantRows = useMemo(
@@ -224,11 +155,7 @@ export default function EngineSettings({
   if (!open) return null;
 
   function updateSetting(updater: (current: EngineSettings) => EngineSettings) {
-    setSettings((current) => {
-      const next = updater(current);
-      saveEngineSettings(next);
-      return next;
-    });
+    setSettings((current) => updater(current));
   }
 
   function updateImportant(team: "A" | "B", key: keyof EngineSettings["teamA"], value: number) {
@@ -246,6 +173,10 @@ export default function EngineSettings({
       ...current,
       advanced: { ...current.advanced, [key]: value },
     }));
+  }
+
+  function handleSave() {
+    saveEngineSettings(settings);
   }
 
   function handleReset() {
@@ -306,8 +237,11 @@ export default function EngineSettings({
           )}
 
           <div className="mt-4 flex items-center justify-between gap-3">
-            <p className="ui-text-muted text-[10px] leading-relaxed">Les valeurs initiales reprennent les coefficients actuellement utilisés par le moteur.</p>
-            <button type="button" onClick={handleReset} className="ui-action shrink-0 rounded-lg border px-3 py-2 text-xs font-bold transition">Réinitialiser</button>
+            <p className="ui-text-muted text-[10px] leading-relaxed">Les valeurs sont modifiées localement jusqu'à la sauvegarde.</p>
+            <div className="flex shrink-0 items-center gap-2">
+              <button type="button" onClick={handleSave} className="ui-action rounded-lg border px-3 py-2 text-xs font-bold transition">💾 Sauvegarder</button>
+              <button type="button" onClick={handleReset} className="ui-action rounded-lg border px-3 py-2 text-xs font-bold transition">Réinitialiser</button>
+            </div>
           </div>
         </div>
 
