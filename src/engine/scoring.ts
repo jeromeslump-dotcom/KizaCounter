@@ -44,10 +44,11 @@ export function coverageReport(enemyIds: string[], teamIds: string[], combats: C
       heroGroups.set(coreKey, stats); byHeroAndCore.set(heroId, heroGroups);
     }
   }
+  const settings = getEngineSettings();
   const heroes = team.map((heroId) => {
     let wins = 0, losses = 0; const heroGroups = byHeroAndCore.get(heroId);
-    if (heroGroups) for (const stats of heroGroups.values()) { const battles = stats.wins + stats.losses; if (battles < getEngineSettings().advanced.core4MinBattles) continue; wins += stats.wins; losses += stats.losses; }
-    const battles = wins + losses, winRate = calculateWinRate(wins, battles), confidence = Math.min(battles / 4, 1), score = winRate * confidence;
+    if (heroGroups) for (const stats of heroGroups.values()) { const battles = stats.wins + stats.losses; if (battles < settings.advanced.core4MinBattles) continue; wins += stats.wins; losses += stats.losses; }
+    const battles = wins + losses, winRate = calculateWinRate(wins, battles), confidence = Math.min(battles / settings.advanced.core4ConfidenceBattles, 1), score = winRate * confidence;
     return { heroId, wins, losses, battles, winRate, confidence, score };
   }).sort((a,b) => b.score-a.score || b.battles-a.battles || b.wins-a.wins || a.heroId.localeCompare(b.heroId));
   const covered = heroes.filter((hero) => hero.wins > 0).length;
@@ -75,7 +76,7 @@ export function evaluateTeam(team: Hero[], combats: Combat[], usage: Record<stri
   const usageValues=team.map((hero)=>heroUsageScore(hero.id,usage)), statValues=team.map((hero)=>heroStatScore(hero));
   const usageScore=usageValues.length?usageValues.reduce((sum,value)=>sum+value,0)/usageValues.length:0;
   const statScore=statValues.length?statValues.reduce((sum,value)=>sum+value,0)/statValues.length:0;
-  const score=history.winRate*2+usageScore*settings.teamA.generalWinRateWeight+statScore*settings.teamA.statsWeight;
+  const score=history.winRate*settings.teamA.generalWinRateWeight+usageScore*settings.teamA.specificHistoryWeight+statScore*settings.teamA.statsWeight;
   return { score, historicalWins:history.wins, historicalLosses:history.losses, historicalBattles:history.battles, historicalWinRate:history.winRate, usageScore, statScore };
 }
 
@@ -133,7 +134,7 @@ export function recommendAlternativeTeam(enemyIds:string[],heroes:Hero[],combats
   if(!enemyIds.length)return [];
   const enemySet=new Set(enemyIds), availableHeroes=heroes.filter((hero)=>!enemySet.has(hero.id)); if(availableHeroes.length<=TEAM_SIZE)return availableHeroes;
   const settings=getEngineSettings(), usage=calculateHeroUsage(combats,heroes), counterUsage=calculateCounterUsage(enemyIds,combats);
-  const ranked=availableHeroes.map((hero)=>{ const counter=counterUsage[hero.id]; const counterScore=counter?(counter.winRate*settings.advanced.teamBCounterWinRateMultiplier+Math.min(counter.total*settings.advanced.teamBCounterExperiencePerBattle,settings.advanced.teamBCounterExperienceCap))*settings.teamB.specificHistoryWeight:0; return { hero, score:heroStatScore(hero)*settings.teamB.statsWeight+counterScore+heroUsageScore(hero.id,usage)*settings.teamB.generalWinRateWeight }; }).sort((a,b)=>b.score-a.score||a.hero.name.localeCompare(b.hero.name));
+  const ranked=availableHeroes.map((hero)=>{ const counter=counterUsage[hero.id]; const counterScore=counter?(counter.winRate*settings.teamBCounterWinRateMultiplier+Math.min(counter.total*settings.teamBCounterExperiencePerBattle,settings.teamBCounterExperienceCap))*settings.teamB.specificHistoryWeight:0; return { hero, score:heroStatScore(hero)*settings.teamB.statsWeight+counterScore+heroUsageScore(hero.id,usage)*settings.teamB.generalWinRateWeight }; }).sort((a,b)=>b.score-a.score||a.hero.name.localeCompare(b.hero.name));
   const alternative:Hero[]=[]; while(alternative.length<TEAM_SIZE&&ranked.length){const selected=ranked.shift()?.hero;if(!selected)break;alternative.push(selected);} return alternative;
 }
 
