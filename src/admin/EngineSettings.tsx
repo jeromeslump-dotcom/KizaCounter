@@ -71,9 +71,9 @@ export default function EngineSettings({
 
             <button
               type="button"
-              onClick={onClose}
+              onClick={onBack}
               className="ui-action flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border text-lg transition"
-              aria-label="Fermer"
+              aria-label="Retour au Admin Panel"
             >
               ✕
             </button>
@@ -88,7 +88,7 @@ export default function EngineSettings({
           />
         </div>
 
-        <footer className="flex justify-start border-t ui-divider px-4 py-3 sm:px-5 sm:py-4">
+        <footer className="flex justify-end border-t ui-divider px-4 py-3 sm:px-5 sm:py-4">
           <button
             type="button"
             onClick={onBack}
