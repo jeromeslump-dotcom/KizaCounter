@@ -290,7 +290,7 @@ export default function CombatHistory({
             onClick={onBack}
             className="ui-action rounded-lg border px-4 py-2 text-xs font-bold transition"
           >
-            Retour au Admin Panel
+            ← Retour au Admin Panel
           </button>
         </footer>
       </section>
