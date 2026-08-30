@@ -90,12 +90,12 @@ export function findBestHistoricalTeam(enemyIds:string[], combats:Combat[], hero
   const settings=getEngineSettings(); const candidates=new Map<string,{heroIds:string[];wins:number;losses:number}>();
   for(const combat of combats){ if(!isSameEnemyTeam(enemyIds,combat.enemy_heroes??[]))continue; const heroIds=uniqueIds(combat.my_heroes??[]); if(heroIds.length!==TEAM_SIZE)continue; const key=teamKey(heroIds); let candidate=candidates.get(key); if(!candidate){candidate={heroIds,wins:0,losses:0};candidates.set(key,candidate);} if(combat.won)candidate.wins++;else candidate.losses++; }
   const winningCandidates=[...candidates.values()].filter((candidate)=>candidate.wins>0); if(!winningCandidates.length)return null;
-  const usage=calculateHeroUsage(combats,heroes); let bestTeam:Hero[]|null=null; let bestCandidate:(typeof winningCandidates)[number]|null=null; let bestEvaluation:TeamEvaluation|null=null; let bestReliability=-Infinity; let bestBattles=-Infinity;
+  const usage=calculateHeroUsage(combats,heroes); let bestTeam:Hero[]|null=null; let bestCandidate:(typeof winningCandidates)[number]|null=null; let bestEvaluation:TeamEvaluation|null=null; let bestReliability=-Infinity; let bestBattles=-Infinity; let bestWinRate=-Infinity;
   for(const candidate of winningCandidates){
     const team=candidate.heroIds.map((id)=>heroes.find((hero)=>hero.id===id)).filter((hero): hero is Hero=>Boolean(hero)); if(team.length!==TEAM_SIZE)continue;
     const battles=candidate.wins+candidate.losses, winRate=calculateWinRate(candidate.wins,battles), confidence=Math.min(battles/settings.advanced.teamAHistoricalConfidenceBattles,1), reliability=winRate*(settings.advanced.teamAHistoricalReliabilityBase+settings.advanced.teamAHistoricalReliabilityConfidenceWeight*confidence), evaluation=evaluateTeam(team,combats,usage), currentTeamKey=teamKey(candidate.heroIds), bestTeamKey=bestCandidate?teamKey(bestCandidate.heroIds):"";
-    const isBetter=!bestCandidate||reliability>bestReliability||(reliability===bestReliability&&battles>bestBattles)||(reliability===bestReliability&&battles===bestBattles&&candidate.wins>bestCandidate.wins)||(reliability===bestReliability&&battles===bestBattles&&candidate.wins===bestCandidate.wins&&evaluation.score>(bestEvaluation?.score??-Infinity))||(reliability===bestReliability&&battles===bestBattles&&candidate.wins===bestCandidate.wins&&evaluation.score===(bestEvaluation?.score??-Infinity)&&currentTeamKey<bestTeamKey);
-    if(isBetter){bestCandidate=candidate;bestEvaluation=evaluation;bestTeam=team;bestReliability=reliability;bestBattles=battles;}
+    const isBetter=!bestCandidate||winRate>bestWinRate||(winRate===bestWinRate&&battles>bestBattles)||(winRate===bestWinRate&&battles===bestBattles&&candidate.wins>bestCandidate.wins)||(winRate===bestWinRate&&battles===bestBattles&&candidate.wins===bestCandidate.wins&&reliability>bestReliability)||(winRate===bestWinRate&&battles===bestBattles&&candidate.wins===bestCandidate.wins&&reliability===bestReliability&&evaluation.score>(bestEvaluation?.score??-Infinity))||(winRate===bestWinRate&&battles===bestBattles&&candidate.wins===bestCandidate.wins&&reliability===bestReliability&&evaluation.score===(bestEvaluation?.score??-Infinity)&&currentTeamKey<bestTeamKey);
+    if(isBetter){bestCandidate=candidate;bestEvaluation=evaluation;bestTeam=team;bestReliability=reliability;bestBattles=battles;bestWinRate=winRate;}
   }
   return bestTeam&&bestReliability>=settings.advanced.teamAHistoricalReliabilityMin?bestTeam:null;
 }
@@ -154,10 +154,6 @@ export function recommendAlternativeTeam(
   const usage = calculateHeroUsage(combats, heroes);
   const counterUsage = calculateCounterUsage(enemyIds, combats);
 
-  // ==========================================================
-  // SCORE INDIVIDUEL TEAM B
-  // ==========================================================
-
   const ranked = availableHeroes
     .map((hero) => {
       const counter = counterUsage[hero.id];
@@ -188,10 +184,6 @@ export function recommendAlternativeTeam(
         a.hero.name.localeCompare(b.hero.name)
     );
 
-  // ==========================================================
-  // CONSTRUCTION D'UNE ÉQUIPE CANDIDATE
-  // ==========================================================
-
   const buildCandidate = (orderedHeroes: typeof ranked): Hero[] => {
     const team: Hero[] = [];
 
@@ -212,16 +204,6 @@ export function recommendAlternativeTeam(
     return baseAlternative;
   }
 
-  // ==========================================================
-  // SCORE CORE4 D'UNE ÉQUIPE
-  //
-  // On cherche les Core4 historiques présents dans la
-  // composition candidate.
-  //
-  // Le bonus n'est appliqué que si le Core4 possède un
-  // historique valide.
-  // ==========================================================
-
   const getCore4Bonus = (team: Hero[]): number => {
     const teamIds = team.map((hero) => hero.id);
 
@@ -232,7 +214,6 @@ export function recommendAlternativeTeam(
       combats,
       settings
     )) {
-
       if (!core.coreIds.every((id) => teamIds.includes(id))) {
         continue;
       }
@@ -253,10 +234,6 @@ export function recommendAlternativeTeam(
     return bestScore * settings.teamB.core4Weight;
   };
 
-  // ==========================================================
-  // ÉVALUATION D'UNE COMPOSITION
-  // ==========================================================
-
   const evaluateAlternative = (team: Hero[]) => {
     const individualScore = team.reduce((total, hero) => {
       const candidate = ranked.find(
@@ -273,8 +250,6 @@ export function recommendAlternativeTeam(
       combats
     );
 
-    // Une équipe historique sans aucune victoire ne doit pas
-    // être considérée comme une bonne alternative.
     const losingHistory =
       history.battles > 0 && history.wins === 0;
 
@@ -287,13 +262,6 @@ export function recommendAlternativeTeam(
       history,
     };
   };
-
-  // ==========================================================
-  // CANDIDATES
-  //
-  // On teste l'équipe de base puis des variantes obtenues
-  // en remplaçant un héros par les suivants du classement.
-  // ==========================================================
 
   const candidates: Hero[][] = [baseAlternative];
 
@@ -323,9 +291,29 @@ export function recommendAlternativeTeam(
     }
   }
 
-  // ==========================================================
-  // CHOIX DE LA MEILLEURE ALTERNATIVE
-  // ==========================================================
+  // Ajouter les équipes historiques gagnantes comme candidates Team B.
+  // Cela permet de retrouver une vraie alternative à 100 % même si
+  // elle n'arrive pas dans le simple classement individuel des héros.
+  const historicalTeams = new Map<string, Hero[]>();
+
+  for (const combat of combats) {
+    if (!isSameEnemyTeam(enemyIds, combat.enemy_heroes ?? [])) continue;
+    if (!combat.won) continue;
+
+    const ids = uniqueIds(combat.my_heroes ?? []);
+    if (ids.length !== TEAM_SIZE) continue;
+    if (ids.some((id) => primaryIds.has(id) || enemySet.has(id))) continue;
+
+    const team = ids
+      .map((id) => heroes.find((hero) => hero.id === id))
+      .filter((hero): hero is Hero => Boolean(hero));
+
+    if (team.length !== TEAM_SIZE) continue;
+
+    historicalTeams.set(teamKey(ids), team);
+  }
+
+  candidates.push(...historicalTeams.values());
 
   let best = evaluateAlternative(baseAlternative);
 
@@ -336,10 +324,16 @@ export function recommendAlternativeTeam(
       evaluation.score > best.score ||
       (
         evaluation.score === best.score &&
+        evaluation.history.winRate > best.history.winRate
+      ) ||
+      (
+        evaluation.score === best.score &&
+        evaluation.history.winRate === best.history.winRate &&
         evaluation.history.wins > best.history.wins
       ) ||
       (
         evaluation.score === best.score &&
+        evaluation.history.winRate === best.history.winRate &&
         evaluation.history.wins === best.history.wins &&
         evaluation.history.battles > best.history.battles
       )
