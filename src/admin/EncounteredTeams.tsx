@@ -255,17 +255,13 @@ export default function EncounteredTeams({
           )}
         </div>
 
-        <footer className="flex items-center justify-between gap-3 border-t ui-divider px-4 py-3 sm:px-5 sm:py-4">
-          <span className="ui-text-soft text-xs">
-            {rankedTeams.length} équipe{rankedTeams.length > 1 ? "s" : ""}{" "}
-            différente{rankedTeams.length > 1 ? "s" : ""}
-          </span>
+        <footer className="flex items-center justify-end gap-3 border-t ui-divider px-4 py-3 sm:px-5 sm:py-4">
           <button
             type="button"
             onClick={onBack}
             className="ui-action rounded-lg border px-4 py-2 text-xs font-bold transition"
           >
-            Retour au Admin Panel
+            ← Retour au Admin Panel
           </button>
         </footer>
       </section>
