@@ -16,7 +16,7 @@ export function calculateHeroUsage(combats: Combat[], heroes: Hero[]): Record<st
   const usage: Record<string, HeroUsage> = {};
   for (const hero of heroes) usage[hero.id] = { heroId: hero.id, total: 0, wins: 0, losses: 0, winRate: 0 };
   for (const combat of combats) for (const heroId of combat.my_heroes ?? []) {
-    if (!usage[heroId]) usage[heroId] = { heroId, total: 0, wins: 0, losses: 0, winRate: 0 };
+    if (!usage[heroId]) usage[heroId] = { heroId: heroId, total: 0, wins: 0, losses: 0, winRate: 0 };
     usage[heroId].total += 1;
     if (combat.won) usage[heroId].wins += 1; else usage[heroId].losses += 1;
   }
@@ -134,7 +134,7 @@ export function recommendAlternativeTeam(enemyIds:string[],heroes:Hero[],combats
   if(!enemyIds.length)return [];
   const enemySet=new Set(enemyIds), availableHeroes=heroes.filter((hero)=>!enemySet.has(hero.id)); if(availableHeroes.length<=TEAM_SIZE)return availableHeroes;
   const settings=getEngineSettings(), usage=calculateHeroUsage(combats,heroes), counterUsage=calculateCounterUsage(enemyIds,combats);
-  const ranked=availableHeroes.map((hero)=>{ const counter=counterUsage[hero.id]; const counterScore=counter?(counter.winRate*settings.teamBCounterWinRateMultiplier+Math.min(counter.total*settings.teamBCounterExperiencePerBattle,settings.teamBCounterExperienceCap))*settings.teamB.specificHistoryWeight:0; return { hero, score:heroStatScore(hero)*settings.teamB.statsWeight+counterScore+heroUsageScore(hero.id,usage)*settings.teamB.generalWinRateWeight }; }).sort((a,b)=>b.score-a.score||a.hero.name.localeCompare(b.hero.name));
+  const ranked=availableHeroes.map((hero)=>{ const counter=counterUsage[hero.id]; const counterScore=counter?(counter.winRate*settings.advanced.teamBCounterWinRateMultiplier+Math.min(counter.total*settings.advanced.teamBCounterExperiencePerBattle,settings.advanced.teamBCounterExperienceCap))*settings.teamB.specificHistoryWeight:0; return { hero, score:heroStatScore(hero)*settings.teamB.statsWeight+counterScore+heroUsageScore(hero.id,usage)*settings.teamB.generalWinRateWeight }; }).sort((a,b)=>b.score-a.score||a.hero.name.localeCompare(b.hero.name));
   const alternative:Hero[]=[]; while(alternative.length<TEAM_SIZE&&ranked.length){const selected=ranked.shift()?.hero;if(!selected)break;alternative.push(selected);} return alternative;
 }
 
