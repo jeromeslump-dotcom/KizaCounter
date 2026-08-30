@@ -105,8 +105,8 @@ function calculateCounterUsage(enemyIds:string[],combats:Combat[]):Record<string
 
 function counterHeroScore(hero:Hero,usage:Record<string,HeroUsage>,counterUsage:Record<string,{wins:number;losses:number;total:number;winRate:number}>):number{
   const settings=getEngineSettings(); const general=heroUsageScore(hero.id,usage), stats=heroStatScore(hero), counter=counterUsage[hero.id];
-  let counterScore=0; if(counter)counterScore=counter.winRate*settings.teamA.generalWinRateWeight+Math.min(counter.total*settings.advanced.teamACounterExperiencePerBattle,settings.advanced.teamACounterExperienceCap);
-  return counterScore+general*settings.teamA.specificHistoryWeight+stats*settings.teamA.statsWeight;
+  let counterScore=0; if(counter) counterScore=(counter.winRate*settings.advanced.teamACounterWinRateMultiplier+Math.min(counter.total*settings.advanced.teamACounterExperiencePerBattle,settings.advanced.teamACounterExperienceCap))*settings.teamA.specificHistoryWeight;
+  return counterScore+general*settings.teamA.generalWinRateWeight+stats*settings.teamA.statsWeight;
 }
 
 export function recommendTeam(enemyIds:string[],heroes:Hero[],combats:Combat[]):Hero[]{
