@@ -110,21 +110,27 @@ export function calculateWinRate(wins: number, total: number): number {
  * Analyse les héros candidats uniquement contre UNE composition
  * ennemie complète.
  *
+ * Un héros ne compte que lorsqu'il est réellement le 5e héros d'un
+ * Core4 répété : les quatre autres héros de notre équipe doivent
+ * rester identiques sur au moins CORE4_CONFIG.minCore4Battles combats.
+ *
  * Exemple :
- *   Ennemi = A B C D E
  *
- * Les combats contre A B C D X, A B C D Y, etc. sont comparés
- * uniquement lorsqu'ils affrontent exactement A B C D E.
+ *   Ennemi complet = A B C D E
+ *   Notre équipe   = W X Y Z + Taqueuse → victoire
+ *                    W X Y Z + Taqueuse → victoire
+ *                    W X Y Z + Boom      → défaite
  *
- * Pour chaque héros candidat, le héros constitue le 5e élément d'un
- * Core4 implicite : les quatre autres héros de notre équipe forment
- * le Core4. L'ordre n'a aucune importance.
+ * Le groupe Core4 = W X Y Z est alors retenu et Taqueuse / Boom sont
+ * comparés comme remplaçants dans ce contexte ennemi précis.
  *
- * Le score est pondéré par la confiance :
+ * La confiance est calculée sur le volume de combats retenus :
  *   confiance = min(combats / 4, 1)
  *   score = taux de victoire × confiance
  *
- * Ainsi un 1-0 ne domine pas automatiquement un historique plus fourni.
+ * Les résultats de tous les Core4 admissibles sont ensuite agrégés
+ * par héros afin de classer les meilleurs 5e héros contre la team
+ * ennemie complète.
  */
 export function coverageReport(
   enemyIds: string[],
@@ -144,7 +150,16 @@ export function coverageReport(
     };
   }
 
-  const stats = new Map<string, { wins: number; losses: number }>();
+  type ReplacementStats = {
+    wins: number;
+    losses: number;
+  };
+
+  // heroId -> Core4 key -> statistiques du remplacement.
+  const byHeroAndCore = new Map<
+    string,
+    Map<string, ReplacementStats>
+  >();
 
   // Seuls les combats contre la composition ennemie COMPLETE comptent.
   for (const combat of combats) {
@@ -159,35 +174,67 @@ export function coverageReport(
     }
 
     for (const heroId of team) {
-      // Le héros est le 5e héros du Core4 implicite.
       if (!myIds.includes(heroId)) {
         continue;
       }
 
-      const entry = stats.get(heroId) ?? { wins: 0, losses: 0 };
+      const coreIds = myIds.filter((id) => id !== heroId);
 
-      if (combat.won) {
-        entry.wins += 1;
-      } else {
-        entry.losses += 1;
+      if (coreIds.length !== TEAM_SIZE - 1) {
+        continue;
       }
 
-      stats.set(heroId, entry);
+      const coreKey = teamKey(coreIds);
+      const heroGroups =
+        byHeroAndCore.get(heroId) ?? new Map<string, ReplacementStats>();
+
+      const stats = heroGroups.get(coreKey) ?? {
+        wins: 0,
+        losses: 0,
+      };
+
+      if (combat.won) {
+        stats.wins += 1;
+      } else {
+        stats.losses += 1;
+      }
+
+      heroGroups.set(coreKey, stats);
+      byHeroAndCore.set(heroId, heroGroups);
     }
   }
 
   const heroes = team
     .map((heroId) => {
-      const entry = stats.get(heroId) ?? { wins: 0, losses: 0 };
-      const battles = entry.wins + entry.losses;
-      const winRate = calculateWinRate(entry.wins, battles);
+      let wins = 0;
+      let losses = 0;
+
+      const heroGroups = byHeroAndCore.get(heroId);
+
+      if (heroGroups) {
+        for (const stats of heroGroups.values()) {
+          const battles = stats.wins + stats.losses;
+
+          // Un Core4 observé une seule fois n'est pas une preuve
+          // suffisante : il ne participe pas au classement.
+          if (battles < CORE4_CONFIG.minCore4Battles) {
+            continue;
+          }
+
+          wins += stats.wins;
+          losses += stats.losses;
+        }
+      }
+
+      const battles = wins + losses;
+      const winRate = calculateWinRate(wins, battles);
       const confidence = Math.min(battles / 4, 1);
       const score = winRate * confidence;
 
       return {
         heroId,
-        wins: entry.wins,
-        losses: entry.losses,
+        wins,
+        losses,
         battles,
         winRate,
         confidence,
