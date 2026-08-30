@@ -5,13 +5,11 @@ export interface EngineSettings {
     specificHistoryWeight: number;
     core4Weight: number;
     generalWinRateWeight: number;
-    statsWeight: number;
   };
   teamB: {
     specificHistoryWeight: number;
     core4Weight: number;
     generalWinRateWeight: number;
-    statsWeight: number;
   };
   advanced: {
     heroUsageExperiencePerBattle: number;
@@ -44,13 +42,11 @@ export const DEFAULT_ENGINE_SETTINGS: EngineSettings = {
     specificHistoryWeight: 1,
     core4Weight: 1,
     generalWinRateWeight: 0.25,
-    statsWeight: 0.15,
   },
   teamB: {
     specificHistoryWeight: 0.85,
     core4Weight: 0.35,
     generalWinRateWeight: 1.15,
-    statsWeight: 2.5,
   },
   advanced: {
     heroUsageExperiencePerBattle: 2,
