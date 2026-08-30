@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import EngineSettings from "./EngineSettings";
 
 interface AdminPanelProps {
@@ -55,6 +55,12 @@ export default function AdminPanel({
   onCombatHistory,
 }: AdminPanelProps) {
   const [showEngineSettings, setShowEngineSettings] = useState(false);
+
+  useEffect(() => {
+    if (!open) {
+      setShowEngineSettings(false);
+    }
+  }, [open]);
 
   if (!open) return null;
 
