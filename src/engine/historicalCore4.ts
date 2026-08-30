@@ -281,12 +281,27 @@ export function findBestCore4(
 
   if (analyses.length === 0) return null;
 
-  return [...analyses].sort(
-    (a, b) =>
-      b.winRate - a.winRate ||
+  return [...analyses].sort((a, b) => {
+    const aConfidence = Math.min(
+      a.battles / settings.advanced.core4ConfidenceBattles,
+      1
+    );
+
+    const bConfidence = Math.min(
+      b.battles / settings.advanced.core4ConfidenceBattles,
+      1
+    );
+
+    const aScore = a.winRate * aConfidence;
+    const bScore = b.winRate * bConfidence;
+
+    return (
+      bScore - aScore ||
       b.battles - a.battles ||
+      b.wins - a.wins ||
       teamKey(a.coreIds).localeCompare(teamKey(b.coreIds))
-  )[0];
+    );
+  })[0];
 }
 
 // ============================================================
