@@ -2,24 +2,9 @@
 
 import type { Combat } from "../types";
 import {
-  DEFAULT_ENGINE_SETTINGS,
   getEngineSettings,
   type EngineSettings,
 } from "./engineSettings";
-
-// ============================================================
-// COMPATIBILITÉ
-// ============================================================
-
-// Conservé pour les éventuels appelants existants. Les fonctions
-// ci-dessous utilisent désormais les réglages du moteur au moment
-// de leur exécution.
-export const CORE4_CONFIG = {
-  minCore4Battles: DEFAULT_ENGINE_SETTINGS.advanced.core4MinBattles,
-  minReplacementBattles:
-    DEFAULT_ENGINE_SETTINGS.advanced.core4MinReplacementBattles,
-  weight: DEFAULT_ENGINE_SETTINGS.teamA.core4Weight,
-};
 
 // ============================================================
 // TYPES
