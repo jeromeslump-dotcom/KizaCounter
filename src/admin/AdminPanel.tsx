@@ -62,7 +62,7 @@ export default function AdminPanel({
     return (
       <EngineSettings
         open
-        onClose={() => setShowEngineSettings(false)}
+        onClose={onClose}
         onBack={() => setShowEngineSettings(false)}
       />
     );
