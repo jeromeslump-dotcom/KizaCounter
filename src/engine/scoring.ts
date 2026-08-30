@@ -103,137 +103,113 @@ export function calculateWinRate(wins: number, total: number): number {
 }
 
 // ============================================================
-// COUVERTURE HISTORIQUE — ENNEMIS SPÉCIFIQUES
+// COUVERTURE HISTORIQUE — COMPOSITION ENNEMIE COMPLÈTE
 // ============================================================
 
 /**
- * Mesure la couverture historique d'une équipe candidate contre
- * UNE COMPOSITION ENNEMIE COMPLÈTE.
+ * Analyse les héros candidats uniquement contre UNE composition
+ * ennemie complète.
  *
- * Le principe est volontairement proche du système Core4 + 1 :
+ * Exemple :
+ *   Ennemi = A B C D E
  *
- *   Ennemi : A B C D E
- *   Notre historique :
- *     A B C D + X → victoire
- *     A B C D + Y → victoire
- *     A B C D + X → défaite
+ * Les combats contre A B C D X, A B C D Y, etc. sont comparés
+ * uniquement lorsqu'ils affrontent exactement A B C D E.
  *
- * X et Y sont alors évalués uniquement dans le contexte de cette
- * composition ennemie complète.
+ * Pour chaque héros candidat, le héros constitue le 5e élément d'un
+ * Core4 implicite : les quatre autres héros de notre équipe forment
+ * le Core4. L'ordre n'a aucune importance.
  *
- * Pour chaque héros candidat, on compte les combats où il apparaît
- * contre exactement les mêmes 5 ennemis, puis on pondère le résultat
- * par le volume de combats afin qu'un 1-0 ne domine pas un historique
- * beaucoup plus fourni.
+ * Le score est pondéré par la confiance :
+ *   confiance = min(combats / 4, 1)
+ *   score = taux de victoire × confiance
  *
- * IMPORTANT : teamIds représente ici les héros candidats à mesurer.
- * La fonction reste compatible avec l'ancien contrat CoverageReport.
+ * Ainsi un 1-0 ne domine pas automatiquement un historique plus fourni.
  */
 export function coverageReport(
+  enemyIds: string[],
   teamIds: string[],
   combats: Combat[]
 ): CoverageReport {
+  const normalizedEnemy = uniqueIds(enemyIds);
   const team = uniqueIds(teamIds);
 
-  if (team.length === 0) {
+  if (normalizedEnemy.length !== TEAM_SIZE || team.length === 0) {
     return {
+      enemyIds: normalizedEnemy,
       covered: 0,
-      total: 0,
+      total: team.length,
       percentage: 0,
+      heroes: [],
     };
   }
 
-  // Les combats doivent fournir une équipe ennemie complète de 5 héros.
-  const enemyTeams = new Map<string, Combat[]>();
+  const stats = new Map<string, { wins: number; losses: number }>();
 
+  // Seuls les combats contre la composition ennemie COMPLETE comptent.
   for (const combat of combats) {
-    const enemyIds = uniqueIds(combat.enemy_heroes ?? []);
-    const myIds = uniqueIds(combat.my_heroes ?? []);
-
-    if (enemyIds.length !== TEAM_SIZE || myIds.length !== TEAM_SIZE) {
+    if (!sameTeam(normalizedEnemy, combat.enemy_heroes ?? [])) {
       continue;
     }
 
-    const key = teamKey(enemyIds);
-    const existing = enemyTeams.get(key);
+    const myIds = uniqueIds(combat.my_heroes ?? []);
 
-    if (existing) {
-      existing.push(combat);
-    } else {
-      enemyTeams.set(key, [combat]);
+    if (myIds.length !== TEAM_SIZE) {
+      continue;
+    }
+
+    for (const heroId of team) {
+      // Le héros est le 5e héros du Core4 implicite.
+      if (!myIds.includes(heroId)) {
+        continue;
+      }
+
+      const entry = stats.get(heroId) ?? { wins: 0, losses: 0 };
+
+      if (combat.won) {
+        entry.wins += 1;
+      } else {
+        entry.losses += 1;
+      }
+
+      stats.set(heroId, entry);
     }
   }
 
-  /**
-   * Un héros est considéré comme couvert lorsqu'il possède au moins
-   * une présence historique dans un Core4 + 1 contre une composition
-   * ennemie complète.
-   *
-   * Le score de chaque présence est pondéré par la confiance :
-   *   confiance = min(combats du remplacement / 4, 1)
-   *
-   * Un héros qui fait 1-0 obtient donc une couverture plus faible
-   * qu'un héros qui fait 4-0, tandis qu'un historique équilibré
-   * ou négatif ne reçoit pas artificiellement 100 % de couverture.
-   */
-  let covered = 0;
+  const heroes = team
+    .map((heroId) => {
+      const entry = stats.get(heroId) ?? { wins: 0, losses: 0 };
+      const battles = entry.wins + entry.losses;
+      const winRate = calculateWinRate(entry.wins, battles);
+      const confidence = Math.min(battles / 4, 1);
+      const score = winRate * confidence;
 
-  for (const heroId of team) {
-    let bestWeightedScore = -Infinity;
+      return {
+        heroId,
+        wins: entry.wins,
+        losses: entry.losses,
+        battles,
+        winRate,
+        confidence,
+        score,
+      };
+    })
+    .sort(
+      (a, b) =>
+        b.score - a.score ||
+        b.battles - a.battles ||
+        b.wins - a.wins ||
+        a.heroId.localeCompare(b.heroId)
+    );
 
-    for (const enemyCombats of enemyTeams.values()) {
-      const coreGroups = new Map<string, { wins: number; losses: number }>();
-
-      for (const combat of enemyCombats) {
-        const myIds = uniqueIds(combat.my_heroes ?? []);
-
-        if (myIds.length !== TEAM_SIZE || !myIds.includes(heroId)) {
-          continue;
-        }
-
-        const coreIds = myIds.filter((id) => id !== heroId);
-
-        if (coreIds.length !== 4) {
-          continue;
-        }
-
-        const key = teamKey(coreIds);
-        const stats = coreGroups.get(key) ?? { wins: 0, losses: 0 };
-
-        if (combat.won) {
-          stats.wins += 1;
-        } else {
-          stats.losses += 1;
-        }
-
-        coreGroups.set(key, stats);
-      }
-
-      for (const stats of coreGroups.values()) {
-        const battles = stats.wins + stats.losses;
-
-        if (battles <= 0) continue;
-
-        const winRate = calculateWinRate(stats.wins, battles);
-        const confidence = Math.min(battles / 4, 1);
-        const weightedScore = winRate * confidence;
-
-        bestWeightedScore = Math.max(
-          bestWeightedScore,
-          weightedScore
-        );
-      }
-    }
-
-    if (bestWeightedScore > 0) {
-      covered += 1;
-    }
-  }
+  const covered = heroes.filter((hero) => hero.wins > 0).length;
 
   return {
+    enemyIds: normalizedEnemy,
     covered,
     total: team.length,
-    percentage: (covered / team.length) * 100,
+    percentage: team.length > 0 ? (covered / team.length) * 100 : 0,
+    heroes,
   };
 }
 
