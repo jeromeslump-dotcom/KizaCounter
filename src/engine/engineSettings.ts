@@ -35,8 +35,8 @@ advanced: {
 
 
   teamBCounterWinRateMultiplier: number;
-  teamBCounterExperiencePerBattle: number;
-  teamBCounterExperienceCap: number;
+  
+  
 
   teamAHistoricalReliabilityMin: number;
   teamAHistoricalConfidenceBattles: number;
@@ -73,8 +73,8 @@ export const DEFAULT_ENGINE_SETTINGS: EngineSettings = {
 
 
     teamBCounterWinRateMultiplier: 1.2,
-    teamBCounterExperiencePerBattle: 2,
-    teamBCounterExperienceCap: 10,
+    
+    
 
     teamAHistoricalReliabilityMin: 60,
     teamAHistoricalConfidenceBattles: 10,

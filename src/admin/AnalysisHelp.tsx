@@ -34,8 +34,14 @@ export default function AnalysisHelp({ open, heroes, combats, onClose, onBack }:
       const existing = groups.get(key);
       const team = heroIds.map((id) => heroes.find((hero) => hero.id === id)).filter((hero): hero is Hero => Boolean(hero));
       const evaluation = team.length === TEAM_SIZE ? evaluateTeam(team, combats, usage) : null;
-      const scoreA = evaluation ? evaluation.historicalWinRate * settings.teamA.generalWinRateWeight + evaluation.usageScore * settings.teamA.specificHistoryWeight : null;
-      const scoreB = evaluation ? evaluation.historicalWinRate * settings.teamB.generalWinRateWeight + evaluation.usageScore * settings.teamB.specificHistoryWeight : null;
+const scoreA = evaluation
+  ? evaluation.historicalWinRate *
+    settings.teamA.generalWinRateWeight
+  : null;      
+      const scoreB = evaluation
+  ? evaluation.historicalWinRate *
+    settings.teamB.generalWinRateWeight
+  : null;
       if (existing) {
         existing.count += 1;
         if (combat.won) existing.wins += 1; else existing.losses += 1;
@@ -88,7 +94,7 @@ export default function AnalysisHelp({ open, heroes, combats, onClose, onBack }:
               {matchingCombats.length === 0 ? <div className="ui-text-muted rounded-xl border ui-divider p-6 text-center text-sm">Aucun combat enregistré avec cette composition ennemie exacte.</div> : <div className="space-y-3">{combatGroups.map(({ team, evaluation, scoreA, scoreB, count, wins, losses, latestDate }, index) => <article key={`${teamKey(team.map((hero) => hero.id))}-${index}`} className="ui-action rounded-xl border p-3 sm:p-4">
                 <div className="mb-3 flex flex-wrap items-center justify-between gap-3"><div className="flex items-center gap-2"><span className="font-black">{wins > 0 && losses === 0 ? "🏆 Victoire" : wins === 0 ? "❌ Défaite" : "⚔️ Mixte"}</span><span className="ui-text-muted text-[10px]">Dernier combat : {formatDate(latestDate)}</span></div><div className="flex gap-2"><div className="rounded-lg border ui-divider px-3 py-2 text-right"><div className="ui-text-muted text-[9px] uppercase tracking-wider">Score moteur A</div><div className="ui-text-primary text-xl font-black">{scoreA !== null ? scoreA.toFixed(1) : "—"}</div></div><div className="rounded-lg border ui-divider px-3 py-2 text-right"><div className="ui-text-muted text-[9px] uppercase tracking-wider">Score moteur B</div><div className="ui-text-primary text-xl font-black">{scoreB !== null ? scoreB.toFixed(1) : "—"}</div></div></div></div>
                 <div className="ui-text-primary mb-2 text-xs font-black">Équipe utilisée</div><div className="grid grid-cols-2 gap-2 sm:grid-cols-5">{team.map((hero) => <div key={hero.id} className="ui-panel rounded-lg border p-2 text-center"><img src={hero.img} alt={hero.name} className="mx-auto mb-1 h-12 w-12 rounded-lg object-cover" /><div className="ui-text-primary text-[10px] font-bold leading-tight sm:text-xs">{hero.name}</div></div>)}</div>
-                {evaluation && <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1 text-[10px]"><span className="ui-text-primary font-black">×{count} combats</span><span><span className="ui-text-muted">Victoires</span> <b>{wins}</b></span><span><span className="ui-text-muted">Défaites</span> <b>{losses}</b></span><span><span className="ui-text-muted">Taux historique</span> <b>{evaluation.historicalWinRate.toFixed(1)} %</b></span><span><span className="ui-text-muted">Score usage</span> <b>{evaluation.usageScore.toFixed(1)}</b></span></div>}
+                {evaluation && <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1 text-[10px]"><span className="ui-text-primary font-black">×{count} combats</span><span><span className="ui-text-muted">Victoires</span> <b>{wins}</b></span><span><span className="ui-text-muted">Défaites</span> <b>{losses}</b></span><span><span className="ui-text-muted">Taux historique</span> <b>{evaluation.historicalWinRate.toFixed(1)} %</b></span></div>}
               </article>)}</div>}
             </div>
           </div>
