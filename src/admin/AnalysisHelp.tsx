@@ -8,6 +8,7 @@ import { evaluateTeam, calculateHeroUsage } from "../engine/scoring";
 interface AnalysisHelpProps { open: boolean; heroes: Hero[]; combats: Combat[]; onClose: () => void; onBack: () => void; }
 const TEAM_SIZE = 5;
 function sameTeam(first: string[], second: string[]): boolean { if (first.length !== second.length) return false; return [...new Set(first)].sort().join("|") === [...new Set(second)].sort().join("|"); }
+function teamKey(ids: string[]): string { return [...new Set(ids)].sort().join("|"); }
 function formatDate(value?: string): string { if (!value) return "Date inconnue"; const date = new Date(value); if (Number.isNaN(date.getTime())) return "Date inconnue"; return date.toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" }); }
 
 export default function AnalysisHelp({ open, heroes, combats, onClose, onBack }: AnalysisHelpProps) {
@@ -20,7 +21,31 @@ export default function AnalysisHelp({ open, heroes, combats, onClose, onBack }:
   const heroUsage = useMemo(() => { const usage = calculateHeroUsage(combats, heroes); const result: Record<string, number> = {}; for (const [id, value] of Object.entries(usage)) result[id] = value.total; return result; }, [combats, heroes]);
   const selectedEnemies = useMemo(() => enemyIds.map((id) => heroes.find((hero) => hero.id === id)).filter((hero): hero is Hero => Boolean(hero)), [enemyIds, heroes]);
   const matchingCombats = useMemo(() => enemyIds.length === TEAM_SIZE ? combats.filter((combat) => sameTeam(enemyIds, combat.enemy_heroes ?? [])) : [], [combats, enemyIds]);
-  const combatRows = useMemo(() => { const usage = calculateHeroUsage(combats, heroes); return matchingCombats.map((combat) => { const team = (combat.my_heroes ?? []).map((id) => heroes.find((hero) => hero.id === id)).filter((hero): hero is Hero => Boolean(hero)); const evaluation = team.length === TEAM_SIZE ? evaluateTeam(team, combats, usage) : null; return { combat, team, evaluation }; }); }, [combats, heroes, matchingCombats]);
+
+  const combatGroups = useMemo(() => {
+    const usage = calculateHeroUsage(combats, heroes);
+    const groups = new Map<string, { team: Hero[]; evaluation: ReturnType<typeof evaluateTeam> | null; count: number; wins: number; losses: number; latestDate?: string }>();
+    for (const combat of matchingCombats) {
+      const heroIds = [...new Set(combat.my_heroes ?? [])];
+      if (heroIds.length !== TEAM_SIZE) continue;
+      const key = teamKey(heroIds);
+      const existing = groups.get(key);
+      const team = heroIds.map((id) => heroes.find((hero) => hero.id === id)).filter((hero): hero is Hero => Boolean(hero));
+      const evaluation = team.length === TEAM_SIZE ? evaluateTeam(team, combats, usage) : null;
+      if (existing) {
+        existing.count += 1;
+        if (combat.won) existing.wins += 1; else existing.losses += 1;
+        if (!existing.latestDate || (combat.created_at ?? "") > existing.latestDate) existing.latestDate = combat.created_at;
+      } else {
+        groups.set(key, { team, evaluation, count: 1, wins: combat.won ? 1 : 0, losses: combat.won ? 0 : 1, latestDate: combat.created_at });
+      }
+    }
+    return [...groups.values()].sort((a, b) => {
+      const scoreA = a.evaluation?.score ?? -Infinity;
+      const scoreB = b.evaluation?.score ?? -Infinity;
+      return scoreB - scoreA || b.wins - a.wins || b.count - a.count || (b.latestDate ?? "").localeCompare(a.latestDate ?? "");
+    });
+  }, [combats, heroes, matchingCombats]);
 
   const toggleEnemy = (hero: Hero) => { setEnemyIds((current) => { if (current.includes(hero.id)) { setShowResults(false); return current.filter((id) => id !== hero.id); } if (current.length >= TEAM_SIZE) return current; const next = [...current, hero.id]; if (next.length === TEAM_SIZE) setShowResults(true); return next; }); };
   const clearEnemies = () => { setEnemyIds([]); setShowResults(false); };
@@ -55,11 +80,11 @@ export default function AnalysisHelp({ open, heroes, combats, onClose, onBack }:
                 <div className="ui-panel rounded-xl border p-3"><div className="ui-text-muted text-[9px] uppercase tracking-wider">Défaites</div><div className="mt-1 text-xl font-black text-rose-400">{matchingCombats.filter((combat) => !combat.won).length}</div></div>
               </div>
               <h3 className="ui-text-primary mb-1 text-lg font-black">Combats correspondant exactement</h3>
-              <p className="ui-text-secondary mb-4 text-xs">{matchingCombats.length} combat{matchingCombats.length > 1 ? "s" : ""} trouvé{matchingCombats.length > 1 ? "s" : ""} pour cette composition.</p>
-              {matchingCombats.length === 0 ? <div className="ui-text-muted rounded-xl border ui-divider p-6 text-center text-sm">Aucun combat enregistré avec cette composition ennemie exacte.</div> : <div className="space-y-3">{combatRows.map(({ combat, team, evaluation }, index) => <article key={combat.id ?? `${index}-${combat.created_at ?? "combat"}`} className="ui-action rounded-xl border p-3 sm:p-4">
-                <div className="mb-3 flex flex-wrap items-center justify-between gap-3"><div className="flex items-center gap-2"><span className={combat.won ? "font-black text-emerald-400" : "font-black text-rose-400"}>{combat.won ? "🏆 Victoire" : "❌ Défaite"}</span><span className="ui-text-muted text-[10px]">{formatDate(combat.created_at)}</span></div><div className="rounded-lg border ui-divider px-3 py-2 text-right"><div className="ui-text-muted text-[9px] uppercase tracking-wider">Score moteur</div><div className="ui-text-primary text-xl font-black">{evaluation ? evaluation.score.toFixed(1) : "—"}</div></div></div>
+              <p className="ui-text-secondary mb-4 text-xs">{matchingCombats.length} combat{matchingCombats.length > 1 ? "s" : ""} trouvé{matchingCombats.length > 1 ? "s" : ""} pour cette composition. Les combats avec la même équipe sont regroupés.</p>
+              {matchingCombats.length === 0 ? <div className="ui-text-muted rounded-xl border ui-divider p-6 text-center text-sm">Aucun combat enregistré avec cette composition ennemie exacte.</div> : <div className="space-y-3">{combatGroups.map(({ team, evaluation, count, wins, losses, latestDate }, index) => <article key={`${teamKey(team.map((hero) => hero.id))}-${index}`} className="ui-action rounded-xl border p-3 sm:p-4">
+                <div className="mb-3 flex flex-wrap items-center justify-between gap-3"><div className="flex items-center gap-2"><span className="font-black">{wins > 0 && losses === 0 ? "🏆 Victoire" : wins === 0 ? "❌ Défaite" : "⚔️ Mixte"}</span><span className="ui-text-muted text-[10px]">Dernier combat : {formatDate(latestDate)}</span></div><div className="rounded-lg border ui-divider px-3 py-2 text-right"><div className="ui-text-muted text-[9px] uppercase tracking-wider">Score moteur</div><div className="ui-text-primary text-xl font-black">{evaluation ? evaluation.score.toFixed(1) : "—"}</div></div></div>
                 <div className="ui-text-primary mb-2 text-xs font-black">Équipe utilisée</div><div className="grid grid-cols-2 gap-2 sm:grid-cols-5">{team.map((hero) => <div key={hero.id} className="ui-panel rounded-lg border p-2 text-center"><img src={hero.img} alt={hero.name} className="mx-auto mb-1 h-12 w-12 rounded-lg object-cover" /><div className="ui-text-primary text-[10px] font-bold leading-tight sm:text-xs">{hero.name}</div></div>)}</div>
-                {evaluation && <div className="mt-3 grid grid-cols-2 gap-2 text-[10px] sm:grid-cols-4"><div><span className="ui-text-muted">Taux historique</span><br /><b>{evaluation.historicalWinRate.toFixed(1)} %</b></div><div><span className="ui-text-muted">Victoires</span><br /><b>{evaluation.historicalWins}</b></div><div><span className="ui-text-muted">Combats</span><br /><b>{evaluation.historicalBattles}</b></div><div><span className="ui-text-muted">Score usage</span><br /><b>{evaluation.usageScore.toFixed(1)}</b></div></div>}
+                {evaluation && <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1 text-[10px]"><span className="ui-text-primary font-black">×{count} combats</span><span><span className="ui-text-muted">Victoires</span> <b>{wins}</b></span><span><span className="ui-text-muted">Défaites</span> <b>{losses}</b></span><span><span className="ui-text-muted">Taux historique</span> <b>{evaluation.historicalWinRate.toFixed(1)} %</b></span><span><span className="ui-text-muted">Score usage</span> <b>{evaluation.usageScore.toFixed(1)}</b></span></div>}
               </article>)}</div>}
             </div>
           </div>
