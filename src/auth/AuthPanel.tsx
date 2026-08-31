@@ -6,6 +6,7 @@ import AdminPanel from "../admin/AdminPanel";
 import CombatHistory from "../admin/CombatHistory";
 import EncounteredTeams from "../admin/EncounteredTeams";
 import UserManagement from "../admin/UserManagement";
+import AnalysisHelp from "../admin/AnalysisHelp";
 import { getCurrentUserProfile, type UserProfile } from "../admin/adminAccess";
 import type { Combat } from "../types";
 import { HEROES } from "../data/heroes";
@@ -19,6 +20,7 @@ export default function AuthPanel() {
   const [showUserManagement, setShowUserManagement] = useState(false);
   const [showEncounteredTeams, setShowEncounteredTeams] = useState(false);
   const [showCombatHistory, setShowCombatHistory] = useState(false);
+  const [showAnalysisHelp, setShowAnalysisHelp] = useState(false);
   const [adminCombats, setAdminCombats] = useState<Combat[]>([]);
   const [showLogin, setShowLogin] = useState(false);
   const [email, setEmail] = useState("");
@@ -54,6 +56,7 @@ export default function AuthPanel() {
       setShowUserManagement(false);
       setShowEncounteredTeams(false);
       setShowCombatHistory(false);
+      setShowAnalysisHelp(false);
       void getCurrentUserProfile(currentSession).then((currentProfile) => {
         if (mounted) setProfile(currentProfile);
       });
@@ -75,9 +78,7 @@ export default function AuthPanel() {
       setShowLogin(false);
     } catch (error) {
       console.error("Erreur de connexion :", error);
-      setError(
-        error instanceof Error ? error.message : "Connexion impossible."
-      );
+      setError(error instanceof Error ? error.message : "Connexion impossible.");
     } finally {
       setSubmitting(false);
     }
@@ -88,12 +89,14 @@ export default function AuthPanel() {
     setShowUserManagement(false);
     setShowEncounteredTeams(false);
     setShowCombatHistory(false);
+    setShowAnalysisHelp(false);
   }
 
   function backToAdminPanel() {
     setShowUserManagement(false);
     setShowEncounteredTeams(false);
     setShowCombatHistory(false);
+    setShowAnalysisHelp(false);
     setShowAdminPanel(true);
   }
 
@@ -105,9 +108,7 @@ export default function AuthPanel() {
       await signOut();
     } catch (error) {
       console.error("Erreur de déconnexion :", error);
-      setError(
-        error instanceof Error ? error.message : "Déconnexion impossible."
-      );
+      setError(error instanceof Error ? error.message : "Déconnexion impossible.");
     } finally {
       setSubmitting(false);
     }
@@ -117,12 +118,29 @@ export default function AuthPanel() {
     setShowAdminPanel(false);
     setShowUserManagement(false);
     setShowEncounteredTeams(false);
+    setShowAnalysisHelp(false);
     setShowCombatHistory(true);
     try {
       const history = await loadCombats();
       setAdminCombats(history);
     } catch (error) {
       console.error("Impossible de charger l'historique des combats :", error);
+      setAdminCombats([]);
+    }
+  }
+
+  async function openAnalysisHelp() {
+    setShowAdminPanel(false);
+    setShowUserManagement(false);
+    setShowEncounteredTeams(false);
+    setShowCombatHistory(false);
+    setShowAnalysisHelp(true);
+
+    try {
+      const history = await loadCombats();
+      setAdminCombats(history);
+    } catch (error) {
+      console.error("Impossible de charger les combats pour l'analyse :", error);
       setAdminCombats([]);
     }
   }
@@ -158,9 +176,7 @@ export default function AuthPanel() {
               👤 {getUserName()}
             </button>
           ) : (
-            <span className="ui-text-soft text-xs font-bold">
-              👤 {getUserName()}
-            </span>
+            <span className="ui-text-soft text-xs font-bold">👤 {getUserName()}</span>
           )}
 
           <button
@@ -187,6 +203,7 @@ export default function AuthPanel() {
                 setShowEncounteredTeams(true);
               }}
               onCombatHistory={openCombatHistory}
+              onAnalysisHelp={openAnalysisHelp}
               heroes={HEROES}
               combats={adminCombats}
             />
@@ -205,6 +222,14 @@ export default function AuthPanel() {
 
             <CombatHistory
               open={showCombatHistory}
+              combats={adminCombats}
+              onClose={closeAdminArea}
+              onBack={backToAdminPanel}
+            />
+
+            <AnalysisHelp
+              open={showAnalysisHelp}
+              heroes={HEROES}
               combats={adminCombats}
               onClose={closeAdminArea}
               onBack={backToAdminPanel}
