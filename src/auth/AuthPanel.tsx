@@ -8,6 +8,7 @@ import EncounteredTeams from "../admin/EncounteredTeams";
 import UserManagement from "../admin/UserManagement";
 import { getCurrentUserProfile, type UserProfile } from "../admin/adminAccess";
 import type { Combat } from "../types";
+import { HEROES } from "../data/heroes";
 import { loadCombats } from "../storage/combatStorage";
 import { getSession, signIn, signOut, onAuthStateChange } from "./auth";
 
@@ -186,6 +187,8 @@ export default function AuthPanel() {
                 setShowEncounteredTeams(true);
               }}
               onCombatHistory={openCombatHistory}
+              heroes={HEROES}
+              combats={adminCombats}
             />
 
             <UserManagement
