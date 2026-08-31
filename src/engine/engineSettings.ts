@@ -5,11 +5,17 @@ export interface EngineSettings {
     specificHistoryWeight: number;
     core4Weight: number;
     generalWinRateWeight: number;
+    specificHistoryPoints: number;
+    core4Points: number;
+    generalWinRatePoints: number;
   };
   teamB: {
     specificHistoryWeight: number;
     core4Weight: number;
     generalWinRateWeight: number;
+    specificHistoryPoints: number;
+    core4Points: number;
+    generalWinRatePoints: number;
   };
   advanced: {
     heroUsageExperiencePerBattle: number;
@@ -35,18 +41,22 @@ export interface EngineSettings {
   };
 }
 
-// Valeurs exactement issues des coefficients actuellement utilisés
-// par le moteur avant leur passage dans l'interface de réglages.
 export const DEFAULT_ENGINE_SETTINGS: EngineSettings = {
   teamA: {
     specificHistoryWeight: 1,
     core4Weight: 1,
     generalWinRateWeight: 0.25,
+    specificHistoryPoints: 50,
+    core4Points: 30,
+    generalWinRatePoints: 20,
   },
   teamB: {
     specificHistoryWeight: 0.85,
     core4Weight: 0.35,
     generalWinRateWeight: 1.15,
+    specificHistoryPoints: 25,
+    core4Points: 25,
+    generalWinRatePoints: 50,
   },
   advanced: {
     heroUsageExperiencePerBattle: 2,
@@ -133,6 +143,12 @@ export const ENGINE_SETTING_LIMITS = {
     step: 0.05,
     unit: "%",
     multiplier: 100,
+  },
+  points: {
+    min: 0,
+    max: 100,
+    step: 1,
+    unit: "pt",
   },
   experiencePerBattle: {
     min: 0,
