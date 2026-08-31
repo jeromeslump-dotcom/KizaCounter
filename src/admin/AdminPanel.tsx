@@ -10,6 +10,7 @@ interface AdminPanelProps {
   onUserManagement: () => void;
   onEncounteredTeams: () => void;
   onCombatHistory: () => void;
+  onAnalysisHelp: () => void;
   heroes?: Hero[];
   combats?: Combat[];
 }
@@ -35,7 +36,7 @@ function AdminAction({ icon, title, description, onClick }: AdminActionProps) {
   );
 }
 
-export default function AdminPanel({ open, onClose, onUserManagement, onEncounteredTeams, onCombatHistory, heroes = [], combats = [] }: AdminPanelProps) {
+export default function AdminPanel({ open, onClose, onUserManagement, onEncounteredTeams, onCombatHistory, onAnalysisHelp, heroes = [], combats = [] }: AdminPanelProps) {
   const [showEngineSettings, setShowEngineSettings] = useState(false);
   const [showAnalysisHelp, setShowAnalysisHelp] = useState(false);
 
@@ -73,7 +74,7 @@ export default function AdminPanel({ open, onClose, onUserManagement, onEncounte
           <AdminAction icon="👥" title="Gestion des utilisateurs" description="Rechercher les utilisateurs et gérer leurs rôles" onClick={onUserManagement} />
           <AdminAction icon="⚔️" title="Équipes rencontrées" description="Voir les compositions ennemies qui posent le plus de problèmes" onClick={onEncounteredTeams} />
           <AdminAction icon="📜" title="Historique des combats" onClick={onCombatHistory} />
-          <AdminAction icon="🔎" title="Aide à l'analyse" description="Analyser les combats correspondant exactement à une équipe ennemie" onClick={() => setShowAnalysisHelp(true)} />
+          <AdminAction icon="🔎" title="Aide à l'analyse" description="Analyser les combats correspondant exactement à une équipe ennemie" onClick={onAnalysisHelp} />
           <AdminAction icon="⚙️" title="Réglages du moteur" description="Configurer les paramètres du moteur de recommandation" onClick={() => setShowEngineSettings(true)} />
         </div>
 
