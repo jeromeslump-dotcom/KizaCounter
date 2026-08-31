@@ -79,7 +79,8 @@ export default function CounterModal({
           } combat${alternativeHistory.battles > 1 ? "s" : ""}`
         : `${Math.round(alternativeHistory.winRate)} %`;
 
-  const hasRecommendations = recommendedTeam.length > 0 || alternativeTeam.length > 0;
+  const hasRecommendations =
+    recommendedTeam.length > 0 || alternativeTeam.length > 0;
 
   return (
     <div className="ui-modal-overlay fixed inset-0 z-50 flex items-center justify-center p-2 backdrop-blur-sm sm:p-4">
@@ -158,7 +159,13 @@ export default function CounterModal({
               )}
 
               {alternativeTeam.length > 0 && (
-                <div className={recommendedTeam.length > 0 ? "mt-3 border-t ui-divider pt-3" : ""}>
+                <div
+                  className={
+                    recommendedTeam.length > 0
+                      ? "mt-3 border-t ui-divider pt-3"
+                      : ""
+                  }
+                >
                   <button
                     type="button"
                     onClick={() => onSelectRecommendedTeam(alternativeIds)}

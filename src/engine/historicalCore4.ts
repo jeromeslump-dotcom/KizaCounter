@@ -1,10 +1,7 @@
 // src/engine/historicalCore4.ts
 
 import type { Combat } from "../types";
-import {
-  getEngineSettings,
-  type EngineSettings,
-} from "./engineSettings";
+import { getEngineSettings, type EngineSettings } from "./engineSettings";
 
 // ============================================================
 // TYPES
@@ -100,10 +97,7 @@ function calculateConfidence(
 ): number {
   if (battles <= 0) return 0;
 
-  return Math.min(
-    battles / settings.advanced.core4ConfidenceBattles,
-    1
-  );
+  return Math.min(battles / settings.advanced.core4ConfidenceBattles, 1);
 }
 
 // ============================================================
@@ -132,10 +126,7 @@ function analyzeCore4(
     return null;
   }
 
-  const replacements = new Map<
-    string,
-    { wins: number; losses: number }
-  >();
+  const replacements = new Map<string, { wins: number; losses: number }>();
 
   let wins = 0;
   let losses = 0;
@@ -176,10 +167,7 @@ function analyzeCore4(
   for (const [heroId, stats] of replacements.entries()) {
     const replacementBattles = stats.wins + stats.losses;
 
-    if (
-      replacementBattles <
-      settings.advanced.core4MinReplacementBattles
-    ) {
+    if (replacementBattles < settings.advanced.core4MinReplacementBattles) {
       continue;
     }
 
@@ -248,12 +236,7 @@ export function analyzeCore4Plus1(
   const analyses: Core4Analysis[] = [];
 
   for (const coreIds of coreMap.values()) {
-    const analysis = analyzeCore4(
-      normalizedEnemy,
-      coreIds,
-      combats,
-      settings
-    );
+    const analysis = analyzeCore4(normalizedEnemy, coreIds, combats, settings);
 
     if (analysis) analyses.push(analysis);
   }

@@ -94,7 +94,6 @@ export interface TeamEvaluation {
   historicalLosses: number;
   historicalBattles: number;
   historicalWinRate: number;
- 
 }
 
 // ============================================================

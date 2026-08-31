@@ -2,10 +2,7 @@
 
 export type EngineTeam = "A" | "B";
 
-export type EngineModuleKey =
-  | "specificHistory"
-  | "core4"
-  | "generalWinRate";
+export type EngineModuleKey = "specificHistory" | "core4" | "generalWinRate";
 
 export interface EnginePointBudget {
   specificHistory: number;
@@ -30,23 +27,20 @@ export interface EngineSettings {
     core4Points: number;
     generalWinRatePoints: number;
   };
-advanced: {
-  teamACounterWinRateMultiplier: number;
+  advanced: {
+    teamACounterWinRateMultiplier: number;
 
+    teamBCounterWinRateMultiplier: number;
 
-  teamBCounterWinRateMultiplier: number;
-  
-  
+    teamAHistoricalReliabilityMin: number;
+    teamAHistoricalConfidenceBattles: number;
+    teamAHistoricalReliabilityBase: number;
+    teamAHistoricalReliabilityConfidenceWeight: number;
 
-  teamAHistoricalReliabilityMin: number;
-  teamAHistoricalConfidenceBattles: number;
-  teamAHistoricalReliabilityBase: number;
-  teamAHistoricalReliabilityConfidenceWeight: number;
-
-  core4MinBattles: number;
-  core4MinReplacementBattles: number;
-  core4ConfidenceBattles: number;
-};
+    core4MinBattles: number;
+    core4MinReplacementBattles: number;
+    core4ConfidenceBattles: number;
+  };
 }
 
 export const DEFAULT_ENGINE_SETTINGS: EngineSettings = {
@@ -67,14 +61,9 @@ export const DEFAULT_ENGINE_SETTINGS: EngineSettings = {
     generalWinRatePoints: 50,
   },
   advanced: {
-
-
     teamACounterWinRateMultiplier: 2,
 
-
     teamBCounterWinRateMultiplier: 1.2,
-    
-    
 
     teamAHistoricalReliabilityMin: 60,
     teamAHistoricalConfidenceBattles: 10,
@@ -87,7 +76,10 @@ export const DEFAULT_ENGINE_SETTINGS: EngineSettings = {
   },
 };
 
-export function getPointBudgets(settings: EngineSettings, team: EngineTeam): EnginePointBudget {
+export function getPointBudgets(
+  settings: EngineSettings,
+  team: EngineTeam
+): EnginePointBudget {
   const source = team === "A" ? settings.teamA : settings.teamB;
 
   return {
@@ -105,7 +97,10 @@ export function getPointBudgetTotal(
   return points.specificHistory + points.core4 + points.generalWinRate;
 }
 
-export function normalizeModulePoints(rawScore: number, maxPoints: number): number {
+export function normalizeModulePoints(
+  rawScore: number,
+  maxPoints: number
+): number {
   if (maxPoints <= 0) return 0;
   return Math.max(0, Math.min(maxPoints, rawScore * maxPoints));
 }
@@ -113,7 +108,9 @@ export function normalizeModulePoints(rawScore: number, maxPoints: number): numb
 const STORAGE_KEY = "lords-mobile-counter-engine-settings";
 
 function isBrowser(): boolean {
-  return typeof window !== "undefined" && typeof window.localStorage !== "undefined";
+  return (
+    typeof window !== "undefined" && typeof window.localStorage !== "undefined"
+  );
 }
 
 function mergeSettings(

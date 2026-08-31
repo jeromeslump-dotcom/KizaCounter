@@ -78,7 +78,9 @@ export default function AuthPanel() {
       setShowLogin(false);
     } catch (error) {
       console.error("Erreur de connexion :", error);
-      setError(error instanceof Error ? error.message : "Connexion impossible.");
+      setError(
+        error instanceof Error ? error.message : "Connexion impossible."
+      );
     } finally {
       setSubmitting(false);
     }
@@ -108,7 +110,9 @@ export default function AuthPanel() {
       await signOut();
     } catch (error) {
       console.error("Erreur de déconnexion :", error);
-      setError(error instanceof Error ? error.message : "Déconnexion impossible.");
+      setError(
+        error instanceof Error ? error.message : "Déconnexion impossible."
+      );
     } finally {
       setSubmitting(false);
     }
@@ -140,7 +144,10 @@ export default function AuthPanel() {
       const history = await loadCombats();
       setAdminCombats(history);
     } catch (error) {
-      console.error("Impossible de charger les combats pour l'analyse :", error);
+      console.error(
+        "Impossible de charger les combats pour l'analyse :",
+        error
+      );
       setAdminCombats([]);
     }
   }
@@ -176,7 +183,9 @@ export default function AuthPanel() {
               👤 {getUserName()}
             </button>
           ) : (
-            <span className="ui-text-soft text-xs font-bold">👤 {getUserName()}</span>
+            <span className="ui-text-soft text-xs font-bold">
+              👤 {getUserName()}
+            </span>
           )}
 
           <button
