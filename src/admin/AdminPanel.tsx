@@ -1,5 +1,8 @@
 import { useEffect, useState, type ReactNode } from "react";
 import EngineSettings from "./EngineSettings";
+import AnalysisHelp from "./AnalysisHelp";
+import type { Combat } from "../types";
+import type { Hero } from "../data/heroes";
 
 interface AdminPanelProps {
   open: boolean;
@@ -7,7 +10,8 @@ interface AdminPanelProps {
   onUserManagement: () => void;
   onEncounteredTeams: () => void;
   onCombatHistory: () => void;
-  onAnalysisHelp?: () => void;
+  heroes?: Hero[];
+  combats?: Combat[];
 }
 
 interface AdminActionProps {
@@ -19,15 +23,9 @@ interface AdminActionProps {
 
 function AdminAction({ icon, title, description, onClick }: AdminActionProps) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="ui-action w-full rounded-xl border p-4 text-left transition hover:scale-[1.01]"
-    >
+    <button type="button" onClick={onClick} className="ui-action w-full rounded-xl border p-4 text-left transition hover:scale-[1.01]">
       <span className="flex items-start gap-3">
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border ui-divider text-lg" aria-hidden="true">
-          {icon}
-        </span>
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border ui-divider text-lg" aria-hidden="true">{icon}</span>
         <span className="min-w-0">
           <span className="ui-text-primary block text-sm font-black">{title}</span>
           {description && <span className="ui-text-secondary mt-1 block text-xs leading-relaxed">{description}</span>}
@@ -37,24 +35,25 @@ function AdminAction({ icon, title, description, onClick }: AdminActionProps) {
   );
 }
 
-export default function AdminPanel({
-  open,
-  onClose,
-  onUserManagement,
-  onEncounteredTeams,
-  onCombatHistory,
-  onAnalysisHelp,
-}: AdminPanelProps) {
+export default function AdminPanel({ open, onClose, onUserManagement, onEncounteredTeams, onCombatHistory, heroes = [], combats = [] }: AdminPanelProps) {
   const [showEngineSettings, setShowEngineSettings] = useState(false);
+  const [showAnalysisHelp, setShowAnalysisHelp] = useState(false);
 
   useEffect(() => {
-    if (!open) setShowEngineSettings(false);
+    if (!open) {
+      setShowEngineSettings(false);
+      setShowAnalysisHelp(false);
+    }
   }, [open]);
 
   if (!open) return null;
 
   if (showEngineSettings) {
     return <EngineSettings open onClose={onClose} onBack={() => setShowEngineSettings(false)} />;
+  }
+
+  if (showAnalysisHelp) {
+    return <AnalysisHelp open heroes={heroes} combats={combats} onClose={onClose} onBack={() => setShowAnalysisHelp(false)} />;
   }
 
   return (
@@ -74,7 +73,7 @@ export default function AdminPanel({
           <AdminAction icon="👥" title="Gestion des utilisateurs" description="Rechercher les utilisateurs et gérer leurs rôles" onClick={onUserManagement} />
           <AdminAction icon="⚔️" title="Équipes rencontrées" description="Voir les compositions ennemies qui posent le plus de problèmes" onClick={onEncounteredTeams} />
           <AdminAction icon="📜" title="Historique des combats" onClick={onCombatHistory} />
-          <AdminAction icon="🔎" title="Aide à l'analyse" description="Comprendre comment le moteur choisit les équipes recommandées et alternatives" onClick={onAnalysisHelp ?? (() => undefined)} />
+          <AdminAction icon="🔎" title="Aide à l'analyse" description="Analyser les combats correspondant exactement à une équipe ennemie" onClick={() => setShowAnalysisHelp(true)} />
           <AdminAction icon="⚙️" title="Réglages du moteur" description="Configurer les paramètres du moteur de recommandation" onClick={() => setShowEngineSettings(true)} />
         </div>
 
