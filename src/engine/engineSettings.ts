@@ -1,5 +1,18 @@
 // src/engine/engineSettings.ts
 
+export type EngineTeam = "A" | "B";
+
+export type EngineModuleKey =
+  | "specificHistory"
+  | "core4"
+  | "generalWinRate";
+
+export interface EnginePointBudget {
+  specificHistory: number;
+  core4: number;
+  generalWinRate: number;
+}
+
 export interface EngineSettings {
   teamA: {
     specificHistoryWeight: number;
@@ -81,6 +94,29 @@ export const DEFAULT_ENGINE_SETTINGS: EngineSettings = {
     core4ConfidenceBattles: 4,
   },
 };
+
+export function getPointBudgets(settings: EngineSettings, team: EngineTeam): EnginePointBudget {
+  const source = team === "A" ? settings.teamA : settings.teamB;
+
+  return {
+    specificHistory: source.specificHistoryPoints,
+    core4: source.core4Points,
+    generalWinRate: source.generalWinRatePoints,
+  };
+}
+
+export function getPointBudgetTotal(
+  settings: EngineSettings,
+  team: EngineTeam
+): number {
+  const points = getPointBudgets(settings, team);
+  return points.specificHistory + points.core4 + points.generalWinRate;
+}
+
+export function normalizeModulePoints(rawScore: number, maxPoints: number): number {
+  if (maxPoints <= 0) return 0;
+  return Math.max(0, Math.min(maxPoints, rawScore * maxPoints));
+}
 
 const STORAGE_KEY = "lords-mobile-counter-engine-settings";
 
