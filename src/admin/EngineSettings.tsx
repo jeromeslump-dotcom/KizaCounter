@@ -53,12 +53,48 @@ function ImportantSettingRow({
 
       <div className="min-w-0 text-center">
         <div className="ui-text-primary text-xs font-black sm:text-sm">{icon} {title}</div>
-        <div className="ui-text-muted mt-0.5 text-[10px] font-semibold">0 % → {formatWeight(limits.max)}</div>
+        <div className="ui-text-muted mt-0.5 text-[10px] font-semibold">Poids actuel du moteur</div>
       </div>
 
       <div className="min-w-0">
         <div className="flex items-center gap-2">
           <span className="ui-text-primary w-14 text-xs font-black">{formatWeight(valueB)}</span>
+          <input aria-label={`${title} — Équipe B`} type="range" min={limits.min} max={limits.max} step={limits.step} value={valueB} onChange={(event) => onChangeB(Number(event.target.value))} className="w-full accent-current" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+interface PointBudgetRowProps {
+  icon: string;
+  title: string;
+  valueA: number;
+  valueB: number;
+  onChangeA: (value: number) => void;
+  onChangeB: (value: number) => void;
+}
+
+function PointBudgetRow({ icon, title, valueA, valueB, onChangeA, onChangeB }: PointBudgetRowProps) {
+  const limits = ENGINE_SETTING_LIMITS.points;
+
+  return (
+    <div className="grid grid-cols-[minmax(0,1fr)_minmax(150px,190px)_minmax(0,1fr)] items-center gap-3 border-b ui-divider py-4 last:border-b-0">
+      <div className="min-w-0">
+        <div className="flex items-center gap-2">
+          <input aria-label={`${title} — Équipe A`} type="range" min={limits.min} max={limits.max} step={limits.step} value={valueA} onChange={(event) => onChangeA(Number(event.target.value))} className="w-full accent-current" />
+          <span className="ui-text-primary w-16 shrink-0 text-right text-xs font-black">{valueA} / 100</span>
+        </div>
+      </div>
+
+      <div className="min-w-0 text-center">
+        <div className="ui-text-primary text-xs font-black sm:text-sm">{icon} {title}</div>
+        <div className="ui-text-muted mt-0.5 text-[10px] font-semibold">Budget maximum du module</div>
+      </div>
+
+      <div className="min-w-0">
+        <div className="flex items-center gap-2">
+          <span className="ui-text-primary w-16 shrink-0 text-xs font-black">{valueB} / 100</span>
           <input aria-label={`${title} — Équipe B`} type="range" min={limits.min} max={limits.max} step={limits.step} value={valueB} onChange={(event) => onChangeB(Number(event.target.value))} className="w-full accent-current" />
         </div>
       </div>
@@ -81,20 +117,7 @@ interface AdvancedSettingRowProps {
   onChangeGlobal?: (value: number) => void;
 }
 
-function AdvancedSettingRow({
-  label,
-  icon = "⚙️",
-  valueA,
-  valueB,
-  min,
-  max,
-  step,
-  unit,
-  onChangeA,
-  onChangeB,
-  globalValue,
-  onChangeGlobal,
-}: AdvancedSettingRowProps) {
+function AdvancedSettingRow({ label, icon = "⚙️", valueA, valueB, min, max, step, unit, onChangeA, onChangeB, globalValue, onChangeGlobal }: AdvancedSettingRowProps) {
   const hasA = valueA !== undefined && onChangeA;
   const hasB = valueB !== undefined && onChangeB;
   const hasGlobal = globalValue !== undefined && onChangeGlobal;
@@ -107,9 +130,7 @@ function AdvancedSettingRow({
             <input aria-label={`${label} — Équipe A`} type="range" min={min} max={max} step={step} value={valueA} onChange={(event) => onChangeA?.(Number(event.target.value))} className="w-full accent-current" />
             <span className="ui-text-primary w-24 shrink-0 text-right text-[11px] font-black">{formatNumber(valueA)} {unit}</span>
           </div>
-        ) : (
-          <span className="ui-text-muted block text-center text-xs font-semibold">—</span>
-        )}
+        ) : <span className="ui-text-muted block text-center text-xs font-semibold">—</span>}
       </div>
 
       <div className="min-w-0 text-center">
@@ -119,9 +140,7 @@ function AdvancedSettingRow({
             <input aria-label={label} type="range" min={min} max={max} step={step} value={globalValue} onChange={(event) => onChangeGlobal?.(Number(event.target.value))} className="w-full max-w-[120px] accent-current" />
             <span className="ui-text-primary w-24 shrink-0 text-right text-[11px] font-black">{formatNumber(globalValue)} {unit}</span>
           </div>
-        ) : (
-          <div className="ui-text-muted mt-0.5 text-[10px] font-semibold">{formatNumber(min)} {unit} → {formatNumber(max)} {unit}</div>
-        )}
+        ) : <div className="ui-text-muted mt-0.5 text-[10px] font-semibold">{formatNumber(min)} {unit} → {formatNumber(max)} {unit}</div>}
       </div>
 
       <div className="min-w-0">
@@ -130,9 +149,7 @@ function AdvancedSettingRow({
             <span className="ui-text-primary w-24 shrink-0 text-[11px] font-black">{formatNumber(valueB)} {unit}</span>
             <input aria-label={`${label} — Équipe B`} type="range" min={min} max={max} step={step} value={valueB} onChange={(event) => onChangeB?.(Number(event.target.value))} className="w-full accent-current" />
           </div>
-        ) : (
-          <span className="ui-text-muted block text-center text-xs font-semibold">—</span>
-        )}
+        ) : <span className="ui-text-muted block text-center text-xs font-semibold">—</span>}
       </div>
     </div>
   );
@@ -142,14 +159,17 @@ export default function EngineSettings({ open, onClose, onBack }: EngineSettings
   const [settings, setSettings] = useState<EngineSettings>(() => getEngineSettings());
   const [showAdvanced, setShowAdvanced] = useState(false);
 
-  const importantRows = useMemo(
-    () => [
-      { icon: "🎯", title: "Historique spécifique", a: "specificHistoryWeight" as const, b: "specificHistoryWeight" as const },
-      { icon: "🧩", title: "Core4 historique", a: "core4Weight" as const, b: "core4Weight" as const },
-      { icon: "📊", title: "Winrate général", a: "generalWinRateWeight" as const, b: "generalWinRateWeight" as const },
-    ],
-    []
-  );
+  const importantRows = useMemo(() => [
+    { icon: "🎯", title: "Historique spécifique", a: "specificHistoryWeight" as const, b: "specificHistoryWeight" as const },
+    { icon: "🧩", title: "Core4 historique", a: "core4Weight" as const, b: "core4Weight" as const },
+    { icon: "📊", title: "Winrate général", a: "generalWinRateWeight" as const, b: "generalWinRateWeight" as const },
+  ], []);
+
+  const pointRows = useMemo(() => [
+    { icon: "🎯", title: "Historique spécifique", a: "specificHistoryPoints" as const, b: "specificHistoryPoints" as const },
+    { icon: "🧩", title: "Core4 historique", a: "core4Points" as const, b: "core4Points" as const },
+    { icon: "📊", title: "Winrate général", a: "generalWinRatePoints" as const, b: "generalWinRatePoints" as const },
+  ], []);
 
   if (!open) return null;
 
@@ -158,20 +178,11 @@ export default function EngineSettings({ open, onClose, onBack }: EngineSettings
   }
 
   function updateImportant(team: "A" | "B", key: keyof EngineSettings["teamA"], value: number) {
-    updateSetting((current) => ({
-      ...current,
-      [team === "A" ? "teamA" : "teamB"]: {
-        ...(team === "A" ? current.teamA : current.teamB),
-        [key]: value,
-      },
-    }));
+    updateSetting((current) => ({ ...current, [team === "A" ? "teamA" : "teamB"]: { ...(team === "A" ? current.teamA : current.teamB), [key]: value } }));
   }
 
   function updateAdvanced(key: keyof EngineSettings["advanced"], value: number) {
-    updateSetting((current) => ({
-      ...current,
-      advanced: { ...current.advanced, [key]: value },
-    }));
+    updateSetting((current) => ({ ...current, advanced: { ...current.advanced, [key]: value } }));
   }
 
   function handleSave() {
@@ -185,6 +196,8 @@ export default function EngineSettings({ open, onClose, onBack }: EngineSettings
 
   const advanced = settings.advanced;
   const limits = ENGINE_SETTING_LIMITS;
+  const totalPointsA = settings.teamA.specificHistoryPoints + settings.teamA.core4Points + settings.teamA.generalWinRatePoints;
+  const totalPointsB = settings.teamB.specificHistoryPoints + settings.teamB.core4Points + settings.teamB.generalWinRatePoints;
 
   return (
     <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/75 p-3 backdrop-blur-sm sm:p-4" onClick={onClose} role="presentation">
@@ -204,6 +217,29 @@ export default function EngineSettings({ open, onClose, onBack }: EngineSettings
             <div className="ui-text-primary text-sm font-black">Équipe A — Meilleure contre</div>
             <div className="ui-text-muted text-center text-[10px] font-black uppercase tracking-wider">Réglage</div>
             <div className="ui-text-primary text-right text-sm font-black">Équipe B — Analyse alternative</div>
+          </div>
+
+          <div className="ui-panel-alt rounded-2xl border px-4">
+            {pointRows.map((row) => (
+              <PointBudgetRow key={`points-${row.title}`} icon={row.icon} title={row.title} valueA={settings.teamA[row.a]} valueB={settings.teamB[row.b]} onChangeA={(value) => updateImportant("A", row.a, value)} onChangeB={(value) => updateImportant("B", row.b, value)} />
+            ))}
+          </div>
+
+          <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
+            <div className={`rounded-xl border px-4 py-3 text-sm font-black ${totalPointsA === 100 ? "ui-panel-alt" : "ui-action"}`}>
+              Équipe A : <span>{totalPointsA} / 100 pts</span>
+              {totalPointsA !== 100 && <span className="ml-2 text-xs font-semibold">⚠️ Ajuster le total</span>}
+            </div>
+            <div className={`rounded-xl border px-4 py-3 text-sm font-black ${totalPointsB === 100 ? "ui-panel-alt" : "ui-action"}`}>
+              Équipe B : <span>{totalPointsB} / 100 pts</span>
+              {totalPointsB !== 100 && <span className="ml-2 text-xs font-semibold">⚠️ Ajuster le total</span>}
+            </div>
+          </div>
+
+          <div className="mt-6 mb-4 flex items-center gap-3">
+            <div className="h-px flex-1 bg-current opacity-10" />
+            <span className="ui-text-muted text-[10px] font-black uppercase tracking-wider">Ancienne pondération — conservée temporairement</span>
+            <div className="h-px flex-1 bg-current opacity-10" />
           </div>
 
           <div className="ui-panel-alt rounded-2xl border px-4">
