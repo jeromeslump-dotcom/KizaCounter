@@ -30,28 +30,23 @@ export interface EngineSettings {
     core4Points: number;
     generalWinRatePoints: number;
   };
-  advanced: {
-    heroUsageExperiencePerBattle: number;
-    heroUsageExperienceCap: number;
-    heroUsageScoreCap: number;
+advanced: {
+  teamACounterWinRateMultiplier: number;
 
-    teamACounterWinRateMultiplier: number;
-    teamACounterExperiencePerBattle: number;
-    teamACounterExperienceCap: number;
 
-    teamBCounterWinRateMultiplier: number;
-    teamBCounterExperiencePerBattle: number;
-    teamBCounterExperienceCap: number;
+  teamBCounterWinRateMultiplier: number;
+  teamBCounterExperiencePerBattle: number;
+  teamBCounterExperienceCap: number;
 
-    teamAHistoricalReliabilityMin: number;
-    teamAHistoricalConfidenceBattles: number;
-    teamAHistoricalReliabilityBase: number;
-    teamAHistoricalReliabilityConfidenceWeight: number;
+  teamAHistoricalReliabilityMin: number;
+  teamAHistoricalConfidenceBattles: number;
+  teamAHistoricalReliabilityBase: number;
+  teamAHistoricalReliabilityConfidenceWeight: number;
 
-    core4MinBattles: number;
-    core4MinReplacementBattles: number;
-    core4ConfidenceBattles: number;
-  };
+  core4MinBattles: number;
+  core4MinReplacementBattles: number;
+  core4ConfidenceBattles: number;
+};
 }
 
 export const DEFAULT_ENGINE_SETTINGS: EngineSettings = {
@@ -72,13 +67,10 @@ export const DEFAULT_ENGINE_SETTINGS: EngineSettings = {
     generalWinRatePoints: 50,
   },
   advanced: {
-    heroUsageExperiencePerBattle: 2,
-    heroUsageExperienceCap: 20,
-    heroUsageScoreCap: 120,
+
 
     teamACounterWinRateMultiplier: 2,
-    teamACounterExperiencePerBattle: 3,
-    teamACounterExperienceCap: 15,
+
 
     teamBCounterWinRateMultiplier: 1.2,
     teamBCounterExperiencePerBattle: 2,
@@ -186,12 +178,7 @@ export const ENGINE_SETTING_LIMITS = {
     step: 1,
     unit: "pt",
   },
-  experiencePerBattle: {
-    min: 0,
-    max: 5,
-    step: 0.5,
-    unit: "pt/combat",
-  },
+
   scoreCap: {
     min: 0,
     max: 200,
