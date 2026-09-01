@@ -31,6 +31,26 @@ export default function useCombatSelection({
   const openedEnemyKeyRef = useRef<string | null>(null);
 
   // ==========================================================
+  // ROSTER ACTIF
+  //
+  // IMPORTANT :
+  // Le moteur de recommandation doit travailler uniquement
+  // avec les héros activés dans le Hero Manager.
+  //
+  // Un héros désactivé est donc réellement retiré du moteur :
+  // - Team A
+  // - Team B
+  // - Core4
+  // - remplacements
+  // - fallback
+  // ==========================================================
+
+  const enabledHeroes = useMemo(
+    () => heroes.filter((hero) => enabledHeroIds.has(hero.id)),
+    [heroes, enabledHeroIds]
+  );
+
+  // ==========================================================
   // ENNEMIS
   // ==========================================================
 
@@ -56,13 +76,6 @@ export default function useCombatSelection({
 
   // ==========================================================
   // RECOMMANDATION PRINCIPALE
-  //
-  // IMPORTANT :
-  // Ne PAS filtrer avec enabledHeroIds ici.
-  //
-  // enabledHeroIds sert à gérer le roster cliquable.
-  // Le moteur doit recevoir le roster complet afin de
-  // pouvoir construire une vraie équipe de 5.
   // ==========================================================
 
   const recommendedTeam = useMemo(
@@ -91,22 +104,42 @@ export default function useCombatSelection({
 
   function openCounterModal(enemyTeamIds: string[]) {
     /*
+     * --------------------------------------------------------
      * IMPORTANT :
      *
-     * On utilise TOUT le roster.
+     * Le moteur reçoit UNIQUEMENT les héros activés.
      *
      * Avant :
      *
-     *   heroes.filter(hero => enabledHeroIds.has(hero.id))
+     *   const availableHeroes = heroes;
      *
-     * pouvait donner seulement 2 héros au moteur.
+     * Cela permettait à un héros désactivé dans le Hero Manager
+     * de revenir dans les recommandations.
      *
-     * Maintenant le moteur dispose toujours du roster complet.
+     * Maintenant :
+     *
+     *   const availableHeroes = enabledHeroes;
+     *
+     * Un héros désactivé est donc réellement exclu.
+     * --------------------------------------------------------
      */
-    const availableHeroes = heroes;
+
+    const availableHeroes = enabledHeroes;
+
+    /*
+     * Impossible de construire une équipe complète si moins
+     * de 5 héros sont activés.
+     */
+    if (availableHeroes.length < TEAM_SIZE) {
+      setRecommendedIds([]);
+      setAlternativeIds([]);
+      setTeamIds([]);
+      setShowCounterModal(true);
+      return;
+    }
 
     // ----------------------------------------------------------
-    // RECOMMANDATION PRINCIPALE
+    // RECOMMANDATION PRINCIPALE — TEAM A
     // ----------------------------------------------------------
 
     const recommendation = recommendTeam(
@@ -117,32 +150,47 @@ export default function useCombatSelection({
 
     /*
      * Sécurité :
-     * une recommandation affichée automatiquement doit être
-     * une vraie équipe de 5.
-     *
-     * Si le moteur retourne moins de 5 héros, on ne l'injecte
-     * pas dans "Votre équipe".
+     * une recommandation automatique doit toujours contenir
+     * exactement 5 héros.
      */
     const validRecommendation =
-      recommendation.length === TEAM_SIZE ? recommendation : [];
+      recommendation.length === TEAM_SIZE
+        ? recommendation.filter((hero) => enabledHeroIds.has(hero.id))
+        : [];
+
+    /*
+     * Deuxième sécurité :
+     * si le moteur renvoyait malgré tout un héros désactivé,
+     * on refuse la recommandation plutôt que de l'afficher.
+     */
+    const finalRecommendation =
+      validRecommendation.length === TEAM_SIZE ? validRecommendation : [];
 
     // ----------------------------------------------------------
-    // ALTERNATIVE
+    // ALTERNATIVE — TEAM B
     // ----------------------------------------------------------
 
     const alternative = recommendAlternativeTeam(
       enemyTeamIds,
       availableHeroes,
       combats,
-      validRecommendation
+      finalRecommendation
     );
 
+    /*
+     * Même protection pour Team B.
+     */
     const validAlternative =
-      alternative.length === TEAM_SIZE ? alternative : [];
+      alternative.length === TEAM_SIZE
+        ? alternative.filter((hero) => enabledHeroIds.has(hero.id))
+        : [];
 
-    const ids = validRecommendation.map((hero) => hero.id);
+    const finalAlternative =
+      validAlternative.length === TEAM_SIZE ? validAlternative : [];
 
-    const alternativeTeamIds = validAlternative.map((hero) => hero.id);
+    const ids = finalRecommendation.map((hero) => hero.id);
+
+    const alternativeTeamIds = finalAlternative.map((hero) => hero.id);
 
     setRecommendedIds(ids);
     setAlternativeIds(alternativeTeamIds);
@@ -151,7 +199,8 @@ export default function useCombatSelection({
      * La recommandation initiale est automatiquement placée
      * dans notre équipe.
      *
-     * Mais uniquement si elle contient bien 5 héros.
+     * Si aucune équipe complète n'est disponible, on laisse
+     * l'équipe vide.
      */
     setTeamIds(ids);
 
@@ -193,13 +242,11 @@ export default function useCombatSelection({
 
   function selectRecommendedTeam(ids: string[]) {
     /*
-     * Une équipe sélectionnée doit toujours contenir
-     * au maximum 5 héros.
-     *
-     * On ne filtre PAS avec enabledHeroIds :
-     * les IDs viennent déjà d'une recommandation valide.
+     * Une équipe sélectionnée doit uniquement contenir
+     * des héros actuellement activés.
      */
     const validIds = ids
+      .filter((id) => enabledHeroIds.has(id))
       .filter((id) => heroes.some((hero) => hero.id === id))
       .slice(0, TEAM_SIZE);
 
@@ -239,11 +286,8 @@ export default function useCombatSelection({
       }
 
       /*
-       * Ici, contrairement au moteur de recommandation,
-       * enabledHeroIds reste volontairement utilisé :
-       *
-       * un héros désactivé dans le gestionnaire ne peut pas
-       * être ajouté manuellement depuis le roster.
+       * Un héros désactivé ne peut jamais être ajouté
+       * manuellement.
        */
       if (!enabledHeroIds.has(hero.id)) {
         return current;
@@ -267,6 +311,9 @@ export default function useCombatSelection({
         return current;
       }
 
+      /*
+       * Un héros désactivé est toujours interdit.
+       */
       if (!enabledHeroIds.has(hero.id)) {
         return current;
       }

@@ -28,6 +28,18 @@ export interface Core4Analysis {
   replacements: Core4ReplacementStats[];
 }
 
+interface ReplacementAccumulator {
+  wins: number;
+  losses: number;
+}
+
+interface Core4Accumulator {
+  coreIds: string[];
+  wins: number;
+  losses: number;
+  replacements: Map<string, ReplacementAccumulator>;
+}
+
 // ============================================================
 // NORMALISATION
 // ============================================================
@@ -55,28 +67,37 @@ function extractReplacement(
   const team = normalizeIds(teamIds);
   const core = normalizeIds(coreIds);
 
-  if (team.length !== 5 || core.length !== 4) return null;
+  if (team.length !== 5 || core.length !== 4) {
+    return null;
+  }
 
   const coreSet = new Set(core);
 
   for (const heroId of core) {
-    if (!team.includes(heroId)) return null;
+    if (!team.includes(heroId)) {
+      return null;
+    }
   }
 
   const replacements = team.filter((heroId) => !coreSet.has(heroId));
-  if (replacements.length !== 1) return null;
+
+  if (replacements.length !== 1) {
+    return null;
+  }
 
   return replacements[0];
 }
 
 // ============================================================
-// GÉNÉRATION DES CORE 4
+// GÉNÉRATION DES CORE4
 // ============================================================
 
 function generateCore4s(teamIds: string[]): string[][] {
   const team = normalizeIds(teamIds);
 
-  if (team.length !== 5) return [];
+  if (team.length !== 5) {
+    return [];
+  }
 
   const cores: string[][] = [];
 
@@ -95,9 +116,14 @@ function calculateConfidence(
   battles: number,
   settings: EngineSettings
 ): number {
-  if (battles <= 0) return 0;
+  if (battles <= 0) {
+    return 0;
+  }
 
-  return Math.min(battles / settings.advanced.core4ConfidenceBattles, 1);
+  return Math.min(
+    battles / Math.max(1, settings.advanced.core4ConfidenceBattles),
+    1
+  );
 }
 
 // ============================================================
@@ -105,66 +131,33 @@ function calculateConfidence(
 // ============================================================
 
 function calculateWinRate(wins: number, battles: number): number {
-  if (battles <= 0) return 0;
+  if (battles <= 0) {
+    return 0;
+  }
+
   return (wins / battles) * 100;
 }
 
 // ============================================================
-// ANALYSE D'UN CORE 4
+// CONSTRUCTION D'UNE ANALYSE CORE4
 // ============================================================
 
-function analyzeCore4(
+function buildCore4Analysis(
   enemyIds: string[],
-  coreIds: string[],
-  combats: Combat[],
+  accumulator: Core4Accumulator,
   settings: EngineSettings
 ): Core4Analysis | null {
-  const normalizedEnemy = normalizeIds(enemyIds);
-  const normalizedCore = normalizeIds(coreIds);
+  const battles = accumulator.wins + accumulator.losses;
 
-  if (normalizedEnemy.length === 0 || normalizedCore.length !== 4) {
+  if (battles < settings.advanced.core4MinBattles) {
     return null;
   }
 
-  const replacements = new Map<string, { wins: number; losses: number }>();
+  const coreWinRate = calculateWinRate(accumulator.wins, battles);
 
-  let wins = 0;
-  let losses = 0;
-
-  for (const combat of combats) {
-    if (!sameTeam(normalizedEnemy, combat.enemy_heroes ?? [])) {
-      continue;
-    }
-
-    const teamIds = normalizeIds(combat.my_heroes ?? []);
-    if (teamIds.length !== 5) continue;
-
-    const replacement = extractReplacement(teamIds, normalizedCore);
-    if (!replacement) continue;
-
-    if (!replacements.has(replacement)) {
-      replacements.set(replacement, { wins: 0, losses: 0 });
-    }
-
-    const stats = replacements.get(replacement)!;
-
-    if (combat.won) {
-      stats.wins++;
-      wins++;
-    } else {
-      stats.losses++;
-      losses++;
-    }
-  }
-
-  const battles = wins + losses;
-
-  if (battles < settings.advanced.core4MinBattles) return null;
-
-  const coreWinRate = calculateWinRate(wins, battles);
   const replacementStats: Core4ReplacementStats[] = [];
 
-  for (const [heroId, stats] of replacements.entries()) {
+  for (const [heroId, stats] of accumulator.replacements.entries()) {
     const replacementBattles = stats.wins + stats.losses;
 
     if (replacementBattles < settings.advanced.core4MinReplacementBattles) {
@@ -172,8 +165,11 @@ function analyzeCore4(
     }
 
     const winRate = calculateWinRate(stats.wins, replacementBattles);
+
     const delta = winRate - coreWinRate;
+
     const confidence = calculateConfidence(replacementBattles, settings);
+
     const score = delta * confidence;
 
     replacementStats.push({
@@ -196,18 +192,20 @@ function analyzeCore4(
   );
 
   return {
-    enemyIds: normalizedEnemy,
-    coreIds: normalizedCore,
+    enemyIds: normalizeIds(enemyIds),
+    coreIds: [...accumulator.coreIds],
     battles,
-    wins,
-    losses,
+    wins: accumulator.wins,
+    losses: accumulator.losses,
     winRate: coreWinRate,
     replacements: replacementStats,
   };
 }
 
 // ============================================================
-// ANALYSE CORE 4 + 1
+// ANALYSE CORE4 + 1
+//
+// UN SEUL PARCOURS DES COMBATS.
 // ============================================================
 
 export function analyzeCore4Plus1(
@@ -217,29 +215,93 @@ export function analyzeCore4Plus1(
 ): Core4Analysis[] {
   const normalizedEnemy = normalizeIds(enemyIds);
 
-  if (normalizedEnemy.length === 0) return [];
+  if (normalizedEnemy.length === 0) {
+    return [];
+  }
 
-  const coreMap = new Map<string, string[]>();
+  const coreMap = new Map<string, Core4Accumulator>();
+
+  // ----------------------------------------------------------
+  // UN SEUL PARCOURS
+  // ----------------------------------------------------------
 
   for (const combat of combats) {
-    if (!sameTeam(normalizedEnemy, combat.enemy_heroes ?? [])) continue;
+    if (!sameTeam(normalizedEnemy, combat.enemy_heroes ?? [])) {
+      continue;
+    }
 
     const teamIds = normalizeIds(combat.my_heroes ?? []);
-    if (teamIds.length !== 5) continue;
 
-    for (const core of generateCore4s(teamIds)) {
-      const key = teamKey(core);
-      if (!coreMap.has(key)) coreMap.set(key, core);
+    if (teamIds.length !== 5) {
+      continue;
+    }
+
+    const cores = generateCore4s(teamIds);
+
+    for (const coreIds of cores) {
+      const key = teamKey(coreIds);
+
+      let accumulator = coreMap.get(key);
+
+      if (!accumulator) {
+        accumulator = {
+          coreIds,
+          wins: 0,
+          losses: 0,
+          replacements: new Map<string, ReplacementAccumulator>(),
+        };
+
+        coreMap.set(key, accumulator);
+      }
+
+      const replacement = extractReplacement(teamIds, coreIds);
+
+      if (!replacement) {
+        continue;
+      }
+
+      if (combat.won) {
+        accumulator.wins++;
+      } else {
+        accumulator.losses++;
+      }
+
+      let replacementStats = accumulator.replacements.get(replacement);
+
+      if (!replacementStats) {
+        replacementStats = {
+          wins: 0,
+          losses: 0,
+        };
+
+        accumulator.replacements.set(replacement, replacementStats);
+      }
+
+      if (combat.won) {
+        replacementStats.wins++;
+      } else {
+        replacementStats.losses++;
+      }
     }
   }
 
+  // ----------------------------------------------------------
+  // CONSTRUCTION EN MÉMOIRE
+  // ----------------------------------------------------------
+
   const analyses: Core4Analysis[] = [];
 
-  for (const coreIds of coreMap.values()) {
-    const analysis = analyzeCore4(normalizedEnemy, coreIds, combats, settings);
+  for (const accumulator of coreMap.values()) {
+    const analysis = buildCore4Analysis(normalizedEnemy, accumulator, settings);
 
-    if (analysis) analyses.push(analysis);
+    if (analysis) {
+      analyses.push(analysis);
+    }
   }
+
+  // ----------------------------------------------------------
+  // TRI
+  // ----------------------------------------------------------
 
   analyses.sort(
     (a, b) =>
@@ -252,7 +314,7 @@ export function analyzeCore4Plus1(
 }
 
 // ============================================================
-// MEILLEUR CORE 4
+// MEILLEUR CORE4
 // ============================================================
 
 export function findBestCore4(
@@ -262,20 +324,23 @@ export function findBestCore4(
 ): Core4Analysis | null {
   const analyses = analyzeCore4Plus1(enemyIds, combats, settings);
 
-  if (analyses.length === 0) return null;
+  if (analyses.length === 0) {
+    return null;
+  }
 
   return [...analyses].sort((a, b) => {
     const aConfidence = Math.min(
-      a.battles / settings.advanced.core4ConfidenceBattles,
+      a.battles / Math.max(1, settings.advanced.core4ConfidenceBattles),
       1
     );
 
     const bConfidence = Math.min(
-      b.battles / settings.advanced.core4ConfidenceBattles,
+      b.battles / Math.max(1, settings.advanced.core4ConfidenceBattles),
       1
     );
 
     const aScore = a.winRate * aConfidence;
+
     const bScore = b.winRate * bConfidence;
 
     return (
@@ -297,9 +362,23 @@ export function findBestCore4Replacement(
   combats: Combat[],
   settings: EngineSettings = getEngineSettings()
 ): Core4ReplacementStats | null {
-  const analysis = analyzeCore4(enemyIds, coreIds, combats, settings);
+  const normalizedEnemy = normalizeIds(enemyIds);
 
-  if (!analysis || analysis.replacements.length === 0) return null;
+  const normalizedCore = normalizeIds(coreIds);
+
+  if (normalizedEnemy.length === 0 || normalizedCore.length !== 4) {
+    return null;
+  }
+
+  const analyses = analyzeCore4Plus1(normalizedEnemy, combats, settings);
+
+  const key = teamKey(normalizedCore);
+
+  const analysis = analyses.find((entry) => teamKey(entry.coreIds) === key);
+
+  if (!analysis || analysis.replacements.length === 0) {
+    return null;
+  }
 
   return analysis.replacements[0];
 }
@@ -315,9 +394,23 @@ export function core4ReplacementScore(
   combats: Combat[],
   settings: EngineSettings = getEngineSettings()
 ): number {
-  const analysis = analyzeCore4(enemyIds, coreIds, combats, settings);
+  const normalizedEnemy = normalizeIds(enemyIds);
 
-  if (!analysis) return 0;
+  const normalizedCore = normalizeIds(coreIds);
+
+  if (normalizedEnemy.length === 0 || normalizedCore.length !== 4) {
+    return 0;
+  }
+
+  const analyses = analyzeCore4Plus1(normalizedEnemy, combats, settings);
+
+  const key = teamKey(normalizedCore);
+
+  const analysis = analyses.find((entry) => teamKey(entry.coreIds) === key);
+
+  if (!analysis) {
+    return 0;
+  }
 
   const replacement = analysis.replacements.find(
     (entry) => entry.heroId === heroId

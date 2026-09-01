@@ -15,83 +15,6 @@ interface EngineSettingsProps {
   onBack: () => void;
 }
 
-interface ImportantSettingRowProps {
-  icon: string;
-  title: string;
-  valueA: number;
-  valueB: number;
-  onChangeA: (value: number) => void;
-  onChangeB: (value: number) => void;
-}
-
-function formatWeight(value: number): string {
-  return `${Math.round(value * 100)} %`;
-}
-
-function formatNumber(value: number): string {
-  return Number.isInteger(value) ? String(value) : value.toFixed(2);
-}
-
-function ImportantSettingRow({
-  icon,
-  title,
-  valueA,
-  valueB,
-  onChangeA,
-  onChangeB,
-}: ImportantSettingRowProps) {
-  const limits = ENGINE_SETTING_LIMITS.weight;
-
-  return (
-    <div className="grid grid-cols-[minmax(0,1fr)_minmax(150px,190px)_minmax(0,1fr)] items-center gap-3 border-b ui-divider py-4 last:border-b-0">
-      <div className="min-w-0">
-        <div className="flex items-center gap-2">
-          <input
-            aria-label={`${title} — Équipe A`}
-            type="range"
-            min={limits.min}
-            max={limits.max}
-            step={limits.step}
-            value={valueA}
-            onChange={(event) => onChangeA(Number(event.target.value))}
-            className="w-full accent-current"
-          />
-          <span className="ui-text-primary w-14 text-right text-xs font-black">
-            {formatWeight(valueA)}
-          </span>
-        </div>
-      </div>
-
-      <div className="min-w-0 text-center">
-        <div className="ui-text-primary text-xs font-black sm:text-sm">
-          {icon} {title}
-        </div>
-        <div className="ui-text-muted mt-0.5 text-[10px] font-semibold">
-          Poids actuel du moteur
-        </div>
-      </div>
-
-      <div className="min-w-0">
-        <div className="flex items-center gap-2">
-          <span className="ui-text-primary w-14 text-xs font-black">
-            {formatWeight(valueB)}
-          </span>
-          <input
-            aria-label={`${title} — Équipe B`}
-            type="range"
-            min={limits.min}
-            max={limits.max}
-            step={limits.step}
-            value={valueB}
-            onChange={(event) => onChangeB(Number(event.target.value))}
-            className="w-full accent-current"
-          />
-        </div>
-      </div>
-    </div>
-  );
-}
-
 interface PointBudgetRowProps {
   icon: string;
   title: string;
@@ -99,6 +22,10 @@ interface PointBudgetRowProps {
   valueB: number;
   onChangeA: (value: number) => void;
   onChangeB: (value: number) => void;
+}
+
+function formatNumber(value: number): string {
+  return Number.isInteger(value) ? String(value) : value.toFixed(2);
 }
 
 function PointBudgetRow({
@@ -224,6 +151,7 @@ function AdvancedSettingRow({
         <div className="ui-text-primary text-xs font-black sm:text-sm">
           {icon} {label}
         </div>
+
         {hasGlobal ? (
           <div className="mt-1 flex items-center justify-center gap-2">
             <input
@@ -236,6 +164,7 @@ function AdvancedSettingRow({
               onChange={(event) => onChangeGlobal?.(Number(event.target.value))}
               className="w-full max-w-[120px] accent-current"
             />
+
             <span className="ui-text-primary w-24 shrink-0 text-right text-[11px] font-black">
               {formatNumber(globalValue)} {unit}
             </span>
@@ -253,6 +182,7 @@ function AdvancedSettingRow({
             <span className="ui-text-primary w-24 shrink-0 text-[11px] font-black">
               {formatNumber(valueB)} {unit}
             </span>
+
             <input
               aria-label={`${label} — Équipe B`}
               type="range"
@@ -282,31 +212,8 @@ export default function EngineSettings({
   const [settings, setSettings] = useState<EngineSettings>(() =>
     getEngineSettings()
   );
-  const [showAdvanced, setShowAdvanced] = useState(false);
 
-  const importantRows = useMemo(
-    () => [
-      {
-        icon: "🎯",
-        title: "Historique spécifique",
-        a: "specificHistoryWeight" as const,
-        b: "specificHistoryWeight" as const,
-      },
-      {
-        icon: "🧩",
-        title: "Core4 historique",
-        a: "core4Weight" as const,
-        b: "core4Weight" as const,
-      },
-      {
-        icon: "📊",
-        title: "Winrate général",
-        a: "generalWinRateWeight" as const,
-        b: "generalWinRateWeight" as const,
-      },
-    ],
-    []
-  );
+  const [showAdvanced, setShowAdvanced] = useState(false);
 
   const pointRows = useMemo(
     () => [
@@ -338,9 +245,12 @@ export default function EngineSettings({
     setSettings((current) => updater(current));
   }
 
-  function updateImportant(
+  function updatePointBudget(
     team: "A" | "B",
-    key: keyof EngineSettings["teamA"],
+    key: keyof Pick<
+      EngineSettings["teamA"],
+      "specificHistoryPoints" | "core4Points" | "generalWinRatePoints"
+    >,
     value: number
   ) {
     updateSetting((current) => ({
@@ -358,7 +268,10 @@ export default function EngineSettings({
   ) {
     updateSetting((current) => ({
       ...current,
-      advanced: { ...current.advanced, [key]: value },
+      advanced: {
+        ...current.advanced,
+        [key]: value,
+      },
     }));
   }
 
@@ -372,11 +285,12 @@ export default function EngineSettings({
   }
 
   const advanced = settings.advanced;
-  const limits = ENGINE_SETTING_LIMITS;
+
   const totalPointsA =
     settings.teamA.specificHistoryPoints +
     settings.teamA.core4Points +
     settings.teamA.generalWinRatePoints;
+
   const totalPointsB =
     settings.teamB.specificHistoryPoints +
     settings.teamB.core4Points +
@@ -404,10 +318,12 @@ export default function EngineSettings({
               >
                 ⚙️ Réglages du moteur
               </h2>
+
               <p className="ui-text-secondary mt-1 text-xs sm:text-sm">
                 Configuration du moteur de recommandation
               </p>
             </div>
+
             <button
               type="button"
               onClick={onClose}
@@ -424,13 +340,19 @@ export default function EngineSettings({
             <div className="ui-text-primary text-sm font-black">
               Équipe A — Meilleure contre
             </div>
+
             <div className="ui-text-muted text-center text-[10px] font-black uppercase tracking-wider">
-              Réglage
+              Budget
             </div>
+
             <div className="ui-text-primary text-right text-sm font-black">
               Équipe B — Analyse alternative
             </div>
           </div>
+
+          {/* ==================================================
+              BUDGETS DE POINTS DES MODULES
+              ================================================== */}
 
           <div className="ui-panel-alt rounded-2xl border px-4">
             {pointRows.map((row) => (
@@ -440,15 +362,21 @@ export default function EngineSettings({
                 title={row.title}
                 valueA={settings.teamA[row.a]}
                 valueB={settings.teamB[row.b]}
-                onChangeA={(value) => updateImportant("A", row.a, value)}
-                onChangeB={(value) => updateImportant("B", row.b, value)}
+                onChangeA={(value) => updatePointBudget("A", row.a, value)}
+                onChangeB={(value) => updatePointBudget("B", row.b, value)}
               />
             ))}
           </div>
 
+          {/* ==================================================
+              TOTAL DES BUDGETS
+              ================================================== */}
+
           <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
             <div
-              className={`rounded-xl border px-4 py-3 text-sm font-black ${totalPointsA === 100 ? "ui-panel-alt" : "ui-action"}`}
+              className={`rounded-xl border px-4 py-3 text-sm font-black ${
+                totalPointsA === 100 ? "ui-panel-alt" : "ui-action"
+              }`}
             >
               Équipe A : <span>{totalPointsA} / 100 pts</span>
               {totalPointsA !== 100 && (
@@ -457,8 +385,11 @@ export default function EngineSettings({
                 </span>
               )}
             </div>
+
             <div
-              className={`rounded-xl border px-4 py-3 text-sm font-black ${totalPointsB === 100 ? "ui-panel-alt" : "ui-action"}`}
+              className={`rounded-xl border px-4 py-3 text-sm font-black ${
+                totalPointsB === 100 ? "ui-panel-alt" : "ui-action"
+              }`}
             >
               Équipe B : <span>{totalPointsB} / 100 pts</span>
               {totalPointsB !== 100 && (
@@ -469,27 +400,9 @@ export default function EngineSettings({
             </div>
           </div>
 
-          <div className="mt-6 mb-4 flex items-center gap-3">
-            <div className="h-px flex-1 bg-current opacity-10" />
-            <span className="ui-text-muted text-[10px] font-black uppercase tracking-wider">
-              Ancienne pondération — conservée temporairement
-            </span>
-            <div className="h-px flex-1 bg-current opacity-10" />
-          </div>
-
-          <div className="ui-panel-alt rounded-2xl border px-4">
-            {importantRows.map((row) => (
-              <ImportantSettingRow
-                key={row.title}
-                icon={row.icon}
-                title={row.title}
-                valueA={settings.teamA[row.a]}
-                valueB={settings.teamB[row.b]}
-                onChangeA={(value) => updateImportant("A", row.a, value)}
-                onChangeB={(value) => updateImportant("B", row.b, value)}
-              />
-            ))}
-          </div>
+          {/* ==================================================
+              RÉGLAGES AVANCÉS
+              ================================================== */}
 
           <button
             type="button"
@@ -500,6 +413,7 @@ export default function EngineSettings({
             <span className="ui-text-primary text-sm font-black">
               {showAdvanced ? "▾" : "▸"} Réglages avancés
             </span>
+
             <span className="ui-text-muted text-[10px] font-semibold">
               Paramètres techniques actuellement utilisés par le moteur
             </span>
@@ -523,6 +437,7 @@ export default function EngineSettings({
                   updateAdvanced("teamBCounterWinRateMultiplier", value)
                 }
               />
+
               <AdvancedSettingRow
                 icon="🛡️"
                 label="Seuil minimum de fiabilité"
@@ -535,6 +450,7 @@ export default function EngineSettings({
                   updateAdvanced("teamAHistoricalReliabilityMin", value)
                 }
               />
+
               <AdvancedSettingRow
                 icon="🛡️"
                 label="Combats pour confiance maximale"
@@ -547,6 +463,7 @@ export default function EngineSettings({
                   updateAdvanced("teamAHistoricalConfidenceBattles", value)
                 }
               />
+
               <AdvancedSettingRow
                 icon="🛡️"
                 label="Base de fiabilité"
@@ -559,6 +476,7 @@ export default function EngineSettings({
                   updateAdvanced("teamAHistoricalReliabilityBase", value)
                 }
               />
+
               <AdvancedSettingRow
                 icon="🛡️"
                 label="Poids de la confiance"
@@ -574,6 +492,7 @@ export default function EngineSettings({
                   )
                 }
               />
+
               <AdvancedSettingRow
                 icon="🧩"
                 label="Combats minimum pour valider un Core4"
@@ -586,6 +505,7 @@ export default function EngineSettings({
                   updateAdvanced("core4MinBattles", value)
                 }
               />
+
               <AdvancedSettingRow
                 icon="🧩"
                 label="Combats minimum pour un remplacement"
@@ -598,6 +518,7 @@ export default function EngineSettings({
                   updateAdvanced("core4MinReplacementBattles", value)
                 }
               />
+
               <AdvancedSettingRow
                 icon="🧩"
                 label="Combats pour confiance maximale Core4"
@@ -617,6 +538,7 @@ export default function EngineSettings({
             <p className="ui-text-muted text-[10px] leading-relaxed">
               Les valeurs sont modifiées localement jusqu'à la sauvegarde.
             </p>
+
             <div className="flex shrink-0 items-center gap-2">
               <button
                 type="button"
@@ -625,6 +547,7 @@ export default function EngineSettings({
               >
                 💾 Sauvegarder
               </button>
+
               <button
                 type="button"
                 onClick={handleReset}

@@ -10,11 +10,7 @@ import type {
   TeamScore,
 } from "../types";
 
-import {
-  findBestCore4,
-  core4ReplacementScore,
-  analyzeCore4Plus1,
-} from "./historicalCore4";
+import { findBestCore4, analyzeCore4Plus1 } from "./historicalCore4";
 
 import {
   getEngineSettings,
@@ -111,11 +107,6 @@ export function evaluateExactTeamHistory(
 
 // ============================================================
 // MODULE A — HISTORIQUE SPÉCIFIQUE
-//
-// Victoires / Combats.
-//
-// Le nombre de combats sert uniquement à déterminer
-// la confiance dans le résultat.
 // ============================================================
 
 export function calculateSpecificHistoryPoints(
@@ -143,11 +134,6 @@ export function calculateSpecificHistoryPoints(
 
 // ============================================================
 // STATISTIQUES D'UTILISATION DES HÉROS
-//
-// Disponible pour l'affichage statistique / administratif.
-//
-// IMPORTANT : ces statistiques ne participent plus
-// au score de recommandation.
 // ============================================================
 
 export function calculateHeroUsage(
@@ -197,10 +183,6 @@ export function calculateHeroUsage(
 
 // ============================================================
 // COVERAGE
-//
-// Mesure combien de héros de l'équipe possèdent une
-// expérience historique positive contre l'équipe ennemie,
-// en analysant les Core4 associés.
 // ============================================================
 
 export function coverageReport(
@@ -294,7 +276,6 @@ export function coverageReport(
       }
 
       const battles = wins + losses;
-
       const winRate = calculateWinRate(wins, battles);
 
       const confidence = Math.min(
@@ -335,9 +316,6 @@ export function coverageReport(
 
 // ============================================================
 // SCORE D'UN HÉROS
-//
-// Le score d'un héros ne dépend plus de son nombre
-// d'utilisations historiques.
 // ============================================================
 
 export function scoreHero(hero: Hero): HeroScore {
@@ -349,9 +327,6 @@ export function scoreHero(hero: Hero): HeroScore {
 
 // ============================================================
 // HISTORIQUE LARGE D'UNE ÉQUIPE
-//
-// Recherche une équipe contenue dans les combats historiques.
-// L'équipe ennemie n'est volontairement pas utilisée ici.
 // ============================================================
 
 export function evaluateTeamHistory(
@@ -404,7 +379,13 @@ export function evaluateTeamHistory(
 // ============================================================
 // ÉVALUATION D'ÉQUIPE
 //
-// Score = historique de l'équipe × poids général.
+// Les trois modules de points sont maintenant réellement
+// calculables ici.
+//
+// specificHistoryPoints
+// core4Points
+// generalWinRatePoints
+//
 // ============================================================
 
 export function evaluateTeam(
@@ -414,12 +395,51 @@ export function evaluateTeam(
 ): TeamEvaluation {
   const settings = getEngineSettings();
 
-  const history = evaluateTeamHistory(
-    team.map((hero) => hero.id),
-    combats
+  const teamIds = team.map((hero) => hero.id);
+
+  const history = evaluateTeamHistory(teamIds, combats);
+
+  const budgets = getPointBudgets(settings, "A");
+
+  // ----------------------------------------------------------
+  // MODULE GENERAL WIN RATE
+  //
+  // Le win rate historique global de l'équipe est converti
+  // dans le budget configuré.
+  // ----------------------------------------------------------
+
+  const generalWinRateRaw = history.battles > 0 ? history.winRate / 100 : 0;
+
+  const generalWinRatePoints = normalizeModulePoints(
+    generalWinRateRaw,
+    budgets.generalWinRate
   );
 
-  const score = history.winRate * settings.teamA.generalWinRateWeight;
+  // ----------------------------------------------------------
+  // MODULE HISTORIQUE SPÉCIFIQUE
+  //
+  // evaluateTeam() n'a pas d'ennemi connu, donc ce module
+  // ne peut pas être calculé ici.
+  //
+  // Il reste calculé directement dans les recommandations
+  // spécifiques au matchup.
+  // ----------------------------------------------------------
+
+  const specificHistoryPoints = 0;
+
+  // ----------------------------------------------------------
+  // CORE4
+  //
+  // Le Core4 nécessite un ennemi précis.
+  // Il est donc également calculé dans recommendTeam/B.
+  // ----------------------------------------------------------
+
+  const core4Points = 0;
+
+  const score =
+    specificHistoryPoints * settings.teamA.specificHistoryWeight +
+    core4Points * settings.teamA.core4Weight +
+    generalWinRatePoints * settings.teamA.generalWinRateWeight;
 
   return {
     score,
@@ -507,9 +527,7 @@ export function findBestHistoricalTeam(
   }
 
   let bestTeam: Hero[] | null = null;
-
   let bestCandidate: (typeof winningCandidates)[number] | null = null;
-
   let bestEvaluation: TeamEvaluation | null = null;
 
   let bestReliability = -Infinity;
@@ -526,7 +544,6 @@ export function findBestHistoricalTeam(
     }
 
     const battles = candidate.wins + candidate.losses;
-
     const winRate = calculateWinRate(candidate.wins, battles);
 
     const confidence = Math.min(
@@ -543,7 +560,6 @@ export function findBestHistoricalTeam(
     const evaluation = evaluateTeam(team, combats);
 
     const currentTeamKey = teamKey(candidate.heroIds);
-
     const bestTeamKey = bestCandidate ? teamKey(bestCandidate.heroIds) : "";
 
     const isBetter =
@@ -645,8 +661,6 @@ function calculateCounterUsage(
 
 // ============================================================
 // SCORE D'UN HÉROS CONTRE L'ÉQUIPE ENNEMIE
-//
-// Seul l'historique spécifique au matchup intervient.
 // ============================================================
 
 function counterHeroScore(
@@ -662,7 +676,6 @@ function counterHeroScore(
   >
 ): number {
   const settings = getEngineSettings();
-
   const counter = counterUsage[hero.id];
 
   if (!counter || counter.total <= 0) {
@@ -685,7 +698,7 @@ function counterHeroScore(
 }
 
 // ============================================================
-// RECOMMANDATION PRINCIPALE
+// RECOMMANDATION PRINCIPALE — TEAM A
 // ============================================================
 
 export function recommendTeam(
@@ -698,11 +711,10 @@ export function recommendTeam(
   }
 
   const settings = getEngineSettings();
-
   const enemySet = new Set(enemyIds);
 
   // ----------------------------------------------------------
-  // 1. Équipe historique exacte suffisamment fiable
+  // 1. ÉQUIPE HISTORIQUE EXACTE
   // ----------------------------------------------------------
 
   const historicalTeam = findBestHistoricalTeam(enemyIds, combats, heroes);
@@ -712,7 +724,7 @@ export function recommendTeam(
   }
 
   // ----------------------------------------------------------
-  // 2. Héros disponibles
+  // 2. HÉROS DISPONIBLES
   // ----------------------------------------------------------
 
   const availableHeroes = heroes.filter((hero) => !enemySet.has(hero.id));
@@ -722,7 +734,7 @@ export function recommendTeam(
   }
 
   // ----------------------------------------------------------
-  // 3. Historique spécifique au matchup
+  // 3. HISTORIQUE SPÉCIFIQUE
   // ----------------------------------------------------------
 
   const counterUsage = calculateCounterUsage(enemyIds, combats);
@@ -739,10 +751,10 @@ export function recommendTeam(
   const recommended: Hero[] = [];
 
   // ----------------------------------------------------------
-  // 4. Recherche du meilleur Core4 historique
+  // 4. CORE4
   // ----------------------------------------------------------
 
-  const bestCore4 = findBestCore4(enemyIds, combats);
+  const bestCore4 = findBestCore4(enemyIds, combats, settings);
 
   if (bestCore4) {
     const core4Heroes = bestCore4.coreIds
@@ -760,14 +772,20 @@ export function recommendTeam(
       }
 
       // --------------------------------------------------------
-      // 5. Recherche du meilleur 5e héros
+      // 5. MEILLEUR 5e HÉROS
       // --------------------------------------------------------
 
       if (recommended.length === 4) {
         const core4Ids = core4Heroes.map((hero) => hero.id);
 
-        let bestReplacement: Hero | null = null;
+        const replacementScores = new Map(
+          bestCore4.replacements.map((replacement) => [
+            replacement.heroId,
+            replacement.score,
+          ])
+        );
 
+        let bestReplacement: Hero | null = null;
         let bestReplacementScore = -Infinity;
 
         for (const candidate of ranked) {
@@ -779,15 +797,13 @@ export function recommendTeam(
             continue;
           }
 
-          const historicalScore = core4ReplacementScore(
-            enemyIds,
-            core4Ids,
-            candidate.hero.id,
-            combats
-          );
+          const historicalScore = replacementScores.get(candidate.hero.id) ?? 0;
 
           const finalScore =
-            candidate.score + historicalScore * settings.teamA.core4Weight;
+            candidate.score +
+            historicalScore *
+              settings.teamA.core4Weight *
+              (getPointBudgets(settings, "A").core4 / 100);
 
           if (
             finalScore > bestReplacementScore ||
@@ -796,7 +812,6 @@ export function recommendTeam(
                 candidate.hero.name.localeCompare(bestReplacement.name) < 0))
           ) {
             bestReplacementScore = finalScore;
-
             bestReplacement = candidate.hero;
           }
         }
@@ -807,7 +822,7 @@ export function recommendTeam(
       }
 
       // --------------------------------------------------------
-      // GARANTIE : compléter jusqu'à 5 héros
+      // COMPLÉTION
       // --------------------------------------------------------
 
       const usedIds = new Set(recommended.map((hero) => hero.id));
@@ -829,7 +844,6 @@ export function recommendTeam(
         usedIds.add(candidate.hero.id);
       }
 
-      // Sécurité finale avec les héros disponibles.
       if (recommended.length < TEAM_SIZE) {
         for (const hero of availableHeroes) {
           if (recommended.length >= TEAM_SIZE) {
@@ -852,7 +866,7 @@ export function recommendTeam(
   }
 
   // ----------------------------------------------------------
-  // 6. Fallback : classement des héros
+  // 6. FALLBACK
   // ----------------------------------------------------------
 
   const usedIds = new Set(recommended.map((hero) => hero.id));
@@ -872,7 +886,6 @@ export function recommendTeam(
     usedIds.add(selected.id);
   }
 
-  // Sécurité absolue : compléter avec le roster.
   if (recommended.length < TEAM_SIZE) {
     for (const hero of availableHeroes) {
       if (recommended.length >= TEAM_SIZE) {
@@ -906,7 +919,6 @@ export function recommendAlternativeTeam(
   }
 
   const enemySet = new Set(enemyIds);
-
   const primaryIds = new Set(primaryTeam.map((hero) => hero.id));
 
   const availableHeroes = heroes.filter((hero) => !enemySet.has(hero.id));
@@ -916,6 +928,11 @@ export function recommendAlternativeTeam(
   }
 
   const settings = getEngineSettings();
+  const budgets = getPointBudgets(settings, "B");
+
+  // ----------------------------------------------------------
+  // HISTORIQUE SPÉCIFIQUE
+  // ----------------------------------------------------------
 
   const counterUsage = calculateCounterUsage(enemyIds, combats);
 
@@ -953,6 +970,14 @@ export function recommendAlternativeTeam(
       (a, b) => b.score - a.score || a.hero.name.localeCompare(b.hero.name)
     );
 
+  const rankedScoreByHero = new Map(
+    ranked.map((entry) => [entry.hero.id, entry.score])
+  );
+
+  // ----------------------------------------------------------
+  // ÉQUIPE DE BASE
+  // ----------------------------------------------------------
+
   const buildCandidate = (orderedHeroes: typeof ranked): Hero[] => {
     const team: Hero[] = [];
 
@@ -978,16 +1003,21 @@ export function recommendAlternativeTeam(
   }
 
   // ----------------------------------------------------------
-  // Bonus Core4 pour Team B
+  // CORE4
+  //
+  // UNE SEULE ANALYSE.
+  // On conserve l'optimisation du point 1/2.
   // ----------------------------------------------------------
 
-  const getCore4Bonus = (team: Hero[]): number => {
-    const teamIds = team.map((hero) => hero.id);
+  const core4Analyses = analyzeCore4Plus1(enemyIds, combats, settings);
 
-    let bestScore = 0;
+  const getCore4Points = (team: Hero[]): number => {
+    const teamIds = new Set(team.map((hero) => hero.id));
 
-    for (const core of analyzeCore4Plus1(enemyIds, combats, settings)) {
-      if (!core.coreIds.every((id) => teamIds.includes(id))) {
+    let bestRawScore = 0;
+
+    for (const core of core4Analyses) {
+      if (!core.coreIds.every((id) => teamIds.has(id))) {
         continue;
       }
 
@@ -996,28 +1026,75 @@ export function recommendAlternativeTeam(
         1
       );
 
-      const score = core.winRate * confidence;
+      const rawScore = (core.winRate / 100) * confidence;
 
-      if (score > bestScore) {
-        bestScore = score;
+      if (rawScore > bestRawScore) {
+        bestRawScore = rawScore;
       }
     }
 
-    return bestScore * settings.teamB.core4Weight;
+    return normalizeModulePoints(bestRawScore, budgets.core4);
   };
 
   // ----------------------------------------------------------
-  // Évaluation Team B
+  // ÉVALUATION GENERAL WIN RATE
+  //
+  // Le résultat historique global de l'équipe est maintenant
+  // réellement converti en points selon generalWinRatePoints.
+  // ----------------------------------------------------------
+
+  const getGeneralWinRatePoints = (team: Hero[]): number => {
+    const history = evaluateTeamHistory(
+      team.map((hero) => hero.id),
+      combats
+    );
+
+    if (history.battles <= 0) {
+      return 0;
+    }
+
+    return normalizeModulePoints(history.winRate / 100, budgets.generalWinRate);
+  };
+
+  // ----------------------------------------------------------
+  // HISTORIQUE SPÉCIFIQUE DE L'ÉQUIPE
+  // ----------------------------------------------------------
+
+  const getSpecificHistoryPoints = (team: Hero[]): number => {
+    const history = evaluateExactTeamHistory(
+      team.map((hero) => hero.id),
+      enemyIds,
+      combats
+    );
+
+    return calculateSpecificHistoryPoints(
+      history.wins,
+      history.losses,
+      budgets.specificHistory
+    );
+  };
+
+  // ----------------------------------------------------------
+  // SCORE FINAL TEAM B
+  //
+  // Chaque module utilise maintenant son propre budget.
+  // Les poids de configuration restent appliqués.
   // ----------------------------------------------------------
 
   const evaluateAlternative = (team: Hero[]) => {
-    const individualScore = team.reduce((total, hero) => {
-      const candidate = ranked.find((entry) => entry.hero.id === hero.id);
+    const specificHistoryPoints = getSpecificHistoryPoints(team);
 
-      return total + (candidate?.score ?? 0);
-    }, 0);
+    const core4Points = getCore4Points(team);
 
-    const core4Bonus = getCore4Bonus(team);
+    const generalWinRatePoints = getGeneralWinRatePoints(team);
+
+    const weightedSpecific =
+      specificHistoryPoints * settings.teamB.specificHistoryWeight;
+
+    const weightedCore4 = core4Points * settings.teamB.core4Weight;
+
+    const weightedGeneral =
+      generalWinRatePoints * settings.teamB.generalWinRateWeight;
 
     const history = evaluateTeamHistory(
       team.map((hero) => hero.id),
@@ -1029,17 +1106,23 @@ export function recommendAlternativeTeam(
     return {
       team,
       score:
-        individualScore +
-        core4Bonus -
+        weightedSpecific +
+        weightedCore4 +
+        weightedGeneral -
         (losingHistory ? Number.MAX_SAFE_INTEGER : 0),
       history,
+      modules: {
+        specificHistoryPoints,
+        core4Points,
+        generalWinRatePoints,
+      },
     };
   };
 
   const candidates: Hero[][] = [baseAlternative];
 
   // ----------------------------------------------------------
-  // Variantes de Team B
+  // VARIANTES
   // ----------------------------------------------------------
 
   const pool = ranked
@@ -1065,7 +1148,7 @@ export function recommendAlternativeTeam(
   }
 
   // ----------------------------------------------------------
-  // Ajouter les équipes historiques gagnantes
+  // ÉQUIPES HISTORIQUES GAGNANTES
   // ----------------------------------------------------------
 
   const historicalTeams = new Map<string, Hero[]>();
@@ -1103,7 +1186,7 @@ export function recommendAlternativeTeam(
   candidates.push(...historicalTeams.values());
 
   // ----------------------------------------------------------
-  // Choix final
+  // CHOIX FINAL
   // ----------------------------------------------------------
 
   let best = evaluateAlternative(baseAlternative);
@@ -1132,8 +1215,6 @@ export function recommendAlternativeTeam(
 
 // ============================================================
 // RANKING DES HÉROS
-//
-// Ranking descriptif neutre.
 // ============================================================
 
 export function rankHeroes(heroes: Hero[], combats: Combat[]): HeroScore[] {
@@ -1157,7 +1238,6 @@ export function evaluateSpecificHistoryModule(
   const history = evaluateExactTeamHistory(teamIds, enemyIds, combats);
 
   const settings = getEngineSettings();
-
   const budgets = getPointBudgets(settings, team);
 
   const points = calculateSpecificHistoryPoints(
