@@ -20,12 +20,13 @@ export default function useCombatSelection({
   const [enemyIds, setEnemyIds] = useState<string[]>([]);
   const [teamIds, setTeamIds] = useState<string[]>([]);
   const [showCounterModal, setShowCounterModal] = useState(false);
+
   const [recommendedIds, setRecommendedIds] = useState<string[]>([]);
   const [alternativeIds, setAlternativeIds] = useState<string[]>([]);
 
   /*
-   * Permet d'éviter de rouvrir plusieurs fois la fenêtre
-   * tant que la même équipe ennemie reste à 5 héros.
+   * Empêche l'ouverture multiple de la même contre
+   * lorsque les 5 ennemis restent identiques.
    */
   const openedEnemyKeyRef = useRef<string | null>(null);
 
@@ -42,7 +43,7 @@ export default function useCombatSelection({
   );
 
   // ==========================================================
-  // ÉQUIPE DU JOUEUR
+  // NOTRE ÉQUIPE
   // ==========================================================
 
   const team = useMemo(
@@ -54,29 +55,34 @@ export default function useCombatSelection({
   );
 
   // ==========================================================
-  // RECOMMANDATION
+  // RECOMMANDATION PRINCIPALE
+  //
+  // IMPORTANT :
+  // Ne PAS filtrer avec enabledHeroIds ici.
+  //
+  // enabledHeroIds sert à gérer le roster cliquable.
+  // Le moteur doit recevoir le roster complet afin de
+  // pouvoir construire une vraie équipe de 5.
   // ==========================================================
 
   const recommendedTeam = useMemo(
     () =>
       recommendedIds
         .map((id) => heroes.find((hero) => hero.id === id))
-        .filter(
-          (hero): hero is Hero =>
-            hero !== undefined && enabledHeroIds.has(hero.id)
-        ),
-    [recommendedIds, heroes, enabledHeroIds]
+        .filter((hero): hero is Hero => Boolean(hero)),
+    [recommendedIds, heroes]
   );
+
+  // ==========================================================
+  // ÉQUIPE ALTERNATIVE
+  // ==========================================================
 
   const alternativeTeam = useMemo(
     () =>
       alternativeIds
         .map((id) => heroes.find((hero) => hero.id === id))
-        .filter(
-          (hero): hero is Hero =>
-            hero !== undefined && enabledHeroIds.has(hero.id)
-        ),
-    [alternativeIds, heroes, enabledHeroIds]
+        .filter((hero): hero is Hero => Boolean(hero)),
+    [alternativeIds, heroes]
   );
 
   // ==========================================================
@@ -84,9 +90,24 @@ export default function useCombatSelection({
   // ==========================================================
 
   function openCounterModal(enemyTeamIds: string[]) {
-    const availableHeroes = heroes.filter((hero) =>
-      enabledHeroIds.has(hero.id)
-    );
+    /*
+     * IMPORTANT :
+     *
+     * On utilise TOUT le roster.
+     *
+     * Avant :
+     *
+     *   heroes.filter(hero => enabledHeroIds.has(hero.id))
+     *
+     * pouvait donner seulement 2 héros au moteur.
+     *
+     * Maintenant le moteur dispose toujours du roster complet.
+     */
+    const availableHeroes = heroes;
+
+    // ----------------------------------------------------------
+    // RECOMMANDATION PRINCIPALE
+    // ----------------------------------------------------------
 
     const recommendation = recommendTeam(
       enemyTeamIds,
@@ -94,19 +115,46 @@ export default function useCombatSelection({
       combats
     );
 
+    /*
+     * Sécurité :
+     * une recommandation affichée automatiquement doit être
+     * une vraie équipe de 5.
+     *
+     * Si le moteur retourne moins de 5 héros, on ne l'injecte
+     * pas dans "Votre équipe".
+     */
+    const validRecommendation =
+      recommendation.length === TEAM_SIZE ? recommendation : [];
+
+    // ----------------------------------------------------------
+    // ALTERNATIVE
+    // ----------------------------------------------------------
+
     const alternative = recommendAlternativeTeam(
       enemyTeamIds,
       availableHeroes,
       combats,
-      recommendation
+      validRecommendation
     );
 
-    const ids = recommendation.map((hero) => hero.id);
-    const alternativeTeamIds = alternative.map((hero) => hero.id);
+    const validAlternative =
+      alternative.length === TEAM_SIZE ? alternative : [];
+
+    const ids = validRecommendation.map((hero) => hero.id);
+
+    const alternativeTeamIds = validAlternative.map((hero) => hero.id);
 
     setRecommendedIds(ids);
     setAlternativeIds(alternativeTeamIds);
+
+    /*
+     * La recommandation initiale est automatiquement placée
+     * dans notre équipe.
+     *
+     * Mais uniquement si elle contient bien 5 héros.
+     */
     setTeamIds(ids);
+
     setShowCounterModal(true);
   }
 
@@ -117,8 +165,8 @@ export default function useCombatSelection({
   useEffect(() => {
     if (enemyIds.length !== TEAM_SIZE) {
       /*
-       * Dès qu'on repasse sous 5, on autorise une nouvelle
-       * ouverture pour le prochain combat.
+       * Tant qu'il n'y a pas 5 ennemis, aucune contre
+       * n'est générée.
        */
       openedEnemyKeyRef.current = null;
       return;
@@ -127,8 +175,8 @@ export default function useCombatSelection({
     const enemyKey = [...enemyIds].sort().join("|");
 
     /*
-     * Si cette même composition a déjà déclenché la fenêtre,
-     * on ne la rouvre pas à chaque render.
+     * Même composition :
+     * ne pas recalculer / rouvrir.
      */
     if (openedEnemyKeyRef.current === enemyKey) {
       return;
@@ -144,8 +192,15 @@ export default function useCombatSelection({
   // ==========================================================
 
   function selectRecommendedTeam(ids: string[]) {
+    /*
+     * Une équipe sélectionnée doit toujours contenir
+     * au maximum 5 héros.
+     *
+     * On ne filtre PAS avec enabledHeroIds :
+     * les IDs viennent déjà d'une recommandation valide.
+     */
     const validIds = ids
-      .filter((id) => enabledHeroIds.has(id))
+      .filter((id) => heroes.some((hero) => hero.id === id))
       .slice(0, TEAM_SIZE);
 
     setTeamIds(validIds);
@@ -165,22 +220,12 @@ export default function useCombatSelection({
         return current;
       }
 
-      /*
-       * IMPORTANT :
-       * Un héros ennemi peut parfaitement être présent
-       * dans notre propre équipe.
-       *
-       * Il n'existe aucune règle empêchant :
-       *
-       * Ennemi : Rose Knight
-       * Notre équipe : Rose Knight
-       */
       return [...current, hero.id];
     });
   }
 
   // ==========================================================
-  // SÉLECTION DE NOTRE ÉQUIPE
+  // SÉLECTION MANUELLE DE NOTRE ÉQUIPE
   // ==========================================================
 
   function toggleTeam(hero: Hero) {
@@ -193,15 +238,17 @@ export default function useCombatSelection({
         return current;
       }
 
+      /*
+       * Ici, contrairement au moteur de recommandation,
+       * enabledHeroIds reste volontairement utilisé :
+       *
+       * un héros désactivé dans le gestionnaire ne peut pas
+       * être ajouté manuellement depuis le roster.
+       */
       if (!enabledHeroIds.has(hero.id)) {
         return current;
       }
 
-      /*
-       * IMPORTANT :
-       * On ne bloque PAS un héros simplement parce qu'il
-       * est également présent chez l'ennemi.
-       */
       return [...current, hero.id];
     });
   }
@@ -225,9 +272,10 @@ export default function useCombatSelection({
       }
 
       /*
-       * Aucun blocage lié à enemyIds.
+       * Pas de blocage selon enemyIds.
        *
-       * Le même héros peut être sélectionné des deux côtés.
+       * Un même héros peut être présent chez l'ennemi
+       * et dans notre équipe.
        */
       return [...current, hero.id];
     });
@@ -243,15 +291,13 @@ export default function useCombatSelection({
 
   function resetCombat() {
     setShowCounterModal(false);
+
     setEnemyIds([]);
     setTeamIds([]);
+
     setRecommendedIds([]);
     setAlternativeIds([]);
 
-    /*
-     * Autorise immédiatement la prochaine composition
-     * ennemie à déclencher une nouvelle fenêtre.
-     */
     openedEnemyKeyRef.current = null;
   }
 

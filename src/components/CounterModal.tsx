@@ -1,6 +1,6 @@
 import type { Combat, Hero, HeroClassFilter, HeroSort } from "../types";
 
-import { getTeamHistoryStats } from "../engine/teamStats";
+import { evaluateExactTeamHistory } from "../engine/scoring";
 
 import CompactTeam from "./CompactTeam";
 import CombatForm from "./CombatForm";
@@ -55,8 +55,10 @@ export default function CounterModal({
 }: CounterModalProps) {
   if (!open) return null;
 
+  const enemyIds = enemies.map((hero) => hero.id);
+
   const recommendedIds = recommendedTeam.map((hero) => hero.id);
-  const history = getTeamHistoryStats(recommendedIds, combats);
+  const history = evaluateExactTeamHistory(recommendedIds, enemyIds, combats);
 
   const historyLabel =
     history.battles === 0
@@ -68,7 +70,11 @@ export default function CounterModal({
         : `${Math.round(history.winRate)} %`;
 
   const alternativeIds = alternativeTeam.map((hero) => hero.id);
-  const alternativeHistory = getTeamHistoryStats(alternativeIds, combats);
+  const alternativeHistory = evaluateExactTeamHistory(
+    alternativeIds,
+    enemyIds,
+    combats
+  );
 
   const alternativeHistoryLabel =
     alternativeHistory.battles === 0

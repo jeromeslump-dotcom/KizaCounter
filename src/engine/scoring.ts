@@ -144,14 +144,10 @@ export function calculateSpecificHistoryPoints(
 // ============================================================
 // STATISTIQUES D'UTILISATION DES HÉROS
 //
-// Cette fonction reste disponible pour l'affichage
-// statistique / administratif.
+// Disponible pour l'affichage statistique / administratif.
 //
 // IMPORTANT : ces statistiques ne participent plus
 // au score de recommandation.
-//
-// Exemple :
-// Tracker : utilisé 127 fois
 // ============================================================
 
 export function calculateHeroUsage(
@@ -340,11 +336,8 @@ export function coverageReport(
 // ============================================================
 // SCORE D'UN HÉROS
 //
-// IMPORTANT :
 // Le score d'un héros ne dépend plus de son nombre
 // d'utilisations historiques.
-//
-// Le ranking descriptif reste donc neutre.
 // ============================================================
 
 export function scoreHero(hero: Hero): HeroScore {
@@ -410,10 +403,6 @@ export function evaluateTeamHistory(
 
 // ============================================================
 // ÉVALUATION D'ÉQUIPE
-//
-// IMPORTANT :
-// Le score ne mélange plus le taux d'utilisation des héros
-// avec l'historique.
 //
 // Score = historique de l'équipe × poids général.
 // ============================================================
@@ -657,9 +646,7 @@ function calculateCounterUsage(
 // ============================================================
 // SCORE D'UN HÉROS CONTRE L'ÉQUIPE ENNEMIE
 //
-// Ici seul l'historique spécifique au matchup intervient.
-// Le nombre de fois où le héros a été joué globalement
-// ne donne aucun point.
+// Seul l'historique spécifique au matchup intervient.
 // ============================================================
 
 function counterHeroScore(
@@ -786,7 +773,8 @@ export function recommendTeam(
         for (const candidate of ranked) {
           if (
             core4Ids.includes(candidate.hero.id) ||
-            enemySet.has(candidate.hero.id)
+            enemySet.has(candidate.hero.id) ||
+            recommended.some((hero) => hero.id === candidate.hero.id)
           ) {
             continue;
           }
@@ -818,13 +806,56 @@ export function recommendTeam(
         }
       }
 
-      return recommended;
+      // --------------------------------------------------------
+      // GARANTIE : compléter jusqu'à 5 héros
+      // --------------------------------------------------------
+
+      const usedIds = new Set(recommended.map((hero) => hero.id));
+
+      for (const candidate of ranked) {
+        if (recommended.length >= TEAM_SIZE) {
+          break;
+        }
+
+        if (usedIds.has(candidate.hero.id)) {
+          continue;
+        }
+
+        if (enemySet.has(candidate.hero.id)) {
+          continue;
+        }
+
+        recommended.push(candidate.hero);
+        usedIds.add(candidate.hero.id);
+      }
+
+      // Sécurité finale avec les héros disponibles.
+      if (recommended.length < TEAM_SIZE) {
+        for (const hero of availableHeroes) {
+          if (recommended.length >= TEAM_SIZE) {
+            break;
+          }
+
+          if (usedIds.has(hero.id)) {
+            continue;
+          }
+
+          recommended.push(hero);
+          usedIds.add(hero.id);
+        }
+      }
+
+      if (recommended.length === TEAM_SIZE) {
+        return recommended;
+      }
     }
   }
 
   // ----------------------------------------------------------
   // 6. Fallback : classement des héros
   // ----------------------------------------------------------
+
+  const usedIds = new Set(recommended.map((hero) => hero.id));
 
   while (recommended.length < TEAM_SIZE && ranked.length) {
     const selected = ranked.shift()?.hero;
@@ -833,7 +864,28 @@ export function recommendTeam(
       break;
     }
 
+    if (usedIds.has(selected.id) || enemySet.has(selected.id)) {
+      continue;
+    }
+
     recommended.push(selected);
+    usedIds.add(selected.id);
+  }
+
+  // Sécurité absolue : compléter avec le roster.
+  if (recommended.length < TEAM_SIZE) {
+    for (const hero of availableHeroes) {
+      if (recommended.length >= TEAM_SIZE) {
+        break;
+      }
+
+      if (usedIds.has(hero.id)) {
+        continue;
+      }
+
+      recommended.push(hero);
+      usedIds.add(hero.id);
+    }
   }
 
   return recommended;
@@ -1082,8 +1134,6 @@ export function recommendAlternativeTeam(
 // RANKING DES HÉROS
 //
 // Ranking descriptif neutre.
-// L'utilisation historique n'est plus transformée
-// en score moteur.
 // ============================================================
 
 export function rankHeroes(heroes: Hero[], combats: Combat[]): HeroScore[] {
