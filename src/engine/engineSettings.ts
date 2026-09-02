@@ -32,7 +32,6 @@ export interface EngineSettings {
 
     teamBCounterWinRateMultiplier: number;
 
-    teamAHistoricalReliabilityMin: number;
     teamAHistoricalConfidenceBattles: number;
     teamAHistoricalReliabilityBase: number;
     teamAHistoricalReliabilityConfidenceWeight: number;
@@ -65,7 +64,6 @@ export const DEFAULT_ENGINE_SETTINGS: EngineSettings = {
 
     teamBCounterWinRateMultiplier: 1.2,
 
-    teamAHistoricalReliabilityMin: 60,
     teamAHistoricalConfidenceBattles: 10,
     teamAHistoricalReliabilityBase: 0.35,
     teamAHistoricalReliabilityConfidenceWeight: 0.65,
@@ -151,6 +149,7 @@ export function saveEngineSettings(settings: EngineSettings): void {
   if (!isBrowser()) return;
 
   window.localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+
   window.dispatchEvent(new Event("engine-settings-changed"));
 }
 
@@ -158,6 +157,7 @@ export function resetEngineSettings(): void {
   if (!isBrowser()) return;
 
   window.localStorage.removeItem(STORAGE_KEY);
+
   window.dispatchEvent(new Event("engine-settings-changed"));
 }
 
@@ -169,6 +169,7 @@ export const ENGINE_SETTING_LIMITS = {
     unit: "%",
     multiplier: 100,
   },
+
   points: {
     min: 0,
     max: 100,
@@ -182,18 +183,21 @@ export const ENGINE_SETTING_LIMITS = {
     step: 5,
     unit: "pt",
   },
+
   battles: {
     min: 1,
     max: 20,
     step: 1,
     unit: "combats",
   },
+
   percentage: {
     min: 0,
     max: 100,
     step: 5,
     unit: "%",
   },
+
   confidenceWeight: {
     min: 0,
     max: 1,

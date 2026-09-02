@@ -21,7 +21,14 @@ export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [showHeroManager, setShowHeroManager] = useState(false);
 
-  const { enabledHeroIds, activeCount, totalCount, toggleHero, enableAll, disableAll } = useHeroManager();
+  const {
+    enabledHeroIds,
+    activeCount,
+    totalCount,
+    toggleHero,
+    enableAll,
+    disableAll,
+  } = useHeroManager();
 
   const {
     enemyIds,
@@ -63,7 +70,10 @@ export default function App() {
           const history = await loadCombats();
           if (mounted) setCombats(history);
         } catch (error) {
-          console.error("Impossible de charger l'historique des combats :", error);
+          console.error(
+            "Impossible de charger l'historique des combats :",
+            error
+          );
         }
       } catch (error) {
         console.error("Impossible de récupérer la session :", error);
@@ -76,7 +86,9 @@ export default function App() {
 
     initialize();
 
-    const { data: { subscription } } = onAuthStateChange((session) => {
+    const {
+      data: { subscription },
+    } = onAuthStateChange((session) => {
       if (!mounted) return;
 
       const authenticated = Boolean(session);
@@ -92,7 +104,10 @@ export default function App() {
           if (mounted) setCombats(history);
         })
         .catch((error) => {
-          console.error("Impossible de charger l'historique des combats :", error);
+          console.error(
+            "Impossible de charger l'historique des combats :",
+            error
+          );
         });
     });
 
@@ -147,13 +162,20 @@ export default function App() {
               <h1 className="ui-text-primary text-xl font-black tracking-tight sm:text-2xl">
                 Lords Mobile Counter
               </h1>
-              <p className="ui-text-muted mt-0.5 text-[11px] font-semibold sm:hidden">By Kikoine</p>
+              <p className="ui-text-muted mt-0.5 text-[11px] font-semibold sm:hidden">
+                By Kikoine
+              </p>
               <p className="ui-text-secondary mt-1 hidden text-sm sm:block">
-                Sélectionnez les héros ennemis pour trouver la meilleure contre-équipe.
+                Sélectionnez les héros ennemis pour trouver la meilleure
+                contre-équipe.
               </p>
             </div>
             <div className="flex items-center gap-2">
-              <button type="button" onClick={() => setShowHeroManager(true)} className="ui-action rounded-lg border px-3 py-2 text-xs font-bold transition">
+              <button
+                type="button"
+                onClick={() => setShowHeroManager(true)}
+                className="ui-action rounded-lg border px-3 py-2 text-xs font-bold transition"
+              >
                 ⚙️ Gérer les héros
               </button>
               <AuthPanel />
@@ -162,7 +184,13 @@ export default function App() {
         </header>
 
         <div className="mb-6">
-          <EnemyPanel heroes={enemies} maxHeroes={TEAM_SIZE} onHeroClick={toggleEnemy} onClear={clearEnemies} compact />
+          <EnemyPanel
+            heroes={enemies}
+            maxHeroes={TEAM_SIZE}
+            onHeroClick={toggleEnemy}
+            onClear={clearEnemies}
+            compact
+          />
         </div>
 
         <div className="mb-6">

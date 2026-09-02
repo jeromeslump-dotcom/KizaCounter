@@ -16,6 +16,17 @@ import {
 
 const TEAM_SIZE = 5;
 
+// ============================================================
+// SOURCE DE RECOMMANDATION
+// ============================================================
+
+export type RecommendationSource =
+  "exact-history" | "class-history" | "core4" | "counter-usage" | "fallback";
+
+export type RecommendationSourceCallback = (
+  source: RecommendationSource
+) => void;
+
 function uniqueIds(ids: string[]): string[] {
   return [...new Set(ids)];
 }
@@ -340,7 +351,7 @@ export function scoreTeam(
 }
 
 // ============================================================
-// HISTORIQUE EXACT : MÃŠMES 5 ENNEMIS
+// HISTORIQUE EXACT : MÊMES 5 ENNEMIS
 // ============================================================
 
 export function findBestHistoricalTeam(
@@ -383,14 +394,16 @@ export function findBestHistoricalTeam(
     candidates.set(key, candidate);
   }
 
-  const minBattles = Math.max(
-    1,
-    settings.advanced.teamAHistoricalConfidenceBattles
-  );
+  // ==========================================================
+  // //////// MODIF
+  // UNE SEULE VICTOIRE SUFFIT POUR ÊTRE CANDIDAT.
+  //
+  // 1/1, 10/10 et 200/200 sont tous éligibles.
+  // Le volume intervient uniquement dans le classement.
+  // ==========================================================
 
   const winningCandidates = [...candidates.values()].filter(
-    (candidate) =>
-      candidate.wins > 0 && candidate.wins + candidate.losses >= minBattles
+    (candidate) => candidate.wins > 0
   );
 
   if (!winningCandidates.length) {
@@ -398,8 +411,14 @@ export function findBestHistoricalTeam(
   }
 
   // ==========================================================
-  // ðŸ”´5 â€” CLASSEMENT HISTORIQUE FIABLE
+  // //////// MODIF
+  // FIABILITÉ UNIQUEMENT POUR LE CLASSEMENT
   // ==========================================================
+
+  const confidenceBattles = Math.max(
+    1,
+    settings.advanced.teamAHistoricalConfidenceBattles
+  );
 
   const calculateHistoricalReliability = (
     wins: number,
@@ -409,7 +428,7 @@ export function findBestHistoricalTeam(
 
     const winRate = wins / battles;
 
-    const confidence = battles / (battles + minBattles);
+    const confidence = battles / (battles + confidenceBattles);
 
     return (
       winRate *
@@ -421,7 +440,6 @@ export function findBestHistoricalTeam(
 
   winningCandidates.sort((a, b) => {
     const aBattles = a.wins + a.losses;
-
     const bBattles = b.wins + b.losses;
 
     const aReliability = calculateHistoricalReliability(a.wins, aBattles);
@@ -437,7 +455,9 @@ export function findBestHistoricalTeam(
   });
 
   // ==========================================================
-  // SEUIL DE FIABILITÃ‰ FINAL
+  // //////// MODIF
+  // AUCUN SEUIL FINAL DE FIABILITÉ.
+  // LE MEILLEUR CANDIDAT GAGNANT EST RETOURNÉ.
   // ==========================================================
 
   for (const candidate of winningCandidates) {
@@ -445,19 +465,7 @@ export function findBestHistoricalTeam(
       .map((id) => heroes.find((hero) => hero.id === id))
       .filter((hero): hero is Hero => Boolean(hero));
 
-    if (team.length !== TEAM_SIZE) {
-      continue;
-    }
-
-    const battles = candidate.wins + candidate.losses;
-
-    const reliability = calculateHistoricalReliability(candidate.wins, battles);
-
-    // ðŸ”´5 â€” reliability est entre 0 et 1,
-    // alors que le rÃ©glage est exprimÃ© en %.
-    const reliabilityPercent = reliability * 100;
-
-    if (reliabilityPercent >= settings.advanced.teamAHistoricalReliabilityMin) {
+    if (team.length === TEAM_SIZE) {
       return team;
     }
   }
@@ -562,10 +570,6 @@ function findBestHistoricalClassTeam(
     }
   >();
 
-  // ==========================================================
-  // UN SEUL PARCOURS
-  // ==========================================================
-
   for (const combat of combats) {
     const historicalEnemy = uniqueIds(combat.enemy_heroes ?? []);
 
@@ -596,19 +600,43 @@ function findBestHistoricalClassTeam(
     candidates.set(key, candidate);
   }
 
+  // ==========================================================
+  // //////// MODIF
+  // MÊME RÈGLE QUE L'HISTORIQUE EXACT :
+  // UNE SEULE VICTOIRE SUFFIT.
+  // ==========================================================
+
+  const settings = getEngineSettings();
+
+  const confidenceBattles = Math.max(
+    1,
+    settings.advanced.teamAHistoricalConfidenceBattles
+  );
+
   const ordered = [...candidates.values()]
     .filter((candidate) => candidate.wins > 0)
     .sort((a, b) => {
       const aBattles = a.wins + a.losses;
-
       const bBattles = b.wins + b.losses;
 
-      const aRate = a.wins / aBattles;
+      const aReliability =
+        aBattles > 0
+          ? (a.wins / aBattles) *
+            (settings.advanced.teamAHistoricalReliabilityBase +
+              settings.advanced.teamAHistoricalReliabilityConfidenceWeight *
+                (aBattles / (aBattles + confidenceBattles)))
+          : 0;
 
-      const bRate = b.wins / bBattles;
+      const bReliability =
+        bBattles > 0
+          ? (b.wins / bBattles) *
+            (settings.advanced.teamAHistoricalReliabilityBase +
+              settings.advanced.teamAHistoricalReliabilityConfidenceWeight *
+                (bBattles / (bBattles + confidenceBattles)))
+          : 0;
 
       return (
-        bRate - aRate ||
+        bReliability - aReliability ||
         bBattles - aBattles ||
         b.wins - a.wins ||
         teamKey(a.heroIds).localeCompare(teamKey(b.heroIds))
@@ -710,49 +738,46 @@ function counterHeroScore(
   );
 }
 
+// ============================================================
+// RECOMMANDATION
+// ============================================================
+
 export function recommendTeam(
   enemyIds: string[],
   heroes: Hero[],
-  combats: Combat[]
+  combats: Combat[],
+  onSource?: RecommendationSourceCallback
 ): Hero[] {
   if (!enemyIds.length) {
+    onSource?.("fallback");
     return [];
   }
 
   const settings = getEngineSettings();
-  const enemySet = new Set(enemyIds);
 
   // ==========================================================
-  // 1. MÃŠMES 5 ENNEMIS
+  // 1. HISTORIQUE EXACT
   // ==========================================================
 
   const historicalTeam = findBestHistoricalTeam(enemyIds, combats, heroes);
 
   if (historicalTeam && historicalTeam.length === TEAM_SIZE) {
+    onSource?.("exact-history");
     return historicalTeam;
   }
 
   // ==========================================================
-  // 2. MÃŠME COMPOSITION DE CLASSES
+  // //////// MODIF
+  // PLUS AUCUNE EXCLUSION DES HÉROS ENNEMIS.
+  //
+  // Un héros présent dans l'équipe ennemie peut parfaitement
+  // apparaître dans la recommandation si l'historique le justifie.
   // ==========================================================
 
-  const historicalClassTeam = findBestHistoricalClassTeam(
-    enemyIds,
-    combats,
-    heroes
-  );
-
-  if (
-    historicalClassTeam &&
-    historicalClassTeam.length === TEAM_SIZE &&
-    historicalClassTeam.every((hero) => !enemySet.has(hero.id))
-  ) {
-    return historicalClassTeam;
-  }
-
-  const availableHeroes = heroes.filter((hero) => !enemySet.has(hero.id));
+  const availableHeroes = heroes;
 
   if (availableHeroes.length <= TEAM_SIZE) {
+    onSource?.("fallback");
     return availableHeroes;
   }
 
@@ -769,6 +794,10 @@ export function recommendTeam(
 
   const recommended: Hero[] = [];
 
+  // ==========================================================
+  // 2. CORE4 HISTORIQUE
+  // ==========================================================
+
   const bestCore4 = findBestCore4(enemyIds, combats, settings);
 
   if (bestCore4) {
@@ -778,10 +807,9 @@ export function recommendTeam(
 
     if (core4Heroes.length === 4) {
       for (const hero of core4Heroes) {
-        if (
-          !enemySet.has(hero.id) &&
-          !recommended.some((selected) => selected.id === hero.id)
-        ) {
+        // //////// MODIF
+        // Aucun filtrage contre les héros ennemis.
+        if (!recommended.some((selected) => selected.id === hero.id)) {
           recommended.push(hero);
         }
       }
@@ -797,13 +825,11 @@ export function recommendTeam(
         const core4Ids = core4Heroes.map((hero) => hero.id);
 
         let bestReplacement: Hero | null = null;
-
         let bestReplacementScore = -Infinity;
 
         for (const candidate of ranked) {
           if (
             core4Ids.includes(candidate.hero.id) ||
-            enemySet.has(candidate.hero.id) ||
             recommended.some((hero) => hero.id === candidate.hero.id)
           ) {
             continue;
@@ -824,7 +850,6 @@ export function recommendTeam(
                 candidate.hero.name.localeCompare(bestReplacement.name) < 0))
           ) {
             bestReplacementScore = finalScore;
-
             bestReplacement = candidate.hero;
           }
         }
@@ -841,12 +866,11 @@ export function recommendTeam(
           break;
         }
 
-        if (usedIds.has(candidate.hero.id) || enemySet.has(candidate.hero.id)) {
+        if (usedIds.has(candidate.hero.id)) {
           continue;
         }
 
         recommended.push(candidate.hero);
-
         usedIds.add(candidate.hero.id);
       }
 
@@ -866,10 +890,33 @@ export function recommendTeam(
       }
 
       if (recommended.length === TEAM_SIZE) {
+        onSource?.("core4");
         return recommended;
       }
     }
   }
+
+  // ==========================================================
+  // 3. HISTORIQUE PAR COMPOSITION DE CLASSES
+  // ==========================================================
+
+  // //////// MODIF
+  // CORE4 est volontairement testé AVANT l'historique classes.
+
+  const historicalClassTeam = findBestHistoricalClassTeam(
+    enemyIds,
+    combats,
+    heroes
+  );
+
+  if (historicalClassTeam && historicalClassTeam.length === TEAM_SIZE) {
+    onSource?.("class-history");
+    return historicalClassTeam;
+  }
+
+  // ==========================================================
+  // 4. COUNTER USAGE / SCORE
+  // ==========================================================
 
   const usedIds = new Set(recommended.map((hero) => hero.id));
 
@@ -878,7 +925,9 @@ export function recommendTeam(
 
     if (!selected) break;
 
-    if (usedIds.has(selected.id) || enemySet.has(selected.id)) {
+    // //////// MODIF
+    // Aucun filtrage des héros ennemis.
+    if (usedIds.has(selected.id)) {
       continue;
     }
 
@@ -901,11 +950,13 @@ export function recommendTeam(
     }
   }
 
+  onSource?.("counter-usage");
+
   return recommended;
 }
 
 // ============================================================
-// Ã‰QUIPE ALTERNATIVE
+// ÉQUIPE ALTERNATIVE
 // ============================================================
 
 export function recommendAlternativeTeam(
@@ -918,11 +969,16 @@ export function recommendAlternativeTeam(
     return [];
   }
 
-  const enemySet = new Set(enemyIds);
-
   const primaryIds = new Set(primaryTeam.map((hero) => hero.id));
 
-  const availableHeroes = heroes.filter((hero) => !enemySet.has(hero.id));
+  // ==========================================================
+  // //////// MODIF
+  // Plus aucune exclusion basée sur l'équipe ennemie.
+  // L'équipe principale reste exclue car cette fonction doit
+  // réellement produire une alternative.
+  // ==========================================================
+
+  const availableHeroes = heroes.filter((hero) => !primaryIds.has(hero.id));
 
   if (availableHeroes.length <= TEAM_SIZE) {
     return availableHeroes;
@@ -989,7 +1045,7 @@ export function recommendAlternativeTeam(
   }
 
   // ==========================================================
-  // ðŸ”´6 â€” CORE4 ANALYSÃ‰ UNE SEULE FOIS
+  // CORE4 ANALYSÉ UNE SEULE FOIS
   // ==========================================================
 
   const core4Analyses = analyzeCore4Plus1(enemyIds, combats, settings);
@@ -1016,18 +1072,11 @@ export function recommendAlternativeTeam(
   };
 
   // ==========================================================
-  // ðŸ”´6 â€” Ã‰VALUATION D'UNE Ã‰QUIPE
-  //
-  // Chaque historique est calculÃ© UNE SEULE FOIS
-  // par candidat.
+  // ÉVALUATION D'UNE ÉQUIPE
   // ==========================================================
 
   const evaluateAlternative = (team: Hero[]) => {
     const teamIds = team.map((hero) => hero.id);
-
-    // --------------------------------------------------------
-    // HISTORIQUE GÃ‰NÃ‰RAL
-    // --------------------------------------------------------
 
     const history = evaluateTeamHistory(teamIds, combats);
 
@@ -1035,10 +1084,6 @@ export function recommendAlternativeTeam(
       history.battles > 0
         ? normalizeModulePoints(history.winRate / 100, budgets.generalWinRate)
         : 0;
-
-    // --------------------------------------------------------
-    // HISTORIQUE EXACT
-    // --------------------------------------------------------
 
     const exact = evaluateExactTeamHistory(teamIds, enemyIds, combats);
 
@@ -1048,15 +1093,7 @@ export function recommendAlternativeTeam(
       budgets.specificHistory
     );
 
-    // --------------------------------------------------------
-    // CORE4
-    // --------------------------------------------------------
-
     const core4Points = getCore4Points(team);
-
-    // --------------------------------------------------------
-    // HISTORIQUE PAR CLASSES
-    // --------------------------------------------------------
 
     const classHistory = evaluateEnemyClassHistory(
       teamIds,
@@ -1083,13 +1120,19 @@ export function recommendAlternativeTeam(
 
     const losingHistory = history.battles > 0 && history.wins === 0;
 
-    const minBattles = Math.max(
-      1,
-      settings.advanced.teamAHistoricalConfidenceBattles
-    );
+    // ========================================================
+    // //////// MODIF
+    // UN HISTORIQUE DE 1 COMBAT RESTE UTILISABLE.
+    //
+    // Avant :
+    // exact.battles >= minBattles
+    //
+    // Maintenant :
+    // exact.battles > 0
+    // ========================================================
 
     const fallbackPoints =
-      exact.battles >= minBattles
+      exact.battles > 0
         ? specificHistoryPoints
         : classHistory.battles > 0
           ? classHistoryPoints
@@ -1149,7 +1192,10 @@ export function recommendAlternativeTeam(
       continue;
     }
 
-    if (ids.some((id) => primaryIds.has(id) || enemySet.has(id))) {
+    // //////// MODIF
+    // On exclut seulement l'équipe principale.
+    // Les héros ennemis restent parfaitement autorisés.
+    if (ids.some((id) => primaryIds.has(id))) {
       continue;
     }
 

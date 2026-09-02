@@ -1,6 +1,9 @@
 import type { Combat, Hero, HeroClassFilter, HeroSort } from "../types";
 
-import { evaluateExactTeamHistory } from "../engine/scoring";
+import {
+  evaluateEnemyClassHistory,
+  evaluateExactTeamHistory,
+} from "../engine/scoring";
 import {
   recommendationSourceLabel,
   type RecommendationSource,
@@ -64,7 +67,11 @@ export default function CounterModal({
   const enemyIds = enemies.map((hero) => hero.id);
   const currentTeamIds = team.map((hero) => hero.id);
 
-  const currentTeamHistory = evaluateExactTeamHistory(currentTeamIds, enemyIds, combats);
+  const currentTeamHistory = evaluateExactTeamHistory(
+    currentTeamIds,
+    enemyIds,
+    combats
+  );
 
   const currentTeamHistoryLabel =
     currentTeamHistory.battles === 0
@@ -74,17 +81,55 @@ export default function CounterModal({
         : `${Math.round(currentTeamHistory.winRate)} %`;
 
   const recommendedIds = recommendedTeam.map((hero) => hero.id);
-  const history = evaluateExactTeamHistory(recommendedIds, enemyIds, combats);
 
-  const historyLabel =
-    history.battles === 0
-      ? "Aucun historique exact"
-      : isAuthenticated
-        ? `${Math.round(history.winRate)} % · ${history.battles} combat${history.battles > 1 ? "s" : ""}`
-        : `${Math.round(history.winRate)} %`;
+  // //////// MODIF
+  // L'affichage de la recommandation utilise la source réelle
+  // de la recommandation.
+  //
+  // Historique exact :
+  //   → statistiques de l'historique exact.
+  //
+  // Historique classes :
+  //   → statistiques de l'historique de classes.
+  //
+  // Les autres sources ne doivent pas afficher un faux historique.
+  const recommendedExactHistory = evaluateExactTeamHistory(
+    recommendedIds,
+    enemyIds,
+    combats
+  );
+
+  const recommendedClassHistory = evaluateEnemyClassHistory(
+    recommendedIds,
+    enemyIds,
+    combats,
+    heroes
+  );
+
+  let historyLabel = "Nouvelle équipe";
+
+  if (recommendationSource === "exact-history") {
+    historyLabel =
+      recommendedExactHistory.battles === 0
+        ? "Aucun historique exact"
+        : isAuthenticated
+          ? `${Math.round(recommendedExactHistory.winRate)} % · ${recommendedExactHistory.battles} combat${recommendedExactHistory.battles > 1 ? "s" : ""}`
+          : `${Math.round(recommendedExactHistory.winRate)} %`;
+  } else if (recommendationSource === "class-history") {
+    historyLabel =
+      recommendedClassHistory.battles === 0
+        ? "Aucun historique de classes"
+        : isAuthenticated
+          ? `${Math.round(recommendedClassHistory.winRate)} % · ${recommendedClassHistory.battles} combat${recommendedClassHistory.battles > 1 ? "s" : ""}`
+          : `${Math.round(recommendedClassHistory.winRate)} %`;
+  }
 
   const alternativeIds = alternativeTeam.map((hero) => hero.id);
-  const alternativeHistory = evaluateExactTeamHistory(alternativeIds, enemyIds, combats);
+  const alternativeHistory = evaluateExactTeamHistory(
+    alternativeIds,
+    enemyIds,
+    combats
+  );
 
   const alternativeHistoryLabel =
     alternativeHistory.battles === 0
@@ -93,26 +138,47 @@ export default function CounterModal({
         ? `${Math.round(alternativeHistory.winRate)} % · ${alternativeHistory.battles} combat${alternativeHistory.battles > 1 ? "s" : ""}`
         : `${Math.round(alternativeHistory.winRate)} %`;
 
-  const hasRecommendations = recommendedTeam.length > 0 || alternativeTeam.length > 0;
+  const hasRecommendations =
+    recommendedTeam.length > 0 || alternativeTeam.length > 0;
 
   return (
     <div className="ui-modal-overlay fixed inset-0 z-50 flex items-center justify-center p-2 backdrop-blur-sm sm:p-4">
       <div className="ui-modal flex max-h-[96vh] w-full max-w-6xl flex-col overflow-hidden rounded-2xl border shadow-2xl">
         <div className="flex items-center justify-between border-b ui-divider px-4 py-3 sm:px-5 sm:py-4">
           <div>
-            <h2 className="ui-text-primary text-lg font-black sm:text-xl">⚔️ Contre recommandée</h2>
-            <p className="ui-text-secondary mt-1 hidden text-xs sm:block">Modifiez les héros proposés si nécessaire.</p>
+            <h2 className="ui-text-primary text-lg font-black sm:text-xl">
+              ⚔️ Contre recommandée
+            </h2>
+            <p className="ui-text-secondary mt-1 hidden text-xs sm:block">
+              Modifiez les héros proposés si nécessaire.
+            </p>
           </div>
-          <button type="button" onClick={onClose} className="ui-action ui-danger flex h-9 w-9 items-center justify-center rounded-lg border text-lg transition" aria-label="Fermer">✕</button>
+
+          <button
+            type="button"
+            onClick={onClose}
+            className="ui-action ui-danger flex h-9 w-9 items-center justify-center rounded-lg border text-lg transition"
+            aria-label="Fermer"
+          >
+            ✕
+          </button>
         </div>
 
         <div className="overflow-y-auto p-3 sm:p-5">
-          <CompactTeam title={`Ennemis (${enemies.length}/5)`} heroes={enemies} selectedIds={enemies.map((hero) => hero.id)} enemy compactPortrait />
+          <CompactTeam
+            title={`Ennemis (${enemies.length}/5)`}
+            heroes={enemies}
+            selectedIds={enemies.map((hero) => hero.id)}
+            enemy
+            compactPortrait
+          />
 
           <div className="mt-4">
             <CompactTeam
               title={`Votre équipe (${team.length}/5)`}
-              titleRight={team.length === 5 ? currentTeamHistoryLabel : undefined}
+              titleRight={
+                team.length === 5 ? currentTeamHistoryLabel : undefined
+              }
               heroes={team}
               selectedIds={teamIds}
               onHeroClick={onHeroClick}
@@ -126,34 +192,73 @@ export default function CounterModal({
                 <button
                   type="button"
                   onClick={() => onSelectRecommendedTeam(recommendedIds)}
-                  className={["ui-recommendation-team", recommendedIds.every((id) => teamIds.includes(id)) ? "ui-recommendation-selected" : ""].join(" ")}
+                  className={[
+                    "ui-recommendation-team",
+                    recommendedIds.every((id) => teamIds.includes(id))
+                      ? "ui-recommendation-selected"
+                      : "",
+                  ].join(" ")}
                 >
                   <div className="mb-2 flex items-center justify-between gap-3">
-                    <div className="whitespace-nowrap text-[10px] font-bold uppercase tracking-wide sm:text-xs">Recommandation initiale</div>
+                    <div className="whitespace-nowrap text-[10px] font-bold uppercase tracking-wide sm:text-xs">
+                      Recommandation initiale
+                    </div>
+
                     <div className="shrink-0 text-right text-[10px] font-bold sm:text-xs">
-                      {recommendationSource ? recommendationSourceLabel(recommendationSource) : "Source inconnue"}
-                      <span className="ui-text-muted ml-1 font-normal">· {historyLabel}</span>
+                      {recommendationSource
+                        ? recommendationSourceLabel(recommendationSource)
+                        : "Source inconnue"}
+
+                      <span className="ui-text-muted ml-1 font-normal">
+                        · {historyLabel}
+                      </span>
                     </div>
                   </div>
+
                   <div className="grid grid-cols-5 gap-1.5 sm:gap-2">
-                    {recommendedTeam.map((hero) => <span key={hero.id} className="ui-recommendation-hero">{hero.name}</span>)}
+                    {recommendedTeam.map((hero) => (
+                      <span key={hero.id} className="ui-recommendation-hero">
+                        {hero.name}
+                      </span>
+                    ))}
                   </div>
                 </button>
               )}
 
               {alternativeTeam.length > 0 && (
-                <div className={recommendedTeam.length > 0 ? "mt-3 border-t ui-divider pt-3" : ""}>
+                <div
+                  className={
+                    recommendedTeam.length > 0
+                      ? "mt-3 border-t ui-divider pt-3"
+                      : ""
+                  }
+                >
                   <button
                     type="button"
                     onClick={() => onSelectRecommendedTeam(alternativeIds)}
-                    className={["ui-recommendation-team", alternativeIds.every((id) => teamIds.includes(id)) ? "ui-recommendation-selected" : ""].join(" ")}
+                    className={[
+                      "ui-recommendation-team",
+                      alternativeIds.every((id) => teamIds.includes(id))
+                        ? "ui-recommendation-selected"
+                        : "",
+                    ].join(" ")}
                   >
                     <div className="mb-2 flex items-center justify-between gap-3">
-                      <div className="whitespace-nowrap text-[10px] font-bold uppercase tracking-wide sm:text-xs">Alternative</div>
-                      <div className="shrink-0 text-[10px] font-bold sm:text-xs">{alternativeHistoryLabel}</div>
+                      <div className="whitespace-nowrap text-[10px] font-bold uppercase tracking-wide sm:text-xs">
+                        Alternative
+                      </div>
+
+                      <div className="shrink-0 text-[10px] font-bold sm:text-xs">
+                        {alternativeHistoryLabel}
+                      </div>
                     </div>
+
                     <div className="grid grid-cols-5 gap-1.5 sm:gap-2">
-                      {alternativeTeam.map((hero) => <span key={hero.id} className="ui-recommendation-hero">{hero.name}</span>)}
+                      {alternativeTeam.map((hero) => (
+                        <span key={hero.id} className="ui-recommendation-hero">
+                          {hero.name}
+                        </span>
+                      ))}
                     </div>
                   </button>
                 </div>
@@ -161,10 +266,15 @@ export default function CounterModal({
             </div>
           )}
 
-          <div className="mt-4"><CombatForm enemies={enemies} myHeroes={team} onSave={onSave} /></div>
+          <div className="mt-4">
+            <CombatForm enemies={enemies} myHeroes={team} onSave={onSave} />
+          </div>
 
           <div className="mt-5">
-            <div className="ui-text-soft mb-3 text-sm font-bold">Roster — cliquez sur un héros pour l'ajouter ou le retirer</div>
+            <div className="ui-text-soft mb-3 text-sm font-bold">
+              Roster — cliquez sur un héros pour l'ajouter ou le retirer
+            </div>
+
             <HeroGrid
               heroes={heroes}
               enabledHeroIds={enabledHeroIds}

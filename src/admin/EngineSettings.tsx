@@ -440,19 +440,6 @@ export default function EngineSettings({
 
               <AdvancedSettingRow
                 icon="🛡️"
-                label="Seuil minimum de fiabilité"
-                valueA={advanced.teamAHistoricalReliabilityMin}
-                min={0}
-                max={100}
-                step={5}
-                unit="%"
-                onChangeA={(value) =>
-                  updateAdvanced("teamAHistoricalReliabilityMin", value)
-                }
-              />
-
-              <AdvancedSettingRow
-                icon="🛡️"
                 label="Combats pour confiance maximale"
                 valueA={advanced.teamAHistoricalConfidenceBattles}
                 min={1}
