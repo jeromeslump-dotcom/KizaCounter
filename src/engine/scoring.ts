@@ -30,7 +30,10 @@ function sameTeam(first: string[], second: string[]): boolean {
   return teamKey(first) === teamKey(second);
 }
 
-function isSameEnemyTeam(enemyIds: string[], combatEnemyIds: string[]): boolean {
+function isSameEnemyTeam(
+  enemyIds: string[],
+  combatEnemyIds: string[]
+): boolean {
   return sameTeam(enemyIds, combatEnemyIds);
 }
 
@@ -70,10 +73,7 @@ export function calculateSpecificHistoryPoints(
 
   const confidenceBattles =
     getEngineSettings().advanced.teamAHistoricalConfidenceBattles;
-  const confidence = Math.min(
-    battles / Math.max(1, confidenceBattles),
-    1
-  );
+  const confidence = Math.min(battles / Math.max(1, confidenceBattles), 1);
   return normalizeModulePoints((wins / battles) * confidence, maxPoints);
 }
 
@@ -246,8 +246,7 @@ export function evaluateTeam(
     budgets.generalWinRate
   );
 
-  const score =
-    generalWinRatePoints * settings.teamA.generalWinRateWeight;
+  const score = generalWinRatePoints * settings.teamA.generalWinRateWeight;
 
   return {
     score,
@@ -285,8 +284,7 @@ export function findBestHistoricalTeam(
     const heroIds = uniqueIds(combat.my_heroes ?? []);
     if (heroIds.length !== TEAM_SIZE) continue;
     const key = teamKey(heroIds);
-    const candidate =
-      candidates.get(key) ?? { heroIds, wins: 0, losses: 0 };
+    const candidate = candidates.get(key) ?? { heroIds, wins: 0, losses: 0 };
     combat.won ? candidate.wins++ : candidate.losses++;
     candidates.set(key, candidate);
   }
@@ -327,9 +325,7 @@ export function findBestHistoricalTeam(
         (settings.advanced.teamAHistoricalReliabilityBase +
           settings.advanced.teamAHistoricalReliabilityConfidenceWeight *
             confidence);
-      if (
-        reliability >= settings.advanced.teamAHistoricalReliabilityMin
-      ) {
+      if (reliability >= settings.advanced.teamAHistoricalReliabilityMin) {
         return team;
       }
     }
@@ -423,12 +419,11 @@ function findBestHistoricalClassTeam(
     const heroIds = uniqueIds(combat.my_heroes ?? []);
     if (heroIds.length !== TEAM_SIZE) continue;
 
-    const candidate =
-      candidates.get(teamKey(heroIds)) ?? {
-        heroIds,
-        wins: 0,
-        losses: 0,
-      };
+    const candidate = candidates.get(teamKey(heroIds)) ?? {
+      heroIds,
+      wins: 0,
+      losses: 0,
+    };
     candidate.wins++;
     candidates.set(teamKey(heroIds), candidate);
   }
@@ -600,10 +595,10 @@ export function recommendTeam(
             core4Ids.includes(candidate.hero.id) ||
             enemySet.has(candidate.hero.id) ||
             recommended.some((hero) => hero.id === candidate.hero.id)
-          ) continue;
+          )
+            continue;
 
-          const historicalScore =
-            replacementScores.get(candidate.hero.id) ?? 0;
+          const historicalScore = replacementScores.get(candidate.hero.id) ?? 0;
           const finalScore =
             candidate.score +
             historicalScore *
@@ -828,7 +823,8 @@ export function recommendAlternativeTeam(
         baseAlternative.some(
           (hero, heroIndex) => heroIndex !== index && hero.id === replacement.id
         )
-      ) continue;
+      )
+        continue;
       const candidate = [...baseAlternative];
       candidate[index] = replacement;
       candidates.push(candidate);

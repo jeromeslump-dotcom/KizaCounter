@@ -1,7 +1,9 @@
+import type { ReactNode } from "react";
 import type { Hero } from "../types";
 
 interface CompactTeamProps {
   title: string;
+  titleRight?: ReactNode;
   heroes: Hero[];
   selectedIds?: string[];
   enemy?: boolean;
@@ -11,6 +13,7 @@ interface CompactTeamProps {
 
 export default function CompactTeam({
   title,
+  titleRight,
   heroes,
   selectedIds = [],
   enemy = false,
@@ -19,10 +22,16 @@ export default function CompactTeam({
 }: CompactTeamProps) {
   return (
     <section className="ui-panel w-full rounded-xl border p-3">
-      <div className="mb-3 flex items-center justify-between">
-        <h3 className="ui-text-primary text-sm font-bold sm:text-base">
+      <div className="mb-3 flex items-center justify-between gap-3">
+        <h3 className="ui-text-primary min-w-0 truncate text-sm font-bold sm:text-base">
           {title}
         </h3>
+
+        {titleRight && (
+          <div className="ui-text-primary shrink-0 text-[10px] font-bold sm:text-xs">
+            {titleRight}
+          </div>
+        )}
       </div>
 
       {heroes.length === 0 ? (

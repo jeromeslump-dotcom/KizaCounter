@@ -57,7 +57,35 @@ export default function CounterModal({
 
   const enemyIds = enemies.map((hero) => hero.id);
 
+  // ============================================================
+  // HISTORIQUE DE L'ÉQUIPE ACTUELLEMENT SÉLECTIONNÉE
+  // ============================================================
+  //////// MODIF : calcul de l'historique sur l'équipe ACTUELLE
+  //////// et non uniquement sur la recommandation initiale.
+
+  const currentTeamIds = team.map((hero) => hero.id);
+
+  const currentTeamHistory = evaluateExactTeamHistory(
+    currentTeamIds,
+    enemyIds,
+    combats
+  );
+
+  const currentTeamHistoryLabel =
+    currentTeamHistory.battles === 0
+      ? "Nouvelle équipe"
+      : isAuthenticated
+        ? `${Math.round(currentTeamHistory.winRate)} % · ${
+            currentTeamHistory.battles
+          } combat${currentTeamHistory.battles > 1 ? "s" : ""}`
+        : `${Math.round(currentTeamHistory.winRate)} %`;
+
+  // ============================================================
+  // HISTORIQUE RECOMMANDATION INITIALE
+  // ============================================================
+
   const recommendedIds = recommendedTeam.map((hero) => hero.id);
+
   const history = evaluateExactTeamHistory(recommendedIds, enemyIds, combats);
 
   const historyLabel =
@@ -69,7 +97,12 @@ export default function CounterModal({
           }`
         : `${Math.round(history.winRate)} %`;
 
+  // ============================================================
+  // HISTORIQUE ALTERNATIVE
+  // ============================================================
+
   const alternativeIds = alternativeTeam.map((hero) => hero.id);
+
   const alternativeHistory = evaluateExactTeamHistory(
     alternativeIds,
     enemyIds,
@@ -96,6 +129,7 @@ export default function CounterModal({
             <h2 className="ui-text-primary text-lg font-black sm:text-xl">
               ⚔️ Contre recommandée
             </h2>
+
             <p className="ui-text-secondary mt-1 hidden text-xs sm:block">
               Modifiez les héros proposés si nécessaire.
             </p>
@@ -123,6 +157,11 @@ export default function CounterModal({
           <div className="mt-4">
             <CompactTeam
               title={`Votre équipe (${team.length}/5)`}
+              //////// MODIF : statistiques placées à droite,
+              //////// exactement comme "Recommandation initiale".
+              titleRight={
+                team.length === 5 ? currentTeamHistoryLabel : undefined
+              }
               heroes={team}
               selectedIds={teamIds}
               onHeroClick={onHeroClick}
@@ -148,6 +187,7 @@ export default function CounterModal({
                       <div className="whitespace-nowrap text-[10px] font-bold uppercase tracking-wide sm:text-xs">
                         Recommandation initiale
                       </div>
+
                       <div className="shrink-0 text-[10px] font-bold sm:text-xs">
                         {historyLabel}
                       </div>
@@ -186,6 +226,7 @@ export default function CounterModal({
                       <div className="whitespace-nowrap text-[10px] font-bold uppercase tracking-wide sm:text-xs">
                         Alternative
                       </div>
+
                       <div className="shrink-0 text-[10px] font-bold sm:text-xs">
                         {alternativeHistoryLabel}
                       </div>
