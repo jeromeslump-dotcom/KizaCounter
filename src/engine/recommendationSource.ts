@@ -24,18 +24,20 @@ function enemyClassKey(enemyIds: string[], heroes: Hero[]): string | null {
   return [...classes].sort().join("|");
 }
 
+// Reproduit exactement le classement de findBestHistoricalClassTeam
+// pour identifier la vraie source sans modifier le moteur existant.
 function findBestHistoricalClassTeam(enemyIds: string[], combats: Combat[], heroes: Hero[]): Hero[] | null {
   const target = enemyClassKey(enemyIds, heroes);
   if (!target) return null;
 
-  const enemySet = new Set(enemyIds);
   const candidates = new Map<string, { heroIds: string[]; wins: number; losses: number }>();
 
   for (const combat of combats) {
-    if (enemyClassKey(combat.enemy_heroes ?? [], heroes) !== target) continue;
+    const historicalEnemy = [...new Set(combat.enemy_heroes ?? [])];
+    if (historicalEnemy.length !== 5 || enemyClassKey(historicalEnemy, heroes) !== target) continue;
 
     const heroIds = [...new Set(combat.my_heroes ?? [])];
-    if (heroIds.length !== 5 || heroIds.some((id) => enemySet.has(id))) continue;
+    if (heroIds.length !== 5) continue;
 
     const key = teamKey(heroIds);
     const candidate = candidates.get(key) ?? { heroIds, wins: 0, losses: 0 };
@@ -67,7 +69,10 @@ export function recommendTeamWithSource(enemyIds: string[], heroes: Hero[], comb
   if (exact && exact.length === 5 && sameTeam(team, exact)) return { team, source: "exact-history" };
 
   const classTeam = findBestHistoricalClassTeam(enemyIds, combats, heroes);
-  if (classTeam && sameTeam(team, classTeam)) return { team, source: "class-history" };
+  const enemySet = new Set(enemyIds);
+  if (classTeam && classTeam.length === 5 && classTeam.every((hero) => !enemySet.has(hero.id)) && sameTeam(team, classTeam)) {
+    return { team, source: "class-history" };
+  }
 
   const settings = getEngineSettings();
   const bestCore4 = findBestCore4(enemyIds, combats, settings);
