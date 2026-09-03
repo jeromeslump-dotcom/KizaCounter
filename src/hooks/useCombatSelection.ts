@@ -208,12 +208,23 @@ export default function useCombatSelection({
       return;
     }
 
+    // Les combats sont chargés de façon asynchrone. Il est possible que
+    // les 5 ennemis soient déjà sélectionnés quand l'historique arrive.
+    // Le contexte de recommandation doit donc inclure l'état de l'historique
+    // et le pool activé, sinon on conserverait une recommandation calculée
+    // trop tôt sur un historique vide.
     const enemyKey = [...enemyIds].sort().join("|");
-    if (openedEnemyKeyRef.current === enemyKey) return;
+    const historyKey = `${combats.length}:${combats
+      .map((combat) => combat.id ?? combat.created_at ?? "")
+      .join(",")}`;
+    const enabledKey = [...enabledHeroIds].sort().join("|");
+    const recommendationKey = `${enemyKey}::${historyKey}::${enabledKey}`;
 
-    openedEnemyKeyRef.current = enemyKey;
+    if (openedEnemyKeyRef.current === recommendationKey) return;
+
+    openedEnemyKeyRef.current = recommendationKey;
     openCounterModal(enemyIds);
-  }, [enemyIds]);
+  }, [enemyIds, combats, enabledHeroIds]);
 
   function selectRecommendedTeam(ids: string[]) {
     const validIds = ids
