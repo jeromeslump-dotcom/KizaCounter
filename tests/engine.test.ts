@@ -4,6 +4,7 @@ import {
   calculateWinRate,
   evaluateEnemyClassHistory,
   evaluateExactTeamHistory,
+  evaluateTeam,
   recommendTeam,
 } from "../src/engine/scoring";
 import {
@@ -23,6 +24,21 @@ function combat(myHeroes: string[], won: boolean, enemyHeroes: string[] = enemy)
 
 function hero(id: string, cls: Hero["cls"]): Hero {
   return { id, name: id, alias: id, cls, img: "", stats: { hp: 0, atk: 0, matk: 0, def: 0, mdef: 0 } };
+}
+
+function withTeamAScoringSettings(
+  overrides: Partial<typeof DEFAULT_ENGINE_SETTINGS.teamA>,
+  callback: () => void
+): void {
+  const original = { ...DEFAULT_ENGINE_SETTINGS.teamA };
+
+  Object.assign(DEFAULT_ENGINE_SETTINGS.teamA, overrides);
+
+  try {
+    callback();
+  } finally {
+    Object.assign(DEFAULT_ENGINE_SETTINGS.teamA, original);
+  }
 }
 
 describe("recommendation engine history", () => {
@@ -54,6 +70,83 @@ describe("recommendation engine history", () => {
     expect(result).toBeDefined();
     expect(result?.wins).toBe(1);
     expect(result?.battles).toBe(1);
+  });
+});
+
+describe("evaluateTeam scoring modules", () => {
+  const teamHeroes = teamA.map((id) => hero(id, "STR"));
+
+  it("uses the configured specific-history and general-win-rate budgets", () => {
+    const combats = [combat(teamA, true)];
+
+    withTeamAScoringSettings(
+      {
+        specificHistoryWeight: 1,
+        core4Weight: 0,
+        generalWinRateWeight: 0,
+        specificHistoryPoints: 50,
+        core4Points: 30,
+        generalWinRatePoints: 20,
+      },
+      () => {
+        const specificOnly = evaluateTeam(teamHeroes, combats, undefined, enemy);
+        expect(specificOnly.score).toBeCloseTo(12.5, 10);
+      }
+    );
+
+    withTeamAScoringSettings(
+      {
+        specificHistoryWeight: 0,
+        core4Weight: 0,
+        generalWinRateWeight: 1,
+        specificHistoryPoints: 50,
+        core4Points: 30,
+        generalWinRatePoints: 20,
+      },
+      () => {
+        const generalOnly = evaluateTeam(teamHeroes, combats, undefined, enemy);
+        expect(generalOnly.score).toBeCloseTo(20, 10);
+      }
+    );
+  });
+
+  it("changes evaluateTeam when the Team A Core4 budget changes", () => {
+    const combats = [combat(teamA, true), combat(teamA, true)];
+
+    let scoreWith30Points = 0;
+    let scoreWith60Points = 0;
+
+    withTeamAScoringSettings(
+      {
+        specificHistoryWeight: 0,
+        core4Weight: 1,
+        generalWinRateWeight: 0,
+        specificHistoryPoints: 50,
+        core4Points: 30,
+        generalWinRatePoints: 20,
+      },
+      () => {
+        scoreWith30Points = evaluateTeam(teamHeroes, combats, undefined, enemy).score;
+      }
+    );
+
+    withTeamAScoringSettings(
+      {
+        specificHistoryWeight: 0,
+        core4Weight: 1,
+        generalWinRateWeight: 0,
+        specificHistoryPoints: 50,
+        core4Points: 60,
+        generalWinRatePoints: 20,
+      },
+      () => {
+        scoreWith60Points = evaluateTeam(teamHeroes, combats, undefined, enemy).score;
+      }
+    );
+
+    expect(scoreWith30Points).toBeCloseTo(15, 10);
+    expect(scoreWith60Points).toBeCloseTo(30, 10);
+    expect(scoreWith60Points).toBeGreaterThan(scoreWith30Points);
   });
 });
 
