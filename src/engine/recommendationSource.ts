@@ -137,11 +137,16 @@ export function recommendTeamWithSource(
     }
   );
 
+  // Le callback est exécuté par le moteur pendant l'appel ci-dessus.
+  // Cette assertion évite que TypeScript considère "source" comme
+  // définitivement égal à sa valeur d'initialisation.
+  const detectedSource = source as RecommendationSource;
+
   // Le moteur principal reçoit le pool activé. Si aucun candidat exact,
   // Core4 ou usage n'a produit une équipe, on réévalue ici l'historique
   // de classes avec le catalogue complet pour résoudre les classes des
   // ennemis, tout en exigeant que les 5 héros proposés soient activés.
-  if (source !== "exact-history" && source !== "core4") {
+  if (detectedSource !== "exact-history" && detectedSource !== "core4") {
     const historicalClassTeam = findBestEnabledClassHistoryTeam(
       enemyIds,
       heroes,
@@ -164,7 +169,7 @@ export function recommendTeamWithSource(
 
   return {
     team: validTeam.length === TEAM_SIZE ? validTeam : [],
-    source: validTeam.length === TEAM_SIZE ? source : "fallback",
+    source: validTeam.length === TEAM_SIZE ? detectedSource : "fallback",
   };
 }
 
