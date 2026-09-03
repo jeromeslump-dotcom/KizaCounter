@@ -4,6 +4,7 @@ import {
   calculateWinRate,
   evaluateEnemyClassHistory,
   evaluateExactTeamHistory,
+  recommendTeam,
 } from "../src/engine/scoring";
 import {
   analyzeCore4Plus1,
@@ -77,7 +78,15 @@ describe("recommendation engine history", () => {
     const result = evaluateEnemyClassHistory(
       teamA,
       enemy,
-      [combat(teamA, true, ["other-a", "other-b", "other-c", "other-d", "other-e"])],
+      [
+        combat(teamA, true, [
+          "other-a",
+          "other-b",
+          "other-c",
+          "other-d",
+          "other-e",
+        ]),
+      ],
       heroes
     );
 
@@ -85,6 +94,109 @@ describe("recommendation engine history", () => {
     expect(result.wins).toBe(1);
     expect(result.winRate).toBe(100);
     expect(result.classKey).toBe("AGI|INT|INT|STR|STR");
+  });
+});
+
+describe("recommendTeam priority", () => {
+  it("prefers an exact historical winning team before other recommendation sources", () => {
+    const heroes = [
+      ...teamA.map((id) => hero(id, "STR")),
+      ...teamB.map((id) => hero(id, "INT")),
+      ...enemy.map((id) => hero(id, "AGI")),
+    ];
+
+    let source: string | undefined;
+
+    const result = recommendTeam(
+      enemy,
+      heroes,
+      [combat(teamA, true)],
+      (value) => {
+        source = value;
+      }
+    );
+
+    expect(source).toBe("exact-history");
+    expect(result.map((hero) => hero.id).sort()).toEqual([...teamA].sort());
+  });
+
+  it("chooses the best complete Core4 plus fifth hero, not simply the best Core4", () => {
+    const coreATeam = ["a", "b", "c", "d", "x"];
+    const coreBWinningTeam = ["a", "b", "c", "e", "y"];
+    const coreBLosingTeam = ["a", "b", "c", "e", "z"];
+
+    const combats: Combat[] = [
+      ...Array.from({ length: 17 }, () => combat(coreATeam, true)),
+      ...Array.from({ length: 3 }, () => combat(coreATeam, false)),
+      ...Array.from({ length: 16 }, () => combat(coreBWinningTeam, true)),
+      ...Array.from({ length: 4 }, () => combat(coreBLosingTeam, false)),
+    ];
+
+    const heroes = [
+      ...["a", "b", "c", "d", "e", "x", "y", "z"].map((id) =>
+        hero(id, "STR")
+      ),
+      ...enemy.map((id) => hero(id, "AGI")),
+    ];
+
+    let source: string | undefined;
+
+    const result = recommendTeam(
+      enemy,
+      heroes,
+      combats,
+      (value) => {
+        source = value;
+      }
+    );
+
+    expect(source).toBe("core4");
+    expect(result.map((hero) => hero.id).sort()).toEqual(
+      [...coreBWinningTeam].sort()
+    );
+  });
+
+  it("uses enemy class history when no exact or Core4 history is available", () => {
+    const targetEnemy = [
+      "enemy-str-1",
+      "enemy-str-2",
+      "enemy-agi",
+      "enemy-int-1",
+      "enemy-int-2",
+    ];
+    const historicalEnemy = [
+      "other-str-1",
+      "other-str-2",
+      "other-agi",
+      "other-int-1",
+      "other-int-2",
+    ];
+    const historicalTeam = ["class-a", "class-b", "class-c", "class-d", "class-e"];
+
+    const heroes = [
+      ...targetEnemy.map((id) => hero(id, "STR")),
+      ...historicalEnemy.map((id, index) =>
+        hero(id, ["STR", "STR", "AGI", "INT", "INT"][index] as Hero["cls"])
+      ),
+      ...historicalTeam.map((id) => hero(id, "INT")),
+      hero("fallback-a", "AGI"),
+    ];
+
+    let source: string | undefined;
+
+    const result = recommendTeam(
+      targetEnemy,
+      heroes,
+      [combat(historicalTeam, true, historicalEnemy)],
+      (value) => {
+        source = value;
+      }
+    );
+
+    expect(source).toBe("class-history");
+    expect(result.map((hero) => hero.id).sort()).toEqual(
+      [...historicalTeam].sort()
+    );
   });
 });
 
@@ -160,7 +272,12 @@ describe("Core4 historical engine", () => {
 
   it("returns zero for an unavailable Core4 replacement", () => {
     expect(
-      core4ReplacementScore(enemy, teamA.slice(0, 4), "hero-z", [combat(teamA, true)])
+      core4ReplacementScore(
+        enemy,
+        teamA.slice(0, 4),
+        "hero-z",
+        [combat(teamA, true)]
+      )
     ).toBe(0);
   });
 });
