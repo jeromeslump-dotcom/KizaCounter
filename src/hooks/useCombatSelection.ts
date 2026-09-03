@@ -2,7 +2,6 @@ import { useEffect, useMemo, useRef, useState } from "react";
 
 import type { Combat, Hero } from "../types";
 
-import { recommendAlternativeTeam } from "../engine/scoring";
 import {
   recommendTeamWithSource,
   type RecommendationSource,
@@ -97,16 +96,24 @@ export default function useCombatSelection({
     const finalSource =
       finalRecommendation.length === TEAM_SIZE ? recommendation.source : null;
 
-    const alternative = recommendAlternativeTeam(
-      enemyTeamIds,
-      availableHeroes,
-      combats,
-      finalRecommendation
+    // ÉQUIPE N°2 : on relance exactement le même moteur de recommandation,
+    // mais sans les 5 héros de l'équipe n°1. Cela remplace l'ancien moteur
+    // d'alternative (score individuel + Core4 + historiques + pénalité), qui
+    // pouvait reconstruire une équipe générique indépendante de l'ennemi.
+    const alternativePool = availableHeroes.filter(
+      (hero) => !finalRecommendation.some((selected) => selected.id === hero.id)
     );
 
+    const secondRecommendation =
+      alternativePool.length >= TEAM_SIZE
+        ? recommendTeamWithSource(enemyTeamIds, alternativePool, combats).team
+        : [];
+
     const validAlternative =
-      alternative.length === TEAM_SIZE
-        ? alternative.filter((hero: Hero) => enabledHeroIds.has(hero.id))
+      secondRecommendation.length === TEAM_SIZE
+        ? secondRecommendation.filter((hero: Hero) =>
+            enabledHeroIds.has(hero.id)
+          )
         : [];
 
     const finalAlternative =
