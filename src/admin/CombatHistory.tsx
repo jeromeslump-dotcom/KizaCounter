@@ -31,12 +31,12 @@ export default function CombatHistory({
     [combats, deletedIds]
   );
 
-  const creatorIds = useMemo(
+  const userIds = useMemo(
     () =>
       Array.from(
         new Set(
           visibleCombats
-            .map((combat) => combat.created_by)
+            .map((combat) => combat.user_id)
             .filter((id): id is string => Boolean(id))
         )
       ),
@@ -47,7 +47,7 @@ export default function CombatHistory({
     let cancelled = false;
 
     async function loadProfiles() {
-      if (creatorIds.length === 0) {
+      if (userIds.length === 0) {
         setProfiles([]);
         return;
       }
@@ -55,7 +55,7 @@ export default function CombatHistory({
       const { data, error } = await supabase
         .from("profiles")
         .select("id, display_name")
-        .in("id", creatorIds);
+        .in("id", userIds);
 
       if (error) {
         console.error("Erreur chargement des utilisateurs :", error);
@@ -72,7 +72,7 @@ export default function CombatHistory({
     return () => {
       cancelled = true;
     };
-  }, [creatorIds]);
+  }, [userIds]);
 
   if (!open) return null;
 
@@ -275,7 +275,7 @@ export default function CombatHistory({
                     <span>👤</span>
                     <span>Enregistré par :</span>
                     <strong className="ui-text-primary">
-                      {getUserName(combat.created_by)}
+                      {getUserName(combat.user_id)}
                     </strong>
                   </div>
                 </div>
