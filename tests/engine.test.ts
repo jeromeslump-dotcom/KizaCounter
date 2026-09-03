@@ -42,12 +42,16 @@ function hero(id: string, cls: Hero["cls"]): Hero {
 
 describe("recommendation engine history", () => {
   it("calculates win rates correctly", () => {
-    const result = evaluateExactTeamHistory(teamA, [
-      combat(teamA, true),
-      combat(teamA, true),
-      combat(teamA, false),
-      combat(teamB, true),
-    ]);
+    const result = evaluateExactTeamHistory(
+      teamA,
+      enemy,
+      [
+        combat(teamA, true),
+        combat(teamA, true),
+        combat(teamA, false),
+        combat(teamB, true),
+      ]
+    );
 
     expect(result?.wins).toBe(2);
     expect(result?.losses).toBe(1);
@@ -56,7 +60,7 @@ describe("recommendation engine history", () => {
   });
 
   it("keeps a single historical win eligible for exact history", () => {
-    const result = evaluateExactTeamHistory(teamA, [combat(teamA, true)]);
+    const result = evaluateExactTeamHistory(teamA, enemy, [combat(teamA, true)]);
 
     expect(result).toBeDefined();
     expect(result?.wins).toBe(1);
@@ -64,18 +68,32 @@ describe("recommendation engine history", () => {
   });
 
   it("matches historical teams by enemy class composition", () => {
-    const targetEnemy = ["enemy-str-1", "enemy-str-2", "enemy-agi", "enemy-int-1", "enemy-int-2"];
-    const historicalEnemy = ["other-str-1", "other-str-2", "other-agi", "other-int-1", "other-int-2"];
+    const targetEnemy = [
+      "enemy-str-1",
+      "enemy-str-2",
+      "enemy-agi",
+      "enemy-int-1",
+      "enemy-int-2",
+    ];
+    const historicalEnemy = [
+      "other-str-1",
+      "other-str-2",
+      "other-agi",
+      "other-int-1",
+      "other-int-2",
+    ];
     const classes: Hero["cls"][] = ["STR", "STR", "AGI", "INT", "INT"];
     const heroes = [
       ...targetEnemy.map((id, index) => hero(id, classes[index])),
       ...historicalEnemy.map((id, index) => hero(id, classes[index])),
+      ...teamA.map((id) => hero(id, "INT")),
     ];
 
     const result = evaluateEnemyClassHistory(
+      teamA,
       targetEnemy,
-      heroes,
-      [combat(teamA, true, historicalEnemy)]
+      [combat(teamA, true, historicalEnemy)],
+      heroes
     );
 
     expect(result).toBeDefined();
@@ -111,13 +129,12 @@ describe("recommendTeam priority", () => {
     const coreATeam = ["a", "b", "c", "d", "x"];
     const coreBWinningTeam = ["a", "b", "c", "e", "y"];
     const coreBLosingTeam = ["a", "b", "c", "e", "z"];
-    const historicalEnemy = ["history-a", "history-b", "history-c", "history-d", "history-e"];
 
     const combats: Combat[] = [
-      ...Array.from({ length: 8 }, () => combat(coreATeam, true, historicalEnemy)),
-      ...Array.from({ length: 12 }, () => combat(coreATeam, false, historicalEnemy)),
-      ...Array.from({ length: 6 }, () => combat(coreBWinningTeam, true, historicalEnemy)),
-      ...Array.from({ length: 14 }, () => combat(coreBLosingTeam, false, historicalEnemy)),
+      ...Array.from({ length: 8 }, () => combat(coreATeam, true)),
+      ...Array.from({ length: 12 }, () => combat(coreATeam, false)),
+      ...Array.from({ length: 6 }, () => combat(coreBWinningTeam, true)),
+      ...Array.from({ length: 14 }, () => combat(coreBLosingTeam, false)),
     ];
 
     const analyses = analyzeCore4Plus1(enemy, combats);
@@ -224,6 +241,8 @@ describe("Core4 historical engine", () => {
   });
 
   it("does not accept a replacement below its minimum battle threshold", () => {
+    const alternateTeam = ["hero-a", "hero-b", "hero-c", "hero-d", "hero-f"];
+
     const settings = {
       ...DEFAULT_ENGINE_SETTINGS,
       advanced: {
@@ -235,12 +254,14 @@ describe("Core4 historical engine", () => {
 
     const analyses = analyzeCore4Plus1(
       enemy,
-      [combat(teamA, true), combat(teamA, false)],
+      [combat(teamA, true), combat(alternateTeam, false)],
       settings
     );
 
-    expect(analyses).toHaveLength(5);
-    expect(analyses[0].replacements).toHaveLength(0);
+    expect(analyses).toHaveLength(9);
+    expect(analyses.every((analysis) => analysis.replacements.length === 0)).toBe(
+      true
+    );
   });
 
   it("calculates replacement score from delta and confidence", () => {
@@ -263,7 +284,7 @@ describe("Core4 historical engine", () => {
     const replacement = analyses[0].replacements[0];
 
     expect(replacement.delta).toBe(0);
-    expect(replacement.confidence).toBeCloseTo(1 / 5, 10);
+    expect(replacement.confidence).toBeCloseTo(2 / 6, 10);
     expect(replacement.score).toBeCloseTo(
       replacement.delta * replacement.confidence,
       10
