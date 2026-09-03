@@ -197,6 +197,7 @@ export default function App() {
           <HeroGrid
             heroes={HEROES}
             enabledHeroIds={enabledHeroIds}
+            enabledOnly={false}
             activeClass={activeClass}
             query={query}
             sortBy={sortBy}
