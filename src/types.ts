@@ -16,7 +16,6 @@ export interface Combat {
   created_at?: string;
 
   user_id?: string | null;
-  created_by?: string | null;
   status?: string | null;
 }
 
@@ -103,7 +102,14 @@ export interface TeamEvaluation {
 export type HeroClassFilter = "ALL" | HeroClass;
 
 export type HeroSort =
-  "played" | "hp" | "atk" | "matk" | "totalAtk" | "def" | "mdef" | "totalDef";
+  | "played"
+  | "hp"
+  | "atk"
+  | "matk"
+  | "totalAtk"
+  | "def"
+  | "mdef"
+  | "totalDef";
 
 export interface HeroFilterState {
   search: string;
