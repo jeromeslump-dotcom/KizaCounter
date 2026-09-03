@@ -1,3 +1,5 @@
+import { useMemo } from "react";
+
 import type { Combat, Hero, HeroClassFilter, HeroSort } from "../types";
 
 import {
@@ -60,17 +62,40 @@ export default function CounterModal({
   onQueryChange,
   onClassChange,
   onSortChange,
+  onHeroClick,
   onSave,
 }: CounterModalProps) {
   if (!open) return null;
 
-  const enemyIds = enemies.map((hero) => hero.id);
-  const currentTeamIds = team.map((hero) => hero.id);
+  const enemyIds = useMemo(() => enemies.map((hero) => hero.id), [enemies]);
+  const currentTeamIds = useMemo(() => team.map((hero) => hero.id), [team]);
+  const recommendedIds = useMemo(
+    () => recommendedTeam.map((hero) => hero.id),
+    [recommendedTeam]
+  );
+  const alternativeIds = useMemo(
+    () => alternativeTeam.map((hero) => hero.id),
+    [alternativeTeam]
+  );
 
-  const currentTeamHistory = evaluateExactTeamHistory(
-    currentTeamIds,
-    enemyIds,
-    combats
+  const currentTeamHistory = useMemo(
+    () => evaluateExactTeamHistory(currentTeamIds, enemyIds, combats),
+    [currentTeamIds, enemyIds, combats]
+  );
+
+  const recommendedExactHistory = useMemo(
+    () => evaluateExactTeamHistory(recommendedIds, enemyIds, combats),
+    [recommendedIds, enemyIds, combats]
+  );
+
+  const recommendedClassHistory = useMemo(
+    () => evaluateEnemyClassHistory(recommendedIds, enemyIds, combats, heroes),
+    [recommendedIds, enemyIds, combats, heroes]
+  );
+
+  const alternativeHistory = useMemo(
+    () => evaluateExactTeamHistory(alternativeIds, enemyIds, combats),
+    [alternativeIds, enemyIds, combats]
   );
 
   const currentTeamHistoryLabel =
@@ -80,24 +105,9 @@ export default function CounterModal({
         ? `${Math.round(currentTeamHistory.winRate)} % · ${currentTeamHistory.battles} combat${currentTeamHistory.battles > 1 ? "s" : ""}`
         : `${Math.round(currentTeamHistory.winRate)} %`;
 
-  const recommendedIds = recommendedTeam.map((hero) => hero.id);
-
   // Le détail affiché doit correspondre à la source qui a réellement
   // produit la recommandation. On ne mélange pas historique exact,
   // historique de classes et les autres mécanismes de sélection.
-  const recommendedExactHistory = evaluateExactTeamHistory(
-    recommendedIds,
-    enemyIds,
-    combats
-  );
-
-  const recommendedClassHistory = evaluateEnemyClassHistory(
-    recommendedIds,
-    enemyIds,
-    combats,
-    heroes
-  );
-
   let historyLabel = "Aucune statistique historique affichée";
 
   if (recommendationSource === "exact-history") {
@@ -115,13 +125,6 @@ export default function CounterModal({
           ? `${Math.round(recommendedClassHistory.winRate)} % · ${recommendedClassHistory.battles} combat${recommendedClassHistory.battles > 1 ? "s" : ""}`
           : `${Math.round(recommendedClassHistory.winRate)} %`;
   }
-
-  const alternativeIds = alternativeTeam.map((hero) => hero.id);
-  const alternativeHistory = evaluateExactTeamHistory(
-    alternativeIds,
-    enemyIds,
-    combats
-  );
 
   const alternativeHistoryLabel =
     alternativeHistory.battles === 0
