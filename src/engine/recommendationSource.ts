@@ -11,185 +11,126 @@ export interface TeamRecommendation {
 
 const TEAM_SIZE = 5;
 
-function uniqueIds(ids: string[]): string[] {
-  return [...new Set(ids)];
-}
-
-function teamKey(ids: string[]): string {
-  return uniqueIds(ids).sort().join("|");
-}
+function uniqueIds(ids: string[]): string[] { return [...new Set(ids)]; }
+function teamKey(ids: string[]): string { return uniqueIds(ids).sort().join("|"); }
 
 function getClassKey(ids: string[], heroes: Hero[]): string | null {
-  const classes = ids
-    .map((id) => heroes.find((hero) => hero.id === id)?.cls)
-    .filter(
-      (cls): cls is Hero["cls"] =>
-        cls === "STR" || cls === "AGI" || cls === "INT"
-    );
-
+  const classes = ids.map((id) => heroes.find((hero) => hero.id === id)?.cls).filter(
+    (cls): cls is Hero["cls"] => cls === "STR" || cls === "AGI" || cls === "INT"
+  );
   if (classes.length !== TEAM_SIZE) return null;
-
   return [...classes].sort().join("|");
 }
 
+function historicalReliability(wins: number, losses: number): number {
+  const settings = getEngineSettings();
+  const battles = wins + losses;
+  if (battles <= 0) return 0;
+  const confidenceBattles = Math.max(1, settings.advanced.teamAHistoricalConfidenceBattles);
+  const confidence = battles / (battles + confidenceBattles);
+  return (wins / battles) * (settings.advanced.teamAHistoricalReliabilityBase +
+    settings.advanced.teamAHistoricalReliabilityConfidenceWeight * confidence);
+}
+
+function orderHistoricalCandidates(candidates: Map<string, { heroIds: string[]; wins: number; losses: number }>) {
+  return [...candidates.values()].filter((candidate) => candidate.wins > 0).sort((a, b) =>
+    historicalReliability(b.wins, b.losses) - historicalReliability(a.wins, a.losses) ||
+    b.wins + b.losses - (a.wins + a.losses) || b.wins - a.wins ||
+    teamKey(a.heroIds).localeCompare(teamKey(b.heroIds))
+  );
+}
+
+function resolveCandidateTeam(heroIds: string[], candidateHeroes: Hero[]): Hero[] | null {
+  const team = heroIds.map((id) => candidateHeroes.find((hero) => hero.id === id))
+    .filter((hero): hero is Hero => Boolean(hero));
+  return team.length === TEAM_SIZE ? team : null;
+}
+
 function findBestEnabledClassHistoryTeam(
-  enemyIds: string[],
-  heroes: Hero[],
-  candidateHeroes: Hero[],
-  combats: Combat[]
+  enemyIds: string[], heroes: Hero[], candidateHeroes: Hero[], combats: Combat[], excludedTeamKey?: string
 ): Hero[] | null {
   const targetClassKey = getClassKey(enemyIds, heroes);
-
   if (!targetClassKey) return null;
-
   const enabledIds = new Set(candidateHeroes.map((hero) => hero.id));
-  const candidates = new Map<
-    string,
-    { heroIds: string[]; wins: number; losses: number }
-  >();
+  const candidates = new Map<string, { heroIds: string[]; wins: number; losses: number }>();
 
   for (const combat of combats) {
     const historicalEnemy = uniqueIds(combat.enemy_heroes ?? []);
-
-    if (historicalEnemy.length !== TEAM_SIZE) continue;
-    if (getClassKey(historicalEnemy, heroes) !== targetClassKey) continue;
-
+    if (historicalEnemy.length !== TEAM_SIZE || getClassKey(historicalEnemy, heroes) !== targetClassKey) continue;
     const heroIds = uniqueIds(combat.my_heroes ?? []);
-
-    if (heroIds.length !== TEAM_SIZE) continue;
-    if (!heroIds.every((id) => enabledIds.has(id))) continue;
-
+    if (heroIds.length !== TEAM_SIZE || !heroIds.every((id) => enabledIds.has(id))) continue;
     const key = teamKey(heroIds);
-    const candidate = candidates.get(key) ?? {
-      heroIds,
-      wins: 0,
-      losses: 0,
-    };
-
+    if (key === excludedTeamKey) continue;
+    const candidate = candidates.get(key) ?? { heroIds, wins: 0, losses: 0 };
     combat.won ? candidate.wins++ : candidate.losses++;
     candidates.set(key, candidate);
   }
 
-  const settings = getEngineSettings();
-  const confidenceBattles = Math.max(
-    1,
-    settings.advanced.teamAHistoricalConfidenceBattles
-  );
-
-  const ordered = [...candidates.values()]
-    .filter((candidate) => candidate.wins > 0)
-    .sort((a, b) => {
-      const aBattles = a.wins + a.losses;
-      const bBattles = b.wins + b.losses;
-
-      const aReliability =
-        aBattles > 0
-          ? (a.wins / aBattles) *
-            (settings.advanced.teamAHistoricalReliabilityBase +
-              settings.advanced.teamAHistoricalReliabilityConfidenceWeight *
-                (aBattles / (aBattles + confidenceBattles)))
-          : 0;
-
-      const bReliability =
-        bBattles > 0
-          ? (b.wins / bBattles) *
-            (settings.advanced.teamAHistoricalReliabilityBase +
-              settings.advanced.teamAHistoricalReliabilityConfidenceWeight *
-                (bBattles / (bBattles + confidenceBattles)))
-          : 0;
-
-      return (
-        bReliability - aReliability ||
-        bBattles - aBattles ||
-        b.wins - a.wins ||
-        teamKey(a.heroIds).localeCompare(teamKey(b.heroIds))
-      );
-    });
-
-  for (const candidate of ordered) {
-    const team = candidate.heroIds
-      .map((id) => candidateHeroes.find((hero) => hero.id === id))
-      .filter((hero): hero is Hero => Boolean(hero));
-
-    if (team.length === TEAM_SIZE) return team;
+  for (const candidate of orderHistoricalCandidates(candidates)) {
+    const team = resolveCandidateTeam(candidate.heroIds, candidateHeroes);
+    if (team) return team;
   }
-
   return null;
 }
 
-export function recommendTeamWithSource(
-  enemyIds: string[],
-  heroes: Hero[],
-  combats: Combat[],
-  candidateHeroes: Hero[] = heroes
-): TeamRecommendation {
-  let source: RecommendationSource = "fallback";
+function findBestEnabledExactHistoryTeam(
+  enemyIds: string[], candidateHeroes: Hero[], combats: Combat[], excludedTeamKey?: string
+): Hero[] | null {
+  const enabledIds = new Set(candidateHeroes.map((hero) => hero.id));
+  const targetKey = teamKey(enemyIds);
+  const candidates = new Map<string, { heroIds: string[]; wins: number; losses: number }>();
 
-  // IMPORTANT : heroes = catalogue complet pour résoudre les classes
-  // des ennemis et des historiques. candidateHeroes = seuls héros
-  // autorisés dans l'équipe recommandée.
-  const team = recommendTeam(
-    enemyIds,
-    candidateHeroes,
-    combats,
-    (detectedSource) => {
-      source = detectedSource;
-    }
-  );
-
-  // Le callback est exécuté par le moteur pendant l'appel ci-dessus.
-  // Cette assertion évite que TypeScript considère "source" comme
-  // définitivement égal à sa valeur d'initialisation.
-  const detectedSource = source as RecommendationSource;
-
-  // Le moteur principal reçoit le pool activé. Si aucun candidat exact,
-  // Core4 ou usage n'a produit une équipe, on réévalue ici l'historique
-  // de classes avec le catalogue complet pour résoudre les classes des
-  // ennemis, tout en exigeant que les 5 héros proposés soient activés.
-  if (detectedSource !== "exact-history" && detectedSource !== "core4") {
-    const historicalClassTeam = findBestEnabledClassHistoryTeam(
-      enemyIds,
-      heroes,
-      candidateHeroes,
-      combats
-    );
-
-    if (historicalClassTeam && historicalClassTeam.length === TEAM_SIZE) {
-      return {
-        team: historicalClassTeam,
-        source: "class-history",
-      };
-    }
+  for (const combat of combats) {
+    const historicalEnemy = uniqueIds(combat.enemy_heroes ?? []);
+    if (historicalEnemy.length !== TEAM_SIZE || teamKey(historicalEnemy) !== targetKey) continue;
+    const heroIds = uniqueIds(combat.my_heroes ?? []);
+    if (heroIds.length !== TEAM_SIZE || !heroIds.every((id) => enabledIds.has(id))) continue;
+    const key = teamKey(heroIds);
+    if (key === excludedTeamKey) continue;
+    const candidate = candidates.get(key) ?? { heroIds, wins: 0, losses: 0 };
+    combat.won ? candidate.wins++ : candidate.losses++;
+    candidates.set(key, candidate);
   }
 
-  // Sécurité finale : aucune recommandation ne doit contenir un héros
-  // désactivé et aucune équipe partielle ne doit être renvoyée.
-  const enabledIds = new Set(candidateHeroes.map((hero) => hero.id));
-  const validTeam = team.filter((hero) => enabledIds.has(hero.id));
-
-  return {
-    team: validTeam.length === TEAM_SIZE ? validTeam : [],
-    source: validTeam.length === TEAM_SIZE ? detectedSource : "fallback",
-  };
+  for (const candidate of orderHistoricalCandidates(candidates)) {
+    const team = resolveCandidateTeam(candidate.heroIds, candidateHeroes);
+    if (team) return team;
+  }
+  return null;
 }
 
-export function recommendationSourceLabel(
-  source: RecommendationSource
-): string {
+/** Cherche une vraie deuxième équipe historique : exact, puis même composition de classes. */
+export function findHistoricalAlternativeTeam(
+  enemyIds: string[], heroes: Hero[], candidateHeroes: Hero[], combats: Combat[], excludedTeamIds: string[]
+): Hero[] | null {
+  const excludedKey = teamKey(excludedTeamIds);
+  return findBestEnabledExactHistoryTeam(enemyIds, candidateHeroes, combats, excludedKey) ??
+    findBestEnabledClassHistoryTeam(enemyIds, heroes, candidateHeroes, combats, excludedKey);
+}
+
+export function recommendTeamWithSource(
+  enemyIds: string[], heroes: Hero[], combats: Combat[], candidateHeroes: Hero[] = heroes
+): TeamRecommendation {
+  let source: RecommendationSource = "fallback";
+  const team = recommendTeam(enemyIds, candidateHeroes, combats, (detectedSource) => { source = detectedSource; });
+  const detectedSource = source as RecommendationSource;
+
+  if (detectedSource !== "exact-history" && detectedSource !== "core4") {
+    const historicalClassTeam = findBestEnabledClassHistoryTeam(enemyIds, heroes, candidateHeroes, combats);
+    if (historicalClassTeam) return { team: historicalClassTeam, source: "class-history" };
+  }
+
+  const enabledIds = new Set(candidateHeroes.map((hero) => hero.id));
+  const validTeam = team.filter((hero) => enabledIds.has(hero.id));
+  return { team: validTeam.length === TEAM_SIZE ? validTeam : [], source: validTeam.length === TEAM_SIZE ? detectedSource : "fallback" };
+}
+
+export function recommendationSourceLabel(source: RecommendationSource): string {
   switch (source) {
-    case "exact-history":
-      return "Historique exact";
-
-    case "class-history":
-      return "Historique classes";
-
-    case "core4":
-      return "Core4 historique";
-
-    case "counter-usage":
-      return "Counter usage / score";
-
-    case "fallback":
-      return "Fallback";
+    case "exact-history": return "Historique exact";
+    case "class-history": return "Historique classes";
+    case "core4": return "Core4 historique";
+    case "counter-usage": return "Counter usage / score";
+    case "fallback": return "Fallback";
   }
 }
