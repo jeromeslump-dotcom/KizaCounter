@@ -78,10 +78,13 @@ export default function useCombatSelection({
       return;
     }
 
+    // Le catalogue complet sert de référence (classes, IDs, historiques).
+    // availableHeroes reste le pool strictement autorisé pour les équipes.
     const recommendation = recommendTeamWithSource(
       enemyTeamIds,
-      availableHeroes,
-      combats
+      heroes,
+      combats,
+      availableHeroes
     );
 
     const validRecommendation =
@@ -124,8 +127,9 @@ export default function useCombatSelection({
 
       const candidateRecommendation = recommendTeamWithSource(
         enemyTeamIds,
-        alternativePool,
-        combats
+        heroes,
+        combats,
+        alternativePool
       );
 
       const candidateTeam =
@@ -162,8 +166,9 @@ export default function useCombatSelection({
       if (alternativePool.length >= TEAM_SIZE) {
         const fallbackRecommendation = recommendTeamWithSource(
           enemyTeamIds,
-          alternativePool,
-          combats
+          heroes,
+          combats,
+          alternativePool
         );
 
         if (fallbackRecommendation.team.length === TEAM_SIZE) {
