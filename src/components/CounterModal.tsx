@@ -62,7 +62,6 @@ export default function CounterModal({
   onQueryChange,
   onClassChange,
   onSortChange,
-  onHeroClick,
   onSave,
 }: CounterModalProps) {
   if (!open) return null;
