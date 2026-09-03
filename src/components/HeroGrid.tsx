@@ -16,6 +16,13 @@ interface HeroGridProps {
 
   enabledHeroIds: Set<string>;
 
+  /**
+   * Quand true, seuls les héros activés sont affichés.
+   * Le roster ennemi peut désactiver ce filtre pour garder
+   * tous les héros sélectionnables, même ceux désactivés.
+   */
+  enabledOnly?: boolean;
+
   activeClass: HeroClassFilter;
 
   query: string;
@@ -42,6 +49,7 @@ interface HeroGridProps {
 export default function HeroGrid({
   heroes,
   enabledHeroIds,
+  enabledOnly = true,
   activeClass,
   query,
   sortBy,
@@ -58,13 +66,13 @@ export default function HeroGrid({
 
   const filteredHeroes = useMemo(() => {
     return filterAndSortHeroes(heroes, {
-      enabledHeroIds,
+      enabledHeroIds: enabledOnly ? enabledHeroIds : new Set(heroes.map((hero) => hero.id)),
       activeClass: activeClass === "ALL" ? "All" : activeClass,
       query,
       sortBy,
       usage,
     });
-  }, [heroes, enabledHeroIds, activeClass, query, sortBy, usage]);
+  }, [heroes, enabledHeroIds, enabledOnly, activeClass, query, sortBy, usage]);
 
   // ==========================================================
   // RENDER
