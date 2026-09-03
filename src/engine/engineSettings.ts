@@ -64,12 +64,18 @@ export const DEFAULT_ENGINE_SETTINGS: EngineSettings = {
 
     teamBCounterWinRateMultiplier: 1.2,
 
-    teamAHistoricalConfidenceBattles: 10,
+    // //////// MODIF
+    // Même référence de confiance pour Team A et Core4.
+    // 4 combats donnent 50 % de confiance.
+    teamAHistoricalConfidenceBattles: 4,
     teamAHistoricalReliabilityBase: 0.35,
     teamAHistoricalReliabilityConfidenceWeight: 0.65,
 
     core4MinBattles: 2,
-    core4MinReplacementBattles: 1,
+    core4MinReplacementBattles: 3,
+
+    // //////// MODIF
+    // Même référence de confiance que Team A.
     core4ConfidenceBattles: 4,
   },
 };
