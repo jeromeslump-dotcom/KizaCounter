@@ -7,7 +7,7 @@ import type {
   TeamEvaluation,
   TeamScore,
 } from "../types";
-import { findBestCore4, analyzeCore4Plus1 } from "./historicalCore4";
+import { analyzeCore4Plus1 } from "./historicalCore4";
 import {
   getEngineSettings,
   getPointBudgets,
@@ -797,102 +797,138 @@ export function recommendTeam(
   // ==========================================================
   // 2. CORE4 HISTORIQUE
   // ==========================================================
+  //
+  // //////// MODIF
+  //
+  // On ne choisit PLUS d'abord un "meilleur Core4".
+  //
+  // Toutes les analyses Core4 sont parcourues.
+  // Pour CHAQUE Core4, on teste ses 5e héros disponibles.
+  // Ensuite seulement, on compare les ensembles complets.
+  //
+  // Le calcul utilise les scores déjà présents dans le moteur :
+  //
+  //   score Core4 =
+  //     winRate * confidence
+  //
+  //   score 5e =
+  //     replacement.score
+  //
+  // Puis on conserve le même poids Core4 existant.
+  // ==========================================================
 
-  const bestCore4 = findBestCore4(enemyIds, combats, settings);
+  const core4Analyses = analyzeCore4Plus1(enemyIds, combats, settings);
 
-  if (bestCore4) {
-    const core4Heroes = bestCore4.coreIds
-      .map((id) => heroes.find((hero) => hero.id === id))
-      .filter((hero): hero is Hero => Boolean(hero));
+  if (core4Analyses.length > 0) {
+    const budgets = getPointBudgets(settings, "A");
 
-    if (core4Heroes.length === 4) {
-      for (const hero of core4Heroes) {
-        // //////// MODIF
-        // Aucun filtrage contre les héros ennemis.
-        if (!recommended.some((selected) => selected.id === hero.id)) {
-          recommended.push(hero);
-        }
+    let bestCompleteTeam: Hero[] | null = null;
+    let bestCompleteScore = -Infinity;
+    let bestCoreScore = -Infinity;
+    let bestReplacementScore = -Infinity;
+
+    for (const analysis of core4Analyses) {
+      const core4Heroes = analysis.coreIds
+        .map((id) => heroes.find((hero) => hero.id === id))
+        .filter((hero): hero is Hero => Boolean(hero));
+
+      if (core4Heroes.length !== TEAM_SIZE - 1) {
+        continue;
       }
 
-      if (recommended.length === 4) {
-        const replacementScores = new Map(
-          bestCore4.replacements.map((replacement) => [
-            replacement.heroId,
-            replacement.score,
-          ])
-        );
+      // --------------------------------------------------------
+      // SCORE DU CORE4
+      //
+      // Même formule que celle utilisée précédemment pour
+      // sélectionner un Core4.
+      // --------------------------------------------------------
 
-        const core4Ids = core4Heroes.map((hero) => hero.id);
+      const coreConfidence = Math.min(
+        analysis.battles /
+          Math.max(1, settings.advanced.core4ConfidenceBattles),
+        1
+      );
 
-        let bestReplacement: Hero | null = null;
-        let bestReplacementScore = -Infinity;
+      const coreScore = analysis.winRate * coreConfidence;
 
-        for (const candidate of ranked) {
-          if (
-            core4Ids.includes(candidate.hero.id) ||
-            recommended.some((hero) => hero.id === candidate.hero.id)
-          ) {
-            continue;
-          }
+      const core4Ids = new Set(core4Heroes.map((hero) => hero.id));
 
-          const historicalScore = replacementScores.get(candidate.hero.id) ?? 0;
-
-          const finalScore =
-            candidate.score +
-            historicalScore *
-              settings.teamA.core4Weight *
-              (getPointBudgets(settings, "A").core4 / 100);
-
-          if (
-            finalScore > bestReplacementScore ||
-            (finalScore === bestReplacementScore &&
-              (!bestReplacement ||
-                candidate.hero.name.localeCompare(bestReplacement.name) < 0))
-          ) {
-            bestReplacementScore = finalScore;
-            bestReplacement = candidate.hero;
-          }
-        }
-
-        if (bestReplacement) {
-          recommended.push(bestReplacement);
-        }
-      }
-
-      const usedIds = new Set(recommended.map((hero) => hero.id));
+      // --------------------------------------------------------
+      // POUR CE CORE4 :
+      // TESTER TOUS LES 5e HÉROS HISTORIQUEMENT DISPONIBLES
+      // --------------------------------------------------------
 
       for (const candidate of ranked) {
-        if (recommended.length >= TEAM_SIZE) {
-          break;
-        }
-
-        if (usedIds.has(candidate.hero.id)) {
+        if (core4Ids.has(candidate.hero.id)) {
           continue;
         }
 
-        recommended.push(candidate.hero);
-        usedIds.add(candidate.hero.id);
-      }
+        const replacement = analysis.replacements.find(
+          (entry) => entry.heroId === candidate.hero.id
+        );
 
-      if (recommended.length < TEAM_SIZE) {
-        for (const hero of availableHeroes) {
-          if (recommended.length >= TEAM_SIZE) {
-            break;
-          }
+        if (!replacement) {
+          continue;
+        }
 
-          if (usedIds.has(hero.id)) {
-            continue;
-          }
+        // ------------------------------------------------------
+        // SCORE DU 5e
+        //
+        // C'est le score déjà calculé par historicalCore4.ts.
+        // Aucune nouvelle formule de remplacement n'est créée.
+        // ------------------------------------------------------
 
-          recommended.push(hero);
-          usedIds.add(hero.id);
+        const replacementScore = replacement.score;
+
+        // ------------------------------------------------------
+        // SCORE DE L'ENSEMBLE COMPLET
+        //
+        // On conserve le calcul qui existait déjà lorsque le
+        // moteur avait choisi un seul Core4 puis son remplacement.
+        // La différence est que ce calcul est maintenant effectué
+        // pour TOUS les Core4 possibles.
+        // ------------------------------------------------------
+
+        const completeScore =
+          coreScore +
+          replacementScore * settings.teamA.core4Weight * (budgets.core4 / 100);
+
+        const completeTeam = [...core4Heroes, candidate.hero];
+
+        const completeTeamKey = teamKey(completeTeam.map((hero) => hero.id));
+
+        const bestCompleteTeamKey = bestCompleteTeam
+          ? teamKey(bestCompleteTeam.map((hero) => hero.id))
+          : "";
+
+        // ------------------------------------------------------
+        // COMPARAISON DES ENSEMBLES COMPLETS
+        // ------------------------------------------------------
+
+        if (
+          completeScore > bestCompleteScore ||
+          (completeScore === bestCompleteScore &&
+            (coreScore > bestCoreScore ||
+              (coreScore === bestCoreScore &&
+                (replacementScore > bestReplacementScore ||
+                  (replacementScore === bestReplacementScore &&
+                    completeTeamKey.localeCompare(bestCompleteTeamKey) < 0)))))
+        ) {
+          bestCompleteTeam = completeTeam;
+          bestCompleteScore = completeScore;
+          bestCoreScore = coreScore;
+          bestReplacementScore = replacementScore;
         }
       }
+    }
 
-      if (recommended.length === TEAM_SIZE) {
-        onSource?.("core4");
-        return recommended;
-      }
+    // ----------------------------------------------------------
+    // SI UN ENSEMBLE CORE4 + 5e A ÉTÉ TROUVÉ
+    // ----------------------------------------------------------
+
+    if (bestCompleteTeam && bestCompleteTeam.length === TEAM_SIZE) {
+      onSource?.("core4");
+      return bestCompleteTeam;
     }
   }
 
