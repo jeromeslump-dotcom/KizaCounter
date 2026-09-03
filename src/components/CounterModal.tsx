@@ -82,17 +82,9 @@ export default function CounterModal({
 
   const recommendedIds = recommendedTeam.map((hero) => hero.id);
 
-  // //////// MODIF
-  // L'affichage de la recommandation utilise la source réelle
-  // de la recommandation.
-  //
-  // Historique exact :
-  //   → statistiques de l'historique exact.
-  //
-  // Historique classes :
-  //   → statistiques de l'historique de classes.
-  //
-  // Les autres sources ne doivent pas afficher un faux historique.
+  // Le détail affiché doit correspondre à la source qui a réellement
+  // produit la recommandation. On ne mélange pas historique exact,
+  // historique de classes et les autres mécanismes de sélection.
   const recommendedExactHistory = evaluateExactTeamHistory(
     recommendedIds,
     enemyIds,
@@ -106,7 +98,7 @@ export default function CounterModal({
     heroes
   );
 
-  let historyLabel = "Nouvelle équipe";
+  let historyLabel = "Aucune statistique historique affichée";
 
   if (recommendationSource === "exact-history") {
     historyLabel =
