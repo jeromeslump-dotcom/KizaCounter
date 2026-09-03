@@ -137,14 +137,11 @@ export function recommendTeamWithSource(
     }
   );
 
-  // Si un ennemi est désactivé, recommendTeam ne peut pas résoudre sa
-  // classe avec son pool activé. On réévalue alors uniquement le module
-  // "Historique classes" avec le catalogue complet, tout en exigeant que
-  // les 5 héros proposés soient activés.
-  if (
-    source === "counter-usage" ||
-    source === "fallback"
-  ) {
+  // Le moteur principal reçoit le pool activé. Si aucun candidat exact,
+  // Core4 ou usage n'a produit une équipe, on réévalue ici l'historique
+  // de classes avec le catalogue complet pour résoudre les classes des
+  // ennemis, tout en exigeant que les 5 héros proposés soient activés.
+  if (source !== "exact-history" && source !== "core4") {
     const historicalClassTeam = findBestEnabledClassHistoryTeam(
       enemyIds,
       heroes,
@@ -153,10 +150,9 @@ export function recommendTeamWithSource(
     );
 
     if (historicalClassTeam && historicalClassTeam.length === TEAM_SIZE) {
-      source = "class-history";
       return {
         team: historicalClassTeam,
-        source,
+        source: "class-history",
       };
     }
   }
