@@ -97,7 +97,6 @@ export default function useCombatSelection({
       finalRecommendation.length === TEAM_SIZE ? recommendation.source : null;
 
     // ÉQUIPE N°2 : même moteur de recommandation que l'équipe A.
-    // On interdit seulement la répétition EXACTE de l'équipe A :
     // B doit avoir au minimum 1 héros différent, mais peut conserver
     // les 4 autres héros de A si le moteur les considère meilleurs.
     const primaryIds = new Set(finalRecommendation.map((hero) => hero.id));
@@ -111,7 +110,6 @@ export default function useCombatSelection({
     };
 
     let bestAlternative: Hero[] = [];
-    let bestAlternativeSource: RecommendationSource | null = null;
     let bestAlternativeScore = -1;
 
     // On lance le même moteur plusieurs fois, chaque fois en retirant
@@ -139,22 +137,18 @@ export default function useCombatSelection({
 
       if (candidateTeam.length !== TEAM_SIZE) continue;
 
-      // Sécurité : B ne doit jamais être exactement identique à A.
       const differentHeroCount = candidateTeam.filter(
         (hero) => !primaryIds.has(hero.id)
       ).length;
 
       if (differentHeroCount < 1) continue;
 
-      // On privilégie la meilleure source du moteur, puis les équipes
-      // qui conservent le plus de héros de A (alternative minimale).
       const score =
         sourcePriority[candidateRecommendation.source] * 100 +
         (TEAM_SIZE - differentHeroCount);
 
       if (score > bestAlternativeScore) {
         bestAlternative = candidateTeam;
-        bestAlternativeSource = candidateRecommendation.source;
         bestAlternativeScore = score;
       }
     }
@@ -176,7 +170,6 @@ export default function useCombatSelection({
           bestAlternative = fallbackRecommendation.team.filter((hero: Hero) =>
             enabledHeroIds.has(hero.id)
           );
-          bestAlternativeSource = fallbackRecommendation.source;
         }
       }
     }
@@ -187,6 +180,22 @@ export default function useCombatSelection({
     setTeamIds(finalRecommendation.map((hero: Hero) => hero.id));
     setShowCounterModal(true);
   }
+
+  useEffect(() => {
+    // Un héros désactivé ne doit jamais rester dans Votre équipe,
+    // les recommandations ou l'alternative. En revanche, on ne touche
+    // volontairement pas à enemyIds : tous les héros restent valides
+    // pour composer l'équipe ennemie.
+    setTeamIds((current) =>
+      current.filter((id) => enabledHeroIds.has(id))
+    );
+    setRecommendedIds((current) =>
+      current.filter((id) => enabledHeroIds.has(id))
+    );
+    setAlternativeIds((current) =>
+      current.filter((id) => enabledHeroIds.has(id))
+    );
+  }, [enabledHeroIds]);
 
   useEffect(() => {
     if (enemyIds.length !== TEAM_SIZE) {
