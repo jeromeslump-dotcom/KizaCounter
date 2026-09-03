@@ -66,7 +66,9 @@ export default function HeroGrid({
 
   const filteredHeroes = useMemo(() => {
     return filterAndSortHeroes(heroes, {
-      enabledHeroIds: enabledOnly ? enabledHeroIds : new Set(heroes.map((hero) => hero.id)),
+      enabledHeroIds: enabledOnly
+        ? enabledHeroIds
+        : new Set(heroes.map((hero) => hero.id)),
       activeClass: activeClass === "ALL" ? "All" : activeClass,
       query,
       sortBy,

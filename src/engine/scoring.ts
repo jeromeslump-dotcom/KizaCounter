@@ -346,8 +346,7 @@ function calculateCore4ModulePoints(
     }
 
     const confidence = Math.min(
-      analysis.battles /
-        Math.max(1, settings.advanced.core4ConfidenceBattles),
+      analysis.battles / Math.max(1, settings.advanced.core4ConfidenceBattles),
       1
     );
 

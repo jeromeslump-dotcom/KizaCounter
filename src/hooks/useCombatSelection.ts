@@ -16,20 +16,52 @@ interface UseCombatSelectionProps {
   enabledHeroIds: Set<string>;
 }
 
-export default function useCombatSelection({ heroes, combats, enabledHeroIds }: UseCombatSelectionProps) {
+export default function useCombatSelection({
+  heroes,
+  combats,
+  enabledHeroIds,
+}: UseCombatSelectionProps) {
   const [enemyIds, setEnemyIds] = useState<string[]>([]);
   const [teamIds, setTeamIds] = useState<string[]>([]);
   const [showCounterModal, setShowCounterModal] = useState(false);
   const [recommendedIds, setRecommendedIds] = useState<string[]>([]);
   const [alternativeIds, setAlternativeIds] = useState<string[]>([]);
-  const [recommendationSource, setRecommendationSource] = useState<RecommendationSource | null>(null);
+  const [recommendationSource, setRecommendationSource] =
+    useState<RecommendationSource | null>(null);
   const openedEnemyKeyRef = useRef<string | null>(null);
 
-  const enabledHeroes = useMemo(() => heroes.filter((hero) => enabledHeroIds.has(hero.id)), [heroes, enabledHeroIds]);
-  const enemies = useMemo(() => enemyIds.map((id) => heroes.find((hero) => hero.id === id)).filter((hero): hero is Hero => Boolean(hero)), [enemyIds, heroes]);
-  const team = useMemo(() => teamIds.map((id) => heroes.find((hero) => hero.id === id)).filter((hero): hero is Hero => Boolean(hero)), [teamIds, heroes]);
-  const recommendedTeam = useMemo(() => recommendedIds.map((id) => heroes.find((hero) => hero.id === id)).filter((hero): hero is Hero => Boolean(hero)), [recommendedIds, heroes]);
-  const alternativeTeam = useMemo(() => alternativeIds.map((id) => heroes.find((hero) => hero.id === id)).filter((hero): hero is Hero => Boolean(hero)), [alternativeIds, heroes]);
+  const enabledHeroes = useMemo(
+    () => heroes.filter((hero) => enabledHeroIds.has(hero.id)),
+    [heroes, enabledHeroIds]
+  );
+  const enemies = useMemo(
+    () =>
+      enemyIds
+        .map((id) => heroes.find((hero) => hero.id === id))
+        .filter((hero): hero is Hero => Boolean(hero)),
+    [enemyIds, heroes]
+  );
+  const team = useMemo(
+    () =>
+      teamIds
+        .map((id) => heroes.find((hero) => hero.id === id))
+        .filter((hero): hero is Hero => Boolean(hero)),
+    [teamIds, heroes]
+  );
+  const recommendedTeam = useMemo(
+    () =>
+      recommendedIds
+        .map((id) => heroes.find((hero) => hero.id === id))
+        .filter((hero): hero is Hero => Boolean(hero)),
+    [recommendedIds, heroes]
+  );
+  const alternativeTeam = useMemo(
+    () =>
+      alternativeIds
+        .map((id) => heroes.find((hero) => hero.id === id))
+        .filter((hero): hero is Hero => Boolean(hero)),
+    [alternativeIds, heroes]
+  );
 
   function openCounterModal(enemyTeamIds: string[]) {
     const availableHeroes = enabledHeroes;
@@ -43,12 +75,22 @@ export default function useCombatSelection({ heroes, combats, enabledHeroIds }: 
       return;
     }
 
-    const recommendation = recommendTeamWithSource(enemyTeamIds, heroes, combats, availableHeroes);
-    const validRecommendation = recommendation.team.length === TEAM_SIZE
-      ? recommendation.team.filter((hero: Hero) => enabledHeroIds.has(hero.id))
-      : [];
-    const finalRecommendation = validRecommendation.length === TEAM_SIZE ? validRecommendation : [];
-    const finalSource = finalRecommendation.length === TEAM_SIZE ? recommendation.source : null;
+    const recommendation = recommendTeamWithSource(
+      enemyTeamIds,
+      heroes,
+      combats,
+      availableHeroes
+    );
+    const validRecommendation =
+      recommendation.team.length === TEAM_SIZE
+        ? recommendation.team.filter((hero: Hero) =>
+            enabledHeroIds.has(hero.id)
+          )
+        : [];
+    const finalRecommendation =
+      validRecommendation.length === TEAM_SIZE ? validRecommendation : [];
+    const finalSource =
+      finalRecommendation.length === TEAM_SIZE ? recommendation.source : null;
 
     const primaryIds = finalRecommendation.map((hero) => hero.id);
 
@@ -56,17 +98,21 @@ export default function useCombatSelection({ heroes, combats, enabledHeroIds }: 
     // Exact ennemi d'abord, puis même composition de classes.
     // Elle peut partager 4/5, 3/5, 2/5 ou 1/5 héros avec A.
     // Une seule victoire suffit pour qu'une équipe historique soit éligible.
-    let bestAlternative = findHistoricalAlternativeTeam(
-      enemyTeamIds,
-      heroes,
-      availableHeroes,
-      combats,
-      primaryIds
-    ) ?? [];
+    let bestAlternative =
+      findHistoricalAlternativeTeam(
+        enemyTeamIds,
+        heroes,
+        availableHeroes,
+        combats,
+        primaryIds
+      ) ?? [];
 
     // Seulement s'il n'existe aucune autre équipe historique éligible,
     // B est générée comme nouvelle composition par le même moteur.
-    if (bestAlternative.length !== TEAM_SIZE && primaryIds.length === TEAM_SIZE) {
+    if (
+      bestAlternative.length !== TEAM_SIZE &&
+      primaryIds.length === TEAM_SIZE
+    ) {
       const sourcePriority: Record<RecommendationSource, number> = {
         "exact-history": 5,
         core4: 4,
@@ -79,19 +125,33 @@ export default function useCombatSelection({ heroes, combats, enabledHeroIds }: 
       let bestGeneratedScore = -1;
 
       for (const excludedHeroId of primaryIds) {
-        const alternativePool = availableHeroes.filter((hero) => hero.id !== excludedHeroId);
+        const alternativePool = availableHeroes.filter(
+          (hero) => hero.id !== excludedHeroId
+        );
         if (alternativePool.length < TEAM_SIZE) continue;
 
-        const candidateRecommendation = recommendTeamWithSource(enemyTeamIds, heroes, combats, alternativePool);
-        const candidateTeam = candidateRecommendation.team.length === TEAM_SIZE
-          ? candidateRecommendation.team.filter((hero: Hero) => enabledHeroIds.has(hero.id))
-          : [];
+        const candidateRecommendation = recommendTeamWithSource(
+          enemyTeamIds,
+          heroes,
+          combats,
+          alternativePool
+        );
+        const candidateTeam =
+          candidateRecommendation.team.length === TEAM_SIZE
+            ? candidateRecommendation.team.filter((hero: Hero) =>
+                enabledHeroIds.has(hero.id)
+              )
+            : [];
         if (candidateTeam.length !== TEAM_SIZE) continue;
 
-        const differentHeroCount = candidateTeam.filter((hero) => !primaryIds.includes(hero.id)).length;
+        const differentHeroCount = candidateTeam.filter(
+          (hero) => !primaryIds.includes(hero.id)
+        ).length;
         if (differentHeroCount < 1) continue;
 
-        const score = sourcePriority[candidateRecommendation.source] * 100 + (TEAM_SIZE - differentHeroCount);
+        const score =
+          sourcePriority[candidateRecommendation.source] * 100 +
+          (TEAM_SIZE - differentHeroCount);
         if (score > bestGeneratedScore) {
           bestGenerated = candidateTeam;
           bestGeneratedScore = score;
@@ -110,8 +170,12 @@ export default function useCombatSelection({ heroes, combats, enabledHeroIds }: 
 
   useEffect(() => {
     setTeamIds((current) => current.filter((id) => enabledHeroIds.has(id)));
-    setRecommendedIds((current) => current.filter((id) => enabledHeroIds.has(id)));
-    setAlternativeIds((current) => current.filter((id) => enabledHeroIds.has(id)));
+    setRecommendedIds((current) =>
+      current.filter((id) => enabledHeroIds.has(id))
+    );
+    setAlternativeIds((current) =>
+      current.filter((id) => enabledHeroIds.has(id))
+    );
   }, [enabledHeroIds]);
 
   useEffect(() => {
@@ -131,13 +195,17 @@ export default function useCombatSelection({ heroes, combats, enabledHeroIds }: 
   }, [enemyIds, combats, enabledHeroIds]);
 
   function selectRecommendedTeam(ids: string[]) {
-    const validIds = ids.filter((id) => enabledHeroIds.has(id)).filter((id) => heroes.some((hero) => hero.id === id)).slice(0, TEAM_SIZE);
+    const validIds = ids
+      .filter((id) => enabledHeroIds.has(id))
+      .filter((id) => heroes.some((hero) => hero.id === id))
+      .slice(0, TEAM_SIZE);
     setTeamIds(validIds);
   }
 
   function toggleEnemy(hero: Hero) {
     setEnemyIds((current) => {
-      if (current.includes(hero.id)) return current.filter((id) => id !== hero.id);
+      if (current.includes(hero.id))
+        return current.filter((id) => id !== hero.id);
       if (current.length >= TEAM_SIZE) return current;
       return [...current, hero.id];
     });
@@ -145,21 +213,27 @@ export default function useCombatSelection({ heroes, combats, enabledHeroIds }: 
 
   function toggleTeam(hero: Hero) {
     setTeamIds((current) => {
-      if (current.includes(hero.id)) return current.filter((id) => id !== hero.id);
-      if (current.length >= TEAM_SIZE || !enabledHeroIds.has(hero.id)) return current;
+      if (current.includes(hero.id))
+        return current.filter((id) => id !== hero.id);
+      if (current.length >= TEAM_SIZE || !enabledHeroIds.has(hero.id))
+        return current;
       return [...current, hero.id];
     });
   }
 
   function selectCounterHero(hero: Hero) {
     setTeamIds((current) => {
-      if (current.includes(hero.id)) return current.filter((id) => id !== hero.id);
-      if (current.length >= TEAM_SIZE || !enabledHeroIds.has(hero.id)) return current;
+      if (current.includes(hero.id))
+        return current.filter((id) => id !== hero.id);
+      if (current.length >= TEAM_SIZE || !enabledHeroIds.has(hero.id))
+        return current;
       return [...current, hero.id];
     });
   }
 
-  function clearEnemies() { setEnemyIds([]); }
+  function clearEnemies() {
+    setEnemyIds([]);
+  }
 
   function resetCombat() {
     setShowCounterModal(false);
@@ -172,9 +246,22 @@ export default function useCombatSelection({ heroes, combats, enabledHeroIds }: 
   }
 
   return {
-    enemyIds, teamIds, showCounterModal, recommendedIds, alternativeIds,
-    recommendationSource, enemies, team, recommendedTeam, alternativeTeam,
-    toggleEnemy, toggleTeam, selectCounterHero, selectRecommendedTeam,
-    clearEnemies, resetCombat, openCounterModal,
+    enemyIds,
+    teamIds,
+    showCounterModal,
+    recommendedIds,
+    alternativeIds,
+    recommendationSource,
+    enemies,
+    team,
+    recommendedTeam,
+    alternativeTeam,
+    toggleEnemy,
+    toggleTeam,
+    selectCounterHero,
+    selectRecommendedTeam,
+    clearEnemies,
+    resetCombat,
+    openCounterModal,
   };
 }
