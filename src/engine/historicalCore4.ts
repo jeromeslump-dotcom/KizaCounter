@@ -108,7 +108,7 @@ function generateCore4s(teamIds: string[]): string[][] {
 }
 
 // ============================================================
-// CONFIANCE
+// CONFIANCE HISTORIQUE
 // ============================================================
 
 function calculateConfidence(
@@ -119,10 +119,18 @@ function calculateConfidence(
     return 0;
   }
 
-  return Math.min(
-    battles / Math.max(1, settings.advanced.core4ConfidenceBattles),
-    1
+  // //////// MODIF
+  // Même logique de confiance que l'historique Team A :
+  // battles / (battles + K)
+  //
+  // Ici K = core4ConfidenceBattles, réglé à 4 par défaut.
+  // 1 combat = 20 %, 4 = 50 %, 10 = 71 %, 20 = 83 %.
+  const confidenceBattles = Math.max(
+    1,
+    settings.advanced.core4ConfidenceBattles
   );
+
+  return battles / (battles + confidenceBattles);
 }
 
 // ============================================================
