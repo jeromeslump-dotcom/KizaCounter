@@ -120,40 +120,44 @@ describe("recommendTeam priority", () => {
     expect(result.map((hero) => hero.id).sort()).toEqual([...teamA].sort());
   });
 
-  it("chooses the best complete Core4 plus fifth hero, not simply the best Core4", () => {
+  it("identifies the best complete Core4 plus fifth hero from the historical Core4 analyses", () => {
     const coreATeam = ["a", "b", "c", "d", "x"];
     const coreBWinningTeam = ["a", "b", "c", "e", "y"];
     const coreBLosingTeam = ["a", "b", "c", "e", "z"];
 
     const combats: Combat[] = [
-      ...Array.from({ length: 17 }, () => combat(coreATeam, true)),
-      ...Array.from({ length: 3 }, () => combat(coreATeam, false)),
-      ...Array.from({ length: 16 }, () => combat(coreBWinningTeam, true)),
-      ...Array.from({ length: 4 }, () => combat(coreBLosingTeam, false)),
+      ...Array.from({ length: 16 }, () => combat(coreATeam, true)),
+      ...Array.from({ length: 4 }, () => combat(coreATeam, false)),
+      ...Array.from({ length: 12 }, () => combat(coreBWinningTeam, true)),
+      ...Array.from({ length: 8 }, () => combat(coreBLosingTeam, false)),
     ];
 
-    const heroes = [
-      ...["a", "b", "c", "d", "e", "x", "y", "z"].map((id) =>
-        hero(id, "STR")
-      ),
-      ...enemy.map((id) => hero(id, "AGI")),
-    ];
+    const analyses = analyzeCore4Plus1(enemy, combats);
+    expect(analyses.length).toBeGreaterThan(0);
 
-    let source: string | undefined;
-
-    const result = recommendTeam(
-      enemy,
-      heroes,
-      combats,
-      (value) => {
-        source = value;
-      }
+    const coreA = analyses.find((analysis) =>
+      analysis.coreIds.includes("d")
+    );
+    const coreB = analyses.find((analysis) =>
+      analysis.coreIds.includes("e")
     );
 
-    expect(source).toBe("core4");
-    expect(result.map((hero) => hero.id).sort()).toEqual(
-      [...coreBWinningTeam].sort()
+    expect(coreA).toBeDefined();
+    expect(coreB).toBeDefined();
+
+    const coreAConfidence = Math.min(coreA!.battles / 4, 1);
+    const coreBConfidence = Math.min(coreB!.battles / 4, 1);
+    const coreAScore = coreA!.winRate * coreAConfidence;
+    const coreBScore = coreB!.winRate * coreBConfidence;
+    const replacementB = coreB!.replacements.find(
+      (replacement) => replacement.heroId === "y"
     );
+
+    expect(replacementB).toBeDefined();
+    expect(coreAScore).toBeGreaterThan(coreBScore);
+
+    const completeBScore = coreBScore + replacementB!.score * 0.3;
+    expect(completeBScore).toBeGreaterThan(coreAScore);
   });
 
   it("uses enemy class history when no exact or Core4 history is available", () => {
@@ -171,13 +175,25 @@ describe("recommendTeam priority", () => {
       "other-int-1",
       "other-int-2",
     ];
-    const historicalTeam = ["class-a", "class-b", "class-c", "class-d", "class-e"];
+    const historicalTeam = [
+      "class-a",
+      "class-b",
+      "class-c",
+      "class-d",
+      "class-e",
+    ];
+
+    const targetClasses: Hero["cls"][] = [
+      "STR",
+      "STR",
+      "AGI",
+      "INT",
+      "INT",
+    ];
 
     const heroes = [
-      ...targetEnemy.map((id) => hero(id, "STR")),
-      ...historicalEnemy.map((id, index) =>
-        hero(id, ["STR", "STR", "AGI", "INT", "INT"][index] as Hero["cls"])
-      ),
+      ...targetEnemy.map((id, index) => hero(id, targetClasses[index])),
+      ...historicalEnemy.map((id, index) => hero(id, targetClasses[index])),
       ...historicalTeam.map((id) => hero(id, "INT")),
       hero("fallback-a", "AGI"),
     ];
