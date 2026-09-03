@@ -10,9 +10,7 @@ import { supabase } from "./supabase";
 export async function loadCombats(): Promise<Combat[]> {
   const { data, error } = await supabase
     .from("combats")
-    .select(
-      "id, user_id, enemy_heroes, my_heroes, won, created_at, created_by, status"
-    )
+    .select("id, user_id, enemy_heroes, my_heroes, won, created_at, status")
     .eq("status", "active")
     .order("created_at", {
       ascending: false,
@@ -63,9 +61,8 @@ export async function addCombat(
     ...combat,
 
     // L'utilisateur connecté devient automatiquement
-    // le créateur du combat.
+    // le propriétaire du combat.
     user_id: user.id,
-    created_by: user.id,
 
     // Les nouveaux combats sont actifs.
     status: "active" as const,
@@ -78,9 +75,7 @@ export async function addCombat(
   const { data, error } = await supabase
     .from("combats")
     .insert(combatToInsert)
-    .select(
-      "id, user_id, enemy_heroes, my_heroes, won, created_at, created_by, status"
-    )
+    .select("id, user_id, enemy_heroes, my_heroes, won, created_at, status")
     .single();
 
   if (error) {
