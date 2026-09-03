@@ -96,31 +96,93 @@ export default function useCombatSelection({
     const finalSource =
       finalRecommendation.length === TEAM_SIZE ? recommendation.source : null;
 
-    // ÉQUIPE N°2 : on relance exactement le même moteur de recommandation,
-    // mais sans les 5 héros de l'équipe n°1. Cela remplace l'ancien moteur
-    // d'alternative (score individuel + Core4 + historiques + pénalité), qui
-    // pouvait reconstruire une équipe générique indépendante de l'ennemi.
-    const alternativePool = availableHeroes.filter(
-      (hero) => !finalRecommendation.some((selected) => selected.id === hero.id)
-    );
+    // ÉQUIPE N°2 : même moteur de recommandation que l'équipe A.
+    // On interdit seulement la répétition EXACTE de l'équipe A :
+    // B doit avoir au minimum 1 héros différent, mais peut conserver
+    // les 4 autres héros de A si le moteur les considère meilleurs.
+    const primaryIds = new Set(finalRecommendation.map((hero) => hero.id));
 
-    const secondRecommendation =
-      alternativePool.length >= TEAM_SIZE
-        ? recommendTeamWithSource(enemyTeamIds, alternativePool, combats).team
-        : [];
+    const sourcePriority: Record<RecommendationSource, number> = {
+      "exact-history": 5,
+      core4: 4,
+      "class-history": 3,
+      "counter-usage": 2,
+      fallback: 1,
+    };
 
-    const validAlternative =
-      secondRecommendation.length === TEAM_SIZE
-        ? secondRecommendation.filter((hero: Hero) =>
+    let bestAlternative: Hero[] = [];
+    let bestAlternativeSource: RecommendationSource | null = null;
+    let bestAlternativeScore = -1;
+
+    // On lance le même moteur plusieurs fois, chaque fois en retirant
+    // un seul héros différent de A. Cela garantit une vraie alternative
+    // tout en laissant au moteur la possibilité de conserver les 4 autres.
+    for (const excludedHeroId of primaryIds) {
+      const alternativePool = availableHeroes.filter(
+        (hero) => hero.id !== excludedHeroId
+      );
+
+      if (alternativePool.length < TEAM_SIZE) continue;
+
+      const candidateRecommendation = recommendTeamWithSource(
+        enemyTeamIds,
+        alternativePool,
+        combats
+      );
+
+      const candidateTeam =
+        candidateRecommendation.team.length === TEAM_SIZE
+          ? candidateRecommendation.team.filter((hero: Hero) =>
+              enabledHeroIds.has(hero.id)
+            )
+          : [];
+
+      if (candidateTeam.length !== TEAM_SIZE) continue;
+
+      // Sécurité : B ne doit jamais être exactement identique à A.
+      const differentHeroCount = candidateTeam.filter(
+        (hero) => !primaryIds.has(hero.id)
+      ).length;
+
+      if (differentHeroCount < 1) continue;
+
+      // On privilégie la meilleure source du moteur, puis les équipes
+      // qui conservent le plus de héros de A (alternative minimale).
+      const score =
+        sourcePriority[candidateRecommendation.source] * 100 +
+        (TEAM_SIZE - differentHeroCount);
+
+      if (score > bestAlternativeScore) {
+        bestAlternative = candidateTeam;
+        bestAlternativeSource = candidateRecommendation.source;
+        bestAlternativeScore = score;
+      }
+    }
+
+    // Fallback de sécurité si aucune variante n'a été trouvée.
+    if (bestAlternative.length !== TEAM_SIZE) {
+      const alternativePool = availableHeroes.filter(
+        (hero) => !primaryIds.has(hero.id)
+      );
+
+      if (alternativePool.length >= TEAM_SIZE) {
+        const fallbackRecommendation = recommendTeamWithSource(
+          enemyTeamIds,
+          alternativePool,
+          combats
+        );
+
+        if (fallbackRecommendation.team.length === TEAM_SIZE) {
+          bestAlternative = fallbackRecommendation.team.filter((hero: Hero) =>
             enabledHeroIds.has(hero.id)
-          )
-        : [];
-
-    const finalAlternative =
-      validAlternative.length === TEAM_SIZE ? validAlternative : [];
+          );
+          bestAlternativeSource = fallbackRecommendation.source;
+        }
+      }
+    }
 
     setRecommendedIds(finalRecommendation.map((hero: Hero) => hero.id));
-    setAlternativeIds(finalAlternative.map((hero: Hero) => hero.id));
+    setAlternativeIds(bestAlternative.map((hero: Hero) => hero.id));
     setRecommendationSource(finalSource);
     setTeamIds(finalRecommendation.map((hero: Hero) => hero.id));
     setShowCounterModal(true);
