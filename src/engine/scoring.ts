@@ -21,7 +21,12 @@ const TEAM_SIZE = 5;
 // ============================================================
 
 export type RecommendationSource =
-  "exact-history" | "class-history" | "core4" | "counter-usage" | "fallback";
+  | "exact-history"
+  | "class-history"
+  | "similar-history"
+  | "core4"
+  | "counter-usage"
+  | "fallback";
 
 export type RecommendationSourceCallback = (
   source: RecommendationSource
@@ -920,7 +925,7 @@ export function recommendTeam(
   }
 
   // ==========================================================
-  // 3. HISTORIQUE PAR COMPOSITION DE CLASSES
+  // 3. HISTORIQUE PAR COMPOSITION DE CLASSES ENNEMIES
   // ==========================================================
 
   const historicalClassTeam = findBestHistoricalClassTeam(
