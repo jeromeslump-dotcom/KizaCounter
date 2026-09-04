@@ -898,8 +898,13 @@ export function recommendTeam(
 
         const replacementScore = replacement.score;
 
+        const core4Points = normalizeModulePoints(
+          coreScore / 100,
+          budgets.core4
+        );
+
         const completeScore =
-          coreScore +
+          core4Points * settings.teamA.core4Weight +
           replacementScore * settings.teamA.core4Weight * (budgets.core4 / 100);
 
         const completeTeam = [...core4Heroes, candidate.hero];
