@@ -465,14 +465,6 @@ export function findBestHistoricalTeam(
     candidates.set(key, candidate);
   }
 
-  // ==========================================================
-  // //////// MODIF
-  // UNE SEULE VICTOIRE SUFFIT POUR ÊTRE CANDIDAT.
-  //
-  // 1/1, 10/10 et 200/200 sont tous éligibles.
-  // Le volume intervient uniquement dans le classement.
-  // ==========================================================
-
   const winningCandidates = [...candidates.values()].filter(
     (candidate) => candidate.wins > 0
   );
@@ -480,11 +472,6 @@ export function findBestHistoricalTeam(
   if (!winningCandidates.length) {
     return null;
   }
-
-  // ==========================================================
-  // //////// MODIF
-  // FIABILITÉ UNIQUEMENT POUR LE CLASSEMENT
-  // ==========================================================
 
   const confidenceBattles = Math.max(
     1,
@@ -524,12 +511,6 @@ export function findBestHistoricalTeam(
       teamKey(a.heroIds).localeCompare(teamKey(b.heroIds))
     );
   });
-
-  // ==========================================================
-  // //////// MODIF
-  // AUCUN SEUIL FINAL DE FIABILITÉ.
-  // LE MEILLEUR CANDIDAT GAGNANT EST RETOURNÉ.
-  // ==========================================================
 
   for (const candidate of winningCandidates) {
     const team = candidate.heroIds
@@ -670,12 +651,6 @@ function findBestHistoricalClassTeam(
 
     candidates.set(key, candidate);
   }
-
-  // ==========================================================
-  // //////// MODIF
-  // MÊME RÈGLE QUE L'HISTORIQUE EXACT :
-  // UNE SEULE VICTOIRE SUFFIT.
-  // ==========================================================
 
   const settings = getEngineSettings();
 
@@ -837,14 +812,6 @@ export function recommendTeam(
     return historicalTeam;
   }
 
-  // ==========================================================
-  // //////// MODIF
-  // PLUS AUCUNE EXCLUSION DES HÉROS ENNEMIS.
-  //
-  // Un héros présent dans l'équipe ennemie peut parfaitement
-  // apparaître dans la recommandation si l'historique le justifie.
-  // ==========================================================
-
   const availableHeroes = heroes;
 
   if (availableHeroes.length <= TEAM_SIZE) {
@@ -869,7 +836,6 @@ export function recommendTeam(
   // 2. CORE4 HISTORIQUE
   // ==========================================================
   //
-  // //////// MODIF
   //
   // On ne choisit PLUS d'abord un "meilleur Core4".
   //
@@ -992,8 +958,6 @@ export function recommendTeam(
     const selected = ranked.shift()?.hero;
 
     if (!selected) break;
-
-    // //////// MODIF
     // Aucun filtrage des héros ennemis.
     if (usedIds.has(selected.id)) {
       continue;
@@ -1038,13 +1002,6 @@ export function recommendAlternativeTeam(
   }
 
   const primaryIds = new Set(primaryTeam.map((hero) => hero.id));
-
-  // ==========================================================
-  // //////// MODIF
-  // Plus aucune exclusion basée sur l'équipe ennemie.
-  // L'équipe principale reste exclue car cette fonction doit
-  // réellement produire une alternative.
-  // ==========================================================
 
   const availableHeroes = heroes.filter((hero) => !primaryIds.has(hero.id));
 
@@ -1248,8 +1205,6 @@ export function recommendAlternativeTeam(
     if (ids.length !== TEAM_SIZE) {
       continue;
     }
-
-    // //////// MODIF
     // On exclut seulement l'équipe principale.
     // Les héros ennemis restent parfaitement autorisés.
     if (ids.some((id) => primaryIds.has(id))) {
