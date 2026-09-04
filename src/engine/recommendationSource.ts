@@ -109,7 +109,7 @@ function findBestEnabledSimilarHistoryTeam(enemyIds: string[], candidateHeroes: 
 
 export function findHistoricalAlternativeTeam(enemyIds: string[], heroes: Hero[], candidateHeroes: Hero[], combats: Combat[], excludedTeamIds: string[]): Hero[] | null {
   const excludedKey = teamKey(excludedTeamIds);
-  return findBestEnabledExactHistoryTeam(enemyIds, candidateHeroes, combats, excludedKey) ?? findBestEnabledClassHistoryTeam(enemyIds, heroes, candidateHeroes, combats, excludedKey) ?? findBestEnabledSimilarHistoryTeam(enemyIds, candidateHeroes, combats, excludedKey);
+  return findBestEnabledExactHistoryTeam(enemyIds, candidateHeroes, combats, excludedKey) ?? findBestEnabledSimilarHistoryTeam(enemyIds, candidateHeroes, combats, excludedKey) ?? findBestEnabledClassHistoryTeam(enemyIds, heroes, candidateHeroes, combats, excludedKey);
 }
 
 export function recommendTeamWithSource(enemyIds: string[], heroes: Hero[], combats: Combat[], candidateHeroes: Hero[] = heroes): TeamRecommendation {
@@ -117,20 +117,16 @@ export function recommendTeamWithSource(enemyIds: string[], heroes: Hero[], comb
   const exactHistoryTeam = findBestEnabledExactHistoryTeam(enemyIds, candidateHeroes, combats);
   if (exactHistoryTeam) return { team: exactHistoryTeam, source: "exact-history" };
 
+  // Proven historical wins take priority over score-only Core4 recommendations.
+  const similarHistoryTeam = findBestEnabledSimilarHistoryTeam(enemyIds, candidateHeroes, combats);
+  if (similarHistoryTeam) return { team: similarHistoryTeam, source: "similar-history" };
+
+  const historicalClassTeam = findBestEnabledClassHistoryTeam(enemyIds, heroes, candidateHeroes, combats);
+  if (historicalClassTeam) return { team: historicalClassTeam, source: "class-history" };
+
   let source: RecommendationSource = "fallback";
   const team = recommendTeam(enemyIds, candidateHeroes, combats, (detectedSource) => { source = detectedSource; });
   const detectedSource = source as ScoringRecommendationSource;
-
-  if (detectedSource !== "core4") {
-    const historicalClassTeam = findBestEnabledClassHistoryTeam(enemyIds, heroes, candidateHeroes, combats);
-    if (historicalClassTeam) return { team: historicalClassTeam, source: "class-history" };
-  }
-
-  if (detectedSource !== "core4") {
-    const similarHistoryTeam = findBestEnabledSimilarHistoryTeam(enemyIds, candidateHeroes, combats);
-    if (similarHistoryTeam) return { team: similarHistoryTeam, source: "similar-history" };
-  }
-
   const validTeam = team.filter((hero) => enabledIds.has(hero.id));
   return { team: validTeam.length === TEAM_SIZE ? validTeam : [], source: validTeam.length === TEAM_SIZE ? detectedSource : "fallback" };
 }
