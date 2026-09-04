@@ -3,7 +3,6 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { Combat, Hero } from "../types";
 
 import {
-  findHistoricalAlternativeTeam,
   recommendTeamWithSource,
   type RecommendationSource,
 } from "../engine/recommendationSource";
@@ -34,6 +33,7 @@ export default function useCombatSelection({
     () => heroes.filter((hero) => enabledHeroIds.has(hero.id)),
     [heroes, enabledHeroIds]
   );
+
   const enemies = useMemo(
     () =>
       enemyIds
@@ -41,6 +41,7 @@ export default function useCombatSelection({
         .filter((hero): hero is Hero => Boolean(hero)),
     [enemyIds, heroes]
   );
+
   const team = useMemo(
     () =>
       teamIds
@@ -48,6 +49,7 @@ export default function useCombatSelection({
         .filter((hero): hero is Hero => Boolean(hero)),
     [teamIds, heroes]
   );
+
   const recommendedTeam = useMemo(
     () =>
       recommendedIds
@@ -55,6 +57,7 @@ export default function useCombatSelection({
         .filter((hero): hero is Hero => Boolean(hero)),
     [recommendedIds, heroes]
   );
+
   const alternativeTeam = useMemo(
     () =>
       alternativeIds
@@ -81,38 +84,38 @@ export default function useCombatSelection({
       combats,
       availableHeroes
     );
+
     const validRecommendation =
       recommendation.team.length === TEAM_SIZE
         ? recommendation.team.filter((hero: Hero) =>
             enabledHeroIds.has(hero.id)
           )
         : [];
+
     const finalRecommendation =
       validRecommendation.length === TEAM_SIZE ? validRecommendation : [];
+
     const finalSource =
       finalRecommendation.length === TEAM_SIZE ? recommendation.source : null;
 
     const primaryIds = finalRecommendation.map((hero) => hero.id);
 
-    // B : priorité absolue à une AUTRE équipe déjà enregistrée en base.
-    // Exact ennemi d'abord, puis même composition de classes.
-    // Elle peut partager 4/5, 3/5, 2/5 ou 1/5 héros avec A.
-    // Une seule victoire suffit pour qu'une équipe historique soit éligible.
-    let bestAlternative =
-      findHistoricalAlternativeTeam(
-        enemyTeamIds,
-        heroes,
-        availableHeroes,
-        combats,
-        primaryIds
-      ) ?? [];
+    // B utilise le même moteur de priorité que A :
+    //
+    // Historique exact
+    //      ↓ sinon
+    // Core4
+    //      ↓ sinon
+    // Historique classes
+    //      ↓ sinon
+    // Counter usage
+    //
+    // La différence vient des réglages Team B du moteur.
+    // B doit cependant être différente de A d'au moins un héros.
 
-    // Seulement s'il n'existe aucune autre équipe historique éligible,
-    // B est générée comme nouvelle composition par le même moteur.
-    if (
-      bestAlternative.length !== TEAM_SIZE &&
-      primaryIds.length === TEAM_SIZE
-    ) {
+    let bestAlternative: Hero[] = [];
+
+    if (primaryIds.length === TEAM_SIZE) {
       const sourcePriority: Record<RecommendationSource, number> = {
         "exact-history": 5,
         core4: 4,
@@ -121,44 +124,46 @@ export default function useCombatSelection({
         fallback: 1,
       };
 
-      let bestGenerated: Hero[] = [];
-      let bestGeneratedScore = -1;
+      let bestScore = -1;
 
       for (const excludedHeroId of primaryIds) {
         const alternativePool = availableHeroes.filter(
           (hero) => hero.id !== excludedHeroId
         );
+
         if (alternativePool.length < TEAM_SIZE) continue;
 
-        const candidateRecommendation = recommendTeamWithSource(
+        const recommendation = recommendTeamWithSource(
           enemyTeamIds,
           heroes,
           combats,
           alternativePool
         );
+
         const candidateTeam =
-          candidateRecommendation.team.length === TEAM_SIZE
-            ? candidateRecommendation.team.filter((hero: Hero) =>
+          recommendation.team.length === TEAM_SIZE
+            ? recommendation.team.filter((hero: Hero) =>
                 enabledHeroIds.has(hero.id)
               )
             : [];
+
         if (candidateTeam.length !== TEAM_SIZE) continue;
 
         const differentHeroCount = candidateTeam.filter(
           (hero) => !primaryIds.includes(hero.id)
         ).length;
+
         if (differentHeroCount < 1) continue;
 
         const score =
-          sourcePriority[candidateRecommendation.source] * 100 +
+          sourcePriority[recommendation.source] * 100 +
           (TEAM_SIZE - differentHeroCount);
-        if (score > bestGeneratedScore) {
-          bestGenerated = candidateTeam;
-          bestGeneratedScore = score;
+
+        if (score > bestScore) {
+          bestAlternative = candidateTeam;
+          bestScore = score;
         }
       }
-
-      bestAlternative = bestGenerated;
     }
 
     setRecommendedIds(finalRecommendation.map((hero: Hero) => hero.id));
@@ -170,9 +175,11 @@ export default function useCombatSelection({
 
   useEffect(() => {
     setTeamIds((current) => current.filter((id) => enabledHeroIds.has(id)));
+
     setRecommendedIds((current) =>
       current.filter((id) => enabledHeroIds.has(id))
     );
+
     setAlternativeIds((current) =>
       current.filter((id) => enabledHeroIds.has(id))
     );
@@ -185,11 +192,17 @@ export default function useCombatSelection({
     }
 
     const enemyKey = [...enemyIds].sort().join("|");
-    const historyKey = `${combats.length}:${combats.map((combat) => combat.id ?? combat.created_at ?? "").join(",")}`;
+
+    const historyKey = `${combats.length}:${combats
+      .map((combat) => combat.id ?? combat.created_at ?? "")
+      .join(",")}`;
+
     const enabledKey = [...enabledHeroIds].sort().join("|");
+
     const recommendationKey = `${enemyKey}::${historyKey}::${enabledKey}`;
 
     if (openedEnemyKeyRef.current === recommendationKey) return;
+
     openedEnemyKeyRef.current = recommendationKey;
     openCounterModal(enemyIds);
   }, [enemyIds, combats, enabledHeroIds]);
@@ -199,34 +212,46 @@ export default function useCombatSelection({
       .filter((id) => enabledHeroIds.has(id))
       .filter((id) => heroes.some((hero) => hero.id === id))
       .slice(0, TEAM_SIZE);
+
     setTeamIds(validIds);
   }
 
   function toggleEnemy(hero: Hero) {
     setEnemyIds((current) => {
-      if (current.includes(hero.id))
+      if (current.includes(hero.id)) {
         return current.filter((id) => id !== hero.id);
+      }
+
       if (current.length >= TEAM_SIZE) return current;
+
       return [...current, hero.id];
     });
   }
 
   function toggleTeam(hero: Hero) {
     setTeamIds((current) => {
-      if (current.includes(hero.id))
+      if (current.includes(hero.id)) {
         return current.filter((id) => id !== hero.id);
-      if (current.length >= TEAM_SIZE || !enabledHeroIds.has(hero.id))
+      }
+
+      if (current.length >= TEAM_SIZE || !enabledHeroIds.has(hero.id)) {
         return current;
+      }
+
       return [...current, hero.id];
     });
   }
 
   function selectCounterHero(hero: Hero) {
     setTeamIds((current) => {
-      if (current.includes(hero.id))
+      if (current.includes(hero.id)) {
         return current.filter((id) => id !== hero.id);
-      if (current.length >= TEAM_SIZE || !enabledHeroIds.has(hero.id))
+      }
+
+      if (current.length >= TEAM_SIZE || !enabledHeroIds.has(hero.id)) {
         return current;
+      }
+
       return [...current, hero.id];
     });
   }
