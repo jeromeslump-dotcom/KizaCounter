@@ -214,7 +214,7 @@ export function recommendTeamWithSource(
       enemyIds, candidateHeroes, combats
     );
     if (similarHistoryTeam) {
-      return { team: similarHistoryTeam, source: "class-history" };
+      return { team: similarHistoryTeam, source: "similar-history" };
     }
   }
 
@@ -229,6 +229,7 @@ export function recommendationSourceLabel(source: RecommendationSource): string 
   switch (source) {
     case "exact-history": return "Historique exact";
     case "class-history": return "Historique classes";
+    case "similar-history": return "Historique similaire";
     case "core4": return "Core4 historique";
     case "counter-usage": return "Counter usage / score";
     case "fallback": return "Fallback";
