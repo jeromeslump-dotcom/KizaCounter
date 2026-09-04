@@ -10,6 +10,7 @@ export interface TeamRecommendation {
 }
 
 const TEAM_SIZE = 5;
+const MIN_SIMILARITY = 3;
 
 function uniqueIds(ids: string[]): string[] {
   return [...new Set(ids)];
@@ -117,13 +118,69 @@ function findBestEnabledExactHistoryTeam(
   return null;
 }
 
+function findBestEnabledSimilarHistoryTeam(
+  enemyIds: string[], candidateHeroes: Hero[], combats: Combat[], excludedTeamKey?: string
+): Hero[] | null {
+  const targetIds = uniqueIds(enemyIds);
+  if (targetIds.length !== TEAM_SIZE) return null;
+
+  const enabledIds = new Set(candidateHeroes.map((hero) => hero.id));
+  const targetSet = new Set(targetIds);
+  const candidates = new Map<
+    string,
+    { heroIds: string[]; wins: number; losses: number; similarity: number }
+  >();
+
+  for (const combat of combats) {
+    const historicalEnemy = uniqueIds(combat.enemy_heroes ?? []);
+    if (historicalEnemy.length !== TEAM_SIZE) continue;
+
+    const sharedHeroes = historicalEnemy.filter((id) => targetSet.has(id)).length;
+    if (sharedHeroes < MIN_SIMILARITY || sharedHeroes === TEAM_SIZE) continue;
+
+    const heroIds = uniqueIds(combat.my_heroes ?? []);
+    if (heroIds.length !== TEAM_SIZE || !heroIds.every((id) => enabledIds.has(id))) continue;
+
+    const key = teamKey(heroIds);
+    if (key === excludedTeamKey) continue;
+
+    const candidate = candidates.get(key) ?? {
+      heroIds,
+      wins: 0,
+      losses: 0,
+      similarity: 0,
+    };
+
+    const similarity = sharedHeroes / TEAM_SIZE;
+    candidate.similarity = Math.max(candidate.similarity, similarity);
+    combat.won ? candidate.wins++ : candidate.losses++;
+    candidates.set(key, candidate);
+  }
+
+  return (
+    [...candidates.values()]
+      .filter((candidate) => candidate.wins > 0)
+      .sort(
+        (a, b) =>
+          b.similarity - a.similarity ||
+          historicalReliability(b.wins, b.losses) - historicalReliability(a.wins, a.losses) ||
+          b.wins + b.losses - (a.wins + a.losses) ||
+          b.wins - a.wins ||
+          teamKey(a.heroIds).localeCompare(teamKey(b.heroIds))
+      )
+      .map((candidate) => resolveCandidateTeam(candidate.heroIds, candidateHeroes))
+      .find((team): team is Hero[] => Boolean(team)) ?? null
+  );
+}
+
 export function findHistoricalAlternativeTeam(
   enemyIds: string[], heroes: Hero[], candidateHeroes: Hero[], combats: Combat[], excludedTeamIds: string[]
 ): Hero[] | null {
   const excludedKey = teamKey(excludedTeamIds);
   return (
     findBestEnabledExactHistoryTeam(enemyIds, candidateHeroes, combats, excludedKey) ??
-    findBestEnabledClassHistoryTeam(enemyIds, heroes, candidateHeroes, combats, excludedKey)
+    findBestEnabledClassHistoryTeam(enemyIds, heroes, candidateHeroes, combats, excludedKey) ??
+    findBestEnabledSimilarHistoryTeam(enemyIds, candidateHeroes, combats, excludedKey)
   );
 }
 
@@ -132,8 +189,6 @@ export function recommendTeamWithSource(
 ): TeamRecommendation {
   const enabledIds = new Set(candidateHeroes.map((hero) => hero.id));
 
-  // Exact historical teams are the first source. Their ranking uses the existing
-  // reliability curve, so both win rate and the number of recorded battles matter.
   const exactHistoryTeam = findBestEnabledExactHistoryTeam(enemyIds, candidateHeroes, combats);
   if (exactHistoryTeam) {
     return { team: exactHistoryTeam, source: "exact-history" };
@@ -151,6 +206,15 @@ export function recommendTeamWithSource(
     );
     if (historicalClassTeam) {
       return { team: historicalClassTeam, source: "class-history" };
+    }
+  }
+
+  if (detectedSource !== "core4") {
+    const similarHistoryTeam = findBestEnabledSimilarHistoryTeam(
+      enemyIds, candidateHeroes, combats
+    );
+    if (similarHistoryTeam) {
+      return { team: similarHistoryTeam, source: "class-history" };
     }
   }
 
