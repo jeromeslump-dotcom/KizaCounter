@@ -315,9 +315,8 @@ export function evaluateTeamHistory(
 //
 // Les trois budgets configurés dans engineSettings participent
 // réellement au score : historique exact, Core4 et historique
-// général. enemyIds reste optionnel pour préserver les appels
-// existants ; sans ennemi, les deux modules dépendants de la
-// composition ennemie valent simplement 0.
+// général. enemyIds est obligatoire car les modules historique
+// exact et Core4 dépendent de la composition ennemie.
 // ============================================================
 
 function calculateCore4ModulePoints(
@@ -362,8 +361,8 @@ function calculateCore4ModulePoints(
 export function evaluateTeam(
   team: Hero[],
   combats: Combat[],
-  _usage?: Record<string, HeroUsage>,
-  enemyIds: string[] = []
+  _usage: Record<string, HeroUsage> | undefined,
+  enemyIds: string[]
 ): TeamEvaluation {
   const settings = getEngineSettings();
   const teamIds = team.map((hero) => hero.id);
@@ -412,8 +411,8 @@ export function evaluateTeam(
 export function scoreTeam(
   team: Hero[],
   combats: Combat[],
-  usage?: Record<string, HeroUsage>,
-  enemyIds: string[] = []
+  usage: Record<string, HeroUsage> | undefined,
+  enemyIds: string[]
 ): TeamScore {
   return {
     heroIds: team.map((hero) => hero.id),
@@ -835,24 +834,6 @@ export function recommendTeam(
   // ==========================================================
   // 2. CORE4 HISTORIQUE
   // ==========================================================
-  //
-  //
-  // On ne choisit PLUS d'abord un "meilleur Core4".
-  //
-  // Toutes les analyses Core4 sont parcourues.
-  // Pour CHAQUE Core4, on teste ses 5e héros disponibles.
-  // Ensuite seulement, on compare les ensembles complets.
-  //
-  // Le calcul utilise les scores déjà présents dans le moteur :
-  //
-  //   score Core4 =
-  //     winRate * confidence
-  //
-  //   score 5e =
-  //     replacement.score
-  //
-  // Puis on conserve le même poids Core4 existant.
-  // ==========================================================
 
   const core4Analyses = analyzeCore4Plus1(enemyIds, combats, settings);
 
@@ -963,7 +944,7 @@ export function recommendTeam(
     const selected = ranked.shift()?.hero;
 
     if (!selected) break;
-    // Aucun filtrage des héros ennemis.
+
     if (usedIds.has(selected.id)) {
       continue;
     }
@@ -1210,8 +1191,7 @@ export function recommendAlternativeTeam(
     if (ids.length !== TEAM_SIZE) {
       continue;
     }
-    // On exclut seulement l'équipe principale.
-    // Les héros ennemis restent parfaitement autorisés.
+
     if (ids.some((id) => primaryIds.has(id))) {
       continue;
     }
