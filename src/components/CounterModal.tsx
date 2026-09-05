@@ -6,6 +6,7 @@ import {
   evaluateEnemyClassHistory,
   evaluateExactTeamHistory,
 } from "../engine/scoring";
+import { getEngineSettings } from "../engine/engineSettings";
 import {
   recommendationSourceLabel,
   type RecommendationSource,
@@ -82,6 +83,29 @@ export default function CounterModal({
     [currentTeamIds, enemyIds, combats]
   );
 
+  const currentTeamClassHistory = useMemo(
+    () => evaluateEnemyClassHistory(currentTeamIds, enemyIds, combats, heroes),
+    [currentTeamIds, enemyIds, combats, heroes]
+  );
+
+  const currentTeamConfidence = useMemo(() => {
+    const battles =
+      currentTeamHistory.battles > 0
+        ? currentTeamHistory.battles
+        : currentTeamClassHistory.battles;
+
+    if (battles <= 0) {
+      return 0;
+    }
+
+    const confidenceBattles = Math.max(
+      1,
+      getEngineSettings().advanced.teamAHistoricalConfidenceBattles
+    );
+
+    return (battles / (battles + confidenceBattles)) * 100;
+  }, [currentTeamHistory.battles, currentTeamClassHistory.battles]);
+
   const recommendedExactHistory = useMemo(
     () => evaluateExactTeamHistory(recommendedIds, enemyIds, combats),
     [recommendedIds, enemyIds, combats]
@@ -104,7 +128,9 @@ export default function CounterModal({
 
   const currentTeamHistoryLabel =
     currentTeamHistory.battles === 0
-      ? "Nouvelle équipe"
+      ? currentTeamClassHistory.battles > 0
+        ? `Nouvelle équipe · Confiance statistique : ${Math.round(currentTeamConfidence)} %`
+        : "Nouvelle équipe"
       : isAuthenticated
         ? `${Math.round(currentTeamHistory.winRate)} % · ${currentTeamHistory.battles} combat${currentTeamHistory.battles > 1 ? "s" : ""}`
         : `${Math.round(currentTeamHistory.winRate)} %`;
