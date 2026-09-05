@@ -113,40 +113,35 @@ export default function useCombatSelection({
 
       let bestScore = -1;
 
-      for (const excludedHeroId of primaryIds) {
-        const alternativePool = availableHeroes.filter(
-          (hero) => hero.id !== excludedHeroId
+      // B utilise le même moteur que A, sans exclure arbitrairement les héros de A.
+      // La seule règle est que B doit être différent de A.
+      const alternativeRecommendation = recommendTeamWithSource(
+        enemyTeamIds,
+        heroes,
+        combats,
+        availableHeroes
+      );
+
+      const candidateTeam =
+        alternativeRecommendation.team.length === TEAM_SIZE
+          ? alternativeRecommendation.team.filter((hero: Hero) =>
+              enabledHeroIds.has(hero.id)
+            )
+          : [];
+
+      if (candidateTeam.length === TEAM_SIZE) {
+        const sameTeam = candidateTeam.every((hero) =>
+          primaryIds.includes(hero.id)
+        ) && primaryIds.every((id) =>
+          candidateTeam.some((hero) => hero.id === id)
         );
-        if (alternativePool.length < TEAM_SIZE) continue;
 
-        const alternativeRecommendation = recommendTeamWithSource(
-          enemyTeamIds,
-          heroes,
-          combats,
-          alternativePool
-        );
-
-        const candidateTeam =
-          alternativeRecommendation.team.length === TEAM_SIZE
-            ? alternativeRecommendation.team.filter((hero: Hero) =>
-                enabledHeroIds.has(hero.id)
-              )
-            : [];
-
-        if (candidateTeam.length !== TEAM_SIZE) continue;
-
-        const differentHeroCount = candidateTeam.filter(
-          (hero) => !primaryIds.includes(hero.id)
-        ).length;
-        if (differentHeroCount < 1) continue;
-
-        const score =
-          sourcePriority[alternativeRecommendation.source] * 100 +
-          (TEAM_SIZE - differentHeroCount);
-
-        if (score > bestScore) {
-          bestAlternative = candidateTeam;
-          bestScore = score;
+        if (!sameTeam) {
+          const score = sourcePriority[alternativeRecommendation.source];
+          if (score > bestScore) {
+            bestAlternative = candidateTeam;
+            bestScore = score;
+          }
         }
       }
     }
