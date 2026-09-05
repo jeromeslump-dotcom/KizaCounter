@@ -1,3 +1,4 @@
+
 import { describe, expect, it } from "vitest";
 import type { Combat, Hero } from "../src/types";
 import {
@@ -18,12 +19,33 @@ const enemy = ["enemy-a", "enemy-b", "enemy-c", "enemy-d", "enemy-e"];
 const teamA = ["hero-a", "hero-b", "hero-c", "hero-d", "hero-e"];
 const teamB = ["hero-f", "hero-g", "hero-h", "hero-i", "hero-j"];
 
-function combat(myHeroes: string[], won: boolean, enemyHeroes: string[] = enemy): Combat {
-  return { enemy_heroes: enemyHeroes, my_heroes: myHeroes, won };
+function combat(
+  myHeroes: string[],
+  won: boolean,
+  enemyHeroes: string[] = enemy
+): Combat {
+  return {
+    enemy_heroes: enemyHeroes,
+    my_heroes: myHeroes,
+    won,
+  };
 }
 
 function hero(id: string, cls: Hero["cls"]): Hero {
-  return { id, name: id, alias: id, cls, img: "", stats: { hp: 0, atk: 0, matk: 0, def: 0, mdef: 0 } };
+  return {
+    id,
+    name: id,
+    alias: id,
+    cls,
+    img: "",
+    stats: {
+      hp: 0,
+      atk: 0,
+      matk: 0,
+      def: 0,
+      mdef: 0,
+    },
+  };
 }
 
 function withTeamAScoringSettings(
@@ -43,7 +65,13 @@ function withTeamAScoringSettings(
 
 describe("recommendation engine history", () => {
   it("calculates win rates correctly", () => {
-    const result = evaluateExactTeamHistory(teamA, enemy, [combat(teamA, true), combat(teamA, true), combat(teamA, false), combat(teamB, true)]);
+    const result = evaluateExactTeamHistory(teamA, enemy, [
+      combat(teamA, true),
+      combat(teamA, true),
+      combat(teamA, false),
+      combat(teamB, true),
+    ]);
+
     expect(result?.wins).toBe(2);
     expect(result?.losses).toBe(1);
     expect(result?.battles).toBe(3);
@@ -51,34 +79,90 @@ describe("recommendation engine history", () => {
   });
 
   it("keeps a single historical win eligible for exact history", () => {
-    const result = evaluateExactTeamHistory(teamA, enemy, [combat(teamA, true)]);
+    const result = evaluateExactTeamHistory(teamA, enemy, [
+      combat(teamA, true),
+    ]);
+
     expect(result).toBeDefined();
     expect(result?.wins).toBe(1);
     expect(result?.battles).toBe(1);
   });
 
   it("matches historical teams by enemy class composition", () => {
-    const targetEnemy = ["enemy-str-1", "enemy-str-2", "enemy-agi", "enemy-int-1", "enemy-int-2"];
-    const historicalEnemy = ["other-str-1", "other-str-2", "other-agi", "other-int-1", "other-int-2"];
-    const classes: Hero["cls"][] = ["STR", "STR", "AGI", "INT", "INT"];
+    const targetEnemy = [
+      "enemy-str-1",
+      "enemy-str-2",
+      "enemy-agi",
+      "enemy-int-1",
+      "enemy-int-2",
+    ];
+
+    const historicalEnemy = [
+      "other-str-1",
+      "other-str-2",
+      "other-agi",
+      "other-int-1",
+      "other-int-2",
+    ];
+
+    const classes: Hero["cls"][] = [
+      "STR",
+      "STR",
+      "AGI",
+      "INT",
+      "INT",
+    ];
+
     const heroes = [
       ...targetEnemy.map((id, index) => hero(id, classes[index])),
       ...historicalEnemy.map((id, index) => hero(id, classes[index])),
       ...teamA.map((id) => hero(id, "INT")),
     ];
-    const result = evaluateEnemyClassHistory(teamA, targetEnemy, [combat(teamA, true, historicalEnemy)], heroes);
+
+    const result = evaluateEnemyClassHistory(
+      teamA,
+      targetEnemy,
+      [combat(teamA, true, historicalEnemy)],
+      heroes
+    );
+
     expect(result).toBeDefined();
     expect(result?.wins).toBe(1);
     expect(result?.battles).toBe(1);
   });
 
   it("does not let a 100% class-history team on 2 battles beat an 85% team on 15 battles", () => {
-    const targetEnemy = ["target-str-1", "target-str-2", "target-agi", "target-int-1", "target-int-2"];
-    const historicalEnemy = ["history-str-1", "history-str-2", "history-agi", "history-int-1", "history-int-2"];
-    const targetClasses: Hero["cls"][] = ["STR", "STR", "AGI", "INT", "INT"];
+    const targetEnemy = [
+      "target-str-1",
+      "target-str-2",
+      "target-agi",
+      "target-int-1",
+      "target-int-2",
+    ];
+
+    const historicalEnemy = [
+      "history-str-1",
+      "history-str-2",
+      "history-agi",
+      "history-int-1",
+      "history-int-2",
+    ];
+
+    const targetClasses: Hero["cls"][] = [
+      "STR",
+      "STR",
+      "AGI",
+      "INT",
+      "INT",
+    ];
+
     const heroes = [
-      ...targetEnemy.map((id, index) => hero(id, targetClasses[index])),
-      ...historicalEnemy.map((id, index) => hero(id, targetClasses[index])),
+      ...targetEnemy.map((id, index) =>
+        hero(id, targetClasses[index])
+      ),
+      ...historicalEnemy.map((id, index) =>
+        hero(id, targetClasses[index])
+      ),
       ...teamA.map((id) => hero(id, "STR")),
       ...teamB.map((id) => hero(id, "AGI")),
     ];
@@ -86,38 +170,91 @@ describe("recommendation engine history", () => {
     const combats: Combat[] = [
       combat(teamA, true, historicalEnemy),
       combat(teamA, true, historicalEnemy),
-      ...Array.from({ length: 13 }, () => combat(teamB, true, historicalEnemy)),
-      ...Array.from({ length: 2 }, () => combat(teamB, false, historicalEnemy)),
+      ...Array.from({ length: 13 }, () =>
+        combat(teamB, true, historicalEnemy)
+      ),
+      ...Array.from({ length: 2 }, () =>
+        combat(teamB, false, historicalEnemy)
+      ),
     ];
 
-    const originalAdvanced = { ...DEFAULT_ENGINE_SETTINGS.advanced };
+    const originalAdvanced = {
+      ...DEFAULT_ENGINE_SETTINGS.advanced,
+    };
 
     try {
       // Isolate the class-history selector from the Core4 source so this test
       // audits exactly the reliability rule for multiple historical teams.
-      Object.assign(DEFAULT_ENGINE_SETTINGS.advanced, { core4MinBattles: 100 });
+      Object.assign(DEFAULT_ENGINE_SETTINGS.advanced, {
+        core4MinBattles: 100,
+      });
 
-      const result = recommendTeam(targetEnemy, heroes, combats);
-      expect(result.map((hero) => hero.id).sort()).toEqual([...teamB].sort());
+      const result = recommendTeam(
+        targetEnemy,
+        heroes,
+        combats
+      );
 
-      const teamAHistory = evaluateEnemyClassHistory(teamA, targetEnemy, combats, heroes);
-      const teamBHistory = evaluateEnemyClassHistory(teamB, targetEnemy, combats, heroes);
-      const confidenceBattles = DEFAULT_ENGINE_SETTINGS.advanced.teamAHistoricalConfidenceBattles;
-      const reliability = (wins: number, battles: number) =>
+      expect(result.map((hero) => hero.id).sort()).toEqual(
+        [...teamB].sort()
+      );
+
+      const teamAHistory = evaluateEnemyClassHistory(
+        teamA,
+        targetEnemy,
+        combats,
+        heroes
+      );
+
+      const teamBHistory = evaluateEnemyClassHistory(
+        teamB,
+        targetEnemy,
+        combats,
+        heroes
+      );
+
+      const confidenceBattles =
+        DEFAULT_ENGINE_SETTINGS.advanced
+          .teamAHistoricalConfidenceBattles;
+
+      const reliability = (
+        wins: number,
+        battles: number
+      ) =>
         (wins / battles) *
-        (DEFAULT_ENGINE_SETTINGS.advanced.teamAHistoricalReliabilityBase +
-          DEFAULT_ENGINE_SETTINGS.advanced.teamAHistoricalReliabilityConfidenceWeight *
-            (battles / (battles + confidenceBattles)));
+        (DEFAULT_ENGINE_SETTINGS.advanced
+          .teamAHistoricalReliabilityBase +
+          DEFAULT_ENGINE_SETTINGS.advanced
+            .teamAHistoricalReliabilityConfidenceWeight *
+            (battles /
+              (battles + confidenceBattles)));
 
       expect(teamAHistory.winRate).toBe(100);
       expect(teamAHistory.battles).toBe(2);
-      expect(teamBHistory.winRate).toBeCloseTo(86.6666667, 5);
+
+      expect(teamBHistory.winRate).toBeCloseTo(
+        86.6666667,
+        5
+      );
+
       expect(teamBHistory.battles).toBe(15);
-      expect(reliability(teamBHistory.wins, teamBHistory.battles)).toBeGreaterThan(
-        reliability(teamAHistory.wins, teamAHistory.battles)
+
+      expect(
+        reliability(
+          teamBHistory.wins,
+          teamBHistory.battles
+        )
+      ).toBeGreaterThan(
+        reliability(
+          teamAHistory.wins,
+          teamAHistory.battles
+        )
       );
     } finally {
-      Object.assign(DEFAULT_ENGINE_SETTINGS.advanced, originalAdvanced);
+      Object.assign(
+        DEFAULT_ENGINE_SETTINGS.advanced,
+        originalAdvanced
+      );
     }
   });
 });
@@ -138,8 +275,20 @@ describe("evaluateTeam scoring modules", () => {
         generalWinRatePoints: 20,
       },
       () => {
-        const specificOnly = evaluateTeam(teamHeroes, combats, undefined, enemy);
-        expect(specificOnly.score).toBeCloseTo(12.5, 10);
+        const specificOnly = evaluateTeam(
+          teamHeroes,
+          combats,
+          undefined,
+          enemy
+        );
+
+        // New rational confidence:
+        // 1 battle / (1 + 4) = 20%
+        // 20% of 50 points = 10 points.
+        expect(specificOnly.score).toBeCloseTo(
+          10,
+          10
+        );
       }
     );
 
@@ -153,14 +302,26 @@ describe("evaluateTeam scoring modules", () => {
         generalWinRatePoints: 20,
       },
       () => {
-        const generalOnly = evaluateTeam(teamHeroes, combats, undefined, enemy);
-        expect(generalOnly.score).toBeCloseTo(20, 10);
+        const generalOnly = evaluateTeam(
+          teamHeroes,
+          combats,
+          undefined,
+          enemy
+        );
+
+        expect(generalOnly.score).toBeCloseTo(
+          20,
+          10
+        );
       }
     );
   });
 
   it("changes evaluateTeam when the Team A Core4 budget changes", () => {
-    const combats = [combat(teamA, true), combat(teamA, true)];
+    const combats = [
+      combat(teamA, true),
+      combat(teamA, true),
+    ];
 
     let scoreWith30Points = 0;
     let scoreWith60Points = 0;
@@ -175,7 +336,12 @@ describe("evaluateTeam scoring modules", () => {
         generalWinRatePoints: 20,
       },
       () => {
-        scoreWith30Points = evaluateTeam(teamHeroes, combats, undefined, enemy).score;
+        scoreWith30Points = evaluateTeam(
+          teamHeroes,
+          combats,
+          undefined,
+          enemy
+        ).score;
       }
     );
 
@@ -189,111 +355,394 @@ describe("evaluateTeam scoring modules", () => {
         generalWinRatePoints: 20,
       },
       () => {
-        scoreWith60Points = evaluateTeam(teamHeroes, combats, undefined, enemy).score;
+        scoreWith60Points = evaluateTeam(
+          teamHeroes,
+          combats,
+          undefined,
+          enemy
+        ).score;
       }
     );
 
-    expect(scoreWith30Points).toBeCloseTo(15, 10);
-    expect(scoreWith60Points).toBeCloseTo(30, 10);
-    expect(scoreWith60Points).toBeGreaterThan(scoreWith30Points);
+    // New rational confidence:
+    // 2 battles / (2 + 4) = 33.33%
+    // 33.33% of 30 points = 10 points.
+    // 33.33% of 60 points = 20 points.
+    expect(scoreWith30Points).toBeCloseTo(
+      10,
+      10
+    );
+
+    expect(scoreWith60Points).toBeCloseTo(
+      20,
+      10
+    );
+
+    expect(scoreWith60Points).toBeGreaterThan(
+      scoreWith30Points
+    );
   });
 });
 
 describe("recommendTeam priority", () => {
   it("prefers an exact historical winning team before other recommendation sources", () => {
-    const heroes = [...teamA.map((id) => hero(id, "STR")), ...teamB.map((id) => hero(id, "INT")), ...enemy.map((id) => hero(id, "AGI"))];
+    const heroes = [
+      ...teamA.map((id) => hero(id, "STR")),
+      ...teamB.map((id) => hero(id, "INT")),
+      ...enemy.map((id) => hero(id, "AGI")),
+    ];
+
     let source: string | undefined;
-    const result = recommendTeam(enemy, heroes, [combat(teamA, true)], (value) => { source = value; });
+
+    const result = recommendTeam(
+      enemy,
+      heroes,
+      [combat(teamA, true)],
+      (value) => {
+        source = value;
+      }
+    );
+
     expect(source).toBe("exact-history");
-    expect(result.map((hero) => hero.id).sort()).toEqual([...teamA].sort());
+
+    expect(result.map((hero) => hero.id).sort()).toEqual(
+      [...teamA].sort()
+    );
   });
 
   it("identifies the best complete Core4 plus fifth hero from the historical Core4 analyses", () => {
-    const coreATeam = ["a", "b", "c", "d", "x"];
-    const coreBWinningTeam = ["a", "b", "c", "e", "y"];
-    const coreBLosingTeam = ["a", "b", "c", "e", "z"];
-    const combats: Combat[] = [
-      ...Array.from({ length: 8 }, () => combat(coreATeam, true)),
-      ...Array.from({ length: 12 }, () => combat(coreATeam, false)),
-      ...Array.from({ length: 6 }, () => combat(coreBWinningTeam, true)),
-      ...Array.from({ length: 14 }, () => combat(coreBLosingTeam, false)),
+    const coreATeam = [
+      "a",
+      "b",
+      "c",
+      "d",
+      "x",
     ];
-    const analyses = analyzeCore4Plus1(enemy, combats);
+
+    const coreBWinningTeam = [
+      "a",
+      "b",
+      "c",
+      "e",
+      "y",
+    ];
+
+    const coreBLosingTeam = [
+      "a",
+      "b",
+      "c",
+      "e",
+      "z",
+    ];
+
+    const combats: Combat[] = [
+      ...Array.from({ length: 8 }, () =>
+        combat(coreATeam, true)
+      ),
+      ...Array.from({ length: 12 }, () =>
+        combat(coreATeam, false)
+      ),
+      ...Array.from({ length: 6 }, () =>
+        combat(coreBWinningTeam, true)
+      ),
+      ...Array.from({ length: 14 }, () =>
+        combat(coreBLosingTeam, false)
+      ),
+    ];
+
+    const analyses = analyzeCore4Plus1(
+      enemy,
+      combats
+    );
+
     expect(analyses.length).toBeGreaterThan(0);
-    const coreA = analyses.find((analysis) => analysis.coreIds.includes("d"));
-    const coreB = analyses.find((analysis) => analysis.coreIds.includes("e"));
+
+    const coreA = analyses.find((analysis) =>
+      analysis.coreIds.includes("d")
+    );
+
+    const coreB = analyses.find((analysis) =>
+      analysis.coreIds.includes("e")
+    );
+
     expect(coreA).toBeDefined();
     expect(coreB).toBeDefined();
-    const coreAConfidence = Math.min(coreA!.battles / 4, 1);
-    const coreBConfidence = Math.min(coreB!.battles / 4, 1);
-    const coreAScore = coreA!.winRate * coreAConfidence;
-    const coreBScore = coreB!.winRate * coreBConfidence;
-    const replacementB = coreB!.replacements.find((replacement) => replacement.heroId === "y");
+
+    const confidenceBattles =
+      DEFAULT_ENGINE_SETTINGS.advanced
+        .core4ConfidenceBattles;
+
+    const coreAConfidence =
+      coreA!.battles /
+      (coreA!.battles + confidenceBattles);
+
+    const coreBConfidence =
+      coreB!.battles /
+      (coreB!.battles + confidenceBattles);
+
+    const coreAScore =
+      coreA!.winRate * coreAConfidence;
+
+    const coreBScore =
+      coreB!.winRate * coreBConfidence;
+
+    const replacementB = coreB!.replacements.find(
+      (replacement) =>
+        replacement.heroId === "y"
+    );
+
     expect(replacementB).toBeDefined();
-    expect(coreAScore).toBeGreaterThan(coreBScore);
-    const completeBScore = coreBScore + replacementB!.score * 0.3;
-    expect(completeBScore).toBeGreaterThan(coreAScore);
+
+    expect(coreAScore).toBeGreaterThan(
+      coreBScore
+    );
+
+    const completeBScore =
+      coreBScore +
+      replacementB!.score * 0.3;
+
+    expect(completeBScore).toBeGreaterThan(
+      coreAScore
+    );
   });
 
   it("uses enemy class history when no exact or Core4 history is available", () => {
-    const targetEnemy = ["enemy-str-1", "enemy-str-2", "enemy-agi", "enemy-int-1", "enemy-int-2"];
-    const historicalEnemy = ["other-str-1", "other-str-2", "other-agi", "other-int-1", "other-int-2"];
-    const historicalTeam = ["class-a", "class-b", "class-c", "class-d", "class-e"];
-    const targetClasses: Hero["cls"][] = ["STR", "STR", "AGI", "INT", "INT"];
+    const targetEnemy = [
+      "enemy-str-1",
+      "enemy-str-2",
+      "enemy-agi",
+      "enemy-int-1",
+      "enemy-int-2",
+    ];
+
+    const historicalEnemy = [
+      "other-str-1",
+      "other-str-2",
+      "other-agi",
+      "other-int-1",
+      "other-int-2",
+    ];
+
+    const historicalTeam = [
+      "class-a",
+      "class-b",
+      "class-c",
+      "class-d",
+      "class-e",
+    ];
+
+    const targetClasses: Hero["cls"][] = [
+      "STR",
+      "STR",
+      "AGI",
+      "INT",
+      "INT",
+    ];
+
     const heroes = [
-      ...targetEnemy.map((id, index) => hero(id, targetClasses[index])),
-      ...historicalEnemy.map((id, index) => hero(id, targetClasses[index])),
-      ...historicalTeam.map((id) => hero(id, "INT")),
+      ...targetEnemy.map((id, index) =>
+        hero(id, targetClasses[index])
+      ),
+      ...historicalEnemy.map((id, index) =>
+        hero(id, targetClasses[index])
+      ),
+      ...historicalTeam.map((id) =>
+        hero(id, "INT")
+      ),
       hero("fallback-a", "AGI"),
     ];
+
     let source: string | undefined;
-    const result = recommendTeam(targetEnemy, heroes, [combat(historicalTeam, true, historicalEnemy)], (value) => { source = value; });
+
+    const result = recommendTeam(
+      targetEnemy,
+      heroes,
+      [
+        combat(
+          historicalTeam,
+          true,
+          historicalEnemy
+        ),
+      ],
+      (value) => {
+        source = value;
+      }
+    );
+
     expect(source).toBe("class-history");
-    expect(result.map((hero) => hero.id).sort()).toEqual([...historicalTeam].sort());
+
+    expect(result.map((hero) => hero.id).sort()).toEqual(
+      [...historicalTeam].sort()
+    );
   });
 });
 
 describe("Core4 historical engine", () => {
   it("uses the shared rational confidence curve", () => {
-    const settings = { ...DEFAULT_ENGINE_SETTINGS, advanced: { ...DEFAULT_ENGINE_SETTINGS.advanced, core4MinBattles: 1, core4MinReplacementBattles: 1, core4ConfidenceBattles: 4 } };
-    const analyses = analyzeCore4Plus1(enemy, [combat(teamA, true)], settings);
+    const settings = {
+      ...DEFAULT_ENGINE_SETTINGS,
+      advanced: {
+        ...DEFAULT_ENGINE_SETTINGS.advanced,
+        core4MinBattles: 1,
+        core4MinReplacementBattles: 1,
+        core4ConfidenceBattles: 4,
+      },
+    };
+
+    const analyses = analyzeCore4Plus1(
+      enemy,
+      [combat(teamA, true)],
+      settings
+    );
+
     expect(analyses).toHaveLength(5);
-    expect(analyses[0].replacements[0].confidence).toBeCloseTo(1 / 5, 10);
+
+    expect(
+      analyses[0].replacements[0].confidence
+    ).toBeCloseTo(1 / 5, 10);
   });
 
   it("does not accept a Core4 below its minimum battle threshold", () => {
-    const analyses = analyzeCore4Plus1(enemy, [combat(teamA, true)]);
+    const analyses = analyzeCore4Plus1(
+      enemy,
+      [combat(teamA, true)]
+    );
+
     expect(analyses).toHaveLength(0);
   });
 
   it("does not accept a replacement below its minimum battle threshold", () => {
-    const alternateTeam = ["hero-a", "hero-b", "hero-c", "hero-d", "hero-f"];
-    const settings = { ...DEFAULT_ENGINE_SETTINGS, advanced: { ...DEFAULT_ENGINE_SETTINGS.advanced, core4MinBattles: 1, core4MinReplacementBattles: 2 } };
-    const analyses = analyzeCore4Plus1(enemy, [combat(teamA, true), combat(alternateTeam, false)], settings);
+    const alternateTeam = [
+      "hero-a",
+      "hero-b",
+      "hero-c",
+      "hero-d",
+      "hero-f",
+    ];
+
+    const settings = {
+      ...DEFAULT_ENGINE_SETTINGS,
+      advanced: {
+        ...DEFAULT_ENGINE_SETTINGS.advanced,
+        core4MinBattles: 1,
+        core4MinReplacementBattles: 2,
+      },
+    };
+
+    const analyses = analyzeCore4Plus1(
+      enemy,
+      [
+        combat(teamA, true),
+        combat(alternateTeam, false),
+      ],
+      settings
+    );
+
     expect(analyses).toHaveLength(9);
-    expect(analyses.every((analysis) => analysis.replacements.length === 0)).toBe(true);
+
+    expect(
+      analyses.every(
+        (analysis) =>
+          analysis.replacements.length === 0
+      )
+    ).toBe(true);
   });
 
   it("calculates replacement score from delta and confidence", () => {
-    const settings = { ...DEFAULT_ENGINE_SETTINGS, advanced: { ...DEFAULT_ENGINE_SETTINGS.advanced, core4MinBattles: 1, core4MinReplacementBattles: 1, core4ConfidenceBattles: 4 } };
-    const analyses = analyzeCore4Plus1(enemy, [combat(teamA, true), combat(teamA, false)], settings);
-    const replacement = analyses[0].replacements[0];
+    const settings = {
+      ...DEFAULT_ENGINE_SETTINGS,
+      advanced: {
+        ...DEFAULT_ENGINE_SETTINGS.advanced,
+        core4MinBattles: 1,
+        core4MinReplacementBattles: 1,
+        core4ConfidenceBattles: 4,
+      },
+    };
+
+    const analyses = analyzeCore4Plus1(
+      enemy,
+      [
+        combat(teamA, true),
+        combat(teamA, false),
+      ],
+      settings
+    );
+
+    const replacement =
+      analyses[0].replacements[0];
+
     expect(replacement.delta).toBe(0);
-    expect(replacement.confidence).toBeCloseTo(2 / 6, 10);
-    expect(replacement.score).toBeCloseTo(replacement.delta * replacement.confidence, 10);
+
+    expect(
+      replacement.confidence
+    ).toBeCloseTo(2 / 6, 10);
+
+    expect(
+      replacement.score
+    ).toBeCloseTo(
+      replacement.delta *
+        replacement.confidence,
+      10
+    );
   });
 
   it("finds the best Core4 using the same confidence curve", () => {
-    const settings = { ...DEFAULT_ENGINE_SETTINGS, advanced: { ...DEFAULT_ENGINE_SETTINGS.advanced, core4MinBattles: 1, core4MinReplacementBattles: 1, core4ConfidenceBattles: 4 } };
-    const result = findBestCore4(enemy, [combat(teamA, true), combat(teamA, false)], settings);
+    const settings = {
+      ...DEFAULT_ENGINE_SETTINGS,
+      advanced: {
+        ...DEFAULT_ENGINE_SETTINGS.advanced,
+        core4MinBattles: 1,
+        core4MinReplacementBattles: 1,
+        core4ConfidenceBattles: 4,
+      },
+    };
+
+    const result = findBestCore4(
+      enemy,
+      [
+        combat(teamA, true),
+        combat(teamA, false),
+      ],
+      settings
+    );
+
     expect(result).toBeDefined();
-    const confidence = result!.battles / (result!.battles + settings.advanced.core4ConfidenceBattles);
-    expect(confidence).toBeCloseTo(2 / 6, 10);
+
+    const confidence =
+      result!.battles /
+      (result!.battles +
+        settings.advanced.core4ConfidenceBattles);
+
+    expect(confidence).toBeCloseTo(
+      2 / 6,
+      10
+    );
   });
 
   it("returns zero for an unavailable Core4 replacement", () => {
-    const settings = { ...DEFAULT_ENGINE_SETTINGS, advanced: { ...DEFAULT_ENGINE_SETTINGS.advanced, core4MinBattles: 1, core4MinReplacementBattles: 2 } };
-    const result = core4ReplacementScore(enemy, ["missing-a", "missing-b", "missing-c", "missing-d"], "missing-e", [combat(teamA, true)], settings);
+    const settings = {
+      ...DEFAULT_ENGINE_SETTINGS,
+      advanced: {
+        ...DEFAULT_ENGINE_SETTINGS.advanced,
+        core4MinBattles: 1,
+        core4MinReplacementBattles: 2,
+      },
+    };
+
+    const result = core4ReplacementScore(
+      enemy,
+      [
+        "missing-a",
+        "missing-b",
+        "missing-c",
+        "missing-d",
+      ],
+      "missing-e",
+      [combat(teamA, true)],
+      settings
+    );
+
     expect(result).toBe(0);
   });
 });
+
