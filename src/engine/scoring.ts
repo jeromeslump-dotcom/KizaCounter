@@ -388,7 +388,7 @@ export function evaluateTeamHistory(
 } {
   const team = uniqueIds(teamIds);
 
-  if (team.length === 0) {
+  if (team.length !== TEAM_SIZE) {
     return {
       wins: 0,
       losses: 0,
@@ -401,11 +401,15 @@ export function evaluateTeamHistory(
   let losses = 0;
 
   for (const combat of combats) {
-    const historicalTeam = new Set(
+    const historicalTeam = uniqueIds(
       combat.my_heroes ?? []
     );
 
-    if (!team.every((heroId) => historicalTeam.has(heroId))) {
+    if (historicalTeam.length !== TEAM_SIZE) {
+      continue;
+    }
+
+    if (teamKey(team) !== teamKey(historicalTeam)) {
       continue;
     }
 
@@ -1619,7 +1623,7 @@ export function recommendAlternativeTeam(
 
   // ==========================================================
   // ÉVALUATION D'UNE ÉQUIPE
-  // ==========================================================
+  // ============================================================
 
   const evaluateAlternative = (
     team: Hero[]
