@@ -170,6 +170,20 @@ export default function CounterModal({
           : "Historique classes"
         : "Aucune statistique historique";
 
+  const recommendationMobileHistoryLabel =
+    recommendationSource === "exact-history" && recommendedExactHistory.battles > 0
+      ? `${Math.round(recommendedExactHistory.winRate)} %`
+      : recommendationSource === "class-history" && recommendedClassHistory.battles > 0
+        ? `${Math.round(recommendedClassHistory.winRate)} %`
+        : null;
+
+  const alternativeMobileHistoryLabel =
+    alternativeHistory.battles > 0
+      ? `${Math.round(alternativeHistory.winRate)} %`
+      : alternativeClassHistory.battles > 0
+        ? `${Math.round(alternativeClassHistory.winRate)} %`
+        : null;
+
   const hasRecommendations =
     recommendedTeam.length > 0 || alternativeTeam.length > 0;
 
@@ -211,7 +225,8 @@ export default function CounterModal({
                   <div className="mb-2 flex items-center justify-between gap-3">
                     <div className="whitespace-nowrap text-[10px] font-bold uppercase tracking-wide sm:text-xs">Recommandation initiale</div>
                     <div className="shrink-0 text-right text-[10px] font-bold sm:text-xs">
-                      <span>{recommendationSourceText}<span className="ui-text-muted ml-1 font-normal">· {historyLabel}</span></span>
+                      <span className="sm:hidden">{recommendationMobileHistoryLabel}</span>
+                      <span className="hidden sm:inline">{recommendationSourceText}<span className="ui-text-muted ml-1 font-normal">· {historyLabel}</span></span>
                     </div>
                   </div>
                   <div className="grid grid-cols-5 gap-1.5 sm:gap-2">{recommendedTeam.map((hero) => <span key={hero.id} className="ui-recommendation-hero">{hero.name}</span>)}</div>
@@ -224,7 +239,8 @@ export default function CounterModal({
                     <div className="mb-2 flex items-center justify-between gap-3">
                       <div className="whitespace-nowrap text-[10px] font-bold uppercase tracking-wide sm:text-xs">Alternative</div>
                       <div className="shrink-0 text-right text-[10px] font-bold sm:text-xs">
-                        <span>{alternativeHistoryLabel}</span>
+                        <span className="sm:hidden">{alternativeMobileHistoryLabel}</span>
+                        <span className="hidden sm:inline">{alternativeHistoryLabel}</span>
                       </div>
                     </div>
                     <div className="grid grid-cols-5 gap-1.5 sm:gap-2">{alternativeTeam.map((hero) => <span key={hero.id} className="ui-recommendation-hero">{hero.name}</span>)}</div>
