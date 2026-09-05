@@ -222,7 +222,7 @@ export function analyzeCore4Plus1(
 ): Core4Analysis[] {
   const normalizedEnemy = normalizeIds(enemyIds);
 
-  if (normalizedEnemy.length === 0) {
+  if (normalizedEnemy.length !== 5) {
     return [];
   }
 
@@ -235,12 +235,11 @@ export function analyzeCore4Plus1(
   // ----------------------------------------------------------
 
   for (const combat of combats) {
+    // Une donnée historique n'est valide pour Core4 que si les
+    // deux équipes sont composées de 5 héros uniques.
     const combatEnemy = normalizeIds(combat.enemy_heroes ?? []);
 
-    if (
-      combatEnemy.length !== normalizedEnemy.length ||
-      combatEnemy.join("|") !== enemyKey
-    ) {
+    if (combatEnemy.length !== 5 || combatEnemy.join("|") !== enemyKey) {
       continue;
     }
 
