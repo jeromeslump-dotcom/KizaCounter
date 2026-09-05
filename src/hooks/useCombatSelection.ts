@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { Combat, Hero } from "../types";
 
 import {
+  findHistoricalAlternativeTeam,
   recommendTeamWithSource,
   type RecommendationSource,
 } from "../engine/recommendationSource";
@@ -101,35 +102,18 @@ export default function useCombatSelection({
     let bestAlternative: Hero[] = [];
 
     if (primaryIds.length === TEAM_SIZE) {
-      const sourcePriority: Record<RecommendationSource, number> = {
-        "exact-history": 5,
-        core4: 4,
-        "defeat-history": 3.5,
-        "class-history": 3,
-        "similar-history": 2,
-        "counter-usage": 1,
-        fallback: 0,
-      };
-
-      let bestScore = -1;
-
-      // B utilise le même moteur que A, sans exclure arbitrairement les héros de A.
-      // La seule règle est que B doit être différent de A.
-      const alternativeRecommendation = recommendTeamWithSource(
+      // B est une vraie seconde recommandation historique.
+      // La seule contrainte : B doit être différent de A.
+      // Aucun nombre de héros communs n'est imposé.
+      const candidateTeam = findHistoricalAlternativeTeam(
         enemyTeamIds,
         heroes,
+        availableHeroes,
         combats,
-        availableHeroes
+        primaryIds
       );
 
-      const candidateTeam =
-        alternativeRecommendation.team.length === TEAM_SIZE
-          ? alternativeRecommendation.team.filter((hero: Hero) =>
-              enabledHeroIds.has(hero.id)
-            )
-          : [];
-
-      if (candidateTeam.length === TEAM_SIZE) {
+      if (candidateTeam?.length === TEAM_SIZE) {
         const sameTeam = candidateTeam.every((hero) =>
           primaryIds.includes(hero.id)
         ) && primaryIds.every((id) =>
@@ -137,11 +121,7 @@ export default function useCombatSelection({
         );
 
         if (!sameTeam) {
-          const score = sourcePriority[alternativeRecommendation.source];
-          if (score > bestScore) {
-            bestAlternative = candidateTeam;
-            bestScore = score;
-          }
+          bestAlternative = candidateTeam;
         }
       }
     }
