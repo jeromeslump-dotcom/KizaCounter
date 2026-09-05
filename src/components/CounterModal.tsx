@@ -154,8 +154,8 @@ export default function CounterModal({
   const alternativeHistoryLabel =
     alternativeHistory.battles > 0
       ? isAuthenticated
-        ? `${Math.round(alternativeHistory.winRate)} % · ${alternativeHistory.battles} combat${alternativeHistory.battles > 1 ? "s" : ""}`
-        : `${Math.round(alternativeHistory.winRate)} %`
+        ? `Historique exact · ${Math.round(alternativeHistory.winRate)} % · ${alternativeHistory.battles} combat${alternativeHistory.battles > 1 ? "s" : ""}`
+        : "Historique exact"
       : alternativeClassHistory.battles > 0
         ? isAuthenticated
           ? `Historique classes · ${Math.round(alternativeClassHistory.winRate)} % · ${alternativeClassHistory.battles} combat${alternativeClassHistory.battles > 1 ? "s" : ""}`
