@@ -65,10 +65,8 @@ export default function CounterModal({
   onSortChange,
   onSave,
 }: CounterModalProps) {
-  if (!open) return null;
-
   const enemyIds = useMemo(() => enemies.map((hero) => hero.id), [enemies]);
-  const currentTeamIds = useMemo(() => team.map((hero) => hero.id), [team]);
+  const currentTeamIds = useMemo(() => teamIds, [teamIds]);
   const recommendedIds = useMemo(
     () => recommendedTeam.map((hero) => hero.id),
     [recommendedTeam]
@@ -78,6 +76,8 @@ export default function CounterModal({
     [alternativeTeam]
   );
 
+  // Toujours calculé depuis l'équipe actuellement sélectionnée.
+  // Ainsi, un remplacement manuel recalcule immédiatement le statut.
   const currentTeamHistory = useMemo(
     () => evaluateExactTeamHistory(currentTeamIds, enemyIds, combats),
     [currentTeamIds, enemyIds, combats]
@@ -168,6 +168,8 @@ export default function CounterModal({
   const recommendationSourceText = recommendationSource
     ? recommendationSourceLabel(recommendationSource)
     : "Source inconnue";
+
+  if (!open) return null;
 
   return (
     <div className="ui-modal-overlay fixed inset-0 z-50 flex items-center justify-center p-2 backdrop-blur-sm sm:p-4">
