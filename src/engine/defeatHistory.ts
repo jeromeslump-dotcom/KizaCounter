@@ -43,9 +43,11 @@ function confidenceForBattles(battles: number): number {
 export function findHistoricalDefeatCounters(
   enemyIds: string[],
   combats: Combat[],
-  candidateHeroes: Hero[]
+  candidateHeroes: Hero[],
+  excludedTeamIds: string[] = []
 ): DefeatHistoryCandidate[] {
   const targetTeam = uniqueIds(enemyIds);
+  const excludedKey = teamKey(excludedTeamIds);
 
   if (targetTeam.length !== TEAM_SIZE) return [];
 
@@ -72,6 +74,8 @@ export function findHistoricalDefeatCounters(
     }
 
     const key = teamKey(historicalEnemy);
+    if (key === excludedKey) continue;
+
     const candidate = candidates.get(key) ?? {
       heroIds: historicalEnemy,
       losses: 0,
@@ -109,12 +113,14 @@ export function findHistoricalDefeatCounters(
 export function findBestHistoricalDefeatTeam(
   enemyIds: string[],
   combats: Combat[],
-  candidateHeroes: Hero[]
+  candidateHeroes: Hero[],
+  excludedTeamIds: string[] = []
 ): Hero[] | null {
   const candidates = findHistoricalDefeatCounters(
     enemyIds,
     combats,
-    candidateHeroes
+    candidateHeroes,
+    excludedTeamIds
   );
 
   for (const candidate of candidates) {
