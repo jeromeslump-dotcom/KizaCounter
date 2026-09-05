@@ -68,7 +68,7 @@ export default function CompactTeam({
                     loading="lazy"
                   />
 
-                  <span className="selection-order-badge absolute left-1 top-1 z-20 flex h-5 w-5 items-center justify-center rounded-full border text-[10px] font-black leading-none shadow sm:left-2 sm:top-2 sm:h-7 sm:w-7 sm:border-2 sm:text-sm">
+                  <span className="selection-order-badge absolute left-0 top-0 z-20 flex h-5 w-5 items-center justify-center rounded-full border text-[10px] font-black leading-none shadow sm:left-2 sm:top-2 sm:h-7 sm:w-7 sm:border-2 sm:text-sm">
                     {index + 1}
                   </span>
                 </div>
