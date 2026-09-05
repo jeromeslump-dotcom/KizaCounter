@@ -1,6 +1,6 @@
 {
-  "minLines": 12,
-  "minTokens": 100,
+  "minLines": 3,
+  "minTokens": 15,
   "format": ["typescript", "tsx"],
   "ignorePattern": ["node_modules", "dist"],
   "reporters": ["console"]
