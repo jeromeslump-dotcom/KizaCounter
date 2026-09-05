@@ -138,11 +138,12 @@ export default function useCombatSelection({
         const differentHeroCount = candidateTeam.filter(
           (hero) => !primaryIds.includes(hero.id)
         ).length;
-        if (differentHeroCount < 1) continue;
 
-        const score =
-          sourcePriority[alternativeRecommendation.source] * 100 +
-          (TEAM_SIZE - differentHeroCount);
+        // B doit être A avec exactement un héros remplacé :
+        // 4 héros en commun et 1 seul héros différent.
+        if (differentHeroCount !== 1) continue;
+
+        const score = sourcePriority[alternativeRecommendation.source];
 
         if (score > bestScore) {
           bestAlternative = candidateTeam;
