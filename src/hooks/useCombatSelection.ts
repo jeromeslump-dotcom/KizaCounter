@@ -104,9 +104,9 @@ export default function useCombatSelection({
       const sourcePriority: Record<RecommendationSource, number> = {
         "exact-history": 5,
         core4: 4,
+        "defeat-history": 3.5,
         "class-history": 3,
         "similar-history": 2,
-        "defeat-history": 2,
         "counter-usage": 1,
         fallback: 0,
       };
