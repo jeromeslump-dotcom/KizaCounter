@@ -11,6 +11,7 @@ import AuthPanel from "./auth/AuthPanel";
 import useCombatSelection from "./hooks/useCombatSelection";
 import { addCombat, loadCombats } from "./storage/combatStorage";
 import { getSession, onAuthStateChange } from "./auth/auth";
+import { getCurrentUserProfile, type UserProfile } from "./admin/adminAccess";
 import HeroManager from "./heroManager/HeroManager";
 import useHeroManager from "./heroManager/useHeroManager";
 
@@ -19,6 +20,7 @@ const TEAM_SIZE = 5;
 export default function App() {
   const [combats, setCombats] = useState<Combat[]>([]);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [showHeroManager, setShowHeroManager] = useState(false);
 
   const {
@@ -53,32 +55,43 @@ export default function App() {
   useEffect(() => {
     let mounted = true;
 
+    async function applySession(session: Awaited<ReturnType<typeof getSession>>) {
+      if (!mounted) return;
+
+      const authenticated = Boolean(session);
+      setIsAuthenticated(authenticated);
+
+      if (!authenticated) {
+        setUserProfile(null);
+        setCombats([]);
+        return;
+      }
+
+      const profile = await getCurrentUserProfile(session);
+      if (!mounted) return;
+
+      setUserProfile(profile);
+
+      try {
+        const history = await loadCombats();
+        if (mounted) setCombats(history);
+      } catch (error) {
+        console.error(
+          "Impossible de charger l'historique des combats :",
+          error
+        );
+      }
+    }
+
     async function initialize() {
       try {
         const session = await getSession();
-        if (!mounted) return;
-
-        const authenticated = Boolean(session);
-        setIsAuthenticated(authenticated);
-
-        if (!authenticated) {
-          setCombats([]);
-          return;
-        }
-
-        try {
-          const history = await loadCombats();
-          if (mounted) setCombats(history);
-        } catch (error) {
-          console.error(
-            "Impossible de charger l'historique des combats :",
-            error
-          );
-        }
+        await applySession(session);
       } catch (error) {
         console.error("Impossible de récupérer la session :", error);
         if (mounted) {
           setIsAuthenticated(false);
+          setUserProfile(null);
           setCombats([]);
         }
       }
@@ -89,26 +102,7 @@ export default function App() {
     const {
       data: { subscription },
     } = onAuthStateChange((session) => {
-      if (!mounted) return;
-
-      const authenticated = Boolean(session);
-      setIsAuthenticated(authenticated);
-
-      if (!authenticated) {
-        setCombats([]);
-        return;
-      }
-
-      loadCombats()
-        .then((history) => {
-          if (mounted) setCombats(history);
-        })
-        .catch((error) => {
-          console.error(
-            "Impossible de charger l'historique des combats :",
-            error
-          );
-        });
+      void applySession(session);
     });
 
     return () => {
@@ -142,6 +136,13 @@ export default function App() {
     }
   }
 
+  const canManageHeroes =
+    isAuthenticated &&
+    Boolean(userProfile?.active) &&
+    (userProfile?.role === "user" ||
+      userProfile?.role === "contributor" ||
+      userProfile?.role === "admin");
+
   return (
     <main className="app-shell min-h-screen">
       <HeroManager
@@ -171,13 +172,15 @@ export default function App() {
               </p>
             </div>
             <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={() => setShowHeroManager(true)}
-                className="ui-action rounded-lg border px-3 py-2 text-xs font-bold transition"
-              >
-                ⚙️ Gérer les héros
-              </button>
+              {canManageHeroes && (
+                <button
+                  type="button"
+                  onClick={() => setShowHeroManager(true)}
+                  className="ui-action rounded-lg border px-3 py-2 text-xs font-bold transition"
+                >
+                  ⚙️ Gérer les héros
+                </button>
+              )}
               <AuthPanel />
             </div>
           </div>
