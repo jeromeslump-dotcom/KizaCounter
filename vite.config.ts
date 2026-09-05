@@ -4,6 +4,18 @@ import react from "@vitejs/plugin-react";
 
 function getBuildVersion() {
   try {
+    const isShallow = execSync("git rev-parse --is-shallow-repository", {
+      encoding: "utf8",
+    }).trim() === "true";
+
+    if (isShallow) {
+      try {
+        execSync("git fetch --unshallow", { stdio: "ignore" });
+      } catch {
+        // Keep the locally available history as a fallback.
+      }
+    }
+
     const commitCount = Number(
       execSync("git rev-list --count HEAD", { encoding: "utf8" }).trim()
     );
@@ -12,7 +24,7 @@ function getBuildVersion() {
       return (commitCount / 10).toFixed(1);
     }
   } catch {
-    // Fallback for environments without the Git history available.
+    // Fallback for environments without Git history available.
   }
 
   return "0.0";
