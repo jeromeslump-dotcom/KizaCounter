@@ -53,7 +53,9 @@ export default function HeroCard({
 
           <div className="flex shrink-0 items-center gap-2">
             {selected && selectionOrder !== undefined && (
-              <SelectionOrderBadge order={selectionOrder} />
+              <span className="absolute left-2 top-2 z-20 sm:static sm:z-auto">
+                <SelectionOrderBadge order={selectionOrder} />
+              </span>
             )}
 
             <span
