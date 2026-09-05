@@ -73,6 +73,10 @@ export default function CounterModal({
     () => recommendedTeam.map((hero) => hero.id),
     [recommendedTeam]
   );
+  const alternativeIds = useMemo(
+    () => alternativeTeam.map((hero) => hero.id),
+    [alternativeTeam]
+  );
 
   const currentTeamHistory = useMemo(
     () => evaluateExactTeamHistory(currentTeamIds, enemyIds, combats),
@@ -110,112 +114,14 @@ export default function CounterModal({
     [recommendedIds, enemyIds, combats, heroes]
   );
 
-  // B doit chercher une AUTRE équipe ayant déjà gagné contre la même
-  // composition de classes que l'ennemi, en excluant les 5 héros de A.
-  const historicalClassAlternative = useMemo(() => {
-    const primaryIds = new Set(recommendedIds);
-    const targetClassKey = recommendedClassHistory.classKey;
-
-    if (!targetClassKey) return null;
-
-    const candidates = new Map<
-      string,
-      { heroIds: string[]; wins: number; losses: number }
-    >();
-
-    for (const combat of combats) {
-      const enemyTeam = [...new Set(combat.enemy_heroes ?? [])];
-      const myTeam = [...new Set(combat.my_heroes ?? [])];
-
-      if (enemyTeam.length !== 5 || myTeam.length !== 5) continue;
-      if (myTeam.some((id) => primaryIds.has(id))) continue;
-
-      const classHistory = evaluateEnemyClassHistory(
-        myTeam,
-        enemyTeam,
-        [combat],
-        heroes
-      );
-
-      if (classHistory.classKey !== targetClassKey) continue;
-
-      const key = [...myTeam].sort().join("|");
-      const candidate = candidates.get(key) ?? {
-        heroIds: myTeam,
-        wins: 0,
-        losses: 0,
-      };
-
-      combat.won ? candidate.wins++ : candidate.losses++;
-      candidates.set(key, candidate);
-    }
-
-    const settings = getEngineSettings();
-    const confidenceBattles = Math.max(
-      1,
-      settings.advanced.teamAHistoricalConfidenceBattles
-    );
-
-    const ordered = [...candidates.values()]
-      .filter((candidate) => candidate.wins > 0)
-      .sort((a, b) => {
-        const aBattles = a.wins + a.losses;
-        const bBattles = b.wins + b.losses;
-        const aConfidence = aBattles / (aBattles + confidenceBattles);
-        const bConfidence = bBattles / (bBattles + confidenceBattles);
-        const aReliability =
-          (a.wins / aBattles) *
-          (settings.advanced.teamAHistoricalReliabilityBase +
-            settings.advanced.teamAHistoricalReliabilityConfidenceWeight *
-              aConfidence);
-        const bReliability =
-          (b.wins / bBattles) *
-          (settings.advanced.teamAHistoricalReliabilityBase +
-            settings.advanced.teamAHistoricalReliabilityConfidenceWeight *
-              bConfidence);
-
-        return (
-          bReliability - aReliability ||
-          bBattles - aBattles ||
-          b.wins - a.wins ||
-          a.heroIds.sort().join("|").localeCompare(b.heroIds.sort().join("|"))
-        );
-      });
-
-    for (const candidate of ordered) {
-      const candidateHeroes = candidate.heroIds
-        .map((id) => heroes.find((hero) => hero.id === id))
-        .filter((hero): hero is Hero => Boolean(hero));
-
-      if (candidateHeroes.length === 5) {
-        const battles = candidate.wins + candidate.losses;
-        return {
-          team: candidateHeroes,
-          wins: candidate.wins,
-          losses: candidate.losses,
-          battles,
-          winRate: (candidate.wins / battles) * 100,
-        };
-      }
-    }
-
-    return null;
-  }, [recommendedIds, recommendedClassHistory.classKey, combats, heroes]);
-
-  const displayAlternativeTeam = historicalClassAlternative?.team ?? alternativeTeam;
-  const displayAlternativeIds = useMemo(
-    () => displayAlternativeTeam.map((hero) => hero.id),
-    [displayAlternativeTeam]
-  );
-
   const alternativeHistory = useMemo(
-    () => evaluateExactTeamHistory(displayAlternativeIds, enemyIds, combats),
-    [displayAlternativeIds, enemyIds, combats]
+    () => evaluateExactTeamHistory(alternativeIds, enemyIds, combats),
+    [alternativeIds, enemyIds, combats]
   );
 
   const alternativeClassHistory = useMemo(
-    () => evaluateEnemyClassHistory(displayAlternativeIds, enemyIds, combats, heroes),
-    [displayAlternativeIds, enemyIds, combats, heroes]
+    () => evaluateEnemyClassHistory(alternativeIds, enemyIds, combats, heroes),
+    [alternativeIds, enemyIds, combats, heroes]
   );
 
   const currentTeamHistoryLabel =
@@ -246,22 +152,18 @@ export default function CounterModal({
   }
 
   const alternativeHistoryLabel =
-    historicalClassAlternative
+    alternativeHistory.battles > 0
       ? isAuthenticated
-        ? `Historique classes · ${Math.round(historicalClassAlternative.winRate)} % · ${historicalClassAlternative.battles} combat${historicalClassAlternative.battles > 1 ? "s" : ""}`
-        : "Historique classes"
-      : alternativeHistory.battles > 0
+        ? `${Math.round(alternativeHistory.winRate)} % · ${alternativeHistory.battles} combat${alternativeHistory.battles > 1 ? "s" : ""}`
+        : `${Math.round(alternativeHistory.winRate)} %`
+      : alternativeClassHistory.battles > 0
         ? isAuthenticated
-          ? `${Math.round(alternativeHistory.winRate)} % · ${alternativeHistory.battles} combat${alternativeHistory.battles > 1 ? "s" : ""}`
-          : `${Math.round(alternativeHistory.winRate)} %`
-        : alternativeClassHistory.battles > 0
-          ? isAuthenticated
-            ? `Historique classes · ${Math.round(alternativeClassHistory.winRate)} % · ${alternativeClassHistory.battles} combat${alternativeClassHistory.battles > 1 ? "s" : ""}`
-            : "Historique classes"
-          : "Aucune statistique historique";
+          ? `Historique classes · ${Math.round(alternativeClassHistory.winRate)} % · ${alternativeClassHistory.battles} combat${alternativeClassHistory.battles > 1 ? "s" : ""}`
+          : "Historique classes"
+        : "Aucune statistique historique";
 
   const hasRecommendations =
-    recommendedTeam.length > 0 || displayAlternativeTeam.length > 0;
+    recommendedTeam.length > 0 || alternativeTeam.length > 0;
 
   const recommendationSourceText = recommendationSource
     ? recommendationSourceLabel(recommendationSource)
@@ -299,25 +201,23 @@ export default function CounterModal({
                   <div className="mb-2 flex items-center justify-between gap-3">
                     <div className="whitespace-nowrap text-[10px] font-bold uppercase tracking-wide sm:text-xs">Recommandation initiale</div>
                     <div className="shrink-0 text-right text-[10px] font-bold sm:text-xs">
-                      <span className="hidden sm:inline">{recommendationSourceText}<span className="ui-text-muted ml-1 font-normal">· {historyLabel}</span></span>
-                      <span className="sm:hidden">{recommendedExactHistory.battles > 0 ? `${Math.round(recommendedExactHistory.winRate)} %` : recommendedClassHistory.battles > 0 ? `${Math.round(recommendedClassHistory.winRate)} %` : "—"}</span>
+                      <span>{recommendationSourceText}<span className="ui-text-muted ml-1 font-normal">· {historyLabel}</span></span>
                     </div>
                   </div>
                   <div className="grid grid-cols-5 gap-1.5 sm:gap-2">{recommendedTeam.map((hero) => <span key={hero.id} className="ui-recommendation-hero">{hero.name}</span>)}</div>
                 </button>
               )}
 
-              {displayAlternativeTeam.length > 0 && (
+              {alternativeTeam.length > 0 && (
                 <div className={recommendedTeam.length > 0 ? "mt-3 border-t ui-divider pt-3" : ""}>
-                  <button type="button" onClick={() => onSelectRecommendedTeam(displayAlternativeIds)} className={["ui-recommendation-team", displayAlternativeIds.every((id) => teamIds.includes(id)) ? "ui-recommendation-selected" : ""].join(" ")}>
+                  <button type="button" onClick={() => onSelectRecommendedTeam(alternativeIds)} className={["ui-recommendation-team", alternativeIds.every((id) => teamIds.includes(id)) ? "ui-recommendation-selected" : ""].join(" ")}>
                     <div className="mb-2 flex items-center justify-between gap-3">
                       <div className="whitespace-nowrap text-[10px] font-bold uppercase tracking-wide sm:text-xs">Alternative</div>
                       <div className="shrink-0 text-right text-[10px] font-bold sm:text-xs">
-                        <span className="hidden sm:inline">{alternativeHistoryLabel}</span>
-                        <span className="sm:hidden">{alternativeHistory.battles > 0 ? `${Math.round(alternativeHistory.winRate)} %` : alternativeClassHistory.battles > 0 ? `${Math.round(alternativeClassHistory.winRate)} %` : "—"}</span>
+                        <span>{alternativeHistoryLabel}</span>
                       </div>
                     </div>
-                    <div className="grid grid-cols-5 gap-1.5 sm:gap-2">{displayAlternativeTeam.map((hero) => <span key={hero.id} className="ui-recommendation-hero">{hero.name}</span>)}</div>
+                    <div className="grid grid-cols-5 gap-1.5 sm:gap-2">{alternativeTeam.map((hero) => <span key={hero.id} className="ui-recommendation-hero">{hero.name}</span>)}</div>
                   </button>
                 </div>
               )}
