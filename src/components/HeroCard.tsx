@@ -22,9 +22,6 @@ export default function HeroCard({
   onClick,
 }: HeroCardProps) {
   const { stats } = hero;
-
-  // Le roster affiche toujours le full body.
-  // Les portraits restent utilisés dans CompactTeam après sélection.
   const rosterImage = `/heroes/${hero.id}.png`;
 
   return (
@@ -47,7 +44,7 @@ export default function HeroCard({
 
       <div className="relative z-10 flex min-h-[180px] flex-col">
         <div className="flex items-start justify-between gap-2 px-3 pt-3">
-          <div className="min-w-0">
+          <div className="min-w-0 pr-2">
             <h3 className="ui-text-primary truncate text-sm font-bold sm:text-lg">
               {hero.name}
             </h3>
@@ -59,9 +56,9 @@ export default function HeroCard({
             )}
           </div>
 
-          <div className="flex shrink-0 items-center gap-2">
+          <div className="relative flex shrink-0 items-center gap-2">
             {selected && selectionOrder !== undefined && (
-              <span className="absolute left-2 top-2 z-20 sm:static sm:z-auto">
+              <span className="selection-order-mobile absolute right-full top-1/2 mr-1 -translate-y-1/2 sm:static sm:mr-0 sm:translate-y-0">
                 <SelectionOrderBadge order={selectionOrder} />
               </span>
             )}
