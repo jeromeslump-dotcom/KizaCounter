@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useState } from "react";
 
-import packageJson from "../package.json";
 import { HEROES } from "./data/heroes";
 import type { Combat, HeroClassFilter, HeroSort } from "./types";
 import HeroGrid from "./components/HeroGrid";
@@ -17,7 +16,7 @@ import HeroManager from "./heroManager/HeroManager";
 import useHeroManager from "./heroManager/useHeroManager";
 
 const TEAM_SIZE = 5;
-const BUILD_VERSION = packageJson.version;
+const BUILD_VERSION = __BUILD_VERSION__;
 
 export default function App() {
   const [combats, setCombats] = useState<Combat[]>([]);
@@ -167,9 +166,9 @@ export default function App() {
               <h1 className="ui-text-primary text-xl font-black tracking-tight sm:text-2xl">
                 Lords Mobile Counter
               </h1>
-              <div className="ui-text-muted mt-0.5 text-[11px] font-semibold">
+              <div className="ui-text-muted mt-0.5 text-[11px] font-normal">
                 by kikoine
-                <span className="ml-2 text-rose-500">
+                <span className="ml-2 bg-gradient-to-r from-rose-300 via-rose-500 to-neutral-900 bg-clip-text font-normal text-transparent">
                   BUILD {BUILD_VERSION}
                 </span>
               </div>
