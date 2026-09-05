@@ -16,12 +16,7 @@ interface Profile {
   display_name: string | null;
 }
 
-export default function CombatHistory({
-  open,
-  combats,
-  onClose,
-  onBack,
-}: CombatHistoryProps) {
+export default function CombatHistory({ open, combats, onClose, onBack }: CombatHistoryProps) {
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [deletedIds, setDeletedIds] = useState<Set<string>>(new Set());
@@ -32,43 +27,25 @@ export default function CombatHistory({
   );
 
   const userIds = useMemo(
-    () =>
-      Array.from(
-        new Set(
-          visibleCombats
-            .map((combat) => combat.user_id)
-            .filter((id): id is string => Boolean(id))
-        )
-      ),
+    () => Array.from(new Set(visibleCombats.map((combat) => combat.user_id).filter((id): id is string => Boolean(id)))),
     [visibleCombats]
   );
 
   useEffect(() => {
     let cancelled = false;
-
     async function loadProfiles() {
       if (userIds.length === 0) {
         setProfiles([]);
         return;
       }
-
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("id, display_name")
-        .in("id", userIds);
-
+      const { data, error } = await supabase.from("profiles").select("id, display_name").in("id", userIds);
       if (error) {
         console.error("Erreur chargement des utilisateurs :", error);
         return;
       }
-
-      if (!cancelled) {
-        setProfiles((data ?? []) as Profile[]);
-      }
+      if (!cancelled) setProfiles((data ?? []) as Profile[]);
     }
-
     loadProfiles();
-
     return () => {
       cancelled = true;
     };
@@ -85,22 +62,13 @@ export default function CombatHistory({
 
   function getUserName(userId?: string | null): string {
     if (!userId) return "Utilisateur inconnu";
-
-    return (
-      profiles.find((profile) => profile.id === userId)?.display_name?.trim() ||
-      "Utilisateur"
-    );
+    return profiles.find((profile) => profile.id === userId)?.display_name?.trim() || "Utilisateur";
   }
 
   async function handleDelete(combat: Combat) {
     if (!combat.id) return;
-
-    const confirmed = window.confirm(
-      "Supprimer définitivement ce combat de l'historique ?"
-    );
-
+    const confirmed = window.confirm("Supprimer définitivement ce combat de l'historique ?");
     if (!confirmed) return;
-
     try {
       setDeletingId(combat.id);
       await deleteCombat(combat.id);
@@ -119,26 +87,21 @@ export default function CombatHistory({
 
   function HeroPortrait({ heroId }: { heroId: string }) {
     const hero = getHero(heroId);
-
     if (!hero) {
       return (
-        <span className="ui-text-soft min-w-0 truncate rounded-lg border ui-divider px-1 py-1 text-[9px] sm:px-2 sm:py-1 sm:text-[10px]">
-          {heroId}
-        </span>
+        <div className="min-w-0 text-center">
+          <span className="ui-text-soft block truncate text-[8px]">{heroId}</span>
+        </div>
       );
     }
-
     return (
-      <div
-        className="flex min-w-0 flex-1 items-center gap-1 sm:flex-col sm:gap-1"
-        title={hero.name}
-      >
+      <div className="flex min-w-0 flex-col items-center gap-0.5 sm:gap-1" title={hero.name}>
         <img
           src={hero.img}
           alt={hero.name}
           className="h-7 w-7 shrink-0 rounded-md border ui-divider object-cover shadow-sm sm:h-[72px] sm:w-[72px] sm:rounded-lg"
         />
-        <span className="ui-text-secondary min-w-0 truncate text-[8px] font-semibold leading-tight sm:max-w-[84px] sm:text-center sm:text-[10px]">
+        <span className="ui-text-secondary block w-full min-w-0 truncate text-center text-[8px] font-semibold leading-tight sm:max-w-[84px] sm:text-[10px]">
           {hero.name}
         </span>
       </div>
@@ -146,137 +109,60 @@ export default function CombatHistory({
   }
 
   return (
-    <div
-      className="fixed inset-0 z-[80] flex items-center justify-center bg-black/75 p-3 backdrop-blur-sm sm:p-4"
-      onClick={onClose}
-      role="presentation"
-    >
-      <section
-        className="ui-modal flex max-h-[92vh] w-full max-w-5xl flex-col overflow-hidden rounded-3xl border shadow-2xl"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="combat-history-title"
-        onClick={(event) => event.stopPropagation()}
-      >
+    <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/75 p-3 backdrop-blur-sm sm:p-4" onClick={onClose} role="presentation">
+      <section className="ui-modal flex max-h-[92vh] w-full max-w-5xl flex-col overflow-hidden rounded-3xl border shadow-2xl" role="dialog" aria-modal="true" aria-labelledby="combat-history-title" onClick={(event) => event.stopPropagation()}>
         <header className="border-b ui-divider p-5 sm:p-6">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <h2
-                id="combat-history-title"
-                className="ui-text-primary text-xl font-black"
-              >
-                📜 Historique des combats
-              </h2>
-              <p className="ui-text-secondary mt-1 text-xs sm:text-sm">
-                Historique commun des combats enregistrés.
-              </p>
+              <h2 id="combat-history-title" className="ui-text-primary text-xl font-black">📜 Historique des combats</h2>
+              <p className="ui-text-secondary mt-1 text-xs sm:text-sm">Historique commun des combats enregistrés.</p>
               <div className="mt-3 inline-flex items-center gap-2 rounded-lg border ui-divider px-3 py-1.5">
-                <span className="ui-text-primary text-xs font-bold">
-                  {totalCombats} combats · {victories} victoires
-                </span>
+                <span className="ui-text-primary text-xs font-bold">{totalCombats} combats · {victories} victoires</span>
               </div>
             </div>
-
-            <button
-              type="button"
-              onClick={onClose}
-              className="ui-action flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border text-lg transition"
-              aria-label="Fermer"
-            >
-              ✕
-            </button>
+            <button type="button" onClick={onClose} className="ui-action flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border text-lg transition" aria-label="Fermer">✕</button>
           </div>
         </header>
 
         <div className="min-h-0 overflow-y-auto p-4 sm:p-6">
           {visibleCombats.length === 0 ? (
-            <p className="ui-text-soft py-12 text-center text-sm">
-              Aucun combat enregistré.
-            </p>
+            <p className="ui-text-soft py-12 text-center text-sm">Aucun combat enregistré.</p>
           ) : (
             <div className="space-y-3">
               {visibleCombats.map((combat, index) => (
-                <div
-                  key={combat.id ?? `${combat.created_at ?? "combat"}-${index}`}
-                  className="ui-action rounded-xl border p-3 sm:p-4"
-                >
+                <div key={combat.id ?? `${combat.created_at ?? "combat"}-${index}`} className="ui-action rounded-xl border p-3 sm:p-4">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
                       <div className="flex flex-wrap items-center gap-2">
-                        <span className="ui-text-primary text-xs font-bold">
-                          Combat #{index + 1}
-                        </span>
-                        <span
-                          className={
-                            combat.won
-                              ? "text-xs font-black text-emerald-400"
-                              : "text-xs font-black text-red-400"
-                          }
-                        >
-                          {combat.won ? "Victoire" : "Défaite"}
-                        </span>
+                        <span className="ui-text-primary text-xs font-bold">Combat #{index + 1}</span>
+                        <span className={combat.won ? "text-xs font-black text-emerald-400" : "text-xs font-black text-red-400"}>{combat.won ? "Victoire" : "Défaite"}</span>
                       </div>
-
                       <div className="ui-text-soft mt-1 text-[10px]">
-                        {combat.created_at
-                          ? new Date(combat.created_at).toLocaleString(
-                              "fr-FR",
-                              {
-                                dateStyle: "short",
-                                timeStyle: "short",
-                              }
-                            )
-                          : "Date inconnue"}
+                        {combat.created_at ? new Date(combat.created_at).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" }) : "Date inconnue"}
                       </div>
                     </div>
-
-                    <button
-                      type="button"
-                      onClick={() => handleDelete(combat)}
-                      disabled={!combat.id || deletingId === combat.id}
-                      className="rounded-lg border border-red-400/20 px-2.5 py-1.5 text-xs font-bold text-red-400 transition hover:bg-red-400/10 disabled:cursor-not-allowed disabled:opacity-40"
-                      title="Supprimer ce combat"
-                    >
+                    <button type="button" onClick={() => handleDelete(combat)} disabled={!combat.id || deletingId === combat.id} className="rounded-lg border border-red-400/20 px-2.5 py-1.5 text-xs font-bold text-red-400 transition hover:bg-red-400/10 disabled:cursor-not-allowed disabled:opacity-40" title="Supprimer ce combat">
                       {deletingId === combat.id ? "…" : "🗑️ Supprimer"}
                     </button>
                   </div>
 
                   <div className="mt-3 grid gap-3 lg:grid-cols-2">
                     <div className="rounded-lg border ui-divider p-2.5">
-                      <div className="ui-text-soft mb-2 text-[10px] font-black uppercase tracking-wide">
-                        Ennemis
-                      </div>
+                      <div className="ui-text-soft mb-2 text-[10px] font-black uppercase tracking-wide">Ennemis</div>
                       <div className="grid grid-cols-5 gap-1 sm:gap-2">
-                        {combat.enemy_heroes.map((heroId, heroIndex) => (
-                          <HeroPortrait
-                            key={`${heroId}-${heroIndex}`}
-                            heroId={heroId}
-                          />
-                        ))}
+                        {combat.enemy_heroes.map((heroId, heroIndex) => <HeroPortrait key={`${heroId}-${heroIndex}`} heroId={heroId} />)}
                       </div>
                     </div>
-
                     <div className="rounded-lg border ui-divider p-2.5">
-                      <div className="ui-text-soft mb-2 text-[10px] font-black uppercase tracking-wide">
-                        Équipe
-                      </div>
+                      <div className="ui-text-soft mb-2 text-[10px] font-black uppercase tracking-wide">Équipe</div>
                       <div className="grid grid-cols-5 gap-1 sm:gap-2">
-                        {combat.my_heroes.map((heroId, heroIndex) => (
-                          <HeroPortrait
-                            key={`${heroId}-${heroIndex}`}
-                            heroId={heroId}
-                          />
-                        ))}
+                        {combat.my_heroes.map((heroId, heroIndex) => <HeroPortrait key={`${heroId}-${heroIndex}`} heroId={heroId} />)}
                       </div>
                     </div>
                   </div>
 
                   <div className="ui-text-secondary mt-3 flex items-center gap-2 border-t ui-divider pt-2 text-[10px]">
-                    <span>👤</span>
-                    <span>Enregistré par :</span>
-                    <strong className="ui-text-primary">
-                      {getUserName(combat.user_id)}
-                    </strong>
+                    <span>👤</span><span>Enregistré par :</span><strong className="ui-text-primary">{getUserName(combat.user_id)}</strong>
                   </div>
                 </div>
               ))}
@@ -285,13 +171,7 @@ export default function CombatHistory({
         </div>
 
         <footer className="flex justify-end border-t ui-divider px-4 py-3 sm:px-5 sm:py-4">
-          <button
-            type="button"
-            onClick={onBack}
-            className="ui-action rounded-lg border px-4 py-2 text-xs font-bold transition"
-          >
-            ← Retour au Admin Panel
-          </button>
+          <button type="button" onClick={onBack} className="ui-action rounded-lg border px-4 py-2 text-xs font-bold transition">← Retour au Admin Panel</button>
         </footer>
       </section>
     </div>
