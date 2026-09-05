@@ -145,6 +145,10 @@ export default function CounterModal({
   const hasRecommendations =
     recommendedTeam.length > 0 || alternativeTeam.length > 0;
 
+  const recommendationSourceText = recommendationSource
+    ? recommendationSourceLabel(recommendationSource)
+    : "Source inconnue";
+
   return (
     <div className="ui-modal-overlay fixed inset-0 z-50 flex items-center justify-center p-2 backdrop-blur-sm sm:p-4">
       <div className="ui-modal flex max-h-[96vh] w-full max-w-6xl flex-col overflow-hidden rounded-2xl border shadow-2xl">
@@ -207,11 +211,18 @@ export default function CounterModal({
                       Recommandation initiale
                     </div>
                     <div className="shrink-0 text-right text-[10px] font-bold sm:text-xs">
-                      {recommendationSource
-                        ? recommendationSourceLabel(recommendationSource)
-                        : "Source inconnue"}
-                      <span className="ui-text-muted ml-1 font-normal">
-                        · {historyLabel}
+                      <span className="hidden sm:inline">
+                        {recommendationSourceText}
+                        <span className="ui-text-muted ml-1 font-normal">
+                          · {historyLabel}
+                        </span>
+                      </span>
+                      <span className="sm:hidden">
+                        {recommendedExactHistory.battles > 0
+                          ? `${Math.round(recommendedExactHistory.winRate)} %`
+                          : recommendedClassHistory.battles > 0
+                            ? `${Math.round(recommendedClassHistory.winRate)} %`
+                            : "—"}
                       </span>
                     </div>
                   </div>
@@ -248,7 +259,16 @@ export default function CounterModal({
                         Alternative
                       </div>
                       <div className="shrink-0 text-right text-[10px] font-bold sm:text-xs">
-                        {alternativeHistoryLabel}
+                        <span className="hidden sm:inline">
+                          {alternativeHistoryLabel}
+                        </span>
+                        <span className="sm:hidden">
+                          {alternativeHistory.battles > 0
+                            ? `${Math.round(alternativeHistory.winRate)} %`
+                            : alternativeClassHistory.battles > 0
+                              ? `${Math.round(alternativeClassHistory.winRate)} %`
+                              : "—"}
+                        </span>
                       </div>
                     </div>
                     <div className="grid grid-cols-5 gap-1.5 sm:gap-2">
