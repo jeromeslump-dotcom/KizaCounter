@@ -106,6 +106,7 @@ export default function useCombatSelection({
         core4: 4,
         "class-history": 3,
         "similar-history": 2,
+        "defeat-history": 2,
         "counter-usage": 1,
         fallback: 0,
       };
