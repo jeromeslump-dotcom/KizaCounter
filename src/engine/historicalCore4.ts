@@ -2,6 +2,7 @@
 
 import type { Combat } from "../types";
 import { getEngineSettings, type EngineSettings } from "./engineSettings";
+import { sameTeam } from "./teamUtils";
 
 // ============================================================
 // TYPES
@@ -46,14 +47,6 @@ interface Core4Accumulator {
 
 function normalizeIds(ids: string[]): string[] {
   return [...new Set(ids)].sort();
-}
-
-function teamKey(ids: string[]): string {
-  return normalizeIds(ids).join("|");
-}
-
-function sameTeam(first: string[], second: string[]): boolean {
-  return teamKey(first) === teamKey(second);
 }
 
 // ============================================================
@@ -464,5 +457,5 @@ export function getPossibleCore4s(teamIds: string[]): string[][] {
 }
 
 export function core4Key(coreIds: string[]): string {
-  return teamKey(coreIds);
+  return coreIds.join("|");
 }
