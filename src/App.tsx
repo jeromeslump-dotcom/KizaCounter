@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 
+import packageJson from "../package.json";
 import { HEROES } from "./data/heroes";
 import type { Combat, HeroClassFilter, HeroSort } from "./types";
 import HeroGrid from "./components/HeroGrid";
@@ -16,6 +17,7 @@ import HeroManager from "./heroManager/HeroManager";
 import useHeroManager from "./heroManager/useHeroManager";
 
 const TEAM_SIZE = 5;
+const BUILD_VERSION = packageJson.version;
 
 export default function App() {
   const [combats, setCombats] = useState<Combat[]>([]);
@@ -164,10 +166,13 @@ export default function App() {
             <div>
               <h1 className="ui-text-primary text-xl font-black tracking-tight sm:text-2xl">
                 Lords Mobile Counter
+                <span className="ui-text-muted ml-1 text-[11px] font-semibold sm:ml-2">
+                  by kikoine
+                </span>
+                <span className="ml-1 text-[11px] font-semibold text-rose-500 sm:ml-2">
+                  BUILD {BUILD_VERSION}
+                </span>
               </h1>
-              <p className="ui-text-muted mt-0.5 text-[11px] font-semibold sm:hidden">
-                By Kikoine
-              </p>
               <p className="ui-text-secondary mt-1 hidden text-sm sm:block">
                 Sélectionnez les héros ennemis pour trouver la meilleure
                 contre-équipe.
