@@ -4,9 +4,12 @@ import {
   type RecommendationSource as ScoringRecommendationSource,
 } from "./scoring";
 import { getEngineSettings } from "./engineSettings";
+import { findBestHistoricalDefeatTeam } from "./defeatHistory";
 
 export type RecommendationSource =
-  ScoringRecommendationSource | "similar-history";
+  | ScoringRecommendationSource
+  | "similar-history"
+  | "defeat-history";
 
 export interface TeamRecommendation {
   team: Hero[];
@@ -269,6 +272,16 @@ export function recommendTeamWithSource(
   if (similarHistoryTeam)
     return { team: similarHistoryTeam, source: "similar-history" };
 
+  // Inverse historical engine: current enemy team was previously our team,
+  // and we lost. Reuse the exact opponent team that defeated it.
+  const defeatHistoryTeam = findBestHistoricalDefeatTeam(
+    enemyIds,
+    combats,
+    candidateHeroes
+  );
+  if (defeatHistoryTeam)
+    return { team: defeatHistoryTeam, source: "defeat-history" };
+
   const historicalClassTeam = findBestEnabledClassHistoryTeam(
     enemyIds,
     heroes,
@@ -305,6 +318,8 @@ export function recommendationSourceLabel(
       return "Historique classes";
     case "similar-history":
       return "Historique similaire";
+    case "defeat-history":
+      return "Historique des défaites";
     case "core4":
       return "Core4 historique";
     case "counter-usage":
