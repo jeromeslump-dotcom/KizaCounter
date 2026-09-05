@@ -289,9 +289,6 @@ export default function CounterModal({
           </div>
 
           <div className="mt-5">
-            <div className="ui-text-soft mb-3 text-sm font-bold">
-              Roster — cliquez sur un héros pour l'ajouter ou le retirer
-            </div>
             <HeroGrid
               heroes={heroes}
               enabledHeroIds={enabledHeroIds}
@@ -311,4 +308,8 @@ export default function CounterModal({
     </div>
   );
 }
+
+
+
+
 
