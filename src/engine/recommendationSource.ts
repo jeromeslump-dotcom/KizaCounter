@@ -53,13 +53,22 @@ function historicalReliability(wins: number, losses: number): number {
   );
 }
 
+interface HistoricalCandidate {
+  heroIds: string[];
+  wins: number;
+  losses: number;
+  similarity: number;
+}
+
 function orderHistoricalCandidates(
-  candidates: Map<string, { heroIds: string[]; wins: number; losses: number }>
+  candidates: Map<string, HistoricalCandidate>,
+  sortBySimilarity = false
 ) {
   return [...candidates.values()]
     .filter((candidate) => candidate.wins > 0)
     .sort(
       (a, b) =>
+        (sortBySimilarity ? b.similarity - a.similarity : 0) ||
         historicalReliability(b.wins, b.losses) -
           historicalReliability(a.wins, a.losses) ||
         b.wins + b.losses - (a.wins + a.losses) ||
@@ -78,105 +87,20 @@ function resolveCandidateTeam(
   return team.length === TEAM_SIZE ? team : null;
 }
 
-function findBestEnabledClassHistoryTeam(
-  enemyIds: string[],
-  heroes: Hero[],
+function findBestEnabledHistoricalTeam(
   candidateHeroes: Hero[],
   combats: Combat[],
-  excludedTeamKey?: string
+  excludedTeamKey: string | undefined,
+  matchesHistoricalEnemy: (historicalEnemy: string[]) => number | null,
+  sortBySimilarity = false
 ): Hero[] | null {
-  const targetClassKey = getClassKey(enemyIds, heroes);
-  if (!targetClassKey) return null;
   const enabledIds = new Set(candidateHeroes.map((hero) => hero.id));
-  const candidates = new Map<
-    string,
-    { heroIds: string[]; wins: number; losses: number }
-  >();
-  for (const combat of combats) {
-    const historicalEnemy = uniqueIds(combat.enemy_heroes ?? []);
-    if (
-      historicalEnemy.length !== TEAM_SIZE ||
-      getClassKey(historicalEnemy, heroes) !== targetClassKey
-    )
-      continue;
-    const heroIds = uniqueIds(combat.my_heroes ?? []);
-    if (
-      heroIds.length !== TEAM_SIZE ||
-      !heroIds.every((id) => enabledIds.has(id))
-    )
-      continue;
-    const key = teamKey(heroIds);
-    if (key === excludedTeamKey) continue;
-    const candidate = candidates.get(key) ?? { heroIds, wins: 0, losses: 0 };
-    combat.won ? candidate.wins++ : candidate.losses++;
-    candidates.set(key, candidate);
-  }
-  for (const candidate of orderHistoricalCandidates(candidates)) {
-    const team = resolveCandidateTeam(candidate.heroIds, candidateHeroes);
-    if (team) return team;
-  }
-  return null;
-}
+  const candidates = new Map<string, HistoricalCandidate>();
 
-function findBestEnabledExactHistoryTeam(
-  enemyIds: string[],
-  candidateHeroes: Hero[],
-  combats: Combat[],
-  excludedTeamKey?: string
-): Hero[] | null {
-  const enabledIds = new Set(candidateHeroes.map((hero) => hero.id));
-  const targetKey = teamKey(enemyIds);
-  const candidates = new Map<
-    string,
-    { heroIds: string[]; wins: number; losses: number }
-  >();
   for (const combat of combats) {
     const historicalEnemy = uniqueIds(combat.enemy_heroes ?? []);
-    if (
-      historicalEnemy.length !== TEAM_SIZE ||
-      teamKey(historicalEnemy) !== targetKey
-    )
-      continue;
-    const heroIds = uniqueIds(combat.my_heroes ?? []);
-    if (
-      heroIds.length !== TEAM_SIZE ||
-      !heroIds.every((id) => enabledIds.has(id))
-    )
-      continue;
-    const key = teamKey(heroIds);
-    if (key === excludedTeamKey) continue;
-    const candidate = candidates.get(key) ?? { heroIds, wins: 0, losses: 0 };
-    combat.won ? candidate.wins++ : candidate.losses++;
-    candidates.set(key, candidate);
-  }
-  for (const candidate of orderHistoricalCandidates(candidates)) {
-    const team = resolveCandidateTeam(candidate.heroIds, candidateHeroes);
-    if (team) return team;
-  }
-  return null;
-}
-
-function findBestEnabledSimilarHistoryTeam(
-  enemyIds: string[],
-  candidateHeroes: Hero[],
-  combats: Combat[],
-  excludedTeamKey?: string
-): Hero[] | null {
-  const targetIds = uniqueIds(enemyIds);
-  if (targetIds.length !== TEAM_SIZE) return null;
-  const enabledIds = new Set(candidateHeroes.map((hero) => hero.id));
-  const targetSet = new Set(targetIds);
-  const candidates = new Map<
-    string,
-    { heroIds: string[]; wins: number; losses: number; similarity: number }
-  >();
-  for (const combat of combats) {
-    const historicalEnemy = uniqueIds(combat.enemy_heroes ?? []);
-    if (historicalEnemy.length !== TEAM_SIZE) continue;
-    const sharedHeroes = historicalEnemy.filter((id) =>
-      targetSet.has(id)
-    ).length;
-    if (sharedHeroes < MIN_SIMILARITY || sharedHeroes === TEAM_SIZE) continue;
+    const similarity = matchesHistoricalEnemy(historicalEnemy);
+    if (similarity === null) continue;
     const heroIds = uniqueIds(combat.my_heroes ?? []);
     if (
       heroIds.length !== TEAM_SIZE ||
@@ -191,29 +115,84 @@ function findBestEnabledSimilarHistoryTeam(
       losses: 0,
       similarity: 0,
     };
-    candidate.similarity = Math.max(
-      candidate.similarity,
-      sharedHeroes / TEAM_SIZE
-    );
+    candidate.similarity = Math.max(candidate.similarity, similarity);
     combat.won ? candidate.wins++ : candidate.losses++;
     candidates.set(key, candidate);
   }
-  return (
-    [...candidates.values()]
-      .filter((candidate) => candidate.wins > 0)
-      .sort(
-        (a, b) =>
-          b.similarity - a.similarity ||
-          historicalReliability(b.wins, b.losses) -
-            historicalReliability(a.wins, a.losses) ||
-          b.wins + b.losses - (a.wins + a.losses) ||
-          b.wins - a.wins ||
-          teamKey(a.heroIds).localeCompare(teamKey(b.heroIds))
-      )
-      .map((candidate) =>
-        resolveCandidateTeam(candidate.heroIds, candidateHeroes)
-      )
-      .find((team): team is Hero[] => Boolean(team)) ?? null
+
+  for (const candidate of orderHistoricalCandidates(
+    candidates,
+    sortBySimilarity
+  )) {
+    const team = resolveCandidateTeam(candidate.heroIds, candidateHeroes);
+    if (team) return team;
+  }
+  return null;
+}
+
+function findBestEnabledExactHistoryTeam(
+  enemyIds: string[],
+  candidateHeroes: Hero[],
+  combats: Combat[],
+  excludedTeamKey?: string
+): Hero[] | null {
+  const targetKey = teamKey(enemyIds);
+  return findBestEnabledHistoricalTeam(
+    candidateHeroes,
+    combats,
+    excludedTeamKey,
+    (historicalEnemy) =>
+      historicalEnemy.length === TEAM_SIZE &&
+      teamKey(historicalEnemy) === targetKey
+        ? 0
+        : null
+  );
+}
+
+function findBestEnabledSimilarHistoryTeam(
+  enemyIds: string[],
+  candidateHeroes: Hero[],
+  combats: Combat[],
+  excludedTeamKey?: string
+): Hero[] | null {
+  const targetIds = uniqueIds(enemyIds);
+  if (targetIds.length !== TEAM_SIZE) return null;
+  const targetSet = new Set(targetIds);
+  return findBestEnabledHistoricalTeam(
+    candidateHeroes,
+    combats,
+    excludedTeamKey,
+    (historicalEnemy) => {
+      if (historicalEnemy.length !== TEAM_SIZE) return null;
+      const sharedHeroes = historicalEnemy.filter((id) =>
+        targetSet.has(id)
+      ).length;
+      return sharedHeroes >= MIN_SIMILARITY && sharedHeroes < TEAM_SIZE
+        ? sharedHeroes / TEAM_SIZE
+        : null;
+    },
+    true
+  );
+}
+
+function findBestEnabledClassHistoryTeam(
+  enemyIds: string[],
+  heroes: Hero[],
+  candidateHeroes: Hero[],
+  combats: Combat[],
+  excludedTeamKey?: string
+): Hero[] | null {
+  const targetClassKey = getClassKey(enemyIds, heroes);
+  if (!targetClassKey) return null;
+  return findBestEnabledHistoricalTeam(
+    candidateHeroes,
+    combats,
+    excludedTeamKey,
+    (historicalEnemy) =>
+      historicalEnemy.length === TEAM_SIZE &&
+      getClassKey(historicalEnemy, heroes) === targetClassKey
+        ? 0
+        : null
   );
 }
 
