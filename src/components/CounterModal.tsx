@@ -129,17 +129,42 @@ export default function CounterModal({
   );
 
   const currentTeamHistoryLabel =
-    currentTeamHistory.battles > 0
-      ? isAuthenticated
-        ? <><strong>Historique exact</strong> <span className="font-normal">· {Math.round(currentTeamHistory.winRate)} % · {currentTeamHistory.battles} combat{currentTeamHistory.battles > 1 ? "s" : ""}</span></>
-        : <strong>Historique exact</strong>
-      : currentTeamGeneralHistory.battles > 0
-        ? isAuthenticated
-          ? <><strong>Nouvelle rencontre · Équipe déjà victorieuse</strong> <span className="font-normal">· {Math.round(currentTeamGeneralHistory.winRate)} % · {currentTeamGeneralHistory.battles} combat{currentTeamGeneralHistory.battles > 1 ? "s" : ""}</span></>
-          : <strong>Nouvelle rencontre · Équipe déjà connue</strong>
-        : currentTeamClassHistory.battles > 0
-          ? <><strong>Nouvelle équipe</strong> <span className="font-normal">· Confiance statistique : {Math.round(currentTeamConfidence)} %</span></>
-          : <strong>Nouvelle équipe</strong>;
+    currentTeamHistory.battles > 0 ? (
+      isAuthenticated ? (
+        <>
+          <strong>Historique exact</strong>{" "}
+          <span className="font-normal">
+            · {Math.round(currentTeamHistory.winRate)} % ·{" "}
+            {currentTeamHistory.battles} combat
+            {currentTeamHistory.battles > 1 ? "s" : ""}
+          </span>
+        </>
+      ) : (
+        <strong>Historique exact</strong>
+      )
+    ) : currentTeamGeneralHistory.battles > 0 ? (
+      isAuthenticated ? (
+        <>
+          <strong>Nouvelle rencontre · Équipe déjà victorieuse</strong>{" "}
+          <span className="font-normal">
+            · {Math.round(currentTeamGeneralHistory.winRate)} % ·{" "}
+            {currentTeamGeneralHistory.battles} combat
+            {currentTeamGeneralHistory.battles > 1 ? "s" : ""}
+          </span>
+        </>
+      ) : (
+        <strong>Nouvelle rencontre · Équipe déjà connue</strong>
+      )
+    ) : currentTeamClassHistory.battles > 0 ? (
+      <>
+        <strong>Nouvelle équipe</strong>{" "}
+        <span className="font-normal">
+          · Confiance statistique : {Math.round(currentTeamConfidence)} %
+        </span>
+      </>
+    ) : (
+      <strong>Nouvelle équipe</strong>
+    );
 
   let historyLabel = "Aucune statistique historique affichée";
 
@@ -171,9 +196,11 @@ export default function CounterModal({
         : "Aucune statistique historique";
 
   const recommendationMobileHistoryLabel =
-    recommendationSource === "exact-history" && recommendedExactHistory.battles > 0
+    recommendationSource === "exact-history" &&
+    recommendedExactHistory.battles > 0
       ? `${Math.round(recommendedExactHistory.winRate)} %`
-      : recommendationSource === "class-history" && recommendedClassHistory.battles > 0
+      : recommendationSource === "class-history" &&
+          recommendedClassHistory.battles > 0
         ? `${Math.round(recommendedClassHistory.winRate)} %`
         : null;
 
@@ -198,19 +225,38 @@ export default function CounterModal({
       <div className="ui-modal flex max-h-[96vh] w-full max-w-6xl flex-col overflow-hidden rounded-2xl border shadow-2xl">
         <div className="flex items-center justify-between border-b ui-divider px-4 py-3 sm:px-5 sm:py-4">
           <div>
-            <h2 className="ui-text-primary text-lg font-black sm:text-xl">⚔️ Contre recommandée</h2>
-            <p className="ui-text-secondary mt-1 hidden text-xs sm:block">Modifiez les héros proposés si nécessaire.</p>
+            <h2 className="ui-text-primary text-lg font-black sm:text-xl">
+              ⚔️ Contre recommandée
+            </h2>
+            <p className="ui-text-secondary mt-1 hidden text-xs sm:block">
+              Modifiez les héros proposés si nécessaire.
+            </p>
           </div>
-          <button type="button" onClick={onClose} className="ui-action ui-danger flex h-9 w-9 items-center justify-center rounded-lg border text-lg transition" aria-label="Fermer">✕</button>
+          <button
+            type="button"
+            onClick={onClose}
+            className="ui-action ui-danger flex h-9 w-9 items-center justify-center rounded-lg border text-lg transition"
+            aria-label="Fermer"
+          >
+            ✕
+          </button>
         </div>
 
         <div className="overflow-y-auto p-3 sm:p-5">
-          <CompactTeam title={`Ennemis (${enemies.length}/5)`} heroes={enemies} selectedIds={enemies.map((hero) => hero.id)} enemy compactPortrait />
+          <CompactTeam
+            title={`Ennemis (${enemies.length}/5)`}
+            heroes={enemies}
+            selectedIds={enemies.map((hero) => hero.id)}
+            enemy
+            compactPortrait
+          />
 
           <div className="mt-4">
             <CompactTeam
               title={`Votre équipe (${team.length}/5)`}
-              titleRight={team.length === 5 ? currentTeamHistoryLabel : undefined}
+              titleRight={
+                team.length === 5 ? currentTeamHistoryLabel : undefined
+              }
               heroes={team}
               selectedIds={teamIds}
               onHeroClick={onHeroClick}
@@ -221,39 +267,104 @@ export default function CounterModal({
           {hasRecommendations && (
             <div className="ui-recommendations mt-4 rounded-xl border p-2 sm:p-3">
               {recommendedTeam.length > 0 && (
-                <button type="button" onClick={() => onSelectRecommendedTeam(recommendedIds)} className={["ui-recommendation-team", recommendedIds.every((id) => teamIds.includes(id)) ? "ui-recommendation-selected" : ""].join(" ")}>
+                <button
+                  type="button"
+                  onClick={() => onSelectRecommendedTeam(recommendedIds)}
+                  className={[
+                    "ui-recommendation-team",
+                    recommendedIds.every((id) => teamIds.includes(id))
+                      ? "ui-recommendation-selected"
+                      : "",
+                  ].join(" ")}
+                >
                   <div className="mb-2 flex items-center justify-between gap-3">
-                    <div className="whitespace-nowrap text-[10px] font-bold uppercase tracking-wide sm:text-xs">Recommandation initiale</div>
+                    <div className="whitespace-nowrap text-[10px] font-bold uppercase tracking-wide sm:text-xs">
+                      Recommandation initiale
+                    </div>
                     <div className="shrink-0 text-right text-[10px] font-bold sm:text-xs">
-                      <span className="sm:hidden">{recommendationMobileHistoryLabel}</span>
-                      <span className="hidden sm:inline">{recommendationSourceText}<span className="ui-text-muted ml-1 font-normal">· {historyLabel}</span></span>
+                      <span className="sm:hidden">
+                        {recommendationMobileHistoryLabel}
+                      </span>
+                      <span className="hidden sm:inline">
+                        {recommendationSourceText}
+                        <span className="ui-text-muted ml-1 font-normal">
+                          · {historyLabel}
+                        </span>
+                      </span>
                     </div>
                   </div>
-                  <div className="grid grid-cols-5 gap-1.5 sm:gap-2">{recommendedTeam.map((hero) => <span key={hero.id} className="ui-recommendation-hero">{hero.name}</span>)}</div>
+                  <div className="grid grid-cols-5 gap-1.5 sm:gap-2">
+                    {recommendedTeam.map((hero) => (
+                      <span key={hero.id} className="ui-recommendation-hero">
+                        {hero.name}
+                      </span>
+                    ))}
+                  </div>
                 </button>
               )}
 
               {alternativeTeam.length > 0 && (
-                <div className={recommendedTeam.length > 0 ? "mt-3 border-t ui-divider pt-3" : ""}>
-                  <button type="button" onClick={() => onSelectRecommendedTeam(alternativeIds)} className={["ui-recommendation-team", alternativeIds.every((id) => teamIds.includes(id)) ? "ui-recommendation-selected" : ""].join(" ")}>
+                <div
+                  className={
+                    recommendedTeam.length > 0
+                      ? "mt-3 border-t ui-divider pt-3"
+                      : ""
+                  }
+                >
+                  <button
+                    type="button"
+                    onClick={() => onSelectRecommendedTeam(alternativeIds)}
+                    className={[
+                      "ui-recommendation-team",
+                      alternativeIds.every((id) => teamIds.includes(id))
+                        ? "ui-recommendation-selected"
+                        : "",
+                    ].join(" ")}
+                  >
                     <div className="mb-2 flex items-center justify-between gap-3">
-                      <div className="whitespace-nowrap text-[10px] font-bold uppercase tracking-wide sm:text-xs">Alternative</div>
+                      <div className="whitespace-nowrap text-[10px] font-bold uppercase tracking-wide sm:text-xs">
+                        Alternative
+                      </div>
                       <div className="shrink-0 text-right text-[10px] font-bold sm:text-xs">
-                        <span className="sm:hidden">{alternativeMobileHistoryLabel}</span>
-                        <span className="hidden sm:inline">{alternativeHistoryLabel}</span>
+                        <span className="sm:hidden">
+                          {alternativeMobileHistoryLabel}
+                        </span>
+                        <span className="hidden sm:inline">
+                          {alternativeHistoryLabel}
+                        </span>
                       </div>
                     </div>
-                    <div className="grid grid-cols-5 gap-1.5 sm:gap-2">{alternativeTeam.map((hero) => <span key={hero.id} className="ui-recommendation-hero">{hero.name}</span>)}</div>
+                    <div className="grid grid-cols-5 gap-1.5 sm:gap-2">
+                      {alternativeTeam.map((hero) => (
+                        <span key={hero.id} className="ui-recommendation-hero">
+                          {hero.name}
+                        </span>
+                      ))}
+                    </div>
                   </button>
                 </div>
               )}
             </div>
           )}
 
-          <div className="mt-4"><CombatForm enemies={enemies} myHeroes={team} onSave={onSave} /></div>
+          <div className="mt-4">
+            <CombatForm enemies={enemies} myHeroes={team} onSave={onSave} />
+          </div>
 
           <div className="mt-5">
-            <HeroGrid heroes={heroes} enabledHeroIds={enabledHeroIds} activeClass={activeClass} query={query} sortBy={sortBy} usage={usage} selectedIds={teamIds} onQueryChange={onQueryChange} onClassChange={onClassChange} onSortChange={onSortChange} onHeroClick={onHeroClick} />
+            <HeroGrid
+              heroes={heroes}
+              enabledHeroIds={enabledHeroIds}
+              activeClass={activeClass}
+              query={query}
+              sortBy={sortBy}
+              usage={usage}
+              selectedIds={teamIds}
+              onQueryChange={onQueryChange}
+              onClassChange={onClassChange}
+              onSortChange={onSortChange}
+              onHeroClick={onHeroClick}
+            />
           </div>
         </div>
       </div>

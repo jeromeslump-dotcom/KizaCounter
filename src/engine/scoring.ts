@@ -1,10 +1,5 @@
 import type { Hero } from "../data/heroes";
-import type {
-  HeroScore,
-  HeroUsage,
-  TeamEvaluation,
-  TeamScore,
-} from "../types";
+import type { HeroScore, HeroUsage, TeamEvaluation, TeamScore } from "../types";
 import { analyzeCore4Plus1 } from "./historicalCore4";
 import {
   getEngineSettings,
@@ -44,11 +39,7 @@ export {
 const TEAM_SIZE = 5;
 
 export type RecommendationSource =
-  | "exact-history"
-  | "class-history"
-  | "core4"
-  | "counter-usage"
-  | "fallback";
+  "exact-history" | "class-history" | "core4" | "counter-usage" | "fallback";
 
 export type RecommendationSourceCallback = (
   source: RecommendationSource
@@ -178,8 +169,7 @@ export function recommendTeam(
   const ranked = availableHeroes
     .map((hero) => ({ hero, score: counterHeroScore(hero, counterUsage) }))
     .sort(
-      (a, b) =>
-        b.score - a.score || a.hero.name.localeCompare(b.hero.name)
+      (a, b) => b.score - a.score || a.hero.name.localeCompare(b.hero.name)
     );
 
   const recommended: Hero[] = [];
@@ -219,13 +209,9 @@ export function recommendTeam(
         );
         const completeScore =
           core4Points * settings.teamA.core4Weight +
-          replacementScore *
-            settings.teamA.core4Weight *
-            (budgets.core4 / 100);
+          replacementScore * settings.teamA.core4Weight * (budgets.core4 / 100);
         const completeTeam = [...core4Heroes, candidate.hero];
-        const completeTeamKey = teamKey(
-          completeTeam.map((hero) => hero.id)
-        );
+        const completeTeamKey = teamKey(completeTeam.map((hero) => hero.id));
         const bestCompleteTeamKey = bestCompleteTeam
           ? teamKey(bestCompleteTeam.map((hero) => hero.id))
           : "";
@@ -318,8 +304,7 @@ export function recommendAlternativeTeam(
       };
     })
     .sort(
-      (a, b) =>
-        b.score - a.score || a.hero.name.localeCompare(b.hero.name)
+      (a, b) => b.score - a.score || a.hero.name.localeCompare(b.hero.name)
     );
 
   const buildCandidate = (orderedHeroes: typeof ranked): Hero[] => {
@@ -345,10 +330,7 @@ export function recommendAlternativeTeam(
         core.battles,
         settings.advanced.core4ConfidenceBattles
       );
-      bestRawScore = Math.max(
-        bestRawScore,
-        (core.winRate / 100) * confidence
-      );
+      bestRawScore = Math.max(bestRawScore, (core.winRate / 100) * confidence);
     }
     return normalizeModulePoints(bestRawScore, budgets.core4);
   };
@@ -416,10 +398,10 @@ export function recommendAlternativeTeam(
     for (const replacement of pool) {
       if (
         baseAlternative.some(
-          (hero, heroIndex) =>
-            heroIndex !== index && hero.id === replacement.id
+          (hero, heroIndex) => heroIndex !== index && hero.id === replacement.id
         )
-      ) continue;
+      )
+        continue;
       const candidate = [...baseAlternative];
       candidate[index] = replacement;
       candidates.push(candidate);
@@ -468,8 +450,5 @@ export function rankHeroes(
   void combats;
   return heroes
     .map((hero) => scoreHero(hero))
-    .sort(
-      (a, b) =>
-        b.score - a.score || a.heroId.localeCompare(b.heroId)
-    );
+    .sort((a, b) => b.score - a.score || a.heroId.localeCompare(b.heroId));
 }

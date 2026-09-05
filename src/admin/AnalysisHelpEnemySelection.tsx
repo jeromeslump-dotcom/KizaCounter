@@ -36,10 +36,24 @@ export default function AnalysisHelpEnemySelection({
     <div className="min-h-0 overflow-y-auto p-3 sm:p-5">
       <div className="ui-panel-alt rounded-2xl border p-3 sm:p-4">
         <div className="mb-3 flex items-center justify-between gap-3">
-          <div className="ui-text-primary text-sm font-black">Équipe ennemie à analyser ({enemyIds.length}/5)</div>
-          <button type="button" onClick={onClear} className="ui-action rounded-lg border px-3 py-1.5 text-[10px] font-bold transition">Effacer tout</button>
+          <div className="ui-text-primary text-sm font-black">
+            Équipe ennemie à analyser ({enemyIds.length}/5)
+          </div>
+          <button
+            type="button"
+            onClick={onClear}
+            className="ui-action rounded-lg border px-3 py-1.5 text-[10px] font-bold transition"
+          >
+            Effacer tout
+          </button>
         </div>
-        <CompactTeam title="" heroes={selectedEnemies} selectedIds={enemyIds} enemy compactPortrait />
+        <CompactTeam
+          title=""
+          heroes={selectedEnemies}
+          selectedIds={enemyIds}
+          enemy
+          compactPortrait
+        />
       </div>
       <div className="mt-4">
         <HeroGrid

@@ -130,11 +130,11 @@ export default function useCombatSelection({
       );
 
       if (candidateTeam?.length === TEAM_SIZE) {
-        const sameTeam = candidateTeam.every((hero) =>
-          primaryIds.includes(hero.id)
-        ) && primaryIds.every((id) =>
-          candidateTeam.some((hero) => hero.id === id)
-        );
+        const sameTeam =
+          candidateTeam.every((hero) => primaryIds.includes(hero.id)) &&
+          primaryIds.every((id) =>
+            candidateTeam.some((hero) => hero.id === id)
+          );
 
         if (!sameTeam) {
           bestAlternative = candidateTeam;
@@ -194,15 +194,11 @@ export default function useCombatSelection({
   }
 
   function toggleTeam(hero: Hero) {
-    setTeamIds((current) =>
-      toggleTeamSelection(current, hero, enabledHeroIds)
-    );
+    setTeamIds((current) => toggleTeamSelection(current, hero, enabledHeroIds));
   }
 
   function selectCounterHero(hero: Hero) {
-    setTeamIds((current) =>
-      toggleTeamSelection(current, hero, enabledHeroIds)
-    );
+    setTeamIds((current) => toggleTeamSelection(current, hero, enabledHeroIds));
   }
 
   function clearEnemies() {
