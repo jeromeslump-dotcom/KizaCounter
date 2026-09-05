@@ -37,8 +37,8 @@ function confidenceForBattles(battles: number): number {
 /**
  * Inverse historical engine:
  * the current enemy team becomes our historical team.
- * We search defeats where we played that exact 5-hero team,
- * then return the opponent team that beat it.
+ * We search every historical battle played with that exact 5-hero team,
+ * then identify which complete opponent teams defeated it.
  */
 export function findHistoricalDefeatCounters(
   enemyIds: string[],
@@ -57,8 +57,7 @@ export function findHistoricalDefeatCounters(
 
     if (
       historicalMyTeam.length !== TEAM_SIZE ||
-      !sameTeam(historicalMyTeam, targetTeam) ||
-      combat.won
+      !sameTeam(historicalMyTeam, targetTeam)
     ) {
       continue;
     }
@@ -83,24 +82,28 @@ export function findHistoricalDefeatCounters(
       score: 0,
     };
 
-    candidate.losses++;
     candidate.battles++;
+    combat.won ? candidate.wins++ : candidate.losses++;
     candidates.set(key, candidate);
   }
 
-  for (const candidate of candidates.values()) {
-    candidate.lossRate = candidate.losses / candidate.battles;
-    candidate.confidence = confidenceForBattles(candidate.battles);
-    candidate.score = candidate.lossRate * candidate.confidence;
-  }
+  const ordered = [...candidates.values()]
+    .filter((candidate) => candidate.losses > 0)
+    .map((candidate) => {
+      candidate.lossRate = candidate.losses / candidate.battles;
+      candidate.confidence = confidenceForBattles(candidate.battles);
+      candidate.score = candidate.lossRate * candidate.confidence;
+      return candidate;
+    })
+    .sort(
+      (a, b) =>
+        b.score - a.score ||
+        b.losses - a.losses ||
+        b.battles - a.battles ||
+        teamKey(a.heroIds).localeCompare(teamKey(b.heroIds))
+    );
 
-  return [...candidates.values()].sort(
-    (a, b) =>
-      b.score - a.score ||
-      b.losses - a.losses ||
-      b.battles - a.battles ||
-      teamKey(a.heroIds).localeCompare(teamKey(b.heroIds))
-  );
+  return ordered;
 }
 
 export function findBestHistoricalDefeatTeam(
