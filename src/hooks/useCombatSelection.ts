@@ -16,6 +16,22 @@ interface UseCombatSelectionProps {
   enabledHeroIds: Set<string>;
 }
 
+function toggleTeamSelection(
+  current: string[],
+  hero: Hero,
+  enabledHeroIds: Set<string>
+): string[] {
+  if (current.includes(hero.id)) {
+    return current.filter((id) => id !== hero.id);
+  }
+
+  if (current.length >= TEAM_SIZE || !enabledHeroIds.has(hero.id)) {
+    return current;
+  }
+
+  return [...current, hero.id];
+}
+
 export default function useCombatSelection({
   heroes,
   combats,
@@ -178,23 +194,15 @@ export default function useCombatSelection({
   }
 
   function toggleTeam(hero: Hero) {
-    setTeamIds((current) => {
-      if (current.includes(hero.id))
-        return current.filter((id) => id !== hero.id);
-      if (current.length >= TEAM_SIZE || !enabledHeroIds.has(hero.id))
-        return current;
-      return [...current, hero.id];
-    });
+    setTeamIds((current) =>
+      toggleTeamSelection(current, hero, enabledHeroIds)
+    );
   }
 
   function selectCounterHero(hero: Hero) {
-    setTeamIds((current) => {
-      if (current.includes(hero.id))
-        return current.filter((id) => id !== hero.id);
-      if (current.length >= TEAM_SIZE || !enabledHeroIds.has(hero.id))
-        return current;
-      return [...current, hero.id];
-    });
+    setTeamIds((current) =>
+      toggleTeamSelection(current, hero, enabledHeroIds)
+    );
   }
 
   function clearEnemies() {
