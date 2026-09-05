@@ -62,6 +62,34 @@ function getBodyText(node, sourceFile) {
   return sourceFile.text.slice(node.body.pos, node.body.end);
 }
 
+function isSimpleHelperWrapper(node, sourceFile) {
+  if (!node.body || !ts.isBlock(node.body)) return false;
+
+  const statements = node.body.statements;
+  if (statements.length !== 1) return false;
+
+  const statement = statements[0];
+
+  if (ts.isReturnStatement(statement)) {
+    const expression = statement.expression;
+    if (!expression) return false;
+
+    if (ts.isCallExpression(expression)) {
+      return true;
+    }
+
+    if (ts.isParenthesizedExpression(expression)) {
+      return ts.isCallExpression(expression.expression);
+    }
+  }
+
+  if (ts.isExpressionStatement(statement)) {
+    return ts.isCallExpression(statement.expression);
+  }
+
+  return false;
+}
+
 function extractFunctions(source, file) {
   const sourceFile = ts.createSourceFile(
     file,
@@ -90,7 +118,8 @@ function extractFunctions(source, file) {
 
         if (
           endLine - startLine + 1 <= MAX_FUNCTION_LINES &&
-          body.length >= MIN_BODY_LENGTH
+          body.length >= MIN_BODY_LENGTH &&
+          !isSimpleHelperWrapper(node, sourceFile)
         ) {
           results.push({ file, name, startLine, endLine, body });
         }
