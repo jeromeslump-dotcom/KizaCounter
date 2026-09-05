@@ -71,6 +71,55 @@ describe("recommendation engine history", () => {
     expect(result?.wins).toBe(1);
     expect(result?.battles).toBe(1);
   });
+
+  it("does not let a 100% class-history team on 2 battles beat an 85% team on 15 battles", () => {
+    const targetEnemy = ["target-str-1", "target-str-2", "target-agi", "target-int-1", "target-int-2"];
+    const historicalEnemy = ["history-str-1", "history-str-2", "history-agi", "history-int-1", "history-int-2"];
+    const targetClasses: Hero["cls"][] = ["STR", "STR", "AGI", "INT", "INT"];
+    const heroes = [
+      ...targetEnemy.map((id, index) => hero(id, targetClasses[index])),
+      ...historicalEnemy.map((id, index) => hero(id, targetClasses[index])),
+      ...teamA.map((id) => hero(id, "STR")),
+      ...teamB.map((id) => hero(id, "AGI")),
+    ];
+
+    const combats: Combat[] = [
+      combat(teamA, true, historicalEnemy),
+      combat(teamA, true, historicalEnemy),
+      ...Array.from({ length: 13 }, () => combat(teamB, true, historicalEnemy)),
+      ...Array.from({ length: 2 }, () => combat(teamB, false, historicalEnemy)),
+    ];
+
+    const originalAdvanced = { ...DEFAULT_ENGINE_SETTINGS.advanced };
+
+    try {
+      // Isolate the class-history selector from the Core4 source so this test
+      // audits exactly the reliability rule for multiple historical teams.
+      Object.assign(DEFAULT_ENGINE_SETTINGS.advanced, { core4MinBattles: 100 });
+
+      const result = recommendTeam(targetEnemy, heroes, combats);
+      expect(result.map((hero) => hero.id).sort()).toEqual([...teamB].sort());
+
+      const teamAHistory = evaluateEnemyClassHistory(teamA, targetEnemy, combats, heroes);
+      const teamBHistory = evaluateEnemyClassHistory(teamB, targetEnemy, combats, heroes);
+      const confidenceBattles = DEFAULT_ENGINE_SETTINGS.advanced.teamAHistoricalConfidenceBattles;
+      const reliability = (wins: number, battles: number) =>
+        (wins / battles) *
+        (DEFAULT_ENGINE_SETTINGS.advanced.teamAHistoricalReliabilityBase +
+          DEFAULT_ENGINE_SETTINGS.advanced.teamAHistoricalReliabilityConfidenceWeight *
+            (battles / (battles + confidenceBattles)));
+
+      expect(teamAHistory.winRate).toBe(100);
+      expect(teamAHistory.battles).toBe(2);
+      expect(teamBHistory.winRate).toBeCloseTo(86.6666667, 5);
+      expect(teamBHistory.battles).toBe(15);
+      expect(reliability(teamBHistory.wins, teamBHistory.battles)).toBeGreaterThan(
+        reliability(teamAHistory.wins, teamAHistory.battles)
+      );
+    } finally {
+      Object.assign(DEFAULT_ENGINE_SETTINGS.advanced, originalAdvanced);
+    }
+  });
 });
 
 describe("evaluateTeam scoring modules", () => {
