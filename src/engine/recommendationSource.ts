@@ -5,6 +5,7 @@ import {
 } from "./scoring";
 import { getEngineSettings } from "./engineSettings";
 import { findBestHistoricalDefeatTeam } from "./defeatHistory";
+import { sameTeam, teamKey, uniqueIds } from "./teamUtils";
 
 export type RecommendationSource =
   | ScoringRecommendationSource
@@ -18,13 +19,6 @@ export interface TeamRecommendation {
 
 const TEAM_SIZE = 5;
 const MIN_SIMILARITY = 3;
-
-function uniqueIds(ids: string[]): string[] {
-  return [...new Set(ids)];
-}
-function teamKey(ids: string[]): string {
-  return uniqueIds(ids).sort().join("|");
-}
 
 function getClassKey(ids: string[], heroes: Hero[]): string | null {
   const classes = ids
@@ -143,6 +137,7 @@ function findBestEnabledExactHistoryTeam(
     excludedTeamKey,
     (historicalEnemy) =>
       historicalEnemy.length === TEAM_SIZE &&
+      sameTeam(historicalEnemy, enemyIds) &&
       teamKey(historicalEnemy) === targetKey
         ? 0
         : null
@@ -279,7 +274,6 @@ export function recommendTeamWithSource(
   if (exactHistoryTeam)
     return { team: exactHistoryTeam, source: "exact-history" };
 
-  // Proven historical wins take priority over score-only Core4 recommendations.
   const similarHistoryTeam = findBestEnabledSimilarHistoryTeam(
     enemyIds,
     candidateHeroes,
@@ -288,8 +282,6 @@ export function recommendTeamWithSource(
   if (similarHistoryTeam)
     return { team: similarHistoryTeam, source: "similar-history" };
 
-  // Inverse historical engine: current enemy team was previously our team,
-  // and we lost. Reuse the exact opponent team that defeated it.
   const defeatHistoryTeam = findBestHistoricalDefeatTeam(
     enemyIds,
     combats,
