@@ -5,6 +5,7 @@ import type { Combat, Hero, HeroClassFilter, HeroSort } from "../types";
 import {
   evaluateEnemyClassHistory,
   evaluateExactTeamHistory,
+  evaluateTeamHistory,
 } from "../engine/scoring";
 import { getEngineSettings } from "../engine/engineSettings";
 import {
@@ -83,6 +84,13 @@ export default function CounterModal({
     [currentTeamIds, enemyIds, combats]
   );
 
+  // Historique de cette équipe, quel que soit l'adversaire rencontré.
+  // Cela permet de distinguer "Nouvelle rencontre" de "Nouvelle équipe".
+  const currentTeamGeneralHistory = useMemo(
+    () => evaluateTeamHistory(currentTeamIds, combats),
+    [currentTeamIds, combats]
+  );
+
   const currentTeamClassHistory = useMemo(
     () => evaluateEnemyClassHistory(currentTeamIds, enemyIds, combats, heroes),
     [currentTeamIds, enemyIds, combats, heroes]
@@ -125,13 +133,17 @@ export default function CounterModal({
   );
 
   const currentTeamHistoryLabel =
-    currentTeamHistory.battles === 0
-      ? currentTeamClassHistory.battles > 0
-        ? `Nouvelle équipe · Confiance statistique : ${Math.round(currentTeamConfidence)} %`
-        : "Nouvelle équipe"
-      : isAuthenticated
-        ? `${Math.round(currentTeamHistory.winRate)} % · ${currentTeamHistory.battles} combat${currentTeamHistory.battles > 1 ? "s" : ""}`
-        : `${Math.round(currentTeamHistory.winRate)} %`;
+    currentTeamHistory.battles > 0
+      ? isAuthenticated
+        ? `Historique exact · ${Math.round(currentTeamHistory.winRate)} % · ${currentTeamHistory.battles} combat${currentTeamHistory.battles > 1 ? "s" : ""}`
+        : "Historique exact"
+      : currentTeamGeneralHistory.battles > 0
+        ? isAuthenticated
+          ? `Nouvelle rencontre · Équipe déjà victorieuse · ${Math.round(currentTeamGeneralHistory.winRate)} % · ${currentTeamGeneralHistory.battles} combat${currentTeamGeneralHistory.battles > 1 ? "s" : ""}`
+          : "Nouvelle rencontre · Équipe déjà connue"
+        : currentTeamClassHistory.battles > 0
+          ? `Nouvelle équipe · Confiance statistique : ${Math.round(currentTeamConfidence)} %`
+          : "Nouvelle équipe";
 
   let historyLabel = "Aucune statistique historique affichée";
 
