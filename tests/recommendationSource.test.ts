@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { recommendTeamWithSource } from "../src/engine/recommendationSource";
+import { findHistoricalAlternativeTeam, recommendTeamWithSource } from "../src/engine/recommendationSource";
 import type { Combat, Hero } from "../src/types";
 
 function combat(
@@ -86,6 +86,45 @@ describe("historical recommendation sources", () => {
     expect(result.source).toBe("class-history");
     expect(result.team.map((hero) => hero.id).sort()).toEqual(
       [...recommended].sort()
+    );
+  });
+
+  it("skips A in defeat history before falling back to class history for B", () => {
+    const classMatchedEnemy = [
+      "class-1",
+      "class-2",
+      "class-3",
+      "class-4",
+      "class-5",
+    ];
+    const alternative = [
+      "alternative-1",
+      "alternative-2",
+      "alternative-3",
+      "alternative-4",
+      "alternative-5",
+    ];
+    const classes: Hero["cls"][] = ["STR", "AGI", "INT", "STR", "AGI"];
+    const heroes = uniqueHeroes(
+      heroesFor(target, classes),
+      heroesFor(classMatchedEnemy, classes),
+      heroesFor(recommended, ["INT"]),
+      heroesFor(alternative)
+    );
+
+    const result = findHistoricalAlternativeTeam(
+      target,
+      heroes,
+      heroes,
+      [
+        combat(target, recommended, false),
+        combat(alternative, classMatchedEnemy, true),
+      ],
+      recommended
+    );
+
+    expect(result?.map((hero) => hero.id).sort()).toEqual(
+      [...alternative].sort()
     );
   });
 });

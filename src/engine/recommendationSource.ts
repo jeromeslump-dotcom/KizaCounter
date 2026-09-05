@@ -217,7 +217,12 @@ export function findHistoricalAlternativeTeam(
       combats,
       excludedKey
     ) ??
-    findBestHistoricalDefeatTeam(enemyIds, combats, candidateHeroes) ??
+    findBestHistoricalDefeatTeam(
+      enemyIds,
+      combats,
+      candidateHeroes,
+      excludedTeamIds
+    ) ??
     findBestEnabledClassHistoryTeam(
       enemyIds,
       heroes,
