@@ -124,6 +124,19 @@ select {
       0 0 0 2px rgb(251 191 36 / 0.35),
       0 0 22px rgb(245 158 11 / 0.12);
   }
+  .hero-card-selection-locked {
+    cursor: not-allowed;
+    opacity: 0.48;
+    filter: saturate(0.45);
+  }
+  .hero-card-selection-locked:hover {
+    transform: none;
+    border-color: rgb(30 41 59);
+    background: rgb(7 12 25 / 0.96);
+  }
+  .hero-card-removed {
+    animation: hero-card-removed 0.35s ease-out;
+  }
   .ui-input {
     border-color: rgb(30 41 59);
     background: rgb(3 7 18);
@@ -327,6 +340,21 @@ select {
   }
   .user-management-save:hover {
     border-color: rgb(245 158 11 / 0.7);
+  }
+}
+
+@keyframes hero-card-removed {
+  0% {
+    transform: scale(0.97);
+    opacity: 0.55;
+  }
+  60% {
+    transform: scale(1.01);
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
   }
 }
 
