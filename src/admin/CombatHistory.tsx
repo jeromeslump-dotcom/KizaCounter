@@ -122,7 +122,7 @@ export default function CombatHistory({
 
     if (!hero) {
       return (
-        <span className="ui-text-soft rounded-lg border ui-divider px-2 py-1 text-[10px]">
+        <span className="ui-text-soft min-w-0 truncate rounded-lg border ui-divider px-1 py-1 text-[9px] sm:px-2 sm:py-1 sm:text-[10px]">
           {heroId}
         </span>
       );
@@ -130,15 +130,15 @@ export default function CombatHistory({
 
     return (
       <div
-        className="group flex min-w-[58px] flex-col items-center gap-1"
+        className="flex min-w-0 flex-1 items-center gap-1 sm:flex-col sm:gap-1"
         title={hero.name}
       >
         <img
           src={hero.img}
           alt={hero.name}
-          className="h-[62px] w-[62px] rounded-lg border ui-divider object-cover shadow-sm"
+          className="h-7 w-7 shrink-0 rounded-md border ui-divider object-cover shadow-sm sm:h-[72px] sm:w-[72px] sm:rounded-lg"
         />
-        <span className="ui-text-secondary max-w-[68px] truncate text-center text-[9px] font-semibold leading-tight">
+        <span className="ui-text-secondary min-w-0 truncate text-[8px] font-semibold leading-tight sm:max-w-[84px] sm:text-center sm:text-[10px]">
           {hero.name}
         </span>
       </div>
@@ -246,7 +246,7 @@ export default function CombatHistory({
                       <div className="ui-text-soft mb-2 text-[10px] font-black uppercase tracking-wide">
                         Ennemis
                       </div>
-                      <div className="flex flex-wrap gap-2">
+                      <div className="grid grid-cols-5 gap-1 sm:gap-2">
                         {combat.enemy_heroes.map((heroId, heroIndex) => (
                           <HeroPortrait
                             key={`${heroId}-${heroIndex}`}
@@ -260,7 +260,7 @@ export default function CombatHistory({
                       <div className="ui-text-soft mb-2 text-[10px] font-black uppercase tracking-wide">
                         Équipe
                       </div>
-                      <div className="flex flex-wrap gap-2">
+                      <div className="grid grid-cols-5 gap-1 sm:gap-2">
                         {combat.my_heroes.map((heroId, heroIndex) => (
                           <HeroPortrait
                             key={`${heroId}-${heroIndex}`}
