@@ -166,17 +166,13 @@ export default function App() {
             <div>
               <h1 className="ui-text-primary text-xl font-black tracking-tight sm:text-2xl">
                 Lords Mobile Counter
-                <span className="ui-text-muted ml-1 text-[11px] font-semibold sm:ml-2">
-                  by kikoine
-                </span>
-                <span className="ml-1 text-[11px] font-semibold text-rose-500 sm:ml-2">
+              </h1>
+              <div className="ui-text-muted mt-0.5 text-[11px] font-semibold">
+                by kikoine
+                <span className="ml-2 text-rose-500">
                   BUILD {BUILD_VERSION}
                 </span>
-              </h1>
-              <p className="ui-text-secondary mt-1 hidden text-sm sm:block">
-                Sélectionnez les héros ennemis pour trouver la meilleure
-                contre-équipe.
-              </p>
+              </div>
             </div>
             <div className="flex items-center gap-2">
               {canManageHeroes && (
