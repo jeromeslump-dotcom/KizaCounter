@@ -11,7 +11,7 @@
     "preview": "vite preview",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "duplicates": "jscpd src"
+    "duplicates": "jscpd src && node scripts/check-redundancy.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.57.4",
