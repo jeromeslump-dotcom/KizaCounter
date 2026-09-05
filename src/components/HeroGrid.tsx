@@ -13,32 +13,16 @@ import { filterAndSortHeroes } from "../utils/heroRanking";
 
 interface HeroGridProps {
   heroes: Hero[];
-
   enabledHeroIds: Set<string>;
-
-  /**
-   * Quand true, seuls les héros activés sont affichés.
-   * Le roster ennemi peut désactiver ce filtre pour garder
-   * tous les héros sélectionnables, même ceux désactivés.
-   */
   enabledOnly?: boolean;
-
   activeClass: HeroClassFilter;
-
   query: string;
-
   sortBy: HeroSort;
-
   usage?: Record<string, number>;
-
   selectedIds?: string[];
-
   onQueryChange: (query: string) => void;
-
   onClassChange: (cls: HeroClassFilter) => void;
-
   onSortChange: (sort: HeroSort) => void;
-
   onHeroClick: (hero: Hero) => void;
 }
 
@@ -63,7 +47,6 @@ export default function HeroGrid({
   const [recentlyRemovedId, setRecentlyRemovedId] = useState<string | null>(null);
   const [previousSelectedIds, setPreviousSelectedIds] = useState<string[]>(selectedIds);
 
-  // Petit feedback visuel lors du retrait d'un héros.
   useEffect(() => {
     const removedId = previousSelectedIds.find(
       (id) => !selectedIds.includes(id)
@@ -83,10 +66,6 @@ export default function HeroGrid({
     return () => window.clearTimeout(timeout);
   }, [selectedIds, previousSelectedIds]);
 
-  // ==========================================================
-  // FILTRAGE + CLASSEMENT
-  // ==========================================================
-
   const filteredHeroes = useMemo(() => {
     return filterAndSortHeroes(heroes, {
       enabledHeroIds: enabledOnly
@@ -101,22 +80,10 @@ export default function HeroGrid({
 
   const selectionFull = selectedIds.length >= 5;
 
-  // ============================================================
-  // RENDER
-  // ============================================================
-
   return (
     <section className="w-full">
-      {/* ======================================================
-          FILTRES
-          ====================================================== */}
-
       <div className="hero-grid-panel mb-3 rounded-xl border p-2 sm:mb-4 sm:p-3">
         <div className="flex flex-col gap-2 sm:gap-3">
-          {/* ==================================================
-              RECHERCHE
-              ================================================== */}
-
           <input
             type="text"
             value={query}
@@ -125,20 +92,11 @@ export default function HeroGrid({
             className="hero-grid-input h-9 w-full rounded-lg border px-3 text-xs outline-none transition sm:h-auto sm:py-2 sm:text-sm"
           />
 
-          {/* ==================================================
-              CLASSE + TRI
-              ================================================== */}
-
           <div className="grid grid-cols-2 gap-2 sm:gap-3">
-            {/* =================================================
-                CLASSE
-                ================================================= */}
-
             <div className="flex flex-col gap-0.5">
               <label className="hero-grid-label px-1 text-[9px] font-bold uppercase tracking-wide sm:text-[11px]">
                 Classe
               </label>
-
               <select
                 value={activeClass}
                 onChange={(event) =>
@@ -153,15 +111,10 @@ export default function HeroGrid({
               </select>
             </div>
 
-            {/* =================================================
-                TRI
-                ================================================= */
-
             <div className="flex flex-col gap-0.5">
               <label className="hero-grid-label px-1 text-[9px] font-bold uppercase tracking-wide sm:text-[11px]">
                 Trier par
               </label>
-
               <select
                 value={sortBy}
                 onChange={(event) =>
@@ -183,22 +136,13 @@ export default function HeroGrid({
         </div>
       </div>
 
-      {/* ======================================================
-          COMPTEUR
-          ====================================================== */}
-
       <div className="mb-3 flex items-center justify-between">
         <span className="hero-grid-title text-sm font-semibold">Héros</span>
-
         <span className="hero-grid-result-count text-xs">
           {filteredHeroes.length} résultat
           {filteredHeroes.length !== 1 ? "s" : ""}
         </span>
       </div>
-
-      {/* ======================================================
-          GRILLE DES HÉROS
-          ====================================================== */}
 
       {filteredHeroes.length === 0 ? (
         <div className="hero-grid-empty rounded-xl border border-dashed p-8 text-center">
@@ -215,9 +159,7 @@ export default function HeroGrid({
                 key={hero.id}
                 hero={hero}
                 selected={selected}
-                selectionOrder={
-                  selected ? selectionIndex + 1 : undefined
-                }
+                selectionOrder={selected ? selectionIndex + 1 : undefined}
                 disabled={selectionFull && !selected}
                 removedVisual={recentlyRemovedId === hero.id}
                 onClick={() => onHeroClick(hero)}
