@@ -77,15 +77,11 @@ export default function CounterModal({
     [alternativeTeam]
   );
 
-  // Toujours calculé depuis l'équipe actuellement sélectionnée.
-  // Ainsi, un remplacement manuel recalcule immédiatement le statut.
   const currentTeamHistory = useMemo(
     () => evaluateExactTeamHistory(currentTeamIds, enemyIds, combats),
     [currentTeamIds, enemyIds, combats]
   );
 
-  // Historique de cette équipe, quel que soit l'adversaire rencontré.
-  // Cela permet de distinguer "Nouvelle rencontre" de "Nouvelle équipe".
   const currentTeamGeneralHistory = useMemo(
     () => evaluateTeamHistory(currentTeamIds, combats),
     [currentTeamIds, combats]
@@ -135,15 +131,15 @@ export default function CounterModal({
   const currentTeamHistoryLabel =
     currentTeamHistory.battles > 0
       ? isAuthenticated
-        ? `Historique exact · ${Math.round(currentTeamHistory.winRate)} % · ${currentTeamHistory.battles} combat${currentTeamHistory.battles > 1 ? "s" : ""}`
-        : "Historique exact"
+        ? <><strong>Historique exact</strong> <span className="font-normal">· {Math.round(currentTeamHistory.winRate)} % · {currentTeamHistory.battles} combat{currentTeamHistory.battles > 1 ? "s" : ""}</span></>
+        : <strong>Historique exact</strong>
       : currentTeamGeneralHistory.battles > 0
         ? isAuthenticated
-          ? `Nouvelle rencontre · Équipe déjà victorieuse · ${Math.round(currentTeamGeneralHistory.winRate)} % · ${currentTeamGeneralHistory.battles} combat${currentTeamGeneralHistory.battles > 1 ? "s" : ""}`
-          : "Nouvelle rencontre · Équipe déjà connue"
+          ? <><strong>Nouvelle rencontre · Équipe déjà victorieuse</strong> <span className="font-normal">· {Math.round(currentTeamGeneralHistory.winRate)} % · {currentTeamGeneralHistory.battles} combat{currentTeamGeneralHistory.battles > 1 ? "s" : ""}</span></>
+          : <strong>Nouvelle rencontre · Équipe déjà connue</strong>
         : currentTeamClassHistory.battles > 0
-          ? `Nouvelle équipe · Confiance statistique : ${Math.round(currentTeamConfidence)} %`
-          : "Nouvelle équipe";
+          ? <><strong>Nouvelle équipe</strong> <span className="font-normal">· Confiance statistique : {Math.round(currentTeamConfidence)} %</span></>
+          : <strong>Nouvelle équipe</strong>;
 
   let historyLabel = "Aucune statistique historique affichée";
 
