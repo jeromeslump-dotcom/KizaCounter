@@ -361,12 +361,21 @@ select {
   font-weight: 600;
   line-height: 1.25;
   text-align: center;
-  white-space: nowrap;
-  text-overflow: ellipsis;
   transition:
     border-color 0.2s ease,
     background-color 0.2s ease,
     color 0.2s ease;
+
+  /* Sur mobile : 2 lignes permettent d'afficher les noms moyens
+     (ex. Rose Knight) en entier, avec ... uniquement si le nom
+     dépasse réellement la place disponible. */
+  white-space: normal;
+  min-height: 2.75rem;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  text-overflow: ellipsis;
 }
 .ui-recommendation-team:hover .ui-recommendation-hero {
   border-color: var(--ui-gold);
@@ -380,4 +389,14 @@ select {
 .ui-recommendation-team:focus-visible {
   outline: 2px solid var(--ui-gold);
   outline-offset: 2px;
+}
+
+@media (min-width: 640px) {
+  .ui-recommendation-hero {
+    min-height: 0;
+    white-space: nowrap;
+    display: block;
+    -webkit-line-clamp: unset;
+    line-clamp: unset;
+  }
 }
