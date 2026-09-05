@@ -2,6 +2,7 @@
 
 import fs from "node:fs";
 import path from "node:path";
+import ts from "typescript";
 
 const SRC_DIR = path.resolve("src");
 const EXTENSIONS = new Set([".ts", ".tsx"]);
@@ -22,80 +23,85 @@ function walk(dir) {
   return files;
 }
 
-function stripComments(source) {
-  return source
-    .replace(/\/\*[\s\S]*?\*\//g, "")
-    .replace(/(^|[^:])\/\/.*$/gm, "$1");
-}
-
 function normalizeBody(body) {
-  return stripComments(body)
+  return body
+    .replace(/\/\*[\s\S]*?\*\//g, "")
+    .replace(/(^|[^:])\/\/.*$/gm, "$1")
     .replace(/\s+/g, " ")
-    .replace(/\breturn\b/g, "return")
     .trim();
-}
-
-function lineNumber(source, index) {
-  return source.slice(0, index).split("\n").length;
 }
 
 function isComponentName(name) {
   return /^[A-Z]/.test(name);
 }
 
-function extractFunctions(source, file) {
-  const clean = stripComments(source);
-  const results = [];
-
-  const functionPattern = /(?:export\s+)?(?:async\s+)?function\s+([A-Za-z_$][\w$]*)\s*\([^)]*\)\s*\{/g;
-  let match;
-
-  while ((match = functionPattern.exec(clean))) {
-    const name = match[1];
-    if (isComponentName(name)) continue;
-
-    const open = clean.indexOf("{", match.index);
-    const close = findMatchingBrace(clean, open);
-    if (close < 0) continue;
-
-    const startLine = lineNumber(source, match.index);
-    const endLine = lineNumber(source, close);
-    if (endLine - startLine + 1 > MAX_FUNCTION_LINES) continue;
-
-    const body = normalizeBody(clean.slice(open + 1, close));
-    if (body.length < MIN_BODY_LENGTH) continue;
-
-    results.push({ file, name, startLine, endLine, body });
+function getFunctionName(node) {
+  if (ts.isFunctionDeclaration(node) && node.name) {
+    return node.name.text;
   }
 
-  return results;
+  if (
+    (ts.isArrowFunction(node) || ts.isFunctionExpression(node)) &&
+    node.parent &&
+    ts.isVariableDeclaration(node.parent) &&
+    ts.isIdentifier(node.parent.name)
+  ) {
+    return node.parent.name.text;
+  }
+
+  return null;
 }
 
-function findMatchingBrace(source, openIndex) {
-  let depth = 0;
-  let quote = null;
-  let escaped = false;
+function getBodyText(node, sourceFile) {
+  if (!node.body) return "";
 
-  for (let i = openIndex; i < source.length; i++) {
-    const char = source[i];
-
-    if (quote) {
-      if (escaped) escaped = false;
-      else if (char === "\\") escaped = true;
-      else if (char === quote) quote = null;
-      continue;
-    }
-
-    if (char === '"' || char === "'" || char === "`") {
-      quote = char;
-      continue;
-    }
-
-    if (char === "{") depth++;
-    else if (char === "}" && --depth === 0) return i;
+  if (ts.isBlock(node.body)) {
+    return sourceFile.text.slice(node.body.pos + 1, node.body.end - 1);
   }
 
-  return -1;
+  return sourceFile.text.slice(node.body.pos, node.body.end);
+}
+
+function extractFunctions(source, file) {
+  const sourceFile = ts.createSourceFile(
+    file,
+    source,
+    ts.ScriptTarget.Latest,
+    true,
+    file.endsWith(".tsx") ? ts.ScriptKind.TSX : ts.ScriptKind.TS
+  );
+
+  const results = [];
+
+  function visit(node) {
+    if (
+      ts.isFunctionDeclaration(node) ||
+      ts.isArrowFunction(node) ||
+      ts.isFunctionExpression(node)
+    ) {
+      const name = getFunctionName(node);
+
+      if (name && !isComponentName(name)) {
+        const start = node.getStart(sourceFile);
+        const end = node.end;
+        const startLine = sourceFile.getLineAndCharacterOfPosition(start).line + 1;
+        const endLine = sourceFile.getLineAndCharacterOfPosition(end).line + 1;
+        const body = normalizeBody(getBodyText(node, sourceFile));
+
+        if (
+          endLine - startLine + 1 <= MAX_FUNCTION_LINES &&
+          body.length >= MIN_BODY_LENGTH
+        ) {
+          results.push({ file, name, startLine, endLine, body });
+        }
+      }
+    }
+
+    ts.forEachChild(node, visit);
+  }
+
+  visit(sourceFile);
+  return results;
 }
 
 const files = walk(SRC_DIR);
