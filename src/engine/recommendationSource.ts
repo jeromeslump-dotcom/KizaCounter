@@ -196,6 +196,58 @@ function findBestEnabledClassHistoryTeam(
   );
 }
 
+function findBestHistoricalAlternativeTeam(
+  enemyIds: string[],
+  candidateHeroes: Hero[],
+  combats: Combat[],
+  excludedTeamKey: string
+): Hero[] | null {
+  const targetEnemyKey = teamKey(enemyIds);
+  const enabledIds = new Set(candidateHeroes.map((hero) => hero.id));
+  const candidates = new Map<string, HistoricalCandidate>();
+
+  for (const combat of combats) {
+    const heroIds = uniqueIds(combat.my_heroes ?? []);
+    if (
+      heroIds.length !== TEAM_SIZE ||
+      !heroIds.every((id) => enabledIds.has(id))
+    ) {
+      continue;
+    }
+
+    const key = teamKey(heroIds);
+    if (key === excludedTeamKey) continue;
+
+    const historicalEnemy = uniqueIds(combat.enemy_heroes ?? []);
+    if (
+      historicalEnemy.length !== TEAM_SIZE ||
+      teamKey(historicalEnemy) === targetEnemyKey
+    ) {
+      continue;
+    }
+
+    const candidate = candidates.get(key) ?? {
+      heroIds,
+      wins: 0,
+      losses: 0,
+      similarity: 0,
+    };
+
+    if (combat.won) candidate.wins++;
+    else candidate.losses++;
+    candidates.set(key, candidate);
+  }
+
+  return (
+    orderHistoricalCandidates(candidates)[0]
+      ? resolveCandidateTeam(
+          orderHistoricalCandidates(candidates)[0].heroIds,
+          candidateHeroes
+        )
+      : null
+  );
+}
+
 export function findHistoricalAlternativeTeam(
   enemyIds: string[],
   heroes: Hero[],
@@ -203,33 +255,12 @@ export function findHistoricalAlternativeTeam(
   combats: Combat[],
   excludedTeamIds: string[]
 ): Hero[] | null {
-  const excludedKey = teamKey(excludedTeamIds);
-  return (
-    findBestEnabledExactHistoryTeam(
-      enemyIds,
-      candidateHeroes,
-      combats,
-      excludedKey
-    ) ??
-    findBestEnabledSimilarHistoryTeam(
-      enemyIds,
-      candidateHeroes,
-      combats,
-      excludedKey
-    ) ??
-    findBestHistoricalDefeatTeam(
-      enemyIds,
-      combats,
-      candidateHeroes,
-      excludedTeamIds
-    ) ??
-    findBestEnabledClassHistoryTeam(
-      enemyIds,
-      heroes,
-      candidateHeroes,
-      combats,
-      excludedKey
-    )
+  void heroes;
+  return findBestHistoricalAlternativeTeam(
+    enemyIds,
+    candidateHeroes,
+    combats,
+    teamKey(excludedTeamIds)
   );
 }
 
