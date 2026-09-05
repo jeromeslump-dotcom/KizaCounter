@@ -1,0 +1,126 @@
+import type { Combat, Hero } from "../types";
+import { getEngineSettings } from "./engineSettings";
+
+const TEAM_SIZE = 5;
+
+export interface DefeatHistoryCandidate {
+  heroIds: string[];
+  losses: number;
+  wins: number;
+  battles: number;
+  lossRate: number;
+  confidence: number;
+  score: number;
+}
+
+function uniqueIds(ids: string[]): string[] {
+  return [...new Set(ids)];
+}
+
+function teamKey(ids: string[]): string {
+  return uniqueIds(ids).sort().join("|");
+}
+
+function sameTeam(first: string[], second: string[]): boolean {
+  return teamKey(first) === teamKey(second);
+}
+
+function confidenceForBattles(battles: number): number {
+  const confidenceBattles = Math.max(
+    1,
+    getEngineSettings().advanced.teamAHistoricalConfidenceBattles
+  );
+
+  return battles / (battles + confidenceBattles);
+}
+
+/**
+ * Inverse historical engine:
+ * the current enemy team becomes our historical team.
+ * We search defeats where we played that exact 5-hero team,
+ * then return the opponent team that beat it.
+ */
+export function findHistoricalDefeatCounters(
+  enemyIds: string[],
+  combats: Combat[],
+  candidateHeroes: Hero[]
+): DefeatHistoryCandidate[] {
+  const targetTeam = uniqueIds(enemyIds);
+
+  if (targetTeam.length !== TEAM_SIZE) return [];
+
+  const enabledIds = new Set(candidateHeroes.map((hero) => hero.id));
+  const candidates = new Map<string, DefeatHistoryCandidate>();
+
+  for (const combat of combats) {
+    const historicalMyTeam = uniqueIds(combat.my_heroes ?? []);
+
+    if (
+      historicalMyTeam.length !== TEAM_SIZE ||
+      !sameTeam(historicalMyTeam, targetTeam) ||
+      combat.won
+    ) {
+      continue;
+    }
+
+    const historicalEnemy = uniqueIds(combat.enemy_heroes ?? []);
+
+    if (
+      historicalEnemy.length !== TEAM_SIZE ||
+      !historicalEnemy.every((id) => enabledIds.has(id))
+    ) {
+      continue;
+    }
+
+    const key = teamKey(historicalEnemy);
+    const candidate = candidates.get(key) ?? {
+      heroIds: historicalEnemy,
+      losses: 0,
+      wins: 0,
+      battles: 0,
+      lossRate: 0,
+      confidence: 0,
+      score: 0,
+    };
+
+    candidate.losses++;
+    candidate.battles++;
+    candidates.set(key, candidate);
+  }
+
+  for (const candidate of candidates.values()) {
+    candidate.lossRate = candidate.losses / candidate.battles;
+    candidate.confidence = confidenceForBattles(candidate.battles);
+    candidate.score = candidate.lossRate * candidate.confidence;
+  }
+
+  return [...candidates.values()].sort(
+    (a, b) =>
+      b.score - a.score ||
+      b.losses - a.losses ||
+      b.battles - a.battles ||
+      teamKey(a.heroIds).localeCompare(teamKey(b.heroIds))
+  );
+}
+
+export function findBestHistoricalDefeatTeam(
+  enemyIds: string[],
+  combats: Combat[],
+  candidateHeroes: Hero[]
+): Hero[] | null {
+  const candidates = findHistoricalDefeatCounters(
+    enemyIds,
+    combats,
+    candidateHeroes
+  );
+
+  for (const candidate of candidates) {
+    const team = candidate.heroIds
+      .map((id) => candidateHeroes.find((hero) => hero.id === id))
+      .filter((hero): hero is Hero => Boolean(hero));
+
+    if (team.length === TEAM_SIZE) return team;
+  }
+
+  return null;
+}
