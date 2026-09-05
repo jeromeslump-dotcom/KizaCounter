@@ -1,5 +1,6 @@
 import type { Combat, Hero } from "../types";
 import { getEngineSettings } from "./engineSettings";
+import { sameTeam, teamKey, uniqueIds } from "./teamUtils";
 
 const TEAM_SIZE = 5;
 
@@ -11,18 +12,6 @@ export interface DefeatHistoryCandidate {
   lossRate: number;
   confidence: number;
   score: number;
-}
-
-function uniqueIds(ids: string[]): string[] {
-  return [...new Set(ids)];
-}
-
-function teamKey(ids: string[]): string {
-  return uniqueIds(ids).sort().join("|");
-}
-
-function sameTeam(first: string[], second: string[]): boolean {
-  return teamKey(first) === teamKey(second);
 }
 
 function confidenceForBattles(battles: number): number {
