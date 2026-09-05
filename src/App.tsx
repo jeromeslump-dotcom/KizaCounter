@@ -56,7 +56,9 @@ export default function App() {
   useEffect(() => {
     let mounted = true;
 
-    async function applySession(session: Awaited<ReturnType<typeof getSession>>) {
+    async function applySession(
+      session: Awaited<ReturnType<typeof getSession>>
+    ) {
       if (!mounted) return;
 
       const authenticated = Boolean(session);

@@ -9,10 +9,15 @@ describe("hero data integrity", () => {
     expect(HEROES.length).toBeGreaterThan(0);
 
     for (const hero of HEROES) {
-      expect(hero.id, `${hero.name || "Héros sans nom"}: id manquant`).toBeTruthy();
+      expect(
+        hero.id,
+        `${hero.name || "Héros sans nom"}: id manquant`
+      ).toBeTruthy();
       expect(hero.name, `${hero.id}: nom manquant`).toBeTruthy();
       expect(hero.img, `${hero.id}: image manquante`).toBeTruthy();
-      expect(["STR", "AGI", "INT"], `${hero.id}: classe invalide`).toContain(hero.cls);
+      expect(["STR", "AGI", "INT"], `${hero.id}: classe invalide`).toContain(
+        hero.cls
+      );
       expect(hero.stats, `${hero.id}: statistiques manquantes`).toBeDefined();
 
       for (const stat of REQUIRED_STATS) {

@@ -44,8 +44,11 @@ export default function HeroGrid({
   onSortChange,
   onHeroClick,
 }: HeroGridProps) {
-  const [recentlyRemovedId, setRecentlyRemovedId] = useState<string | null>(null);
-  const [previousSelectedIds, setPreviousSelectedIds] = useState<string[]>(selectedIds);
+  const [recentlyRemovedId, setRecentlyRemovedId] = useState<string | null>(
+    null
+  );
+  const [previousSelectedIds, setPreviousSelectedIds] =
+    useState<string[]>(selectedIds);
 
   useEffect(() => {
     const removedId = previousSelectedIds.find(
