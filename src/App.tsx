@@ -168,7 +168,7 @@ export default function App() {
               </h1>
               <div className="ui-text-muted mt-0.5 text-[11px] font-normal">
                 by kikoine
-                <span className="ml-2 bg-gradient-to-r from-rose-300 via-rose-500 to-neutral-900 bg-clip-text font-normal text-transparent">
+                <span className="ml-2 bg-gradient-to-r from-rose-300 via-rose-500 to-rose-700 bg-clip-text font-normal text-transparent">
                   BUILD {BUILD_VERSION}
                 </span>
               </div>
