@@ -1,6 +1,6 @@
 // src/components/HeroGrid.tsx
 
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import type { Hero, HeroClassFilter, HeroSort } from "../types";
 
@@ -60,6 +60,29 @@ export default function HeroGrid({
   onSortChange,
   onHeroClick,
 }: HeroGridProps) {
+  const [recentlyRemovedId, setRecentlyRemovedId] = useState<string | null>(null);
+  const [previousSelectedIds, setPreviousSelectedIds] = useState<string[]>(selectedIds);
+
+  // Petit feedback visuel lors du retrait d'un héros.
+  useEffect(() => {
+    const removedId = previousSelectedIds.find(
+      (id) => !selectedIds.includes(id)
+    );
+
+    setPreviousSelectedIds(selectedIds);
+
+    if (!removedId) return;
+
+    setRecentlyRemovedId(removedId);
+    const timeout = window.setTimeout(() => {
+      setRecentlyRemovedId((current) =>
+        current === removedId ? null : current
+      );
+    }, 350);
+
+    return () => window.clearTimeout(timeout);
+  }, [selectedIds, previousSelectedIds]);
+
   // ==========================================================
   // FILTRAGE + CLASSEMENT
   // ==========================================================
@@ -76,9 +99,11 @@ export default function HeroGrid({
     });
   }, [heroes, enabledHeroIds, enabledOnly, activeClass, query, sortBy, usage]);
 
-  // ==========================================================
+  const selectionFull = selectedIds.length >= 5;
+
+  // ============================================================
   // RENDER
-  // ==========================================================
+  // ============================================================
 
   return (
     <section className="w-full">
@@ -130,7 +155,7 @@ export default function HeroGrid({
 
             {/* =================================================
                 TRI
-                ================================================= */}
+                ================================================= */
 
             <div className="flex flex-col gap-0.5">
               <label className="hero-grid-label px-1 text-[9px] font-bold uppercase tracking-wide sm:text-[11px]">
@@ -183,15 +208,18 @@ export default function HeroGrid({
         <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 2xl:grid-cols-5">
           {filteredHeroes.map((hero) => {
             const selectionIndex = selectedIds.indexOf(hero.id);
+            const selected = selectionIndex !== -1;
 
             return (
               <HeroCard
                 key={hero.id}
                 hero={hero}
-                selected={selectionIndex !== -1}
+                selected={selected}
                 selectionOrder={
-                  selectionIndex !== -1 ? selectionIndex + 1 : undefined
+                  selected ? selectionIndex + 1 : undefined
                 }
+                disabled={selectionFull && !selected}
+                removedVisual={recentlyRemovedId === hero.id}
                 onClick={() => onHeroClick(hero)}
               />
             );
