@@ -8,6 +8,8 @@ interface HeroCardProps {
   hero: Hero;
   selected?: boolean;
   selectionOrder?: number;
+  disabled?: boolean;
+  removedVisual?: boolean;
   onClick?: () => void;
 }
 
@@ -15,6 +17,8 @@ export default function HeroCard({
   hero,
   selected = false,
   selectionOrder,
+  disabled = false,
+  removedVisual = false,
   onClick,
 }: HeroCardProps) {
   const { stats } = hero;
@@ -27,10 +31,14 @@ export default function HeroCard({
     <button
       type="button"
       onClick={onClick}
+      disabled={disabled}
+      aria-disabled={disabled}
       className={[
         "hero-card-base relative w-full overflow-hidden rounded-xl border text-left transition-all duration-200",
         "hover:-translate-y-0.5 hero-card-hover",
         selected ? "hero-card-selected" : "",
+        disabled ? "hero-card-selection-locked" : "",
+        removedVisual ? "hero-card-removed" : "",
       ].join(" ")}
     >
       <div
