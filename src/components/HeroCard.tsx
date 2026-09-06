@@ -11,7 +11,7 @@ interface HeroCardProps {
   selectionOrder?: number;
   disabled?: boolean;
   removedVisual?: boolean;
-  onClick?: () => void;
+  onClick?: (hero: Hero) => void;
 }
 
 function HeroCard({
@@ -28,7 +28,7 @@ function HeroCard({
   return (
     <button
       type="button"
-      onClick={onClick}
+      onClick={() => onClick?.(hero)}
       disabled={disabled}
       aria-disabled={disabled}
       className={[
