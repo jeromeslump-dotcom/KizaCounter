@@ -8,10 +8,9 @@ import HeroGrid from "./components/HeroGrid";
 import EnemyPanel from "./components/EnemyPanel";
 import CounterModal from "./components/CounterModal";
 import AuthPanel from "./auth/AuthPanel";
+import useAuthSession from "./auth/useAuthSession";
 import useCombatSelection from "./hooks/useCombatSelection";
 import { addCombat, loadCombats } from "./storage/combatStorage";
-import { getSession, onAuthStateChange } from "./auth/auth";
-import { getCurrentUserProfile, type UserProfile } from "./admin/adminAccess";
 import HeroManager from "./heroManager/HeroManager";
 import useHeroManager from "./heroManager/useHeroManager";
 import { calculateHeroUsage } from "./engine/historicalScoring";
@@ -21,9 +20,9 @@ const BUILD_VERSION = __BUILD_VERSION__;
 
 export default function App() {
   const [combats, setCombats] = useState<Combat[]>([]);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [showHeroManager, setShowHeroManager] = useState(false);
+  const { session, profile } = useAuthSession();
+  const isAuthenticated = Boolean(session);
 
   const {
     enabledHeroIds,
@@ -55,27 +54,14 @@ export default function App() {
   const [sortBy, setSortBy] = useState<HeroSort>("played");
 
   useEffect(() => {
+    if (!session) {
+      setCombats([]);
+      return;
+    }
+
     let mounted = true;
 
-    async function applySession(
-      session: Awaited<ReturnType<typeof getSession>>
-    ) {
-      if (!mounted) return;
-
-      const authenticated = Boolean(session);
-      setIsAuthenticated(authenticated);
-
-      if (!authenticated) {
-        setUserProfile(null);
-        setCombats([]);
-        return;
-      }
-
-      const profile = await getCurrentUserProfile(session);
-      if (!mounted) return;
-
-      setUserProfile(profile);
-
+    async function loadHistory() {
       try {
         const history = await loadCombats();
         if (mounted) setCombats(history);
@@ -87,33 +73,12 @@ export default function App() {
       }
     }
 
-    async function initialize() {
-      try {
-        const session = await getSession();
-        await applySession(session);
-      } catch (error) {
-        console.error("Impossible de récupérer la session :", error);
-        if (mounted) {
-          setIsAuthenticated(false);
-          setUserProfile(null);
-          setCombats([]);
-        }
-      }
-    }
-
-    initialize();
-
-    const {
-      data: { subscription },
-    } = onAuthStateChange((session) => {
-      void applySession(session);
-    });
+    void loadHistory();
 
     return () => {
       mounted = false;
-      subscription.unsubscribe();
     };
-  }, []);
+  }, [session]);
 
   const heroUsage = useMemo(() => {
     const usage = calculateHeroUsage(combats, HEROES);
@@ -139,12 +104,12 @@ export default function App() {
 
   const canManageHeroes =
     isAuthenticated &&
-    Boolean(userProfile?.active) &&
-    (userProfile?.role === "user" ||
-      userProfile?.role === "contributor" ||
-      userProfile?.role === "admin");
+    Boolean(profile?.active) &&
+    (profile?.role === "user" ||
+      profile?.role === "contributor" ||
+      profile?.role === "admin");
 
-  const canViewDetailedHistory = userProfile?.role === "admin";
+  const canViewDetailedHistory = profile?.role === "admin";
 
   return (
     <main className="app-shell min-h-screen">
