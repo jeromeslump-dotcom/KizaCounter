@@ -1,6 +1,6 @@
 // src/auth/useAuthSession.ts
 
-import { useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { getCurrentUserProfile, type UserProfile } from "../admin/adminAccess";
 import { getSession, onAuthStateChange } from "./auth";
@@ -11,7 +11,9 @@ interface AuthSessionState {
   loading: boolean;
 }
 
-export default function useAuthSession(): AuthSessionState {
+const AuthSessionContext = createContext<AuthSessionState | null>(null);
+
+export function AuthSessionProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -75,5 +77,19 @@ export default function useAuthSession(): AuthSessionState {
     };
   }, []);
 
-  return { session, profile, loading };
+  return (
+    <AuthSessionContext.Provider value={{ session, profile, loading }}>
+      {children}
+    </AuthSessionContext.Provider>
+  );
+}
+
+export default function useAuthSession(): AuthSessionState {
+  const context = useContext(AuthSessionContext);
+
+  if (!context) {
+    throw new Error("useAuthSession doit être utilisé dans AuthSessionProvider.");
+  }
+
+  return context;
 }
