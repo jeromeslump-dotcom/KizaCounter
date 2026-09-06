@@ -218,6 +218,10 @@ function findBestEnabledCore4HistoryTeam(
       replacements: Map<string, { wins: number; losses: number }>;
     }
   >();
+  const coreVariantsByTeamKey = new Map<
+    string,
+    Array<{ coreIds: string[]; replacement: string; key: string }>
+  >();
 
   for (const combat of combats) {
     const historicalEnemy = uniqueIds(combat.enemy_heroes ?? []);
@@ -236,14 +240,26 @@ function findBestEnabledCore4HistoryTeam(
       continue;
     }
 
-    if (teamKey(historicalTeam) === excludedTeamKey) continue;
+    const historicalTeamKey = teamKey(historicalTeam);
+    if (historicalTeamKey === excludedTeamKey) continue;
 
-    for (let index = 0; index < historicalTeam.length; index++) {
-      const coreIds = historicalTeam.slice();
-      const replacement = coreIds.splice(index, 1)[0];
-      const key = teamKey(coreIds);
-      const accumulator = coreCandidates.get(key) ?? {
-        coreIds,
+    let variants = coreVariantsByTeamKey.get(historicalTeamKey);
+    if (!variants) {
+      variants = [];
+      for (let index = 0; index < historicalTeam.length; index++) {
+        const coreIds = historicalTeam.filter((_, currentIndex) => currentIndex !== index);
+        variants.push({
+          coreIds,
+          replacement: historicalTeam[index],
+          key: teamKey(coreIds),
+        });
+      }
+      coreVariantsByTeamKey.set(historicalTeamKey, variants);
+    }
+
+    for (const variant of variants) {
+      const accumulator = coreCandidates.get(variant.key) ?? {
+        coreIds: variant.coreIds,
         wins: 0,
         losses: 0,
         replacements: new Map<string, { wins: number; losses: number }>(),
@@ -252,14 +268,14 @@ function findBestEnabledCore4HistoryTeam(
       if (combat.won) accumulator.wins++;
       else accumulator.losses++;
 
-      const replacementStats = accumulator.replacements.get(replacement) ?? {
+      const replacementStats = accumulator.replacements.get(variant.replacement) ?? {
         wins: 0,
         losses: 0,
       };
       if (combat.won) replacementStats.wins++;
       else replacementStats.losses++;
-      accumulator.replacements.set(replacement, replacementStats);
-      coreCandidates.set(key, accumulator);
+      accumulator.replacements.set(variant.replacement, replacementStats);
+      coreCandidates.set(variant.key, accumulator);
     }
   }
 
