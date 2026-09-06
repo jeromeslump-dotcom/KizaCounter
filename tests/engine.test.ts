@@ -278,7 +278,6 @@ describe("evaluateTeam scoring modules", () => {
         const specificOnly = evaluateTeam(
           teamHeroes,
           combats,
-          undefined,
           enemy
         );
 
@@ -305,7 +304,6 @@ describe("evaluateTeam scoring modules", () => {
         const generalOnly = evaluateTeam(
           teamHeroes,
           combats,
-          undefined,
           enemy
         );
 
@@ -339,7 +337,6 @@ describe("evaluateTeam scoring modules", () => {
         scoreWith30Points = evaluateTeam(
           teamHeroes,
           combats,
-          undefined,
           enemy
         ).score;
       }
@@ -358,7 +355,6 @@ describe("evaluateTeam scoring modules", () => {
         scoreWith60Points = evaluateTeam(
           teamHeroes,
           combats,
-          undefined,
           enemy
         ).score;
       }
@@ -745,3 +741,4 @@ describe("Core4 historical engine", () => {
     expect(result).toBe(0);
   });
 });
+
