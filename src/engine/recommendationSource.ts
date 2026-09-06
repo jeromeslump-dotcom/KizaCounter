@@ -4,6 +4,7 @@ import {
   type RecommendationSource as ScoringRecommendationSource,
 } from "./scoring";
 import { getEngineSettings } from "./engineSettings";
+import { calculateHistoricalReliability } from "./historicalScoring";
 import { findBestHistoricalDefeatTeam } from "./defeatHistory";
 import { calculateCounterUsage, counterHeroScore } from "./counterUsage";
 import { sameTeam, teamKey, uniqueIds } from "./teamUtils";
@@ -33,22 +34,6 @@ function getClassKey(ids: string[], heroes: Hero[]): string | null {
   return [...classes].sort().join("|");
 }
 
-function historicalReliability(wins: number, losses: number): number {
-  const settings = getEngineSettings();
-  const battles = wins + losses;
-  if (battles <= 0) return 0;
-  const confidenceBattles = Math.max(
-    1,
-    settings.advanced.teamAHistoricalConfidenceBattles
-  );
-  const confidence = battles / (battles + confidenceBattles);
-  return (
-    (wins / battles) *
-    (settings.advanced.teamAHistoricalReliabilityBase +
-      settings.advanced.teamAHistoricalReliabilityConfidenceWeight * confidence)
-  );
-}
-
 interface HistoricalCandidate {
   heroIds: string[];
   wins: number;
@@ -60,6 +45,12 @@ function orderHistoricalCandidates(
   candidates: Map<string, HistoricalCandidate>,
   sortBySimilarity = false
 ): HistoricalCandidate[] {
+  const settings = getEngineSettings();
+  const confidenceBattles = Math.max(
+    1,
+    settings.advanced.teamAHistoricalConfidenceBattles
+  );
+
   return [...candidates.values()]
     .filter(
       (candidate) =>
@@ -68,8 +59,20 @@ function orderHistoricalCandidates(
     .sort(
       (a, b) =>
         (sortBySimilarity ? b.similarity - a.similarity : 0) ||
-        historicalReliability(b.wins, b.losses) -
-          historicalReliability(a.wins, a.losses) ||
+        calculateHistoricalReliability(
+          b.wins,
+          b.losses,
+          confidenceBattles,
+          settings.advanced.teamAHistoricalReliabilityBase,
+          settings.advanced.teamAHistoricalReliabilityConfidenceWeight
+        ) -
+          calculateHistoricalReliability(
+            a.wins,
+            a.losses,
+            confidenceBattles,
+            settings.advanced.teamAHistoricalReliabilityBase,
+            settings.advanced.teamAHistoricalReliabilityConfidenceWeight
+          ) ||
         b.wins + b.losses - (a.wins + a.losses) ||
         b.wins - a.wins ||
         teamKey(a.heroIds).localeCompare(teamKey(b.heroIds))
@@ -247,19 +250,25 @@ function findBestEnabledCore4HistoryTeam(
     }
   }
 
+  const settings = getEngineSettings();
   const confidenceBattles = Math.max(
     1,
-    getEngineSettings().advanced.core4ConfidenceBattles
+    settings.advanced.core4ConfidenceBattles
   );
 
   const rankedCores = [...coreCandidates.values()]
     .filter((core) => core.wins > 0 && core.wins >= core.losses)
     .map((core) => {
       const battles = core.wins + core.losses;
-      const confidence = battles / (battles + confidenceBattles);
       return {
         core,
-        score: (core.wins / battles) * confidence,
+        score: calculateHistoricalReliability(
+          core.wins,
+          core.losses,
+          confidenceBattles,
+          0,
+          1
+        ),
         battles,
       };
     })
@@ -276,10 +285,15 @@ function findBestEnabledCore4HistoryTeam(
       .filter(([, stats]) => stats.wins > 0 && stats.wins >= stats.losses)
       .map(([heroId, stats]) => {
         const battles = stats.wins + stats.losses;
-        const confidence = battles / (battles + confidenceBattles);
         return {
           heroId,
-          score: (stats.wins / battles) * confidence,
+          score: calculateHistoricalReliability(
+            stats.wins,
+            stats.losses,
+            confidenceBattles,
+            0,
+            1
+          ),
           battles,
           wins: stats.wins,
         };
