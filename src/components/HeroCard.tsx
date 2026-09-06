@@ -1,5 +1,6 @@
 // src/components/HeroCard.tsx
 
+import { memo } from "react";
 import type { Hero } from "../types";
 
 import SelectionOrderBadge from "./SelectionOrderBadge";
@@ -13,7 +14,7 @@ interface HeroCardProps {
   onClick?: () => void;
 }
 
-export default function HeroCard({
+function HeroCard({
   hero,
   selected = false,
   selectionOrder,
@@ -95,6 +96,8 @@ export default function HeroCard({
     </button>
   );
 }
+
+export default memo(HeroCard);
 
 function StatLine({ label, value }: { label: string; value: number }) {
   return (
