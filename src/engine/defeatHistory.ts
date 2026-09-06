@@ -81,7 +81,10 @@ export function findHistoricalDefeatCounters(
   }
 
   const ordered = [...candidates.values()]
-    .filter((candidate) => candidate.losses > 0)
+    .filter(
+      (candidate) =>
+        candidate.losses > 0 && candidate.losses >= candidate.wins
+    )
     .map((candidate) => {
       candidate.lossRate = candidate.losses / candidate.battles;
       candidate.confidence = confidenceForBattles(candidate.battles);
