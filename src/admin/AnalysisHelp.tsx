@@ -69,7 +69,6 @@ export default function AnalysisHelp({
   );
 
   const combatGroups = useMemo<HeroEvaluationGroup[]>(() => {
-    const usage = calculateHeroUsage(combats, heroes);
     const settings = getEngineSettings();
     const groups = new Map<string, HeroEvaluationGroup>();
 
@@ -83,9 +82,7 @@ export default function AnalysisHelp({
         .map((id) => heroes.find((hero) => hero.id === id))
         .filter((hero): hero is Hero => Boolean(hero));
       const evaluation =
-        team.length === TEAM_SIZE
-          ? evaluateTeam(team, combats, usage, enemyIds)
-          : null;
+        team.length === TEAM_SIZE ? evaluateTeam(team, combats, enemyIds) : null;
       const scoreA = evaluation
         ? evaluation.historicalWinRate * settings.teamA.generalWinRateWeight
         : null;
