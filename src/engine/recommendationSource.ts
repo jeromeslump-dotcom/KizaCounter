@@ -24,14 +24,24 @@ const CORE_SIZE = 4;
 const MIN_SIMILARITY = 3;
 
 function getClassKey(ids: string[], heroesById: Map<string, Hero>): string | null {
-  const classes = ids
-    .map((id) => heroesById.get(id)?.cls)
-    .filter(
-      (cls): cls is Hero["cls"] =>
-        cls === "STR" || cls === "AGI" || cls === "INT"
-    );
-  if (classes.length !== TEAM_SIZE) return null;
-  return [...classes].sort().join("|");
+  let agi = 0;
+  let int = 0;
+  let str = 0;
+
+  for (const id of ids) {
+    const cls = heroesById.get(id)?.cls;
+    if (cls === "AGI") agi++;
+    else if (cls === "INT") int++;
+    else if (cls === "STR") str++;
+    else return null;
+  }
+
+  if (agi + int + str !== TEAM_SIZE) return null;
+  return [
+    ...Array(agi).fill("AGI"),
+    ...Array(int).fill("INT"),
+    ...Array(str).fill("STR"),
+  ].join("|");
 }
 
 interface HistoricalCandidate {
@@ -273,6 +283,7 @@ function findBestEnabledCore4HistoryTeam(
           1
         ),
         battles,
+        key: teamKey(core.coreIds),
       };
     })
     .sort(
@@ -280,7 +291,7 @@ function findBestEnabledCore4HistoryTeam(
         b.score - a.score ||
         b.battles - a.battles ||
         b.core.wins - a.core.wins ||
-        teamKey(a.core.coreIds).localeCompare(teamKey(b.core.coreIds))
+        a.key.localeCompare(b.key)
     );
 
   for (const rankedCore of rankedCores) {
