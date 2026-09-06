@@ -86,7 +86,7 @@ export function calculateHeroUsage(
     };
   }
   for (const combat of combats) {
-    for (const heroId of combat.my_heroes ?? []) {
+    for (const heroId of uniqueIds(combat.my_heroes ?? [])) {
       usage[heroId] ??= { heroId, total: 0, wins: 0, losses: 0, winRate: 0 };
       usage[heroId].total++;
       combat.won ? usage[heroId].wins++ : usage[heroId].losses++;
