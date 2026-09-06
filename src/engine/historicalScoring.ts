@@ -281,7 +281,7 @@ export function findBestHistoricalTeam(
   return null;
 }
 
-function getEnemyClassKey(
+export function getEnemyClassKey(
   enemyIds: string[],
   heroesById: Map<string, Hero>
 ): string | null {

@@ -14,6 +14,7 @@ import {
   evaluateTeamHistory,
   findBestHistoricalClassTeam,
   findBestHistoricalTeam,
+  getEnemyClassKey,
   historicalConfidence,
   calculateWinRate,
   calculateHeroUsage,
@@ -47,27 +48,6 @@ function addHistoryStats(
   const stats = index.get(key) ?? { wins: 0, losses: 0 };
   won ? stats.wins++ : stats.losses++;
   index.set(key, stats);
-}
-function getEnemyClassKey(
-  enemyIds: string[],
-  heroesById: Map<string, Hero>
-): string | null {
-  let agi = 0,
-    int = 0,
-    str = 0;
-  for (const id of enemyIds) {
-    const cls = heroesById.get(id)?.cls;
-    if (cls === "AGI") agi++;
-    else if (cls === "INT") int++;
-    else if (cls === "STR") str++;
-    else return null;
-  }
-  if (agi + int + str !== TEAM_SIZE) return null;
-  return [
-    ...Array(agi).fill("AGI"),
-    ...Array(int).fill("INT"),
-    ...Array(str).fill("STR"),
-  ].join("|");
 }
 export type RecommendationSource =
   "exact-history" | "class-history" | "core4" | "counter-usage" | "fallback";
