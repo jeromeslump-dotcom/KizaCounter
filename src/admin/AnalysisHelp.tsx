@@ -82,7 +82,9 @@ export default function AnalysisHelp({
         .map((id) => heroes.find((hero) => hero.id === id))
         .filter((hero): hero is Hero => Boolean(hero));
       const evaluation =
-        team.length === TEAM_SIZE ? evaluateTeam(team, combats, enemyIds) : null;
+        team.length === TEAM_SIZE
+          ? evaluateTeam(team, combats, enemyIds)
+          : null;
       const scoreA = evaluation
         ? evaluation.historicalWinRate * settings.teamA.generalWinRateWeight
         : null;

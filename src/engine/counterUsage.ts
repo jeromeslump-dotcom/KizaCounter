@@ -1,7 +1,10 @@
 import type { Hero } from "../data/heroes";
 import type { Combat } from "../types";
 import { getEngineSettings } from "./engineSettings";
-import { historicalConfidence, type HistoricalEnemyContext } from "./historicalScoring";
+import {
+  historicalConfidence,
+  type HistoricalEnemyContext,
+} from "./historicalScoring";
 import { teamKey, uniqueIds } from "./teamUtils";
 
 export interface CounterUsageStats {
