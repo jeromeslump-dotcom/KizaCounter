@@ -456,55 +456,80 @@ export function recommendAlternativeTeam(
         ? normalizeModulePoints(historyWinRate / 100, budgets.generalWinRate)
         : 0;
 
-    const exact = exactHistory.get(`${targetEnemyKey}::${myKey}`) ?? {
-      wins: 0,
-      losses: 0,
-    };
-    const exactPoints = calculateSpecificHistoryPoints(
+    const exact =
+      exactHistory.get(`${targetEnemyKey}::${myKey}`) ?? {
+        wins: 0,
+        losses: 0,
+      };
+    const specificHistoryPoints = calculateSpecificHistoryPoints(
       exact.wins,
       exact.losses,
       budgets.specificHistory
     );
+    const core4Points = getCore4Points(team);
 
-    const classStats = targetEnemyClassKey
-      ? classHistory.get(`${targetEnemyClassKey}::${myKey}`) ?? {
-          wins: 0,
-          losses: 0,
-        }
-      : { wins: 0, losses: 0 };
+    const classStats =
+      targetEnemyClassKey
+        ? classHistory.get(`${targetEnemyClassKey}::${myKey}`) ?? {
+            wins: 0,
+            losses: 0,
+          }
+        : { wins: 0, losses: 0 };
     const classBattles = classStats.wins + classStats.losses;
     const classWinRate = calculateWinRate(classStats.wins, classBattles);
-    const classPoints =
-      classBattles > 0
-        ? normalizeModulePoints(classWinRate / 100, budgets.classHistory)
-        : 0;
-
-    const core4Points = getCore4Points(team);
-    return (
-      exactPoints * settings.teamB.specificHistoryWeight +
-      classPoints * settings.teamB.classHistoryWeight +
-      core4Points * settings.teamB.core4Weight +
-      generalWinRatePoints * settings.teamB.generalWinRateWeight
+    const classHistoryConfidenceBattles = Math.max(
+      1,
+      settings.advanced.historicalConfidenceBattles * 2
     );
+    const classHistoryConfidence = historicalConfidence(
+      classBattles,
+      classHistoryConfidenceBattles
+    );
+    const classHistoryPoints =
+      classBattles > 0
+        ? normalizeModulePoints(
+            (classWinRate / 100) * classHistoryConfidence,
+            budgets.generalWinRate
+          )
+        : 0;
+    const losingHistory = historyBattles > 0 && history.wins === 0;
+    const fallbackPoints =
+      exact.wins + exact.losses > 0
+        ? specificHistoryPoints
+        : classBattles > 0
+          ? classHistoryPoints
+          : generalWinRatePoints;
+
+    return {
+      team,
+      score:
+        specificHistoryPoints * settings.teamB.specificHistoryWeight +
+        core4Points * settings.teamB.core4Weight +
+        fallbackPoints * settings.teamB.generalWinRateWeight -
+        (losingHistory ? Number.MAX_SAFE_INTEGER : 0),
+      history: {
+        wins: history.wins,
+        losses: history.losses,
+        battles: historyBattles,
+        winRate: historyWinRate,
+      },
+    };
   };
 
-  let bestTeam: Hero[] | null = null;
-  let bestScore = -Infinity;
-
-  for (const team of candidates.values()) {
-    const score = evaluateAlternative(team);
-    if (score > bestScore) {
-      bestScore = score;
-      bestTeam = team;
-      continue;
+  const evaluations = Array.from(candidates.values()).map(evaluateAlternative);
+  evaluations.sort((a, b) => {
+    if (a.score !== b.score) return b.score - a.score;
+    if (a.history.winRate !== b.history.winRate) {
+      return b.history.winRate - a.history.winRate;
     }
-
-    if (score === bestScore && bestTeam) {
-      const candidateKey = teamKey(team.map((hero) => hero.id));
-      const bestKey = teamKey(bestTeam.map((hero) => hero.id));
-      if (candidateKey.localeCompare(bestKey) < 0) bestTeam = team;
+    if (a.history.wins !== b.history.wins) return b.history.wins - a.history.wins;
+    if (a.history.battles !== b.history.battles) {
+      return b.history.battles - a.history.battles;
     }
-  }
+    return teamKey(a.team.map((hero) => hero.id)).localeCompare(
+      teamKey(b.team.map((hero) => hero.id))
+    );
+  });
 
-  return bestTeam ?? [];
+  return evaluations[0]?.team ?? [];
 }
