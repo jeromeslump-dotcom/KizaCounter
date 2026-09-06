@@ -283,14 +283,17 @@ export function recommendAlternativeTeam(
 ): Hero[] {
   if (!enemyIds.length) return [];
 
-  const primaryIds = new Set(primaryTeam.map((hero) => hero.id));
-  const availableHeroes = heroes.filter((hero) => !primaryIds.has(hero.id));
-  if (availableHeroes.length <= TEAM_SIZE) return availableHeroes;
+  const primaryTeamKey =
+    primaryTeam.length === TEAM_SIZE
+      ? teamKey(primaryTeam.map((hero) => hero.id))
+      : "";
+
+  if (heroes.length < TEAM_SIZE) return heroes;
 
   const settings = getEngineSettings();
   const budgets = getPointBudgets(settings, "B");
   const counterUsage = calculateCounterUsage(enemyIds, combats);
-  const ranked = availableHeroes
+  const ranked = heroes
     .map((hero) => {
       const counter = counterUsage[hero.id];
       if (!counter) return { hero, score: 0 };
@@ -311,18 +314,63 @@ export function recommendAlternativeTeam(
       (a, b) => b.score - a.score || a.hero.name.localeCompare(b.hero.name)
     );
 
-  const buildCandidate = (orderedHeroes: typeof ranked): Hero[] => {
-    const team: Hero[] = [];
-    for (const candidate of orderedHeroes) {
-      if (primaryIds.has(candidate.hero.id)) continue;
-      team.push(candidate.hero);
-      if (team.length === TEAM_SIZE) break;
-    }
-    return team;
+  const isPrimaryTeam = (team: Hero[]): boolean =>
+    primaryTeamKey !== "" && teamKey(team.map((hero) => hero.id)) === primaryTeamKey;
+
+  const addCandidate = (
+    candidates: Map<string, Hero[]>,
+    team: Hero[]
+  ): void => {
+    if (team.length !== TEAM_SIZE) return;
+    const ids = uniqueIds(team.map((hero) => hero.id));
+    if (ids.length !== TEAM_SIZE) return;
+    const normalizedTeam = ids
+      .map((id) => heroes.find((hero) => hero.id === id))
+      .filter((hero): hero is Hero => Boolean(hero));
+    if (normalizedTeam.length !== TEAM_SIZE) return;
+    if (isPrimaryTeam(normalizedTeam)) return;
+    candidates.set(teamKey(ids), normalizedTeam);
   };
 
-  const baseAlternative = buildCandidate(ranked);
-  if (baseAlternative.length !== TEAM_SIZE) return baseAlternative;
+  const candidates = new Map<string, Hero[]>();
+
+  const baseAlternative = ranked.slice(0, TEAM_SIZE).map((entry) => entry.hero);
+  addCandidate(candidates, baseAlternative);
+
+  const pool = ranked.map((candidate) => candidate.hero);
+  for (let index = 0; index < TEAM_SIZE; index++) {
+    const baseTeam = baseAlternative.length === TEAM_SIZE ? baseAlternative : [];
+    if (baseTeam.length !== TEAM_SIZE) break;
+
+    for (const replacement of pool) {
+      if (
+        baseTeam.some(
+          (hero, heroIndex) => heroIndex !== index && hero.id === replacement.id
+        )
+      ) {
+        continue;
+      }
+      const candidate = [...baseTeam];
+      candidate[index] = replacement;
+      addCandidate(candidates, candidate);
+    }
+  }
+
+  const historicalTeams = new Map<string, Hero[]>();
+  for (const combat of combats) {
+    if (!sameTeam(enemyIds, combat.enemy_heroes ?? []) || !combat.won) continue;
+    const ids = uniqueIds(combat.my_heroes ?? []);
+    if (ids.length !== TEAM_SIZE) continue;
+    const team = ids
+      .map((id) => heroes.find((hero) => hero.id === id))
+      .filter((hero): hero is Hero => Boolean(hero));
+    if (team.length !== TEAM_SIZE) continue;
+    if (teamKey(ids) === primaryTeamKey) continue;
+    historicalTeams.set(teamKey(ids), team);
+  }
+  for (const team of historicalTeams.values()) addCandidate(candidates, team);
+
+  if (!candidates.size) return [];
 
   const core4Analyses = analyzeCore4Plus1(enemyIds, combats, settings);
   const getCore4Points = (team: Hero[]): number => {
@@ -393,58 +441,22 @@ export function recommendAlternativeTeam(
     };
   };
 
-  const candidates: Hero[][] = [baseAlternative];
-  const pool = ranked
-    .filter((candidate) => !primaryIds.has(candidate.hero.id))
-    .map((candidate) => candidate.hero);
-
-  for (let index = 0; index < baseAlternative.length; index++) {
-    for (const replacement of pool) {
-      if (
-        baseAlternative.some(
-          (hero, heroIndex) => heroIndex !== index && hero.id === replacement.id
-        )
-      )
-        continue;
-      const candidate = [...baseAlternative];
-      candidate[index] = replacement;
-      candidates.push(candidate);
+  const evaluations = Array.from(candidates.values()).map(evaluateAlternative);
+  evaluations.sort((a, b) => {
+    if (a.score !== b.score) return b.score - a.score;
+    if (a.history.winRate !== b.history.winRate) {
+      return b.history.winRate - a.history.winRate;
     }
-  }
-
-  const historicalTeams = new Map<string, Hero[]>();
-  for (const combat of combats) {
-    if (!sameTeam(enemyIds, combat.enemy_heroes ?? []) || !combat.won) continue;
-    const ids = uniqueIds(combat.my_heroes ?? []);
-    if (ids.length !== TEAM_SIZE) continue;
-    if (ids.some((id) => primaryIds.has(id))) continue;
-    const team = ids
-      .map((id) => heroes.find((hero) => hero.id === id))
-      .filter((hero): hero is Hero => Boolean(hero));
-    if (team.length === TEAM_SIZE) historicalTeams.set(teamKey(ids), team);
-  }
-  candidates.push(...historicalTeams.values());
-
-  let best = evaluateAlternative(baseAlternative);
-  for (const candidate of candidates.slice(1)) {
-    const evaluation = evaluateAlternative(candidate);
-    if (
-      evaluation.score > best.score ||
-      (evaluation.score === best.score &&
-        evaluation.history.winRate > best.history.winRate) ||
-      (evaluation.score === best.score &&
-        evaluation.history.winRate === best.history.winRate &&
-        evaluation.history.wins > best.history.wins) ||
-      (evaluation.score === best.score &&
-        evaluation.history.winRate === best.history.winRate &&
-        evaluation.history.wins === best.history.wins &&
-        evaluation.history.battles > best.history.battles)
-    ) {
-      best = evaluation;
+    if (a.history.wins !== b.history.wins) return b.history.wins - a.history.wins;
+    if (a.history.battles !== b.history.battles) {
+      return b.history.battles - a.history.battles;
     }
-  }
+    return teamKey(a.team.map((hero) => hero.id)).localeCompare(
+      teamKey(b.team.map((hero) => hero.id))
+    );
+  });
 
-  return best.team;
+  return evaluations[0]?.team ?? [];
 }
 
 export function rankHeroes(
