@@ -153,10 +153,10 @@ export function findBestHistoricalTeam(enemyIds: string[], combats: Combat[], he
   return null;
 }
 
-function getEnemyClassKey(enemyIds: string[], heroesById: Map<string, Hero>): string | null {
+export function getEnemyClassKey(enemyIds: string[], heroesById: Map<string, Hero>): string | null {
   let agi=0,int=0,str=0;
   for (const id of enemyIds) { const cls=heroesById.get(id)?.cls; if(cls==="AGI") agi++; else if(cls==="INT") int++; else if(cls==="STR") str++; else return null; }
-  if(agi+int+str!==TEAM_SIZE) return null;
+  if(agi+int+str!==TEAM_SIZE)return null;
   return [...Array(agi).fill("AGI"),...Array(int).fill("INT"),...Array(str).fill("STR")].join("|");
 }
 
