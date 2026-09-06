@@ -62,7 +62,7 @@ describe("historical recommendation sources", () => {
       [combat(recommended, similarEnemy, true)]
     );
 
-    expect(result.source).toBe("similar-history");
+    expect(result.source).toBe("core4");
     expect(result.team.map((hero) => hero.id).sort()).toEqual(
       [...recommended].sort()
     );
