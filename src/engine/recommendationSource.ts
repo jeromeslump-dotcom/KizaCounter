@@ -8,7 +8,9 @@ import { findBestHistoricalDefeatTeam } from "./defeatHistory";
 import { sameTeam, teamKey, uniqueIds } from "./teamUtils";
 
 export type RecommendationSource =
-  ScoringRecommendationSource | "similar-history" | "defeat-history";
+  | ScoringRecommendationSource
+  | "similar-history"
+  | "defeat-history";
 
 export interface TeamRecommendation {
   team: Hero[];
@@ -57,7 +59,10 @@ function orderHistoricalCandidates(
   sortBySimilarity = false
 ) {
   return [...candidates.values()]
-    .filter((candidate) => candidate.wins > 0)
+    .filter(
+      (candidate) =>
+        candidate.wins > 0 && candidate.wins >= candidate.losses
+    )
     .sort(
       (a, b) =>
         (sortBySimilarity ? b.similarity - a.similarity : 0) ||
