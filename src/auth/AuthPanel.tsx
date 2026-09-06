@@ -1,21 +1,19 @@
 // src/auth/AuthPanel.tsx
 
-import { useEffect, useState } from "react";
-import type { Session } from "@supabase/supabase-js";
+import { useState } from "react";
 import AdminPanel from "../admin/AdminPanel";
 import CombatHistory from "../admin/CombatHistory";
 import EncounteredTeams from "../admin/EncounteredTeams";
 import UserManagement from "../admin/UserManagement";
 import AnalysisHelp from "../admin/AnalysisHelp";
-import { getCurrentUserProfile, type UserProfile } from "../admin/adminAccess";
 import type { Combat } from "../types";
 import { HEROES } from "../data/heroes";
 import { loadCombats } from "../storage/combatStorage";
-import { getSession, signIn, signOut, onAuthStateChange } from "./auth";
+import { signIn, signOut } from "./auth";
+import useAuthSession from "./useAuthSession";
 
 export default function AuthPanel() {
-  const [session, setSession] = useState<Session | null>(null);
-  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const { session, profile, loading } = useAuthSession();
   const [showAdminPanel, setShowAdminPanel] = useState(false);
   const [showUserManagement, setShowUserManagement] = useState(false);
   const [showEncounteredTeams, setShowEncounteredTeams] = useState(false);
@@ -25,48 +23,8 @@ export default function AuthPanel() {
   const [showLogin, setShowLogin] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
-
-  useEffect(() => {
-    let mounted = true;
-
-    async function loadSession() {
-      try {
-        const currentSession = await getSession();
-        if (!mounted) return;
-        setSession(currentSession);
-        const currentProfile = await getCurrentUserProfile(currentSession);
-        if (mounted) setProfile(currentProfile);
-      } catch (error) {
-        console.error("Impossible de récupérer la session :", error);
-      } finally {
-        if (mounted) setLoading(false);
-      }
-    }
-
-    loadSession();
-
-    const {
-      data: { subscription },
-    } = onAuthStateChange((currentSession) => {
-      setSession(currentSession);
-      setShowAdminPanel(false);
-      setShowUserManagement(false);
-      setShowEncounteredTeams(false);
-      setShowCombatHistory(false);
-      setShowAnalysisHelp(false);
-      void getCurrentUserProfile(currentSession).then((currentProfile) => {
-        if (mounted) setProfile(currentProfile);
-      });
-    });
-
-    return () => {
-      mounted = false;
-      subscription.unsubscribe();
-    };
-  }, []);
 
   async function handleSignIn(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
