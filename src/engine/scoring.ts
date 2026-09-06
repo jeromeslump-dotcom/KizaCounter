@@ -19,6 +19,7 @@ import {
   calculateHeroUsage,
   coverageReport,
   evaluateSpecificHistoryModule,
+  getEnemyClassKey,
 } from "./historicalScoring";
 import { calculateCounterUsage, counterHeroScore } from "./counterUsage";
 import { teamKey, uniqueIds } from "./teamUtils";
@@ -40,7 +41,6 @@ export {
 const TEAM_SIZE = 5;
 type HistoryStats = { wins: number; losses: number };
 function addHistoryStats(index: Map<string, HistoryStats>, key: string, won: boolean): void { const stats=index.get(key)??{wins:0,losses:0}; won?stats.wins++:stats.losses++; index.set(key,stats); }
-function getEnemyClassKey(enemyIds: string[], heroesById: Map<string, Hero>): string | null { let agi=0,int=0,str=0; for(const id of enemyIds){const cls=heroesById.get(id)?.cls;if(cls==="AGI")agi++;else if(cls==="INT")int++;else if(cls==="STR")str++;else return null;} if(agi+int+str!==TEAM_SIZE)return null; return [...Array(agi).fill("AGI"),...Array(int).fill("INT"),...Array(str).fill("STR")].join("|"); }
 export type RecommendationSource="exact-history"|"class-history"|"core4"|"counter-usage"|"fallback";
 export type RecommendationSourceCallback=(source:RecommendationSource)=>void;
 function calculateCore4ModulePoints(teamIds:string[],enemyIds:string[],combats:Parameters<typeof analyzeCore4Plus1>[1],settings:ReturnType<typeof getEngineSettings>,maxPoints:number):number{if(enemyIds.length!==TEAM_SIZE||maxPoints<=0)return 0;const analyses=analyzeCore4Plus1(enemyIds,combats,settings);if(!analyses.length)return 0;const teamSet=new Set(teamIds);let bestRawScore=0;for(const analysis of analyses){if(!analysis.coreIds.every((id)=>teamSet.has(id)))continue;const confidence=historicalConfidence(analysis.battles,settings.advanced.core4ConfidenceBattles);bestRawScore=Math.max(bestRawScore,(analysis.winRate/100)*confidence);}return normalizeModulePoints(bestRawScore,maxPoints);}
