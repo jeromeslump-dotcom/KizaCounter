@@ -41,7 +41,7 @@ export default function TeamPanel({
                 selectionOrder={
                   selectedIndex !== -1 ? selectedIndex + 1 : index + 1
                 }
-                onClick={onHeroClick ? () => onHeroClick(hero) : undefined}
+                onClick={onHeroClick}
               />
             );
           })}
