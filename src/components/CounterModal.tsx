@@ -33,7 +33,7 @@ interface CounterModalProps {
   sortBy: HeroSort;
   usage: Record<string, number>;
   combats: Combat[];
-  isAuthenticated: boolean;
+  canViewDetailedHistory: boolean;
   onClose: () => void;
   onHeroClick: (hero: Hero) => void;
   onQueryChange: (value: string) => void;
@@ -58,7 +58,7 @@ export default function CounterModal({
   sortBy,
   usage,
   combats,
-  isAuthenticated,
+  canViewDetailedHistory,
   onClose,
   onHeroClick,
   onQueryChange,
@@ -130,7 +130,7 @@ export default function CounterModal({
 
   const currentTeamHistoryLabel =
     currentTeamHistory.battles > 0 ? (
-      isAuthenticated ? (
+      canViewDetailedHistory ? (
         <>
           <strong>Historique exact</strong>{" "}
           <span className="font-normal">
@@ -143,7 +143,7 @@ export default function CounterModal({
         <strong>Historique exact</strong>
       )
     ) : currentTeamGeneralHistory.battles > 0 ? (
-      isAuthenticated ? (
+      canViewDetailedHistory ? (
         <>
           <strong>Nouvelle rencontre · Équipe déjà victorieuse</strong>{" "}
           <span className="font-normal">
@@ -172,25 +172,25 @@ export default function CounterModal({
     historyLabel =
       recommendedExactHistory.battles === 0
         ? "Aucun historique exact"
-        : isAuthenticated
+        : canViewDetailedHistory
           ? `${Math.round(recommendedExactHistory.winRate)} % · ${recommendedExactHistory.battles} combat${recommendedExactHistory.battles > 1 ? "s" : ""}`
           : `${Math.round(recommendedExactHistory.winRate)} %`;
   } else if (recommendationSource === "class-history") {
     historyLabel =
       recommendedClassHistory.battles === 0
         ? "Aucun historique de classes"
-        : isAuthenticated
+        : canViewDetailedHistory
           ? `${Math.round(recommendedClassHistory.winRate)} % · ${recommendedClassHistory.battles} combat${recommendedClassHistory.battles > 1 ? "s" : ""}`
           : `${Math.round(recommendedClassHistory.winRate)} %`;
   }
 
   const alternativeHistoryLabel =
     alternativeHistory.battles > 0
-      ? isAuthenticated
+      ? canViewDetailedHistory
         ? `Historique exact · ${Math.round(alternativeHistory.winRate)} % · ${alternativeHistory.battles} combat${alternativeHistory.battles > 1 ? "s" : ""}`
         : "Historique exact"
       : alternativeClassHistory.battles > 0
-        ? isAuthenticated
+        ? canViewDetailedHistory
           ? `Historique classes · ${Math.round(alternativeClassHistory.winRate)} % · ${alternativeClassHistory.battles} combat${alternativeClassHistory.battles > 1 ? "s" : ""}`
           : "Historique classes"
         : "Aucune statistique historique";
