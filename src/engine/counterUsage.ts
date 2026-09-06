@@ -1,7 +1,7 @@
 import type { Hero } from "../data/heroes";
 import type { Combat } from "../types";
 import { getEngineSettings } from "./engineSettings";
-import { historicalConfidence } from "./historicalScoring";
+import { historicalConfidence, type HistoricalEnemyContext } from "./historicalScoring";
 import { teamKey, uniqueIds } from "./teamUtils";
 
 export interface CounterUsageStats {
@@ -13,19 +13,15 @@ export interface CounterUsageStats {
 
 export function calculateCounterUsage(
   enemyIds: string[],
-  combats: Combat[]
+  combats: Combat[],
+  context?: HistoricalEnemyContext
 ): Record<string, CounterUsageStats> {
   const result: Record<string, CounterUsageStats> = {};
-  const enemyKey = teamKey(enemyIds);
-  const combatEnemyKeys = new WeakMap<Combat, string>();
+  const enemyKey = context?.enemyKey ?? teamKey(enemyIds);
+  const historicalCombats = context?.combats ?? combats;
 
-  for (const combat of combats) {
-    let historicalEnemyKey = combatEnemyKeys.get(combat);
-    if (historicalEnemyKey === undefined) {
-      historicalEnemyKey = teamKey(combat.enemy_heroes ?? []);
-      combatEnemyKeys.set(combat, historicalEnemyKey);
-    }
-    if (historicalEnemyKey !== enemyKey) continue;
+  for (const combat of historicalCombats) {
+    if (!context && teamKey(combat.enemy_heroes ?? []) !== enemyKey) continue;
 
     for (const heroId of uniqueIds(combat.my_heroes ?? [])) {
       result[heroId] ??= {
