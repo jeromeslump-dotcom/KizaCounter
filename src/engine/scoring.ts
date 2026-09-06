@@ -194,6 +194,7 @@ export function recommendTeam(
     return availableHeroes;
   }
 
+  const heroesById = new Map(heroes.map((hero) => [hero.id, hero]));
   const counterUsage = calculateCounterUsage(enemyIds, combats);
   const ranked = availableHeroes
     .map((hero) => ({ hero, score: counterHeroScore(hero, counterUsage) }))
@@ -210,10 +211,11 @@ export function recommendTeam(
     let bestCompleteScore = -Infinity;
     let bestCoreScore = -Infinity;
     let bestReplacementScore = -Infinity;
+    let bestCompleteTeamKey = "";
 
     for (const analysis of core4Analyses) {
       const core4Heroes = analysis.coreIds
-        .map((id) => heroes.find((hero) => hero.id === id))
+        .map((id) => heroesById.get(id))
         .filter((hero): hero is Hero => Boolean(hero));
       if (core4Heroes.length !== TEAM_SIZE - 1) continue;
 
@@ -223,27 +225,25 @@ export function recommendTeam(
       );
       const coreScore = analysis.winRate * coreConfidence;
       const core4Ids = new Set(core4Heroes.map((hero) => hero.id));
+      const replacementsByHeroId = new Map(
+        analysis.replacements.map((entry) => [entry.heroId, entry])
+      );
+      const core4Points = normalizeModulePoints(
+        coreScore / 100,
+        budgets.core4
+      );
 
       for (const candidate of ranked) {
         if (core4Ids.has(candidate.hero.id)) continue;
-        const replacement = analysis.replacements.find(
-          (entry) => entry.heroId === candidate.hero.id
-        );
+        const replacement = replacementsByHeroId.get(candidate.hero.id);
         if (!replacement) continue;
 
         const replacementScore = replacement.score;
-        const core4Points = normalizeModulePoints(
-          coreScore / 100,
-          budgets.core4
-        );
         const completeScore =
           core4Points * settings.teamA.core4Weight +
           replacementScore * settings.teamA.core4Weight * (budgets.core4 / 100);
         const completeTeam = [...core4Heroes, candidate.hero];
         const completeTeamKey = teamKey(completeTeam.map((hero) => hero.id));
-        const bestCompleteTeamKey = bestCompleteTeam
-          ? teamKey(bestCompleteTeam.map((hero) => hero.id))
-          : "";
 
         if (
           completeScore > bestCompleteScore ||
@@ -258,6 +258,7 @@ export function recommendTeam(
           bestCompleteScore = completeScore;
           bestCoreScore = coreScore;
           bestReplacementScore = replacementScore;
+          bestCompleteTeamKey = completeTeamKey;
         }
       }
     }
