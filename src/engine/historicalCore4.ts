@@ -2,7 +2,10 @@
 
 import type { Combat } from "../types";
 import { getEngineSettings, type EngineSettings } from "./engineSettings";
-import { calculateHistoricalReliability } from "./historicalScoring";
+import {
+  calculateHistoricalReliability,
+  historicalConfidence,
+} from "./historicalScoring";
 import { sameTeam } from "./teamUtils";
 
 // ============================================================
@@ -102,31 +105,6 @@ function generateCore4s(teamIds: string[]): string[][] {
 }
 
 // ============================================================
-// CONFIANCE HISTORIQUE
-// ============================================================
-
-function calculateConfidence(
-  battles: number,
-  settings: EngineSettings
-): number {
-  if (battles <= 0) {
-    return 0;
-  }
-
-  // Même logique de confiance que l'historique Team A :
-  // battles / (battles + K)
-  //
-  // Ici K = core4ConfidenceBattles, réglé à 4 par défaut.
-  // 1 combat = 20 %, 4 = 50 %, 10 = 71 %, 20 = 83 %.
-  const confidenceBattles = Math.max(
-    1,
-    settings.advanced.core4ConfidenceBattles
-  );
-
-  return battles / (battles + confidenceBattles);
-}
-
-// ============================================================
 // TAUX DE VICTOIRE
 // ============================================================
 
@@ -168,7 +146,10 @@ function buildCore4Analysis(
 
     const delta = winRate - coreWinRate;
 
-    const confidence = calculateConfidence(replacementBattles, settings);
+    const confidence = historicalConfidence(
+      replacementBattles,
+      settings.advanced.core4ConfidenceBattles
+    );
 
     const score = delta * confidence;
 
