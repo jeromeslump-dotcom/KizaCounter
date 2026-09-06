@@ -221,8 +221,11 @@ export function findBestHistoricalTeam(
     candidates.set(key, candidate);
   }
 
+  // A historical team is considered valid only when it has at least one win
+  // and no more losses than wins. This keeps direct recommendation paths
+  // consistent with recommendationSource.ts.
   const winningCandidates = [...candidates.values()].filter(
-    (candidate) => candidate.wins > 0
+    (candidate) => candidate.wins > 0 && candidate.wins >= candidate.losses
   );
   if (!winningCandidates.length) return null;
 
@@ -340,7 +343,7 @@ export function findBestHistoricalClassTeam(
     settings.advanced.teamAHistoricalConfidenceBattles
   );
   const ordered = [...candidates.values()]
-    .filter((candidate) => candidate.wins > 0)
+    .filter((candidate) => candidate.wins > 0 && candidate.wins >= candidate.losses)
     .sort((a, b) => {
       const aBattles = a.wins + a.losses;
       const bBattles = b.wins + b.losses;
