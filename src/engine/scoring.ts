@@ -237,13 +237,21 @@ export function recommendAlternativeTeam(enemyIds: string[], heroes: Hero[], com
   for (const team of historicalTeams.values()) addCandidate(candidates, team);
   if (!candidates.size) return [];
   const core4Analyses = analyzeCore4Plus1(enemyIds, combats, settings);
+  const core4Scores = new Map<string, number>();
+  for (const core of core4Analyses) {
+    const coreKey = teamKey(core.coreIds);
+    const confidence = historicalConfidence(core.battles, settings.advanced.core4ConfidenceBattles);
+    const rawScore = (core.winRate / 100) * confidence;
+    const previous = core4Scores.get(coreKey) ?? 0;
+    if (rawScore > previous) core4Scores.set(coreKey, rawScore);
+  }
   const getCore4Points = (team: Hero[]): number => {
-    const teamIds = new Set(team.map((hero) => hero.id));
+    const teamIds = team.map((hero) => hero.id);
     let bestRawScore = 0;
-    for (const core of core4Analyses) {
-      if (!core.coreIds.every((id) => teamIds.has(id))) continue;
-      const confidence = historicalConfidence(core.battles, settings.advanced.core4ConfidenceBattles);
-      bestRawScore = Math.max(bestRawScore, (core.winRate / 100) * confidence);
+    for (let excludedIndex = 0; excludedIndex < TEAM_SIZE; excludedIndex++) {
+      const coreIds = teamIds.filter((_, index) => index !== excludedIndex);
+      const rawScore = core4Scores.get(teamKey(coreIds)) ?? 0;
+      if (rawScore > bestRawScore) bestRawScore = rawScore;
     }
     return normalizeModulePoints(bestRawScore, budgets.core4);
   };
