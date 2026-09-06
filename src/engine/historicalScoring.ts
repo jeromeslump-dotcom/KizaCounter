@@ -205,6 +205,7 @@ export function findBestHistoricalTeam(
   heroes: Hero[]
 ): Hero[] | null {
   const settings = getEngineSettings();
+  const heroesById = new Map(heroes.map((hero) => [hero.id, hero]));
   const candidates = new Map<
     string,
     { heroIds: string[]; wins: number; losses: number }
@@ -256,16 +257,16 @@ export function findBestHistoricalTeam(
 
   for (const candidate of winningCandidates) {
     const team = candidate.heroIds
-      .map((id) => heroes.find((hero) => hero.id === id))
+      .map((id) => heroesById.get(id))
       .filter((hero): hero is Hero => Boolean(hero));
     if (team.length === TEAM_SIZE) return team;
   }
   return null;
 }
 
-function getEnemyClassKey(enemyIds: string[], heroes: Hero[]): string | null {
+function getEnemyClassKey(enemyIds: string[], heroesById: Map<string, Hero>): string | null {
   const classes = enemyIds
-    .map((id) => heroes.find((hero) => hero.id === id)?.cls)
+    .map((id) => heroesById.get(id)?.cls)
     .filter(
       (cls): cls is Hero["cls"] =>
         cls === "STR" || cls === "AGI" || cls === "INT"
@@ -281,7 +282,8 @@ export function evaluateEnemyClassHistory(
   heroes: Hero[]
 ) {
   const team = uniqueIds(teamIds);
-  const targetClassKey = getEnemyClassKey(enemyIds, heroes);
+  const heroesById = new Map(heroes.map((hero) => [hero.id, hero]));
+  const targetClassKey = getEnemyClassKey(enemyIds, heroesById);
   if (team.length !== TEAM_SIZE || !targetClassKey)
     return {
       wins: 0,
@@ -296,7 +298,7 @@ export function evaluateEnemyClassHistory(
     if (!sameTeam(team, combat.my_heroes ?? [])) continue;
     const historicalEnemy = uniqueIds(combat.enemy_heroes ?? []);
     if (historicalEnemy.length !== TEAM_SIZE) continue;
-    if (getEnemyClassKey(historicalEnemy, heroes) !== targetClassKey) continue;
+    if (getEnemyClassKey(historicalEnemy, heroesById) !== targetClassKey) continue;
     combat.won ? wins++ : losses++;
   }
   const battles = wins + losses;
@@ -314,7 +316,8 @@ export function findBestHistoricalClassTeam(
   combats: Combat[],
   heroes: Hero[]
 ): Hero[] | null {
-  const targetClassKey = getEnemyClassKey(enemyIds, heroes);
+  const heroesById = new Map(heroes.map((hero) => [hero.id, hero]));
+  const targetClassKey = getEnemyClassKey(enemyIds, heroesById);
   if (!targetClassKey) return null;
   const candidates = new Map<
     string,
@@ -323,7 +326,7 @@ export function findBestHistoricalClassTeam(
   for (const combat of combats) {
     const historicalEnemy = uniqueIds(combat.enemy_heroes ?? []);
     if (historicalEnemy.length !== TEAM_SIZE) continue;
-    if (getEnemyClassKey(historicalEnemy, heroes) !== targetClassKey) continue;
+    if (getEnemyClassKey(historicalEnemy, heroesById) !== targetClassKey) continue;
     const heroIds = uniqueIds(combat.my_heroes ?? []);
     if (heroIds.length !== TEAM_SIZE) continue;
     const key = teamKey(heroIds);
@@ -366,7 +369,7 @@ export function findBestHistoricalClassTeam(
 
   for (const candidate of ordered) {
     const team = candidate.heroIds
-      .map((id) => heroes.find((hero) => hero.id === id))
+      .map((id) => heroesById.get(id))
       .filter((hero): hero is Hero => Boolean(hero));
     if (team.length === TEAM_SIZE) return team;
   }
