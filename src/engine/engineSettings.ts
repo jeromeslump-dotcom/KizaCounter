@@ -32,9 +32,9 @@ export interface EngineSettings {
 
     teamBCounterWinRateMultiplier: number;
 
-    teamAHistoricalConfidenceBattles: number;
-    teamAHistoricalReliabilityBase: number;
-    teamAHistoricalReliabilityConfidenceWeight: number;
+    historicalConfidenceBattles: number;
+    historicalReliabilityBase: number;
+    historicalReliabilityConfidenceWeight: number;
 
     core4MinBattles: number;
     core4MinReplacementBattles: number;
@@ -64,18 +64,16 @@ export const DEFAULT_ENGINE_SETTINGS: EngineSettings = {
 
     teamBCounterWinRateMultiplier: 1.2,
 
-    // //////// MODIF
-    // Même référence de confiance pour Team A et Core4.
+    // Même référence de confiance pour l'historique partagé.
     // 4 combats donnent 50 % de confiance.
-    teamAHistoricalConfidenceBattles: 4,
-    teamAHistoricalReliabilityBase: 0.35,
-    teamAHistoricalReliabilityConfidenceWeight: 0.65,
+    historicalConfidenceBattles: 4,
+    historicalReliabilityBase: 0.35,
+    historicalReliabilityConfidenceWeight: 0.65,
 
     core4MinBattles: 2,
     core4MinReplacementBattles: 3,
 
-    // //////// MODIF
-    // Même référence de confiance que Team A.
+    // Même référence de confiance que l'historique partagé.
     core4ConfidenceBattles: 4,
   },
 };
@@ -111,6 +109,16 @@ export function normalizeModulePoints(
 
 const STORAGE_KEY = "lords-mobile-counter-engine-settings";
 
+type LegacyAdvancedSettings = Partial<EngineSettings["advanced"]> & {
+  teamAHistoricalConfidenceBattles?: number;
+  teamAHistoricalReliabilityBase?: number;
+  teamAHistoricalReliabilityConfidenceWeight?: number;
+};
+
+type SavedEngineSettings = Omit<Partial<EngineSettings>, "advanced"> & {
+  advanced?: LegacyAdvancedSettings;
+};
+
 function isBrowser(): boolean {
   return (
     typeof window !== "undefined" && typeof window.localStorage !== "undefined"
@@ -118,8 +126,24 @@ function isBrowser(): boolean {
 }
 
 function mergeSettings(
-  saved: Partial<EngineSettings> | null | undefined
+  saved: SavedEngineSettings | null | undefined
 ): EngineSettings {
+  const legacyAdvanced = saved?.advanced;
+  const savedAdvanced = legacyAdvanced
+    ? {
+        ...legacyAdvanced,
+        historicalConfidenceBattles:
+          legacyAdvanced.historicalConfidenceBattles ??
+          legacyAdvanced.teamAHistoricalConfidenceBattles,
+        historicalReliabilityBase:
+          legacyAdvanced.historicalReliabilityBase ??
+          legacyAdvanced.teamAHistoricalReliabilityBase,
+        historicalReliabilityConfidenceWeight:
+          legacyAdvanced.historicalReliabilityConfidenceWeight ??
+          legacyAdvanced.teamAHistoricalReliabilityConfidenceWeight,
+      }
+    : {};
+
   return {
     ...DEFAULT_ENGINE_SETTINGS,
     ...saved,
@@ -133,7 +157,7 @@ function mergeSettings(
     },
     advanced: {
       ...DEFAULT_ENGINE_SETTINGS.advanced,
-      ...(saved?.advanced ?? {}),
+      ...savedAdvanced,
     },
   };
 }
@@ -145,7 +169,7 @@ export function getEngineSettings(): EngineSettings {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     if (!raw) return DEFAULT_ENGINE_SETTINGS;
 
-    return mergeSettings(JSON.parse(raw) as Partial<EngineSettings>);
+    return mergeSettings(JSON.parse(raw) as SavedEngineSettings);
   } catch {
     return DEFAULT_ENGINE_SETTINGS;
   }
