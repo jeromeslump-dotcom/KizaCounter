@@ -1,4 +1,10 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 
 import { HEROES } from "../data/heroes";
 import { supabase } from "../storage/supabase";
@@ -13,11 +19,13 @@ export default function useHeroManager() {
   const [userId, setUserId] = useState<string | null>(null);
   const [loaded, setLoaded] = useState(false);
   const [preferencesReady, setPreferencesReady] = useState(false);
+  const loadRequestRef = useRef(0);
 
   useEffect(() => {
     let cancelled = false;
 
     async function loadForUser(nextUserId: string | null) {
+      const requestId = ++loadRequestRef.current;
       setLoaded(false);
       setPreferencesReady(false);
       setUserId(nextUserId);
@@ -25,20 +33,20 @@ export default function useHeroManager() {
       try {
         const ids = await loadHeroPreferences(nextUserId);
 
-        if (cancelled) return;
+        if (cancelled || requestId !== loadRequestRef.current) return;
 
         setEnabledHeroIds(ids);
         setPreferencesReady(true);
       } catch (error) {
         console.error("Impossible de charger les préférences héros :", error);
 
-        if (cancelled) return;
+        if (cancelled || requestId !== loadRequestRef.current) return;
 
         // En cas d'erreur Supabase, on ne réutilise jamais la sélection
         // d'un autre utilisateur et on n'autorise pas une sauvegarde.
         setEnabledHeroIds(new Set(ALL_HERO_IDS));
       } finally {
-        if (!cancelled) {
+        if (!cancelled && requestId === loadRequestRef.current) {
           setLoaded(true);
         }
       }
