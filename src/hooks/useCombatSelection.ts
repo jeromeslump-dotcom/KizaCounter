@@ -46,6 +46,11 @@ export default function useCombatSelection({
     useState<RecommendationSource | null>(null);
   const openedEnemyKeyRef = useRef<string | null>(null);
 
+  const heroesById = useMemo(
+    () => new Map(heroes.map((hero) => [hero.id, hero])),
+    [heroes]
+  );
+
   const enabledHeroes = useMemo(
     () => heroes.filter((hero) => enabledHeroIds.has(hero.id)),
     [heroes, enabledHeroIds]
@@ -54,33 +59,33 @@ export default function useCombatSelection({
   const enemies = useMemo(
     () =>
       enemyIds
-        .map((id) => heroes.find((hero) => hero.id === id))
+        .map((id) => heroesById.get(id))
         .filter((hero): hero is Hero => Boolean(hero)),
-    [enemyIds, heroes]
+    [enemyIds, heroesById]
   );
 
   const team = useMemo(
     () =>
       teamIds
-        .map((id) => heroes.find((hero) => hero.id === id))
+        .map((id) => heroesById.get(id))
         .filter((hero): hero is Hero => Boolean(hero)),
-    [teamIds, heroes]
+    [teamIds, heroesById]
   );
 
   const recommendedTeam = useMemo(
     () =>
       recommendedIds
-        .map((id) => heroes.find((hero) => hero.id === id))
+        .map((id) => heroesById.get(id))
         .filter((hero): hero is Hero => Boolean(hero)),
-    [recommendedIds, heroes]
+    [recommendedIds, heroesById]
   );
 
   const alternativeTeam = useMemo(
     () =>
       alternativeIds
-        .map((id) => heroes.find((hero) => hero.id === id))
+        .map((id) => heroesById.get(id))
         .filter((hero): hero is Hero => Boolean(hero)),
-    [alternativeIds, heroes]
+    [alternativeIds, heroesById]
   );
 
   function openCounterModal(enemyTeamIds: string[]) {
@@ -132,9 +137,7 @@ export default function useCombatSelection({
       if (candidateTeam?.length === TEAM_SIZE) {
         const sameTeam =
           candidateTeam.every((hero) => primaryIds.includes(hero.id)) &&
-          primaryIds.every((id) =>
-            candidateTeam.some((hero) => hero.id === id)
-          );
+          primaryIds.every((id) => candidateTeam.some((hero) => hero.id === id));
 
         if (!sameTeam) {
           bestAlternative = candidateTeam;
@@ -179,7 +182,7 @@ export default function useCombatSelection({
   function selectRecommendedTeam(ids: string[]) {
     const validIds = ids
       .filter((id) => enabledHeroIds.has(id))
-      .filter((id) => heroes.some((hero) => hero.id === id))
+      .filter((id) => heroesById.has(id))
       .slice(0, TEAM_SIZE);
     setTeamIds(validIds);
   }
