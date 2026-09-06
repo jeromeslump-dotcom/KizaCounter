@@ -371,7 +371,6 @@ function findScoringAlternative(
   if (ranked.length < TEAM_SIZE) return null;
 
   const base = ranked.slice(0, TEAM_SIZE).map((entry) => entry.hero);
-  const candidates: Hero[][] = [];
 
   for (let index = 0; index < TEAM_SIZE; index++) {
     for (const replacement of ranked.slice(TEAM_SIZE)) {
@@ -379,11 +378,11 @@ function findScoringAlternative(
       candidate[index] = replacement.hero;
       if (new Set(candidate.map((hero) => hero.id)).size !== TEAM_SIZE) continue;
       if (teamKey(candidate.map((hero) => hero.id)) === excludedTeamKey) continue;
-      candidates.push(candidate);
+      return candidate;
     }
   }
 
-  return candidates[0] ?? null;
+  return null;
 }
 
 export function recommendTeamWithSource(
