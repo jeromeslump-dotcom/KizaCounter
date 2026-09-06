@@ -350,10 +350,6 @@ export default function EngineSettings({
             </div>
           </div>
 
-          {/* ==================================================
-              BUDGETS DE POINTS DES MODULES
-              ================================================== */}
-
           <div className="ui-panel-alt rounded-2xl border px-4">
             {pointRows.map((row) => (
               <PointBudgetRow
@@ -367,10 +363,6 @@ export default function EngineSettings({
               />
             ))}
           </div>
-
-          {/* ==================================================
-              TOTAL DES BUDGETS
-              ================================================== */}
 
           <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
             <div
@@ -399,10 +391,6 @@ export default function EngineSettings({
               )}
             </div>
           </div>
-
-          {/* ==================================================
-              RÉGLAGES AVANCÉS
-              ================================================== */}
 
           <button
             type="button"
@@ -441,42 +429,39 @@ export default function EngineSettings({
               <AdvancedSettingRow
                 icon="🛡️"
                 label="Combats pour confiance maximale"
-                valueA={advanced.teamAHistoricalConfidenceBattles}
+                valueA={advanced.historicalConfidenceBattles}
                 min={1}
                 max={20}
                 step={1}
                 unit="combats"
                 onChangeA={(value) =>
-                  updateAdvanced("teamAHistoricalConfidenceBattles", value)
+                  updateAdvanced("historicalConfidenceBattles", value)
                 }
               />
 
               <AdvancedSettingRow
                 icon="🛡️"
                 label="Base de fiabilité"
-                valueA={advanced.teamAHistoricalReliabilityBase}
+                valueA={advanced.historicalReliabilityBase}
                 min={0}
                 max={1}
                 step={0.05}
                 unit="×"
                 onChangeA={(value) =>
-                  updateAdvanced("teamAHistoricalReliabilityBase", value)
+                  updateAdvanced("historicalReliabilityBase", value)
                 }
               />
 
               <AdvancedSettingRow
                 icon="🛡️"
                 label="Poids de la confiance"
-                valueA={advanced.teamAHistoricalReliabilityConfidenceWeight}
+                valueA={advanced.historicalReliabilityConfidenceWeight}
                 min={0}
                 max={1}
                 step={0.05}
                 unit="×"
                 onChangeA={(value) =>
-                  updateAdvanced(
-                    "teamAHistoricalReliabilityConfidenceWeight",
-                    value
-                  )
+                  updateAdvanced("historicalReliabilityConfidenceWeight", value)
                 }
               />
 
