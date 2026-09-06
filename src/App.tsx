@@ -14,6 +14,7 @@ import { getSession, onAuthStateChange } from "./auth/auth";
 import { getCurrentUserProfile, type UserProfile } from "./admin/adminAccess";
 import HeroManager from "./heroManager/HeroManager";
 import useHeroManager from "./heroManager/useHeroManager";
+import { calculateHeroUsage } from "./engine/historicalScoring";
 
 const TEAM_SIZE = 5;
 const BUILD_VERSION = __BUILD_VERSION__;
@@ -115,13 +116,10 @@ export default function App() {
   }, []);
 
   const heroUsage = useMemo(() => {
-    const usage: Record<string, number> = {};
-    for (const combat of combats) {
-      for (const heroId of combat.my_heroes ?? []) {
-        usage[heroId] = (usage[heroId] ?? 0) + 1;
-      }
-    }
-    return usage;
+    const usage = calculateHeroUsage(combats, HEROES);
+    return Object.fromEntries(
+      Object.entries(usage).map(([heroId, stats]) => [heroId, stats.total])
+    );
   }, [combats]);
 
   async function handleSaveCombat(combat: Combat) {
