@@ -270,14 +270,6 @@ export function recommendTeamWithSource(
   if (exactHistoryTeam)
     return { team: exactHistoryTeam, source: "exact-history" };
 
-  const similarHistoryTeam = findBestEnabledSimilarHistoryTeam(
-    enemyIds,
-    candidateHeroes,
-    combats
-  );
-  if (similarHistoryTeam)
-    return { team: similarHistoryTeam, source: "similar-history" };
-
   const defeatHistoryTeam = findBestHistoricalDefeatTeam(
     enemyIds,
     combats,
@@ -285,6 +277,14 @@ export function recommendTeamWithSource(
   );
   if (defeatHistoryTeam)
     return { team: defeatHistoryTeam, source: "defeat-history" };
+
+  const similarHistoryTeam = findBestEnabledSimilarHistoryTeam(
+    enemyIds,
+    candidateHeroes,
+    combats
+  );
+  if (similarHistoryTeam)
+    return { team: similarHistoryTeam, source: "similar-history" };
 
   const historicalClassTeam = findBestEnabledClassHistoryTeam(
     enemyIds,
