@@ -51,7 +51,7 @@ export function counterHeroScore(
 
   const confidence = historicalConfidence(
     counter.total,
-    settings.advanced.teamAHistoricalConfidenceBattles
+    settings.advanced.historicalConfidenceBattles
   );
 
   return (
