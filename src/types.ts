@@ -32,27 +32,6 @@ export interface HeroUsage {
 }
 
 // ============================================================
-// STATISTIQUES D'UNE COMBINAISON
-// ============================================================
-
-export interface TeamStats {
-  team: string[];
-  total: number;
-  wins: number;
-  losses: number;
-  winRate: number;
-}
-
-// ============================================================
-// ÉQUIPE RECOMMANDÉE
-// ============================================================
-
-export interface RecommendedTeam {
-  team: Hero[];
-  score: number;
-}
-
-// ============================================================
 // COUVERTURE HISTORIQUE
 // ============================================================
 
@@ -102,39 +81,20 @@ export interface TeamEvaluation {
 export type HeroClassFilter = "ALL" | HeroClass;
 
 export type HeroSort =
-  "played" | "hp" | "atk" | "matk" | "totalAtk" | "def" | "mdef" | "totalDef";
-
-export interface HeroFilterState {
-  search: string;
-  cls: HeroClassFilter;
-  sort: HeroSort;
-}
-
-// ============================================================
-// ÉQUIPES
-// ============================================================
-
-export type HeroId = string;
-
-export type HeroTeam = HeroId[];
-
-export interface HeroSelection {
-  ids: HeroId[];
-}
+  | "played"
+  | "hp"
+  | "atk"
+  | "matk"
+  | "totalAtk"
+  | "def"
+  | "mdef"
+  | "totalDef";
 
 // ============================================================
 // SCORES
 // ============================================================
 
 export interface TeamScore {
-  heroIds: HeroId[];
+  heroIds: string[];
   score: number;
-}
-
-// ============================================================
-// PRÉFÉRENCES
-// ============================================================
-
-export interface HeroPreferences {
-  [heroId: string]: boolean;
 }
