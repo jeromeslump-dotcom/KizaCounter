@@ -44,9 +44,9 @@ export function calculateCounterUsage(
 
 export function counterHeroScore(
   hero: Hero,
-  counterUsage: Record<string, CounterUsageStats>
+  counterUsage: Record<string, CounterUsageStats>,
+  settings = getEngineSettings()
 ): number {
-  const settings = getEngineSettings();
   const counter = counterUsage[hero.id];
 
   if (!counter || counter.total <= 0) return 0;
