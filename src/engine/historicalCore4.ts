@@ -2,6 +2,7 @@
 
 import type { Combat } from "../types";
 import { getEngineSettings, type EngineSettings } from "./engineSettings";
+import { calculateHistoricalReliability } from "./historicalScoring";
 import { sameTeam } from "./teamUtils";
 
 // ============================================================
@@ -112,7 +113,6 @@ function calculateConfidence(
     return 0;
   }
 
-  // //////// MODIF
   // Même logique de confiance que l'historique Team A :
   // battles / (battles + K)
   //
@@ -346,16 +346,24 @@ export function findBestCore4(
 
   let best = analyses[0];
 
-  let bestConfidence = calculateConfidence(best.battles, settings);
-
-  let bestScore = best.winRate * bestConfidence;
+  let bestScore = calculateHistoricalReliability(
+    best.wins,
+    best.losses,
+    settings.advanced.core4ConfidenceBattles,
+    0,
+    1
+  );
 
   for (let index = 1; index < analyses.length; index++) {
     const current = analyses[index];
 
-    const confidence = calculateConfidence(current.battles, settings);
-
-    const score = current.winRate * confidence;
+    const score = calculateHistoricalReliability(
+      current.wins,
+      current.losses,
+      settings.advanced.core4ConfidenceBattles,
+      0,
+      1
+    );
 
     if (
       score > bestScore ||
@@ -369,7 +377,6 @@ export function findBestCore4(
                   .localeCompare(best.coreIds.join("|")) < 0)))))
     ) {
       best = current;
-      bestConfidence = confidence;
       bestScore = score;
     }
   }
