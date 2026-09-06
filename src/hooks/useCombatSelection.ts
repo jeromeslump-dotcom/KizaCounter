@@ -165,6 +165,19 @@ export default function useCombatSelection({
     );
   }, [enabledHeroIds]);
 
+  const combatHistoryKey = useMemo(
+    () =>
+      `${combats.length}:${combats
+        .map((combat) => combat.id ?? combat.created_at ?? "")
+        .join(",")}`,
+    [combats]
+  );
+
+  const enabledHeroKey = useMemo(
+    () => [...enabledHeroIds].sort().join("|"),
+    [enabledHeroIds]
+  );
+
   useEffect(() => {
     if (enemyIds.length !== TEAM_SIZE) {
       openedEnemyKeyRef.current = null;
@@ -172,15 +185,13 @@ export default function useCombatSelection({
     }
 
     const enemyKey = [...enemyIds].sort().join("|");
-    const historyKey = `${combats.length}:${combats.map((combat) => combat.id ?? combat.created_at ?? "").join(",")}`;
-    const enabledKey = [...enabledHeroIds].sort().join("|");
-    const recommendationKey = `${enemyKey}::${historyKey}::${enabledKey}`;
+    const recommendationKey = `${enemyKey}::${combatHistoryKey}::${enabledHeroKey}`;
 
     if (openedEnemyKeyRef.current === recommendationKey) return;
 
     openedEnemyKeyRef.current = recommendationKey;
     openCounterModal(enemyIds);
-  }, [enemyIds, combats, enabledHeroIds, openCounterModal]);
+  }, [enemyIds, combatHistoryKey, enabledHeroKey, openCounterModal]);
 
   const selectRecommendedTeam = useCallback(
     (ids: string[]) => {
