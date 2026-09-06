@@ -5,6 +5,7 @@ import {
 } from "./scoring";
 import { getEngineSettings } from "./engineSettings";
 import { findBestHistoricalDefeatTeam } from "./defeatHistory";
+import { calculateCounterUsage, counterHeroScore } from "./counterUsage";
 import { sameTeam, teamKey, uniqueIds } from "./teamUtils";
 
 export type RecommendationSource =
@@ -58,7 +59,7 @@ interface HistoricalCandidate {
 function orderHistoricalCandidates(
   candidates: Map<string, HistoricalCandidate>,
   sortBySimilarity = false
-) {
+): HistoricalCandidate[] {
   return [...candidates.values()]
     .filter(
       (candidate) =>
@@ -99,14 +100,18 @@ function findBestEnabledHistoricalTeam(
     const historicalEnemy = uniqueIds(combat.enemy_heroes ?? []);
     const similarity = matchesHistoricalEnemy(historicalEnemy);
     if (similarity === null) continue;
+
     const heroIds = uniqueIds(combat.my_heroes ?? []);
     if (
       heroIds.length !== TEAM_SIZE ||
       !heroIds.every((id) => enabledIds.has(id))
-    )
+    ) {
       continue;
+    }
+
     const key = teamKey(heroIds);
     if (key === excludedTeamKey) continue;
+
     const candidate = candidates.get(key) ?? {
       heroIds,
       wins: 0,
@@ -157,6 +162,7 @@ function findBestEnabledSimilarHistoryTeam(
   const targetIds = uniqueIds(enemyIds);
   if (targetIds.length !== TEAM_SIZE) return null;
   const targetSet = new Set(targetIds);
+
   return findBestEnabledHistoricalTeam(
     candidateHeroes,
     combats,
@@ -174,12 +180,6 @@ function findBestEnabledSimilarHistoryTeam(
   );
 }
 
-/**
- * CORE4 historique :
- * - l'ennemi historique partage exactement 4/5 héros avec l'ennemi actuel ;
- * - on conserve 4 héros de l'équipe historique gagnante ;
- * - le 5e héros est choisi parmi les remplacements historiques du même Core4.
- */
 function findBestEnabledCore4HistoryTeam(
   enemyIds: string[],
   candidateHeroes: Hero[],
@@ -218,8 +218,7 @@ function findBestEnabledCore4HistoryTeam(
       continue;
     }
 
-    const teamKeyValue = teamKey(historicalTeam);
-    if (teamKeyValue === excludedTeamKey) continue;
+    if (teamKey(historicalTeam) === excludedTeamKey) continue;
 
     for (let index = 0; index < historicalTeam.length; index++) {
       const coreIds = historicalTeam.filter(
@@ -258,8 +257,11 @@ function findBestEnabledCore4HistoryTeam(
     .map((core) => {
       const battles = core.wins + core.losses;
       const confidence = battles / (battles + confidenceBattles);
-      const score = (core.wins / battles) * confidence;
-      return { core, score, battles };
+      return {
+        core,
+        score: (core.wins / battles) * confidence,
+        battles,
+      };
     })
     .sort(
       (a, b) =>
@@ -270,13 +272,17 @@ function findBestEnabledCore4HistoryTeam(
     );
 
   for (const rankedCore of rankedCores) {
-    const replacement = [...rankedCore.core.replacements.entries()]
+    const replacements = [...rankedCore.core.replacements.entries()]
       .filter(([, stats]) => stats.wins > 0 && stats.wins >= stats.losses)
       .map(([heroId, stats]) => {
         const battles = stats.wins + stats.losses;
         const confidence = battles / (battles + confidenceBattles);
-        const score = (stats.wins / battles) * confidence;
-        return { heroId, score, battles, wins: stats.wins };
+        return {
+          heroId,
+          score: (stats.wins / battles) * confidence,
+          battles,
+          wins: stats.wins,
+        };
       })
       .sort(
         (a, b) =>
@@ -284,17 +290,16 @@ function findBestEnabledCore4HistoryTeam(
           b.battles - a.battles ||
           b.wins - a.wins ||
           a.heroId.localeCompare(b.heroId)
-      )[0];
+      );
 
-    if (!replacement) continue;
+    for (const replacement of replacements) {
+      const teamIds = [...rankedCore.core.coreIds, replacement.heroId];
+      if (teamIds.length !== TEAM_SIZE) continue;
+      if (teamKey(teamIds) === excludedTeamKey) continue;
 
-    const teamIds = [...rankedCore.core.coreIds, replacement.heroId];
-    if (teamIds.length !== TEAM_SIZE) continue;
-    const key = teamKey(teamIds);
-    if (key === excludedTeamKey) continue;
-
-    const team = resolveCandidateTeam(teamIds, candidateHeroes);
-    if (team) return team;
+      const team = resolveCandidateTeam(teamIds, candidateHeroes);
+      if (team) return team;
+    }
   }
 
   return null;
@@ -321,54 +326,113 @@ function findBestEnabledClassHistoryTeam(
   );
 }
 
-function findBestHistoricalAlternativeTeam(
+function findScoringAlternative(
   enemyIds: string[],
   candidateHeroes: Hero[],
   combats: Combat[],
   excludedTeamKey: string
 ): Hero[] | null {
-  const targetEnemyKey = teamKey(enemyIds);
-  const enabledIds = new Set(candidateHeroes.map((hero) => hero.id));
-  const candidates = new Map<string, HistoricalCandidate>();
-
-  for (const combat of combats) {
-    const heroIds = uniqueIds(combat.my_heroes ?? []);
-    if (
-      heroIds.length !== TEAM_SIZE ||
-      !heroIds.every((id) => enabledIds.has(id))
-    ) {
-      continue;
-    }
-
-    const key = teamKey(heroIds);
-    if (key === excludedTeamKey) continue;
-
-    const historicalEnemy = uniqueIds(combat.enemy_heroes ?? []);
-    if (
-      historicalEnemy.length !== TEAM_SIZE ||
-      teamKey(historicalEnemy) === targetEnemyKey
-    ) {
-      continue;
-    }
-
-    const candidate = candidates.get(key) ?? {
-      heroIds,
-      wins: 0,
-      losses: 0,
-      similarity: 0,
-    };
-
-    if (combat.won) candidate.wins++;
-    else candidate.losses++;
-    candidates.set(key, candidate);
+  const scoringTeam = recommendTeam(enemyIds, candidateHeroes, combats);
+  if (
+    scoringTeam.length === TEAM_SIZE &&
+    teamKey(scoringTeam.map((hero) => hero.id)) !== excludedTeamKey
+  ) {
+    return scoringTeam;
   }
 
-  return orderHistoricalCandidates(candidates)[0]
-    ? resolveCandidateTeam(
-        orderHistoricalCandidates(candidates)[0].heroIds,
-        candidateHeroes
-      )
-    : null;
+  const counterUsage = calculateCounterUsage(enemyIds, combats);
+  const ranked = candidateHeroes
+    .map((hero) => ({ hero, score: counterHeroScore(hero, counterUsage) }))
+    .sort(
+      (a, b) => b.score - a.score || a.hero.name.localeCompare(b.hero.name)
+    );
+
+  if (ranked.length < TEAM_SIZE) return null;
+
+  const base = ranked.slice(0, TEAM_SIZE).map((entry) => entry.hero);
+  const candidates: Hero[][] = [];
+
+  for (let index = 0; index < TEAM_SIZE; index++) {
+    for (const replacement of ranked.slice(TEAM_SIZE)) {
+      const candidate = [...base];
+      candidate[index] = replacement.hero;
+      if (new Set(candidate.map((hero) => hero.id)).size !== TEAM_SIZE) continue;
+      if (teamKey(candidate.map((hero) => hero.id)) === excludedTeamKey) continue;
+      candidates.push(candidate);
+    }
+  }
+
+  return candidates[0] ?? null;
+}
+
+export function recommendTeamWithSource(
+  enemyIds: string[],
+  heroes: Hero[],
+  combats: Combat[],
+  candidateHeroes: Hero[] = heroes,
+  excludedTeamKey?: string
+): TeamRecommendation {
+  const enabledIds = new Set(candidateHeroes.map((hero) => hero.id));
+
+  // A et B suivent exactement la même hiérarchie.
+  // Pour B, seule la combinaison complète de 5 héros de A est interdite.
+  const exactHistoryTeam = findBestEnabledExactHistoryTeam(
+    enemyIds,
+    candidateHeroes,
+    combats,
+    excludedTeamKey
+  );
+  if (exactHistoryTeam)
+    return { team: exactHistoryTeam, source: "exact-history" };
+
+  const defeatHistoryTeam = findBestHistoricalDefeatTeam(
+    enemyIds,
+    combats,
+    candidateHeroes,
+    excludedTeamKey ? excludedTeamKey.split("|") : []
+  );
+  if (defeatHistoryTeam)
+    return { team: defeatHistoryTeam, source: "defeat-history" };
+
+  const core4HistoryTeam = findBestEnabledCore4HistoryTeam(
+    enemyIds,
+    candidateHeroes,
+    combats,
+    excludedTeamKey
+  );
+  if (core4HistoryTeam)
+    return { team: core4HistoryTeam, source: "core4" };
+
+  const similarHistoryTeam = findBestEnabledSimilarHistoryTeam(
+    enemyIds,
+    candidateHeroes,
+    combats,
+    excludedTeamKey
+  );
+  if (similarHistoryTeam)
+    return { team: similarHistoryTeam, source: "similar-history" };
+
+  const historicalClassTeam = findBestEnabledClassHistoryTeam(
+    enemyIds,
+    heroes,
+    candidateHeroes,
+    combats,
+    excludedTeamKey
+  );
+  if (historicalClassTeam)
+    return { team: historicalClassTeam, source: "class-history" };
+
+  let source: RecommendationSource = "fallback";
+  const team = excludedTeamKey
+    ? findScoringAlternative(enemyIds, candidateHeroes, combats, excludedTeamKey)
+    : recommendTeam(enemyIds, candidateHeroes, combats, (detectedSource) => {
+        source = detectedSource;
+      });
+  const validTeam = (team ?? []).filter((hero) => enabledIds.has(hero.id));
+  return {
+    team: validTeam.length === TEAM_SIZE ? validTeam : [],
+    source: validTeam.length === TEAM_SIZE ? source : "fallback",
+  };
 }
 
 export function findHistoricalAlternativeTeam(
@@ -378,87 +442,15 @@ export function findHistoricalAlternativeTeam(
   combats: Combat[],
   excludedTeamIds: string[]
 ): Hero[] | null {
-  void heroes;
-  return findBestHistoricalAlternativeTeam(
-    enemyIds,
-    candidateHeroes,
-    combats,
-    teamKey(excludedTeamIds)
-  );
-}
-
-export function recommendTeamWithSource(
-  enemyIds: string[],
-  heroes: Hero[],
-  combats: Combat[],
-  candidateHeroes: Hero[] = heroes
-): TeamRecommendation {
-  const enabledIds = new Set(candidateHeroes.map((hero) => hero.id));
-
-  // 1. EXACT : 5/5 héros communs.
-  const exactHistoryTeam = findBestEnabledExactHistoryTeam(
-    enemyIds,
-    candidateHeroes,
-    combats
-  );
-  if (exactHistoryTeam)
-    return { team: exactHistoryTeam, source: "exact-history" };
-
-  // 1.5. DÉFAITE EXACTE : même ennemi exact, mais retrouvé via les
-  // combats où cette équipe ennemie a perdu.
-  const defeatHistoryTeam = findBestHistoricalDefeatTeam(
-    enemyIds,
-    combats,
-    candidateHeroes
-  );
-  if (defeatHistoryTeam)
-    return { team: defeatHistoryTeam, source: "defeat-history" };
-
-  // 2. CORE4 : exactement 4/5 héros ennemis communs, on conserve un
-  // Core4 historique et on choisit son meilleur 5e héros.
-  const core4HistoryTeam = findBestEnabledCore4HistoryTeam(
-    enemyIds,
-    candidateHeroes,
-    combats
-  );
-  if (core4HistoryTeam)
-    return { team: core4HistoryTeam, source: "core4" };
-
-  // 3. SIMILAIRE : exactement 3/5 héros ennemis communs.
-  const similarHistoryTeam = findBestEnabledSimilarHistoryTeam(
-    enemyIds,
-    candidateHeroes,
-    combats
-  );
-  if (similarHistoryTeam)
-    return { team: similarHistoryTeam, source: "similar-history" };
-
-  // 4. CLASSE : même composition STR/AGI/INT.
-  const historicalClassTeam = findBestEnabledClassHistoryTeam(
+  const excludedKey = teamKey(excludedTeamIds);
+  const recommendation = recommendTeamWithSource(
     enemyIds,
     heroes,
-    candidateHeroes,
-    combats
-  );
-  if (historicalClassTeam)
-    return { team: historicalClassTeam, source: "class-history" };
-
-  // 5. SCORING / FALLBACK.
-  let source: RecommendationSource = "fallback";
-  const team = recommendTeam(
-    enemyIds,
-    candidateHeroes,
     combats,
-    (detectedSource) => {
-      source = detectedSource;
-    }
+    candidateHeroes,
+    excludedKey
   );
-  const detectedSource = source as ScoringRecommendationSource;
-  const validTeam = team.filter((hero) => enabledIds.has(hero.id));
-  return {
-    team: validTeam.length === TEAM_SIZE ? validTeam : [],
-    source: validTeam.length === TEAM_SIZE ? detectedSource : "fallback",
-  };
+  return recommendation.team.length === TEAM_SIZE ? recommendation.team : null;
 }
 
 export function recommendationSourceLabel(
