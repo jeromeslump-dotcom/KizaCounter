@@ -215,7 +215,7 @@ describe("recommendation engine history", () => {
 
       const confidenceBattles =
         DEFAULT_ENGINE_SETTINGS.advanced
-          .teamAHistoricalConfidenceBattles;
+          .historicalConfidenceBattles;
 
       const reliability = (
         wins: number,
@@ -223,9 +223,9 @@ describe("recommendation engine history", () => {
       ) =>
         (wins / battles) *
         (DEFAULT_ENGINE_SETTINGS.advanced
-          .teamAHistoricalReliabilityBase +
+          .historicalReliabilityBase +
           DEFAULT_ENGINE_SETTINGS.advanced
-            .teamAHistoricalReliabilityConfidenceWeight *
+            .historicalReliabilityConfidenceWeight *
             (battles /
               (battles + confidenceBattles)));
 
@@ -745,4 +745,3 @@ describe("Core4 historical engine", () => {
     expect(result).toBe(0);
   });
 });
-
