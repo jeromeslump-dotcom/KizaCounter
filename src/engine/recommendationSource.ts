@@ -48,7 +48,7 @@ function orderHistoricalCandidates(
   const settings = getEngineSettings();
   const confidenceBattles = Math.max(
     1,
-    settings.advanced.teamAHistoricalConfidenceBattles
+    settings.advanced.historicalConfidenceBattles
   );
 
   return [...candidates.values()]
@@ -63,15 +63,15 @@ function orderHistoricalCandidates(
           b.wins,
           b.losses,
           confidenceBattles,
-          settings.advanced.teamAHistoricalReliabilityBase,
-          settings.advanced.teamAHistoricalReliabilityConfidenceWeight
+          settings.advanced.historicalReliabilityBase,
+          settings.advanced.historicalReliabilityConfidenceWeight
         ) -
           calculateHistoricalReliability(
             a.wins,
             a.losses,
             confidenceBattles,
-            settings.advanced.teamAHistoricalReliabilityBase,
-            settings.advanced.teamAHistoricalReliabilityConfidenceWeight
+            settings.advanced.historicalReliabilityBase,
+            settings.advanced.historicalReliabilityConfidenceWeight
           ) ||
         b.wins + b.losses - (a.wins + a.losses) ||
         b.wins - a.wins ||
