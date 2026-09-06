@@ -1,5 +1,5 @@
 import type { Combat } from "../types";
-import { evaluateTeamHistory } from "./scoring";
+import { evaluateTeamHistory } from "./historicalScoring";
 
 export interface TeamHistoryStats {
   battles: number;
