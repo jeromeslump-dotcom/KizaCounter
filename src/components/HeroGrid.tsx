@@ -165,7 +165,7 @@ export default function HeroGrid({
                 selectionOrder={selected ? selectionIndex + 1 : undefined}
                 disabled={selectionFull && !selected}
                 removedVisual={recentlyRemovedId === hero.id}
-                onClick={() => onHeroClick(hero)}
+                onClick={onHeroClick}
               />
             );
           })}
