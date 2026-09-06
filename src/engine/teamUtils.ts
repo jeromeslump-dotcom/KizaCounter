@@ -3,7 +3,7 @@ export function uniqueIds(ids: string[]): string[] {
 }
 
 export function teamKey(ids: string[]): string {
-  return uniqueIds(ids).sort().join("|");
+  return [...new Set(ids)].sort().join("|");
 }
 
 export function sameTeam(first: string[], second: string[]): boolean {
