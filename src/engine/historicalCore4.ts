@@ -6,7 +6,6 @@ import {
   calculateHistoricalReliability,
   historicalConfidence,
 } from "./historicalScoring";
-import { sameTeam } from "./teamUtils";
 
 // ============================================================
 // TYPES
@@ -45,43 +44,18 @@ interface Core4Accumulator {
   replacements: Map<string, ReplacementAccumulator>;
 }
 
+interface Core4Entry {
+  key: string;
+  coreIds: string[];
+  replacement: string;
+}
+
 // ============================================================
 // NORMALISATION
 // ============================================================
 
 function normalizeIds(ids: string[]): string[] {
   return [...new Set(ids)].sort();
-}
-
-// ============================================================
-// EXTRACTION DU 5e HÉROS
-// ============================================================
-
-function extractReplacement(
-  teamIds: string[],
-  coreIds: string[]
-): string | null {
-  const team = normalizeIds(teamIds);
-
-  if (team.length !== 5 || coreIds.length !== 4) {
-    return null;
-  }
-
-  const coreSet = new Set(coreIds);
-
-  let replacement: string | null = null;
-
-  for (const heroId of team) {
-    if (!coreSet.has(heroId)) {
-      if (replacement !== null) {
-        return null;
-      }
-
-      replacement = heroId;
-    }
-  }
-
-  return replacement;
 }
 
 // ============================================================
@@ -102,6 +76,28 @@ function generateCore4s(teamIds: string[]): string[][] {
   }
 
   return cores;
+}
+
+function generateCore4Entries(teamIds: string[]): Core4Entry[] {
+  const team = normalizeIds(teamIds);
+
+  if (team.length !== 5) {
+    return [];
+  }
+
+  const entries: Core4Entry[] = [];
+
+  for (let index = 0; index < team.length; index++) {
+    const coreIds = team.filter((_, currentIndex) => currentIndex !== index);
+
+    entries.push({
+      key: coreIds.join("|"),
+      coreIds,
+      replacement: team[index],
+    });
+  }
+
+  return entries;
 }
 
 // ============================================================
@@ -132,7 +128,6 @@ function buildCore4Analysis(
   }
 
   const coreWinRate = calculateWinRate(accumulator.wins, battles);
-
   const replacementStats: Core4ReplacementStats[] = [];
 
   for (const [heroId, stats] of accumulator.replacements.entries()) {
@@ -143,15 +138,11 @@ function buildCore4Analysis(
     }
 
     const winRate = calculateWinRate(stats.wins, replacementBattles);
-
     const delta = winRate - coreWinRate;
-
     const confidence = historicalConfidence(
       replacementBattles,
       settings.advanced.core4ConfidenceBattles
     );
-
-    const score = delta * confidence;
 
     replacementStats.push({
       heroId,
@@ -161,7 +152,7 @@ function buildCore4Analysis(
       winRate,
       delta,
       confidence,
-      score,
+      score: delta * confidence,
     });
   }
 
@@ -201,8 +192,8 @@ export function analyzeCore4Plus1(
   }
 
   const enemyKey = normalizedEnemy.join("|");
-
   const coreMap = new Map<string, Core4Accumulator>();
+  const coreEntriesCache = new Map<string, Core4Entry[]>();
 
   // ----------------------------------------------------------
   // UN SEUL PARCOURS DES COMBATS
@@ -223,31 +214,33 @@ export function analyzeCore4Plus1(
       continue;
     }
 
+    // Une même équipe peut apparaître dans beaucoup de combats.
+    // On génère ses 5 Core4 une seule fois puis on réutilise le résultat.
+    const teamKey = teamIds.join("|");
+    let entries = coreEntriesCache.get(teamKey);
+
+    if (!entries) {
+      entries = generateCore4Entries(teamIds);
+      coreEntriesCache.set(teamKey, entries);
+    }
+
     // --------------------------------------------------------
     // Les 5 Core4 possibles d'une équipe de 5
     // --------------------------------------------------------
 
-    for (let index = 0; index < teamIds.length; index++) {
-      const coreIds = teamIds.filter(
-        (_, currentIndex) => currentIndex !== index
-      );
-
-      const key = coreIds.join("|");
-
-      let accumulator = coreMap.get(key);
+    for (const entry of entries) {
+      let accumulator = coreMap.get(entry.key);
 
       if (!accumulator) {
         accumulator = {
-          coreIds,
+          coreIds: entry.coreIds,
           wins: 0,
           losses: 0,
           replacements: new Map<string, ReplacementAccumulator>(),
         };
 
-        coreMap.set(key, accumulator);
+        coreMap.set(entry.key, accumulator);
       }
-
-      const replacement = teamIds[index];
 
       // ------------------------------------------------------
       // Résultat global du Core4
@@ -263,7 +256,7 @@ export function analyzeCore4Plus1(
       // Résultat du 5e héros
       // ------------------------------------------------------
 
-      let replacementStats = accumulator.replacements.get(replacement);
+      let replacementStats = accumulator.replacements.get(entry.replacement);
 
       if (!replacementStats) {
         replacementStats = {
@@ -271,7 +264,7 @@ export function analyzeCore4Plus1(
           losses: 0,
         };
 
-        accumulator.replacements.set(replacement, replacementStats);
+        accumulator.replacements.set(entry.replacement, replacementStats);
       }
 
       if (combat.won) {
@@ -326,7 +319,6 @@ export function findBestCore4(
   }
 
   let best = analyses[0];
-
   let bestScore = calculateHistoricalReliability(
     best.wins,
     best.losses,
@@ -337,7 +329,6 @@ export function findBestCore4(
 
   for (let index = 1; index < analyses.length; index++) {
     const current = analyses[index];
-
     const score = calculateHistoricalReliability(
       current.wins,
       current.losses,
@@ -383,7 +374,6 @@ export function findBestCore4Replacement(
   }
 
   const analyses = analyzeCore4Plus1(normalizedEnemy, combats, settings);
-
   const key = normalizedCore.join("|");
 
   for (const analysis of analyses) {
@@ -416,7 +406,6 @@ export function core4ReplacementScore(
   }
 
   const analyses = analyzeCore4Plus1(normalizedEnemy, combats, settings);
-
   const key = normalizedCore.join("|");
 
   for (const analysis of analyses) {
