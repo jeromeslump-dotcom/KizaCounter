@@ -39,7 +39,11 @@ export {
 const TEAM_SIZE = 5;
 
 export type RecommendationSource =
-  "exact-history" | "class-history" | "core4" | "counter-usage" | "fallback";
+  | "exact-history"
+  | "class-history"
+  | "core4"
+  | "counter-usage"
+  | "fallback";
 
 export type RecommendationSourceCallback = (
   source: RecommendationSource
@@ -292,7 +296,7 @@ export function recommendAlternativeTeam(
       if (!counter) return { hero, score: 0 };
       const confidence = historicalConfidence(
         counter.total,
-        settings.advanced.teamAHistoricalConfidenceBattles
+        settings.advanced.historicalConfidenceBattles
       );
       return {
         hero,
@@ -357,7 +361,7 @@ export function recommendAlternativeTeam(
     );
     const classHistoryConfidenceBattles = Math.max(
       1,
-      settings.advanced.teamAHistoricalConfidenceBattles * 2
+      settings.advanced.historicalConfidenceBattles * 2
     );
     const classHistoryConfidence = historicalConfidence(
       classHistory.battles,
