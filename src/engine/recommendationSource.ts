@@ -56,27 +56,27 @@ function orderHistoricalCandidates(
       (candidate) =>
         candidate.wins > 0 && candidate.wins >= candidate.losses
     )
+    .map((candidate) => ({
+      candidate,
+      reliability: calculateHistoricalReliability(
+        candidate.wins,
+        candidate.losses,
+        confidenceBattles,
+        settings.advanced.historicalReliabilityBase,
+        settings.advanced.historicalReliabilityConfidenceWeight
+      ),
+      key: teamKey(candidate.heroIds),
+    }))
     .sort(
       (a, b) =>
-        (sortBySimilarity ? b.similarity - a.similarity : 0) ||
-        calculateHistoricalReliability(
-          b.wins,
-          b.losses,
-          confidenceBattles,
-          settings.advanced.historicalReliabilityBase,
-          settings.advanced.historicalReliabilityConfidenceWeight
-        ) -
-          calculateHistoricalReliability(
-            a.wins,
-            a.losses,
-            confidenceBattles,
-            settings.advanced.historicalReliabilityBase,
-            settings.advanced.historicalReliabilityConfidenceWeight
-          ) ||
-        b.wins + b.losses - (a.wins + a.losses) ||
-        b.wins - a.wins ||
-        teamKey(a.heroIds).localeCompare(teamKey(b.heroIds))
-    );
+        (sortBySimilarity ? b.candidate.similarity - a.candidate.similarity : 0) ||
+        b.reliability - a.reliability ||
+        b.candidate.wins + b.candidate.losses -
+          (a.candidate.wins + a.candidate.losses) ||
+        b.candidate.wins - a.candidate.wins ||
+        a.key.localeCompare(b.key)
+    )
+    .map(({ candidate }) => candidate);
 }
 
 function resolveCandidateTeam(
@@ -229,10 +229,8 @@ function findBestEnabledCore4HistoryTeam(
     if (teamKey(historicalTeam) === excludedTeamKey) continue;
 
     for (let index = 0; index < historicalTeam.length; index++) {
-      const coreIds = historicalTeam.filter(
-        (_, currentIndex) => currentIndex !== index
-      );
-      const replacement = historicalTeam[index];
+      const coreIds = historicalTeam.slice();
+      const replacement = coreIds.splice(index, 1)[0];
       const key = teamKey(coreIds);
       const accumulator = coreCandidates.get(key) ?? {
         coreIds,
@@ -371,13 +369,15 @@ function findScoringAlternative(
   if (ranked.length < TEAM_SIZE) return null;
 
   const base = ranked.slice(0, TEAM_SIZE).map((entry) => entry.hero);
+  const replacements = ranked.slice(TEAM_SIZE);
 
   for (let index = 0; index < TEAM_SIZE; index++) {
-    for (const replacement of ranked.slice(TEAM_SIZE)) {
+    for (const replacement of replacements) {
       const candidate = [...base];
       candidate[index] = replacement.hero;
-      if (new Set(candidate.map((hero) => hero.id)).size !== TEAM_SIZE) continue;
-      if (teamKey(candidate.map((hero) => hero.id)) === excludedTeamKey) continue;
+      const candidateIds = candidate.map((hero) => hero.id);
+      if (new Set(candidateIds).size !== TEAM_SIZE) continue;
+      if (teamKey(candidateIds) === excludedTeamKey) continue;
       return candidate;
     }
   }
