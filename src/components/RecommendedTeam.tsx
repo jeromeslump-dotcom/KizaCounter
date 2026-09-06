@@ -43,7 +43,7 @@ export default function RecommendedTeam({
               hero={hero}
               selected
               selectionOrder={index + 1}
-              onClick={onHeroClick ? () => onHeroClick(hero) : undefined}
+              onClick={onHeroClick}
             />
           ))}
         </div>
