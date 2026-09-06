@@ -215,15 +215,6 @@ export default function useCombatSelection({
     });
   }, []);
 
-  const toggleTeam = useCallback(
-    (hero: Hero) => {
-      setTeamIds((current) =>
-        toggleTeamSelection(current, hero, enabledHeroIds)
-      );
-    },
-    [enabledHeroIds]
-  );
-
   const selectCounterHero = useCallback(
     (hero: Hero) => {
       setTeamIds((current) =>
@@ -251,19 +242,15 @@ export default function useCombatSelection({
     enemyIds,
     teamIds,
     showCounterModal,
-    recommendedIds,
-    alternativeIds,
     recommendationSource,
     enemies,
     team,
     recommendedTeam,
     alternativeTeam,
     toggleEnemy,
-    toggleTeam,
     selectCounterHero,
     selectRecommendedTeam,
     clearEnemies,
     resetCombat,
-    openCounterModal,
   };
 }

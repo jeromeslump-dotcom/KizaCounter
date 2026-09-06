@@ -74,7 +74,6 @@ export default function CounterModal({
   onSave,
 }: CounterModalProps) {
   const enemyIds = useMemo(() => enemies.map((hero) => hero.id), [enemies]);
-  const currentTeamIds = useMemo(() => teamIds, [teamIds]);
   const recommendedIds = useMemo(
     () => recommendedTeam.map((hero) => hero.id),
     [recommendedTeam]
@@ -87,22 +86,22 @@ export default function CounterModal({
   const currentTeamHistory = useMemo(
     () =>
       open
-        ? evaluateExactTeamHistory(currentTeamIds, enemyIds, combats)
+        ? evaluateExactTeamHistory(teamIds, enemyIds, combats)
         : EMPTY_HISTORY,
-    [open, currentTeamIds, enemyIds, combats]
+    [open, teamIds, enemyIds, combats]
   );
 
   const currentTeamGeneralHistory = useMemo(
-    () => (open ? evaluateTeamHistory(currentTeamIds, combats) : EMPTY_HISTORY),
-    [open, currentTeamIds, combats]
+    () => (open ? evaluateTeamHistory(teamIds, combats) : EMPTY_HISTORY),
+    [open, teamIds, combats]
   );
 
   const currentTeamClassHistory = useMemo(
     () =>
       open
-        ? evaluateEnemyClassHistory(currentTeamIds, enemyIds, combats, heroes)
+        ? evaluateEnemyClassHistory(teamIds, enemyIds, combats, heroes)
         : EMPTY_HISTORY,
-    [open, currentTeamIds, enemyIds, combats, heroes]
+    [open, teamIds, enemyIds, combats, heroes]
   );
 
   const currentTeamConfidence = useMemo(() => {
