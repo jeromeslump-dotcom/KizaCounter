@@ -17,7 +17,7 @@ export interface DefeatHistoryCandidate {
 function confidenceForBattles(battles: number): number {
   const confidenceBattles = Math.max(
     1,
-    getEngineSettings().advanced.teamAHistoricalConfidenceBattles
+    getEngineSettings().advanced.historicalConfidenceBattles
   );
 
   return battles / (battles + confidenceBattles);
