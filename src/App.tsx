@@ -146,7 +146,7 @@ export default function App() {
       userProfile?.role === "contributor" ||
       userProfile?.role === "admin");
 
-  const canViewCombatCounts = userProfile?.role === "admin";
+  const canViewDetailedHistory = userProfile?.role === "admin";
 
   return (
     <main className="app-shell min-h-screen">
@@ -234,7 +234,7 @@ export default function App() {
         sortBy={sortBy}
         usage={heroUsage}
         combats={combats}
-        isAuthenticated={canViewCombatCounts}
+        canViewDetailedHistory={canViewDetailedHistory}
         onClose={resetCombat}
         onHeroClick={selectCounterHero}
         onQueryChange={setQuery}
