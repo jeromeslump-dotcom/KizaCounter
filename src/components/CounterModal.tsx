@@ -102,7 +102,7 @@ export default function CounterModal({
 
     const confidenceBattles = Math.max(
       1,
-      getEngineSettings().advanced.teamAHistoricalConfidenceBattles
+      getEngineSettings().advanced.historicalConfidenceBattles
     );
 
     return (battles / (battles + confidenceBattles)) * 100;
