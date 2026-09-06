@@ -1,6 +1,12 @@
 import { useMemo } from "react";
 
-import type { Combat, Hero, HeroClassFilter, HeroSort } from "../types";
+import type {
+  Combat,
+  Hero,
+  HeroClassFilter,
+  HeroSort,
+  TeamEvaluation,
+} from "../types";
 
 import {
   evaluateEnemyClassHistory,
@@ -42,6 +48,14 @@ interface CounterModalProps {
   onSave: (combat: Combat) => Promise<void>;
 }
 
+const EMPTY_HISTORY: TeamEvaluation = {
+  score: 0,
+  historicalWins: 0,
+  historicalLosses: 0,
+  historicalBattles: 0,
+  historicalWinRate: 0,
+};
+
 export default function CounterModal({
   open,
   enemies,
@@ -78,25 +92,31 @@ export default function CounterModal({
   );
 
   const currentTeamHistory = useMemo(
-    () => evaluateExactTeamHistory(currentTeamIds, enemyIds, combats),
-    [currentTeamIds, enemyIds, combats]
+    () =>
+      open
+        ? evaluateExactTeamHistory(currentTeamIds, enemyIds, combats)
+        : EMPTY_HISTORY,
+    [open, currentTeamIds, enemyIds, combats]
   );
 
   const currentTeamGeneralHistory = useMemo(
-    () => evaluateTeamHistory(currentTeamIds, combats),
-    [currentTeamIds, combats]
+    () => (open ? evaluateTeamHistory(currentTeamIds, combats) : EMPTY_HISTORY),
+    [open, currentTeamIds, combats]
   );
 
   const currentTeamClassHistory = useMemo(
-    () => evaluateEnemyClassHistory(currentTeamIds, enemyIds, combats, heroes),
-    [currentTeamIds, enemyIds, combats, heroes]
+    () =>
+      open
+        ? evaluateEnemyClassHistory(currentTeamIds, enemyIds, combats, heroes)
+        : EMPTY_HISTORY,
+    [open, currentTeamIds, enemyIds, combats, heroes]
   );
 
   const currentTeamConfidence = useMemo(() => {
     const battles =
-      currentTeamHistory.battles > 0
-        ? currentTeamHistory.battles
-        : currentTeamClassHistory.battles;
+      currentTeamHistory.historicalBattles > 0
+        ? currentTeamHistory.historicalBattles
+        : currentTeamClassHistory.historicalBattles;
 
     if (battles <= 0) return 0;
 
@@ -106,56 +126,68 @@ export default function CounterModal({
     );
 
     return (battles / (battles + confidenceBattles)) * 100;
-  }, [currentTeamHistory.battles, currentTeamClassHistory.battles]);
+  }, [currentTeamHistory.historicalBattles, currentTeamClassHistory.historicalBattles]);
 
   const recommendedExactHistory = useMemo(
-    () => evaluateExactTeamHistory(recommendedIds, enemyIds, combats),
-    [recommendedIds, enemyIds, combats]
+    () =>
+      open
+        ? evaluateExactTeamHistory(recommendedIds, enemyIds, combats)
+        : EMPTY_HISTORY,
+    [open, recommendedIds, enemyIds, combats]
   );
 
   const recommendedClassHistory = useMemo(
-    () => evaluateEnemyClassHistory(recommendedIds, enemyIds, combats, heroes),
-    [recommendedIds, enemyIds, combats, heroes]
+    () =>
+      open
+        ? evaluateEnemyClassHistory(recommendedIds, enemyIds, combats, heroes)
+        : EMPTY_HISTORY,
+    [open, recommendedIds, enemyIds, combats, heroes]
   );
 
   const alternativeHistory = useMemo(
-    () => evaluateExactTeamHistory(alternativeIds, enemyIds, combats),
-    [alternativeIds, enemyIds, combats]
+    () =>
+      open
+        ? evaluateExactTeamHistory(alternativeIds, enemyIds, combats)
+        : EMPTY_HISTORY,
+    [open, alternativeIds, enemyIds, combats]
   );
 
   const alternativeClassHistory = useMemo(
-    () => evaluateEnemyClassHistory(alternativeIds, enemyIds, combats, heroes),
-    [alternativeIds, enemyIds, combats, heroes]
+    () =>
+      open
+        ? evaluateEnemyClassHistory(alternativeIds, enemyIds, combats, heroes)
+        : EMPTY_HISTORY,
+    [open, alternativeIds, enemyIds, combats, heroes]
   );
 
   const currentTeamHistoryLabel =
-    currentTeamHistory.battles > 0 ? (
+    currentTeamHistory.historicalBattles > 0 ? (
       canViewDetailedHistory ? (
         <>
           <strong>Historique exact</strong>{" "}
           <span className="font-normal">
-            · {Math.round(currentTeamHistory.winRate)} % ·{" "}
-            {currentTeamHistory.battles} combat
-            {currentTeamHistory.battles > 1 ? "s" : ""}
+            · {Math.round(currentTeamHistory.historicalWinRate)} % ·{" "}
+            {currentTeamHistory.historicalBattles} combat
+            {currentTeamHistory.historicalBattles > 1 ? "s" : ""}
           </span>
         </>
       ) : (
         <strong>Historique exact</strong>
       )
-    ) : currentTeamGeneralHistory.battles > 0 ? (
+    ) : currentTeamGeneralHistory.historicalBattles > 0 ? (
       canViewDetailedHistory ? (
         <>
           <strong>Nouvelle rencontre · Équipe déjà victorieuse</strong>{" "}
           <span className="font-normal">
-            · {Math.round(currentTeamGeneralHistory.winRate)} % ·{" "}
-            {currentTeamGeneralHistory.battles} combat
-            {currentTeamGeneralHistory.battles > 1 ? "s" : ""}
+            · {Math.round(currentTeamGeneralHistory.historicalWinRate)} % ·{" "}
+            {currentTeamGeneralHistory.historicalBattles} combat
+            {currentTeamGeneralHistory.historicalBattles > 1 ? "s" : ""}
           </span>
         </>
       ) : (
         <strong>Nouvelle rencontre · Équipe déjà connue</strong>
       )
-    ) : currentTeamClassHistory.battles > 0 ? (
+    ) : currentTeamClassHistory.historicalBattles > 0 ? (
       <>
         <strong>Nouvelle équipe</strong>{" "}
         <span className="font-normal">
@@ -170,45 +202,45 @@ export default function CounterModal({
 
   if (recommendationSource === "exact-history") {
     historyLabel =
-      recommendedExactHistory.battles === 0
+      recommendedExactHistory.historicalBattles === 0
         ? "Aucun historique exact"
         : canViewDetailedHistory
-          ? `${Math.round(recommendedExactHistory.winRate)} % · ${recommendedExactHistory.battles} combat${recommendedExactHistory.battles > 1 ? "s" : ""}`
-          : `${Math.round(recommendedExactHistory.winRate)} %`;
+          ? `${Math.round(recommendedExactHistory.historicalWinRate)} % · ${recommendedExactHistory.historicalBattles} combat${recommendedExactHistory.historicalBattles > 1 ? "s" : ""}`
+          : `${Math.round(recommendedExactHistory.historicalWinRate)} %`;
   } else if (recommendationSource === "class-history") {
     historyLabel =
-      recommendedClassHistory.battles === 0
+      recommendedClassHistory.historicalBattles === 0
         ? "Aucun historique de classes"
         : canViewDetailedHistory
-          ? `${Math.round(recommendedClassHistory.winRate)} % · ${recommendedClassHistory.battles} combat${recommendedClassHistory.battles > 1 ? "s" : ""}`
-          : `${Math.round(recommendedClassHistory.winRate)} %`;
+          ? `${Math.round(recommendedClassHistory.historicalWinRate)} % · ${recommendedClassHistory.historicalBattles} combat${recommendedClassHistory.historicalBattles > 1 ? "s" : ""}`
+          : `${Math.round(recommendedClassHistory.historicalWinRate)} %`;
   }
 
   const alternativeHistoryLabel =
-    alternativeHistory.battles > 0
+    alternativeHistory.historicalBattles > 0
       ? canViewDetailedHistory
-        ? `Historique exact · ${Math.round(alternativeHistory.winRate)} % · ${alternativeHistory.battles} combat${alternativeHistory.battles > 1 ? "s" : ""}`
+        ? `Historique exact · ${Math.round(alternativeHistory.historicalWinRate)} % · ${alternativeHistory.historicalBattles} combat${alternativeHistory.historicalBattles > 1 ? "s" : "s"}`
         : "Historique exact"
-      : alternativeClassHistory.battles > 0
+      : alternativeClassHistory.historicalBattles > 0
         ? canViewDetailedHistory
-          ? `Historique classes · ${Math.round(alternativeClassHistory.winRate)} % · ${alternativeClassHistory.battles} combat${alternativeClassHistory.battles > 1 ? "s" : ""}`
+          ? `Historique classes · ${Math.round(alternativeClassHistory.historicalWinRate)} % · ${alternativeClassHistory.historicalBattles} combat${alternativeClassHistory.historicalBattles > 1 ? "s" : ""}`
           : "Historique classes"
         : "Aucune statistique historique";
 
   const recommendationMobileHistoryLabel =
     recommendationSource === "exact-history" &&
-    recommendedExactHistory.battles > 0
-      ? `${Math.round(recommendedExactHistory.winRate)} %`
+    recommendedExactHistory.historicalBattles > 0
+      ? `${Math.round(recommendedExactHistory.historicalWinRate)} %`
       : recommendationSource === "class-history" &&
-          recommendedClassHistory.battles > 0
-        ? `${Math.round(recommendedClassHistory.winRate)} %`
+          recommendedClassHistory.historicalBattles > 0
+        ? `${Math.round(recommendedClassHistory.historicalWinRate)} %`
         : null;
 
   const alternativeMobileHistoryLabel =
-    alternativeHistory.battles > 0
-      ? `${Math.round(alternativeHistory.winRate)} %`
-      : alternativeClassHistory.battles > 0
-        ? `${Math.round(alternativeClassHistory.winRate)} %`
+    alternativeHistory.historicalBattles > 0
+      ? `${Math.round(alternativeHistory.historicalWinRate)} %`
+      : alternativeClassHistory.historicalBattles > 0
+        ? `${Math.round(alternativeClassHistory.historicalWinRate)} %`
         : null;
 
   const hasRecommendations =
