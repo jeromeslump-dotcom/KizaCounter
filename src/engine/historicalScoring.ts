@@ -18,6 +18,22 @@ export function historicalConfidence(
   return battles / (battles + safeConfidenceBattles);
 }
 
+export function calculateHistoricalReliability(
+  wins: number,
+  losses: number,
+  confidenceBattles: number,
+  base: number,
+  confidenceWeight: number
+): number {
+  const battles = wins + losses;
+  if (battles <= 0) return 0;
+
+  const confidence = historicalConfidence(battles, confidenceBattles);
+  return (
+    (wins / battles) * (base + confidenceWeight * confidence)
+  );
+}
+
 export function calculateWinRate(wins: number, total: number): number {
   return total <= 0 ? 0 : (wins / total) * 100;
 }
@@ -214,26 +230,24 @@ export function findBestHistoricalTeam(
     1,
     settings.advanced.teamAHistoricalConfidenceBattles
   );
-  const calculateHistoricalReliability = (
-    wins: number,
-    battles: number
-  ): number => {
-    if (battles <= 0) return 0;
-    const winRate = wins / battles;
-    const confidence = historicalConfidence(battles, confidenceBattles);
-    return (
-      winRate *
-      (settings.advanced.teamAHistoricalReliabilityBase +
-        settings.advanced.teamAHistoricalReliabilityConfidenceWeight *
-          confidence)
-    );
-  };
 
   winningCandidates.sort((a, b) => {
     const aBattles = a.wins + a.losses;
     const bBattles = b.wins + b.losses;
-    const aReliability = calculateHistoricalReliability(a.wins, aBattles);
-    const bReliability = calculateHistoricalReliability(b.wins, bBattles);
+    const aReliability = calculateHistoricalReliability(
+      a.wins,
+      a.losses,
+      confidenceBattles,
+      settings.advanced.teamAHistoricalReliabilityBase,
+      settings.advanced.teamAHistoricalReliabilityConfidenceWeight
+    );
+    const bReliability = calculateHistoricalReliability(
+      b.wins,
+      b.losses,
+      confidenceBattles,
+      settings.advanced.teamAHistoricalReliabilityBase,
+      settings.advanced.teamAHistoricalReliabilityConfidenceWeight
+    );
     return (
       bReliability - aReliability ||
       bBattles - aBattles ||
@@ -330,22 +344,20 @@ export function findBestHistoricalClassTeam(
     .sort((a, b) => {
       const aBattles = a.wins + a.losses;
       const bBattles = b.wins + b.losses;
-      const aConfidence = historicalConfidence(aBattles, confidenceBattles);
-      const bConfidence = historicalConfidence(bBattles, confidenceBattles);
-      const aReliability =
-        aBattles > 0
-          ? (a.wins / aBattles) *
-            (settings.advanced.teamAHistoricalReliabilityBase +
-              settings.advanced.teamAHistoricalReliabilityConfidenceWeight *
-                aConfidence)
-          : 0;
-      const bReliability =
-        bBattles > 0
-          ? (b.wins / bBattles) *
-            (settings.advanced.teamAHistoricalReliabilityBase +
-              settings.advanced.teamAHistoricalReliabilityConfidenceWeight *
-                bConfidence)
-          : 0;
+      const aReliability = calculateHistoricalReliability(
+        a.wins,
+        a.losses,
+        confidenceBattles,
+        settings.advanced.teamAHistoricalReliabilityBase,
+        settings.advanced.teamAHistoricalReliabilityConfidenceWeight
+      );
+      const bReliability = calculateHistoricalReliability(
+        b.wins,
+        b.losses,
+        confidenceBattles,
+        settings.advanced.teamAHistoricalReliabilityBase,
+        settings.advanced.teamAHistoricalReliabilityConfidenceWeight
+      );
       return (
         bReliability - aReliability ||
         bBattles - aBattles ||
