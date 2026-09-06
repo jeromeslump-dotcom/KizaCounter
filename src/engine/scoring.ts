@@ -20,7 +20,7 @@ import {
   evaluateSpecificHistoryModule,
 } from "./historicalScoring";
 import { calculateCounterUsage, counterHeroScore } from "./counterUsage";
-import { sameTeam, teamKey, uniqueIds } from "./teamUtils";
+import { teamKey, uniqueIds } from "./teamUtils";
 
 export {
   calculateSpecificHistoryPoints,
@@ -57,14 +57,24 @@ function getEnemyClassKey(
   enemyIds: string[],
   heroesById: Map<string, Hero>
 ): string | null {
-  const classes = enemyIds
-    .map((id) => heroesById.get(id)?.cls)
-    .filter(
-      (cls): cls is Hero["cls"] =>
-        cls === "STR" || cls === "AGI" || cls === "INT"
-    );
-  if (classes.length !== TEAM_SIZE) return null;
-  return [...classes].sort().join("|");
+  let agi = 0;
+  let int = 0;
+  let str = 0;
+
+  for (const id of enemyIds) {
+    const cls = heroesById.get(id)?.cls;
+    if (cls === "AGI") agi++;
+    else if (cls === "INT") int++;
+    else if (cls === "STR") str++;
+    else return null;
+  }
+
+  if (agi + int + str !== TEAM_SIZE) return null;
+  return [
+    ...Array(agi).fill("AGI"),
+    ...Array(int).fill("INT"),
+    ...Array(str).fill("STR"),
+  ].join("|");
 }
 
 export type RecommendationSource =
@@ -350,6 +360,7 @@ export function recommendAlternativeTeam(
   const exactHistory = new Map<string, HistoryStats>();
   const classHistory = new Map<string, HistoryStats>();
   const historicalTeams = new Map<string, Hero[]>();
+  const classKeyCache = new Map<string, string | null>();
 
   for (const combat of combats) {
     const enemyIdsForCombat = uniqueIds(combat.enemy_heroes ?? []);
@@ -378,7 +389,11 @@ export function recommendAlternativeTeam(
     }
 
     if (targetEnemyClassKey) {
-      const classKey = getEnemyClassKey(enemyIdsForCombat, heroesById);
+      let classKey = classKeyCache.get(enemyKey);
+      if (classKey === undefined) {
+        classKey = getEnemyClassKey(enemyIdsForCombat, heroesById);
+        classKeyCache.set(enemyKey, classKey);
+      }
       if (classKey === targetEnemyClassKey) {
         addHistoryStats(classHistory, `${classKey}::${myKey}`, combat.won);
       }
