@@ -30,11 +30,6 @@ export default function CombatOrderEditor({
     [heroes]
   );
 
-  const selectedPositions = useMemo(
-    () => new Set(order.filter(Boolean)),
-    [order]
-  );
-
   const isValid =
     order.length === 5 &&
     new Set(order).size === 5 &&
@@ -130,14 +125,7 @@ export default function CombatOrderEditor({
                   aria-label={`Position de ${hero.name}`}
                 >
                   {[1, 2, 3, 4, 5].map((position) => (
-                    <option
-                      key={position}
-                      value={position}
-                      disabled={
-                        selectedPositions.has(order[position - 1]) &&
-                        order[position - 1] !== hero.id
-                      }
-                    >
+                    <option key={position} value={position}>
                       {position}
                     </option>
                   ))}
