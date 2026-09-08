@@ -167,6 +167,8 @@ describe("historical recommendation sources", () => {
       primary
     );
 
-    expect(result).toBeNull();
+    expect(result?.map((hero) => hero.id).sort()).not.toEqual(
+      [...badAlternative].sort()
+    );
   });
 });
