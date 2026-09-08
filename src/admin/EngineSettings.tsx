@@ -17,16 +17,12 @@ interface EngineSettingsProps {
 interface AdvancedSettingRowProps {
   label: string;
   icon?: string;
-  valueA?: number;
-  valueB?: number;
+  value: number;
   min: number;
   max: number;
   step: number;
   unit: string;
-  onChangeA?: (value: number) => void;
-  onChangeB?: (value: number) => void;
-  globalValue?: number;
-  onChangeGlobal?: (value: number) => void;
+  onChange: (value: number) => void;
 }
 
 function formatNumber(value: number): string {
@@ -36,93 +32,40 @@ function formatNumber(value: number): string {
 function AdvancedSettingRow({
   label,
   icon = "⚙️",
-  valueA,
-  valueB,
+  value,
   min,
   max,
   step,
   unit,
-  onChangeA,
-  onChangeB,
-  globalValue,
-  onChangeGlobal,
+  onChange,
 }: AdvancedSettingRowProps) {
-  const hasA = valueA !== undefined && onChangeA;
-  const hasB = valueB !== undefined && onChangeB;
-  const hasGlobal = globalValue !== undefined && onChangeGlobal;
-
   return (
-    <div className="grid grid-cols-[minmax(0,1fr)_minmax(150px,190px)_minmax(0,1fr)] items-center gap-3 border-b ui-divider py-3 last:border-b-0">
-      <div className="min-w-0">
-        {hasA ? (
-          <div className="flex items-center gap-2">
-            <input
-              aria-label={`${label} — Équipe A`}
-              type="range"
-              min={min}
-              max={max}
-              step={step}
-              value={valueA}
-              onChange={(event) => onChangeA?.(Number(event.target.value))}
-              className="w-full accent-current"
-            />
-            <span className="ui-text-primary w-24 shrink-0 text-right text-[11px] font-black">
-              {formatNumber(valueA)} {unit}
-            </span>
-          </div>
-        ) : (
-          <span className="ui-text-muted block text-center text-xs font-semibold">—</span>
-        )}
-      </div>
-
-      <div className="min-w-0 text-center">
-        <div className="ui-text-primary text-xs font-black sm:text-sm">
-          {icon} {label}
+    <div className="border-b ui-divider py-4 last:border-b-0">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-6">
+        <div className="ui-text-primary flex min-w-0 items-center gap-2 text-xs font-black sm:w-[320px] sm:shrink-0 sm:text-sm">
+          <span>{icon}</span>
+          <span>{label}</span>
         </div>
 
-        {hasGlobal ? (
-          <div className="mt-1 flex items-center justify-center gap-2">
-            <input
-              aria-label={label}
-              type="range"
-              min={min}
-              max={max}
-              step={step}
-              value={globalValue}
-              onChange={(event) => onChangeGlobal?.(Number(event.target.value))}
-              className="w-full max-w-[120px] accent-current"
-            />
-            <span className="ui-text-primary w-24 shrink-0 text-right text-[11px] font-black">
-              {formatNumber(globalValue)} {unit}
-            </span>
-          </div>
-        ) : (
-          <div className="ui-text-muted mt-0.5 text-[10px] font-semibold">
-            {formatNumber(min)} {unit} → {formatNumber(max)} {unit}
-          </div>
-        )}
+        <div className="flex min-w-0 flex-1 items-center gap-3">
+          <input
+            aria-label={label}
+            type="range"
+            min={min}
+            max={max}
+            step={step}
+            value={value}
+            onChange={(event) => onChange(Number(event.target.value))}
+            className="w-full accent-current"
+          />
+          <span className="ui-text-primary w-24 shrink-0 text-right text-[11px] font-black">
+            {formatNumber(value)} {unit}
+          </span>
+        </div>
       </div>
 
-      <div className="min-w-0">
-        {hasB ? (
-          <div className="flex items-center gap-2">
-            <span className="ui-text-primary w-24 shrink-0 text-[11px] font-black">
-              {formatNumber(valueB)} {unit}
-            </span>
-            <input
-              aria-label={`${label} — Équipe B`}
-              type="range"
-              min={min}
-              max={max}
-              step={step}
-              value={valueB}
-              onChange={(event) => onChangeB?.(Number(event.target.value))}
-              className="w-full accent-current"
-            />
-          </div>
-        ) : (
-          <span className="ui-text-muted block text-center text-xs font-semibold">—</span>
-        )}
+      <div className="ui-text-muted mt-1 text-[10px] font-semibold sm:ml-[344px]">
+        {formatNumber(min)} {unit} → {formatNumber(max)} {unit}
       </div>
     </div>
   );
@@ -217,34 +160,34 @@ export default function EngineSettings({
               <AdvancedSettingRow
                 icon="🛡️"
                 label="Combats pour confiance maximale"
-                valueA={advanced.historicalConfidenceBattles}
+                value={advanced.historicalConfidenceBattles}
                 min={1}
                 max={20}
                 step={1}
                 unit="combats"
-                onChangeA={(value) => updateAdvanced("historicalConfidenceBattles", value)}
+                onChange={(value) => updateAdvanced("historicalConfidenceBattles", value)}
               />
 
               <AdvancedSettingRow
                 icon="🛡️"
                 label="Base de fiabilité"
-                valueA={advanced.historicalReliabilityBase}
+                value={advanced.historicalReliabilityBase}
                 min={0}
                 max={1}
                 step={0.05}
                 unit="×"
-                onChangeA={(value) => updateAdvanced("historicalReliabilityBase", value)}
+                onChange={(value) => updateAdvanced("historicalReliabilityBase", value)}
               />
 
               <AdvancedSettingRow
                 icon="🛡️"
                 label="Poids de la confiance"
-                valueA={advanced.historicalReliabilityConfidenceWeight}
+                value={advanced.historicalReliabilityConfidenceWeight}
                 min={0}
                 max={1}
                 step={0.05}
                 unit="×"
-                onChangeA={(value) =>
+                onChange={(value) =>
                   updateAdvanced("historicalReliabilityConfidenceWeight", value)
                 }
               />
@@ -252,36 +195,34 @@ export default function EngineSettings({
               <AdvancedSettingRow
                 icon="🧩"
                 label="Combats minimum pour valider un Core4"
-                globalValue={advanced.core4MinBattles}
+                value={advanced.core4MinBattles}
                 min={1}
                 max={20}
                 step={1}
                 unit="combats"
-                onChangeGlobal={(value) => updateAdvanced("core4MinBattles", value)}
+                onChange={(value) => updateAdvanced("core4MinBattles", value)}
               />
 
               <AdvancedSettingRow
                 icon="🧩"
                 label="Combats minimum pour un remplacement"
-                globalValue={advanced.core4MinReplacementBattles}
+                value={advanced.core4MinReplacementBattles}
                 min={1}
                 max={20}
                 step={1}
                 unit="combats"
-                onChangeGlobal={(value) =>
-                  updateAdvanced("core4MinReplacementBattles", value)
-                }
+                onChange={(value) => updateAdvanced("core4MinReplacementBattles", value)}
               />
 
               <AdvancedSettingRow
                 icon="🧩"
                 label="Combats pour confiance maximale du Core4"
-                globalValue={advanced.core4ConfidenceBattles}
+                value={advanced.core4ConfidenceBattles}
                 min={1}
                 max={20}
                 step={1}
                 unit="combats"
-                onChangeGlobal={(value) => updateAdvanced("core4ConfidenceBattles", value)}
+                onChange={(value) => updateAdvanced("core4ConfidenceBattles", value)}
               />
             </div>
           )}
