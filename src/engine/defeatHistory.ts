@@ -79,16 +79,21 @@ export function findHistoricalDefeatCounters(
     };
 
     candidate.battles++;
-    combat.won ? candidate.wins++ : candidate.losses++;
+
+    // combat.won describes our historical team (the current target).
+    // Therefore, when it loses, the historical opponent wins.
+    if (combat.won) candidate.losses++;
+    else candidate.wins++;
+
     candidates.set(key, candidate);
   }
 
   const ordered = [...candidates.values()]
     .filter(
-      (candidate) => candidate.losses > 0 && candidate.losses >= candidate.wins
+      (candidate) => candidate.wins > 0 && candidate.wins >= candidate.losses
     )
     .map((candidate) => {
-      candidate.lossRate = candidate.losses / candidate.battles;
+      candidate.lossRate = candidate.wins / candidate.battles;
       candidate.confidence = confidenceForBattles(
         candidate.battles,
         confidenceBattles
@@ -102,7 +107,7 @@ export function findHistoricalDefeatCounters(
     .sort(
       (a, b) =>
         b.candidate.score - a.candidate.score ||
-        b.candidate.losses - a.candidate.losses ||
+        b.candidate.wins - a.candidate.wins ||
         b.candidate.battles - a.candidate.battles ||
         a.key.localeCompare(b.key)
     )
