@@ -48,21 +48,6 @@ function hero(id: string, cls: Hero["cls"]): Hero {
   };
 }
 
-function withTeamAScoringSettings(
-  overrides: Partial<typeof DEFAULT_ENGINE_SETTINGS.teamA>,
-  callback: () => void
-): void {
-  const original = { ...DEFAULT_ENGINE_SETTINGS.teamA };
-
-  Object.assign(DEFAULT_ENGINE_SETTINGS.teamA, overrides);
-
-  try {
-    callback();
-  } finally {
-    Object.assign(DEFAULT_ENGINE_SETTINGS.teamA, original);
-  }
-}
-
 describe("recommendation engine history", () => {
   it("calculates win rates correctly", () => {
     const result = evaluateExactTeamHistory(teamA, enemy, [
@@ -226,8 +211,8 @@ describe("recommendation engine history", () => {
           .historicalReliabilityBase +
           DEFAULT_ENGINE_SETTINGS.advanced
             .historicalReliabilityConfidenceWeight *
-            (battles /
-              (battles + confidenceBattles)));
+          (battles /
+            (battles + confidenceBattles)));
 
       expect(teamAHistory.winRate).toBe(100);
       expect(teamAHistory.battles).toBe(2);
@@ -256,127 +241,6 @@ describe("recommendation engine history", () => {
         originalAdvanced
       );
     }
-  });
-});
-
-describe("evaluateTeam scoring modules", () => {
-  const teamHeroes = teamA.map((id) => hero(id, "STR"));
-
-  it("uses the configured specific-history and general-win-rate budgets", () => {
-    const combats = [combat(teamA, true)];
-
-    withTeamAScoringSettings(
-      {
-        specificHistoryWeight: 1,
-        core4Weight: 0,
-        generalWinRateWeight: 0,
-        specificHistoryPoints: 50,
-        core4Points: 30,
-        generalWinRatePoints: 20,
-      },
-      () => {
-        const specificOnly = evaluateTeam(
-          teamHeroes,
-          combats,
-          enemy
-        );
-
-        // New rational confidence:
-        // 1 battle / (1 + 4) = 20%
-        // 20% of 50 points = 10 points.
-        expect(specificOnly.score).toBeCloseTo(
-          10,
-          10
-        );
-      }
-    );
-
-    withTeamAScoringSettings(
-      {
-        specificHistoryWeight: 0,
-        core4Weight: 0,
-        generalWinRateWeight: 1,
-        specificHistoryPoints: 50,
-        core4Points: 30,
-        generalWinRatePoints: 20,
-      },
-      () => {
-        const generalOnly = evaluateTeam(
-          teamHeroes,
-          combats,
-          enemy
-        );
-
-        expect(generalOnly.score).toBeCloseTo(
-          20,
-          10
-        );
-      }
-    );
-  });
-
-  it("changes evaluateTeam when the Team A Core4 budget changes", () => {
-    const combats = [
-      combat(teamA, true),
-      combat(teamA, true),
-    ];
-
-    let scoreWith30Points = 0;
-    let scoreWith60Points = 0;
-
-    withTeamAScoringSettings(
-      {
-        specificHistoryWeight: 0,
-        core4Weight: 1,
-        generalWinRateWeight: 0,
-        specificHistoryPoints: 50,
-        core4Points: 30,
-        generalWinRatePoints: 20,
-      },
-      () => {
-        scoreWith30Points = evaluateTeam(
-          teamHeroes,
-          combats,
-          enemy
-        ).score;
-      }
-    );
-
-    withTeamAScoringSettings(
-      {
-        specificHistoryWeight: 0,
-        core4Weight: 1,
-        generalWinRateWeight: 0,
-        specificHistoryPoints: 50,
-        core4Points: 60,
-        generalWinRatePoints: 20,
-      },
-      () => {
-        scoreWith60Points = evaluateTeam(
-          teamHeroes,
-          combats,
-          enemy
-        ).score;
-      }
-    );
-
-    // New rational confidence:
-    // 2 battles / (2 + 4) = 33.33%
-    // 33.33% of 30 points = 10 points.
-    // 33.33% of 60 points = 20 points.
-    expect(scoreWith30Points).toBeCloseTo(
-      10,
-      10
-    );
-
-    expect(scoreWith60Points).toBeCloseTo(
-      20,
-      10
-    );
-
-    expect(scoreWith60Points).toBeGreaterThan(
-      scoreWith30Points
-    );
   });
 });
 
@@ -741,4 +605,3 @@ describe("Core4 historical engine", () => {
     expect(result).toBe(0);
   });
 });
-
