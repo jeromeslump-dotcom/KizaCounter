@@ -82,21 +82,21 @@ export default function CombatOrderEditor({
       </header>
 
       <div className="flex-1 overflow-y-auto p-5 sm:p-6">
-        <div className="space-y-2">
+        <div className="grid grid-cols-5 gap-2 sm:gap-4">
           {heroes.map((hero) => {
             const currentPosition = getHeroPosition(hero.id);
 
             return (
               <div
                 key={hero.id}
-                className="ui-action flex items-center gap-3 rounded-xl border p-2.5 sm:p-3"
+                className="ui-action flex min-w-0 flex-col items-center gap-2 rounded-xl border p-2.5 sm:p-3"
               >
                 <img
                   src={hero.img}
                   alt={hero.name}
-                  className="h-12 w-12 shrink-0 rounded-lg border ui-divider object-cover sm:h-14 sm:w-14"
+                  className="h-14 w-14 shrink-0 rounded-lg border ui-divider object-cover sm:h-20 sm:w-20 sm:rounded-xl"
                 />
-                <span className="ui-text-primary min-w-0 flex-1 truncate text-sm font-bold">
+                <span className="ui-text-primary w-full min-w-0 truncate text-center text-[10px] font-bold sm:text-xs">
                   {hero.name}
                 </span>
                 <select
@@ -104,12 +104,12 @@ export default function CombatOrderEditor({
                   onChange={(event) =>
                     setPosition(hero.id, Number(event.target.value))
                   }
-                  className="ui-input w-20 rounded-lg border px-2 py-2 text-sm font-bold"
+                  className="ui-input w-full max-w-[72px] rounded-lg border px-2 py-1.5 text-center text-sm font-bold"
                   aria-label={`Position de ${hero.name}`}
                 >
                   {[1, 2, 3, 4, 5].map((position) => (
                     <option key={position} value={position}>
-                      {position}
+                      N° {position}
                     </option>
                   ))}
                 </select>
