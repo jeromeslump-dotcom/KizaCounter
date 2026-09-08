@@ -148,6 +148,7 @@ export default function AdminPanel({
           <AdminAction
             icon="📜"
             title="Historique des combats"
+            description="Consulter, rechercher et gérer les combats enregistrés"
             onClick={onCombatHistory}
           />
           <AdminAction
