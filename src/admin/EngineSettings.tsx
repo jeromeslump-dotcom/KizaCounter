@@ -198,19 +198,10 @@ export default function EngineSettings({
         </header>
 
         <div className="max-h-[68vh] overflow-y-auto p-4 sm:p-6">
-          <div className="ui-panel-alt rounded-2xl border px-4 py-4">
-            <div className="ui-text-primary text-sm font-black">ℹ️ Ordre de décision</div>
-            <p className="ui-text-secondary mt-2 text-xs leading-5 sm:text-sm">
-              Le moteur applique d'abord l'historique spécifique, puis les recherches
-              historiques CORE4, similaires et par composition de classes avant le scoring de secours.
-              Les budgets de points ne sont plus affichés ici.
-            </p>
-          </div>
-
           <button
             type="button"
             onClick={() => setShowAdvanced((current) => !current)}
-            className="ui-action mt-5 flex w-full items-center justify-between rounded-xl border px-4 py-3 text-left transition"
+            className="ui-action flex w-full items-center justify-between rounded-xl border px-4 py-3 text-left transition"
             aria-expanded={showAdvanced}
           >
             <span className="ui-text-primary text-sm font-black">
