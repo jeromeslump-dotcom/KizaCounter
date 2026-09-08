@@ -28,10 +28,6 @@ export interface EngineSettings {
     generalWinRatePoints: number;
   };
   advanced: {
-    teamACounterWinRateMultiplier: number;
-
-    teamBCounterWinRateMultiplier: number;
-
     historicalConfidenceBattles: number;
     historicalReliabilityBase: number;
     historicalReliabilityConfidenceWeight: number;
@@ -60,10 +56,6 @@ export const DEFAULT_ENGINE_SETTINGS: EngineSettings = {
     generalWinRatePoints: 50,
   },
   advanced: {
-    teamACounterWinRateMultiplier: 2,
-
-    teamBCounterWinRateMultiplier: 1.2,
-
     // Même référence de confiance pour l'historique partagé.
     // 4 combats donnent 50 % de confiance.
     historicalConfidenceBattles: 4,
