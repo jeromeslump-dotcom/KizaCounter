@@ -19,6 +19,7 @@ interface OrderEditorState { teamIds: string[]; title: string; }
 export default function CombatHistory({ open, combats, onClose, onBack }: CombatHistoryProps) {
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [teamOrders, setTeamOrders] = useState<Map<string, string[]>>(new Map());
+  const [teamOrdersLoading, setTeamOrdersLoading] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [deletedIds, setDeletedIds] = useState<Set<string>>(new Set());
   const [orderEditor, setOrderEditor] = useState<OrderEditorState | null>(null);
@@ -34,11 +35,18 @@ export default function CombatHistory({ open, combats, onClose, onBack }: Combat
   useEffect(() => {
     if (!open) return;
     let cancelled = false;
+    setTeamOrdersLoading(true);
+    setTeamOrders(new Map());
+
     async function loadOrders() {
       try {
         const orders = await loadTeamOrders();
         if (!cancelled) setTeamOrders(new Map(orders.map((o: TeamOrder) => [o.team_key, o.ordered_hero_ids])));
-      } catch (error) { console.error("Erreur chargement des ordres d'équipes :", error); }
+      } catch (error) {
+        console.error("Erreur chargement des ordres d'équipes :", error);
+      } finally {
+        if (!cancelled) setTeamOrdersLoading(false);
+      }
     }
     void loadOrders();
     return () => { cancelled = true; };
@@ -114,7 +122,7 @@ export default function CombatHistory({ open, combats, onClose, onBack }: Combat
         {!visibleCombats.length ? <p className="ui-text-soft py-12 text-center text-sm">Aucun combat enregistré.</p> : <div className="space-y-3">{visibleCombats.map((combat, index) => {
           const enemyKnown = teamOrders.has(teamKey(combat.enemy_heroes));
           const teamKnown = teamOrders.has(teamKey(combat.my_heroes));
-          const orderButton = (ids: string[], title: string, known: boolean) => <button type="button" onClick={() => openOrderEditor(ids, title)} className={known ? "rounded-md border border-emerald-400/30 px-2 py-1 text-[9px] font-black text-emerald-400 transition hover:bg-emerald-400/10" : "rounded-md border border-red-400/30 px-2 py-1 text-[9px] font-black text-red-400 transition hover:bg-red-400/10"}>{known ? "✓ Ordre connu" : "✏️ Éditer l'ordre"}</button>;
+          const orderButton = (ids: string[], title: string, known: boolean) => <button type="button" onClick={() => openOrderEditor(ids, title)} disabled={teamOrdersLoading} className={teamOrdersLoading ? "cursor-wait rounded-md border ui-divider px-2 py-1 text-[9px] font-black ui-text-soft opacity-70" : known ? "rounded-md border border-emerald-400/30 px-2 py-1 text-[9px] font-black text-emerald-400 transition hover:bg-emerald-400/10" : "rounded-md border border-red-400/30 px-2 py-1 text-[9px] font-black text-red-400 transition hover:bg-red-400/10"}>{teamOrdersLoading ? "⏳ Vérification..." : known ? "✓ Ordre connu" : "✏️ Éditer l'ordre"}</button>;
           return <div key={combat.id ?? `${combat.created_at ?? "combat"}-${index}`} className="ui-action rounded-xl border p-3 sm:p-4">
             <div className="flex items-start justify-between gap-3"><div><div className="flex flex-wrap items-center gap-2"><span className="ui-text-primary text-xs font-bold">Combat #{index + 1}</span><span className={combat.won ? "text-xs font-black text-emerald-400" : "text-xs font-black text-red-400"}>{combat.won ? "Victoire" : "Défaite"}</span></div><div className="ui-text-soft mt-1 text-[10px]">{combat.created_at ? new Date(combat.created_at).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" }) : "Date inconnue"}</div></div>
               <button type="button" onClick={() => handleDelete(combat)} disabled={!combat.id || deletingId === combat.id} className="rounded-lg border border-red-400/20 px-2.5 py-1.5 text-xs font-bold text-red-400 transition hover:bg-red-400/10 disabled:cursor-not-allowed disabled:opacity-40">{deletingId === combat.id ? "…" : "🗑️ Supprimer"}</button>
