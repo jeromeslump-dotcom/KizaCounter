@@ -286,10 +286,7 @@ export function recommendAlternativeTeam(
       return {
         hero,
         score:
-          counter.winRate *
-          confidence *
-          settings.advanced.teamBCounterWinRateMultiplier *
-          settings.teamB.specificHistoryWeight,
+          counter.winRate * confidence * settings.teamB.specificHistoryWeight,
       };
     })
     .sort(
