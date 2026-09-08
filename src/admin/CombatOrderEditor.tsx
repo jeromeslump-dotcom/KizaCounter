@@ -1,6 +1,5 @@
 import { useMemo, useState } from "react";
 import type { Hero } from "../types";
-import CombatFormationPreview from "./CombatFormationPreview";
 import { saveTeamOrder } from "../storage/teamOrderStorage";
 
 interface CombatOrderEditorProps {
@@ -22,7 +21,6 @@ export default function CombatOrderEditor({
   }, [heroes, initialOrder]);
 
   const [order, setOrder] = useState<string[]>(initial);
-  const [page, setPage] = useState<1 | 2>(1);
   const [saving, setSaving] = useState(false);
 
   const heroesById = useMemo(
@@ -53,11 +51,7 @@ export default function CombatOrderEditor({
     return index === -1 ? 0 : index + 1;
   }
 
-  function goToPreview() {
-    if (isValid) setPage(2);
-  }
-
-  async function handleConfirm() {
+  async function handleSave() {
     if (!isValid) return;
 
     try {
@@ -65,7 +59,7 @@ export default function CombatOrderEditor({
       await saveTeamOrder(heroes.map((hero) => hero.id), order);
       onSaved(order);
     } catch (error) {
-      console.error("Erreur validation ordre équipe :", error);
+      console.error("Erreur enregistrement ordre équipe :", error);
       window.alert(
         error instanceof Error
           ? error.message
@@ -74,17 +68,6 @@ export default function CombatOrderEditor({
     } finally {
       setSaving(false);
     }
-  }
-
-  if (page === 2) {
-    return (
-      <CombatFormationPreview
-        heroes={order.map((heroId) => heroesById.get(heroId)!)}
-        onBack={() => setPage(1)}
-        onConfirm={handleConfirm}
-        saving={saving}
-      />
-    );
   }
 
   return (
@@ -152,17 +135,18 @@ export default function CombatOrderEditor({
         <button
           type="button"
           onClick={onBack}
-          className="ui-action rounded-lg border px-4 py-2 text-xs font-bold transition"
+          disabled={saving}
+          className="ui-action rounded-lg border px-4 py-2 text-xs font-bold transition disabled:opacity-50"
         >
           ← Retour
         </button>
         <button
           type="button"
-          onClick={goToPreview}
-          disabled={!isValid}
-          className="rounded-lg border border-rose-400/30 px-4 py-2 text-xs font-black text-rose-400 transition hover:bg-rose-400/10 disabled:cursor-not-allowed disabled:opacity-40"
+          onClick={handleSave}
+          disabled={!isValid || saving}
+          className="rounded-lg border border-emerald-400/30 px-4 py-2 text-xs font-black text-emerald-400 transition hover:bg-emerald-400/10 disabled:cursor-not-allowed disabled:opacity-40"
         >
-          Aperçu →
+          {saving ? "Enregistrement…" : "✓ Enregistrer"}
         </button>
       </footer>
     </div>
