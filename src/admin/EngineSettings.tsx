@@ -77,7 +77,6 @@ export default function EngineSettings({
   onBack,
 }: EngineSettingsProps) {
   const [settings, setSettings] = useState<EngineSettings>(() => getEngineSettings());
-  const [showAdvanced, setShowAdvanced] = useState(false);
 
   if (!open) return null;
 
@@ -141,91 +140,75 @@ export default function EngineSettings({
         </header>
 
         <div className="max-h-[68vh] overflow-y-auto p-4 sm:p-6">
-          <button
-            type="button"
-            onClick={() => setShowAdvanced((current) => !current)}
-            className="ui-action flex w-full items-center justify-between rounded-xl border px-4 py-3 text-left transition"
-            aria-expanded={showAdvanced}
-          >
-            <span className="ui-text-primary text-sm font-black">
-              {showAdvanced ? "▾" : "▸"} Réglages avancés
-            </span>
-            <span className="ui-text-muted text-[10px] font-semibold">
-              Seuils et paramètres techniques
-            </span>
-          </button>
+          <div className="ui-panel-alt rounded-2xl border px-4 sm:px-5">
+            <AdvancedSettingRow
+              icon="🛡️"
+              label="Combats pour confiance maximale"
+              value={advanced.historicalConfidenceBattles}
+              min={1}
+              max={20}
+              step={1}
+              unit="combats"
+              onChange={(value) => updateAdvanced("historicalConfidenceBattles", value)}
+            />
 
-          {showAdvanced && (
-            <div className="ui-panel-alt mt-3 rounded-2xl border px-4 sm:px-5">
-              <AdvancedSettingRow
-                icon="🛡️"
-                label="Combats pour confiance maximale"
-                value={advanced.historicalConfidenceBattles}
-                min={1}
-                max={20}
-                step={1}
-                unit="combats"
-                onChange={(value) => updateAdvanced("historicalConfidenceBattles", value)}
-              />
+            <AdvancedSettingRow
+              icon="🛡️"
+              label="Base de fiabilité"
+              value={advanced.historicalReliabilityBase}
+              min={0}
+              max={1}
+              step={0.05}
+              unit="×"
+              onChange={(value) => updateAdvanced("historicalReliabilityBase", value)}
+            />
 
-              <AdvancedSettingRow
-                icon="🛡️"
-                label="Base de fiabilité"
-                value={advanced.historicalReliabilityBase}
-                min={0}
-                max={1}
-                step={0.05}
-                unit="×"
-                onChange={(value) => updateAdvanced("historicalReliabilityBase", value)}
-              />
+            <AdvancedSettingRow
+              icon="🛡️"
+              label="Poids de la confiance"
+              value={advanced.historicalReliabilityConfidenceWeight}
+              min={0}
+              max={1}
+              step={0.05}
+              unit="×"
+              onChange={(value) =>
+                updateAdvanced("historicalReliabilityConfidenceWeight", value)
+              }
+            />
 
-              <AdvancedSettingRow
-                icon="🛡️"
-                label="Poids de la confiance"
-                value={advanced.historicalReliabilityConfidenceWeight}
-                min={0}
-                max={1}
-                step={0.05}
-                unit="×"
-                onChange={(value) =>
-                  updateAdvanced("historicalReliabilityConfidenceWeight", value)
-                }
-              />
+            <AdvancedSettingRow
+              icon="🧩"
+              label="Combats minimum pour valider un Core4"
+              value={advanced.core4MinBattles}
+              min={1}
+              max={20}
+              step={1}
+              unit="combats"
+              onChange={(value) => updateAdvanced("core4MinBattles", value)}
+            />
 
-              <AdvancedSettingRow
-                icon="🧩"
-                label="Combats minimum pour valider un Core4"
-                value={advanced.core4MinBattles}
-                min={1}
-                max={20}
-                step={1}
-                unit="combats"
-                onChange={(value) => updateAdvanced("core4MinBattles", value)}
-              />
+            <AdvancedSettingRow
+              icon="🧩"
+              label="Combats minimum pour un remplacement"
+              value={advanced.core4MinReplacementBattles}
+              min={1}
+              max={20}
+              step={1}
+              unit="combats"
+              onChange={(value) => updateAdvanced("core4MinReplacementBattles", value)}
+            />
 
-              <AdvancedSettingRow
-                icon="🧩"
-                label="Combats minimum pour un remplacement"
-                value={advanced.core4MinReplacementBattles}
-                min={1}
-                max={20}
-                step={1}
-                unit="combats"
-                onChange={(value) => updateAdvanced("core4MinReplacementBattles", value)}
-              />
-
-              <AdvancedSettingRow
-                icon="🧩"
-                label="Combats pour confiance maximale du Core4"
-                value={advanced.core4ConfidenceBattles}
-                min={1}
-                max={20}
-                step={1}
-                unit="combats"
-                onChange={(value) => updateAdvanced("core4ConfidenceBattles", value)}
-              />
-            </div>
-          )}
+            <AdvancedSettingRow
+              icon="🧩"
+              label="Combats pour confiance maximale du Core4"
+              value={advanced.core4ConfidenceBattles}
+              min={1}
+              max={20}
+              step={1}
+              unit="combats"
+              onChange={(value) => updateAdvanced("core4ConfidenceBattles", value)}
+            />
+          </div>
 
           <div className="mt-5 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
             <button
