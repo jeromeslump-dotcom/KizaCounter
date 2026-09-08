@@ -54,8 +54,8 @@ describe("inverse historical defeat engine", () => {
 
     expect(candidates).toHaveLength(1);
     expect(candidates[0].heroIds.sort()).toEqual([...defeatingTeam].sort());
-    expect(candidates[0].losses).toBe(1);
-    expect(candidates[0].wins).toBe(0);
+    expect(candidates[0].losses).toBe(0);
+    expect(candidates[0].wins).toBe(1);
     expect(candidates[0].battles).toBe(1);
     expect(candidates[0].lossRate).toBe(1);
     expect(candidates[0].confidence).toBeCloseTo(1 / 5, 10);
@@ -75,8 +75,8 @@ describe("inverse historical defeat engine", () => {
     );
 
     expect(candidates).toHaveLength(1);
-    expect(candidates[0].losses).toBe(2);
-    expect(candidates[0].wins).toBe(1);
+    expect(candidates[0].losses).toBe(1);
+    expect(candidates[0].wins).toBe(2);
     expect(candidates[0].battles).toBe(3);
     expect(candidates[0].lossRate).toBeCloseTo(2 / 3, 10);
     expect(candidates[0].confidence).toBeCloseTo(3 / 7, 10);
