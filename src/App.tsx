@@ -1,5 +1,3 @@
-// src/App.tsx
-
 import { useEffect, useMemo, useState } from "react";
 
 import { HEROES } from "./data/heroes";
