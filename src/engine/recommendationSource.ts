@@ -123,11 +123,53 @@ function isHistoricallyWinlessTeam(team: Hero[], combats: Combat[]): boolean {
   return battles > 0 && wins === 0;
 }
 
-function isUsableRecommendationTeam(team: Hero[], combats: Combat[]): boolean {
-  return team.length === TEAM_SIZE && !isHistoricallyWinlessTeam(team, combats);
+/**
+ * A team that has already faced this exact enemy team and never beaten it
+ * must not be recommended against that enemy, even if it has wins elsewhere.
+ */
+function isHistoricallyWinlessAgainstEnemy(
+  team: Hero[],
+  enemyIds: string[],
+  combats: Combat[]
+): boolean {
+  if (
+    team.length !== TEAM_SIZE ||
+    uniqueIds(enemyIds).length !== TEAM_SIZE
+  ) {
+    return false;
+  }
+
+  const teamKeyValue = teamKey(team.map((hero) => hero.id));
+  const enemyKeyValue = teamKey(uniqueIds(enemyIds));
+  let battles = 0;
+  let wins = 0;
+
+  for (const combat of combats) {
+    if (teamKey(uniqueIds(combat.my_heroes ?? [])) !== teamKeyValue) continue;
+    if (teamKey(uniqueIds(combat.enemy_heroes ?? [])) !== enemyKeyValue) {
+      continue;
+    }
+    battles++;
+    if (combat.won) wins++;
+  }
+
+  return battles > 0 && wins === 0;
+}
+
+function isUsableRecommendationTeam(
+  team: Hero[],
+  combats: Combat[],
+  enemyIds: string[]
+): boolean {
+  return (
+    team.length === TEAM_SIZE &&
+    !isHistoricallyWinlessTeam(team, combats) &&
+    !isHistoricallyWinlessAgainstEnemy(team, enemyIds, combats)
+  );
 }
 
 function findBestEnabledHistoricalTeam(
+  enemyIds: string[],
   candidateHeroes: Hero[],
   candidateHeroesById: Map<string, Hero>,
   combats: Combat[],
@@ -170,7 +212,7 @@ function findBestEnabledHistoricalTeam(
     sortBySimilarity
   )) {
     const team = resolveCandidateTeam(candidate.heroIds, candidateHeroesById);
-    if (team && isUsableRecommendationTeam(team, combats)) return team;
+    if (team && isUsableRecommendationTeam(team, combats, enemyIds)) return team;
   }
   return null;
 }
@@ -184,6 +226,7 @@ function findBestEnabledExactHistoryTeam(
 ): Hero[] | null {
   const targetKey = teamKey(enemyIds);
   return findBestEnabledHistoricalTeam(
+    enemyIds,
     candidateHeroes,
     candidateHeroesById,
     combats,
@@ -208,6 +251,7 @@ function findBestEnabledSimilarHistoryTeam(
   const targetSet = new Set(targetIds);
 
   return findBestEnabledHistoricalTeam(
+    targetIds,
     candidateHeroes,
     candidateHeroesById,
     combats,
@@ -372,7 +416,7 @@ function findBestEnabledCore4HistoryTeam(
       if (teamKey(teamIds) === excludedTeamKey) continue;
 
       const team = resolveCandidateTeam(teamIds, candidateHeroesById);
-      if (team && isUsableRecommendationTeam(team, combats)) return team;
+      if (team && isUsableRecommendationTeam(team, combats, enemyIds)) return team;
     }
   }
 
@@ -390,6 +434,7 @@ function findBestEnabledClassHistoryTeam(
   const targetClassKey = getClassKey(enemyIds, heroesById);
   if (!targetClassKey) return null;
   return findBestEnabledHistoricalTeam(
+    enemyIds,
     candidateHeroes,
     candidateHeroesById,
     combats,
@@ -410,7 +455,7 @@ function findScoringAlternative(
 ): Hero[] | null {
   const scoringTeam = recommendTeam(enemyIds, candidateHeroes, combats);
   if (
-    isUsableRecommendationTeam(scoringTeam, combats) &&
+    isUsableRecommendationTeam(scoringTeam, combats, enemyIds) &&
     teamKey(scoringTeam.map((hero) => hero.id)) !== excludedTeamKey
   ) {
     return scoringTeam;
@@ -435,7 +480,7 @@ function findScoringAlternative(
       const candidateIds = candidate.map((hero) => hero.id);
       if (new Set(candidateIds).size !== TEAM_SIZE) continue;
       if (teamKey(candidateIds) === excludedTeamKey) continue;
-      if (!isUsableRecommendationTeam(candidate, combats)) continue;
+      if (!isUsableRecommendationTeam(candidate, combats, enemyIds)) continue;
       return candidate;
     }
   }
@@ -476,7 +521,7 @@ export function recommendTeamWithSource(
   );
   if (
     defeatHistoryTeam &&
-    isUsableRecommendationTeam(defeatHistoryTeam, combats)
+    isUsableRecommendationTeam(defeatHistoryTeam, combats, enemyIds)
   )
     return { team: defeatHistoryTeam, source: "defeat-history" };
 
@@ -524,7 +569,7 @@ export function recommendTeamWithSource(
   const validTeam = (team ?? []).filter((hero) => enabledIds.has(hero.id));
   const usableTeam =
     validTeam.length === TEAM_SIZE &&
-    isUsableRecommendationTeam(validTeam, combats)
+    isUsableRecommendationTeam(validTeam, combats, enemyIds)
       ? validTeam
       : [];
   return {
