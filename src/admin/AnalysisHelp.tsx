@@ -2,7 +2,6 @@ import { useMemo, useState } from "react";
 import type { Combat, HeroClassFilter, HeroSort } from "../types";
 import type { Hero } from "../data/heroes";
 import { evaluateTeam, calculateHeroUsage } from "../engine/scoring";
-import { getEngineSettings } from "../engine/engineSettings";
 import AnalysisHelpEnemySelection from "./AnalysisHelpEnemySelection";
 import AnalysisHelpResults, {
   type HeroEvaluationGroup,
@@ -69,7 +68,6 @@ export default function AnalysisHelp({
   );
 
   const combatGroups = useMemo<HeroEvaluationGroup[]>(() => {
-    const settings = getEngineSettings();
     const groups = new Map<string, HeroEvaluationGroup>();
 
     for (const combat of matchingCombats) {
@@ -85,12 +83,7 @@ export default function AnalysisHelp({
         team.length === TEAM_SIZE
           ? evaluateTeam(team, combats, enemyIds)
           : null;
-      const scoreA = evaluation
-        ? evaluation.historicalWinRate * settings.teamA.generalWinRateWeight
-        : null;
-      const scoreB = evaluation
-        ? evaluation.historicalWinRate * settings.teamB.generalWinRateWeight
-        : null;
+      const score = evaluation ? evaluation.score : null;
 
       if (existing) {
         existing.count += 1;
@@ -105,8 +98,8 @@ export default function AnalysisHelp({
         groups.set(key, {
           team,
           evaluation,
-          scoreA,
-          scoreB,
+          scoreA: score,
+          scoreB: score,
           count: 1,
           wins: combat.won ? 1 : 0,
           losses: combat.won ? 0 : 1,
