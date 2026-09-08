@@ -60,10 +60,5 @@ export function counterHeroScore(
     settings.advanced.historicalConfidenceBattles
   );
 
-  return (
-    counter.winRate *
-    confidence *
-    settings.advanced.teamACounterWinRateMultiplier *
-    settings.teamA.specificHistoryWeight
-  );
+  return counter.winRate * confidence;
 }
