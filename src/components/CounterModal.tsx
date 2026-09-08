@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, type ReactNode } from "react";
 
 import type { Combat, Hero, HeroClassFilter, HeroSort } from "../types";
 
@@ -69,7 +69,9 @@ function findMatchingCore4(
     const replacementId = [...ids].find((id) => !analysis.coreIds.includes(id));
     if (!replacementId) return false;
 
-    return analysis.replacements.some((replacement) => replacement.heroId === replacementId);
+    return analysis.replacements.some(
+      (replacement) => replacement.heroId === replacementId
+    );
   });
 
   if (matches.length === 0) return null;
@@ -82,7 +84,11 @@ function findMatchingCore4(
   )[0];
 }
 
-function formatCount(value: number, singular: string, plural = `${singular}s`): string {
+function formatCount(
+  value: number,
+  singular: string,
+  plural = `${singular}s`
+): string {
   return `${value} ${value > 1 ? plural : singular}`;
 }
 
@@ -210,11 +216,7 @@ export default function CounterModal({
   const recommendedDefeatHistory = useMemo(() => {
     if (!open || recommendedIds.length !== 5) return null;
     return (
-      findHistoricalDefeatCounters(
-        enemyIds,
-        combats,
-        heroes
-      ).find(
+      findHistoricalDefeatCounters(enemyIds, combats, heroes).find(
         (candidate) => teamKey(candidate.heroIds) === teamKey(recommendedIds)
       ) ?? null
     );
@@ -223,11 +225,7 @@ export default function CounterModal({
   const alternativeDefeatHistory = useMemo(() => {
     if (!open || alternativeIds.length !== 5) return null;
     return (
-      findHistoricalDefeatCounters(
-        enemyIds,
-        combats,
-        heroes
-      ).find(
+      findHistoricalDefeatCounters(enemyIds, combats, heroes).find(
         (candidate) => teamKey(candidate.heroIds) === teamKey(alternativeIds)
       ) ?? null
     );
@@ -239,7 +237,7 @@ export default function CounterModal({
         <>
           <strong>Historique exact</strong>{" "}
           <span className="font-normal">
-            · {Math.round(currentTeamHistory.winRate)} % · {" "}
+            · {Math.round(currentTeamHistory.winRate)} % ·{" "}
             {formatCount(currentTeamHistory.battles, "combat")}
           </span>
         </>
@@ -251,7 +249,7 @@ export default function CounterModal({
         <>
           <strong>Nouvelle rencontre · Équipe déjà victorieuse</strong>{" "}
           <span className="font-normal">
-            · {Math.round(currentTeamGeneralHistory.winRate)} % · {" "}
+            · {Math.round(currentTeamGeneralHistory.winRate)} % ·{" "}
             {formatCount(currentTeamGeneralHistory.battles, "combat")}
           </span>
         </>
@@ -269,7 +267,7 @@ export default function CounterModal({
       <strong>Nouvelle équipe</strong>
     );
 
-  let historyLabel: React.ReactNode = "Aucune statistique historique affichée";
+  let historyLabel: ReactNode = "Aucune statistique historique affichée";
 
   if (recommendationSource === "exact-history") {
     historyLabel =
@@ -313,7 +311,7 @@ export default function CounterModal({
       : `${Math.round(recommendedDefeatHistory.lossRate * 100)} %`;
   }
 
-  let alternativeHistoryLabel: React.ReactNode = "Aucune statistique historique";
+  let alternativeHistoryLabel: ReactNode = "Aucune statistique historique";
 
   if (alternativeHistory.battles > 0) {
     alternativeHistoryLabel = canViewDetailedHistory
@@ -335,7 +333,12 @@ export default function CounterModal({
     alternativeHistoryLabel = canViewDetailedHistory ? (
       <span>
         Core4 · {Math.round(alternativeCore4.winRate)} % · {formatCount(alternativeCore4.battles, "combat")}
-        {replacement && ` · Remplacement ${Math.round(replacement.winRate)} % · ${formatCount(replacement.battles, "combat")}`}
+        {replacement && (
+          <>
+            {" · Remplacement "}
+            {Math.round(replacement.winRate)} % · {formatCount(replacement.battles, "combat")}
+          </>
+        )}
       </span>
     ) : (
       `Core4 · ${Math.round(alternativeCore4.winRate)} %`
