@@ -1,5 +1,3 @@
-// src/engine/engineSettings.ts
-
 export interface EngineSettings {
   advanced: {
     historicalConfidenceBattles: number;
@@ -93,25 +91,3 @@ export function resetEngineSettings(): void {
   window.localStorage.removeItem(STORAGE_KEY);
   window.dispatchEvent(new Event("engine-settings-changed"));
 }
-
-export const ENGINE_SETTING_LIMITS = {
-  battles: {
-    min: 1,
-    max: 20,
-    step: 1,
-    unit: "combats",
-  },
-  percentage: {
-    min: 0,
-    max: 100,
-    step: 5,
-    unit: "%",
-  },
-  confidenceWeight: {
-    min: 0,
-    max: 1,
-    step: 0.05,
-    unit: "%",
-    multiplier: 100,
-  },
-} as const;
