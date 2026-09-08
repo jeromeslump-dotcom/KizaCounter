@@ -102,6 +102,31 @@ function resolveCandidateTeam(
   return team.length === TEAM_SIZE ? team : null;
 }
 
+/**
+ * A team that has already been played but has never won must never be
+ * proposed again, regardless of which recommendation source selected it.
+ * An unseen team is still allowed: 0 battles is not a 0% historical record.
+ */
+function isHistoricallyWinlessTeam(team: Hero[], combats: Combat[]): boolean {
+  if (team.length !== TEAM_SIZE) return false;
+
+  const key = teamKey(team.map((hero) => hero.id));
+  let battles = 0;
+  let wins = 0;
+
+  for (const combat of combats) {
+    if (teamKey(uniqueIds(combat.my_heroes ?? [])) !== key) continue;
+    battles++;
+    if (combat.won) wins++;
+  }
+
+  return battles > 0 && wins === 0;
+}
+
+function isUsableRecommendationTeam(team: Hero[], combats: Combat[]): boolean {
+  return team.length === TEAM_SIZE && !isHistoricallyWinlessTeam(team, combats);
+}
+
 function findBestEnabledHistoricalTeam(
   candidateHeroes: Hero[],
   candidateHeroesById: Map<string, Hero>,
@@ -145,7 +170,7 @@ function findBestEnabledHistoricalTeam(
     sortBySimilarity
   )) {
     const team = resolveCandidateTeam(candidate.heroIds, candidateHeroesById);
-    if (team) return team;
+    if (team && isUsableRecommendationTeam(team, combats)) return team;
   }
   return null;
 }
@@ -347,7 +372,7 @@ function findBestEnabledCore4HistoryTeam(
       if (teamKey(teamIds) === excludedTeamKey) continue;
 
       const team = resolveCandidateTeam(teamIds, candidateHeroesById);
-      if (team) return team;
+      if (team && isUsableRecommendationTeam(team, combats)) return team;
     }
   }
 
@@ -385,7 +410,7 @@ function findScoringAlternative(
 ): Hero[] | null {
   const scoringTeam = recommendTeam(enemyIds, candidateHeroes, combats);
   if (
-    scoringTeam.length === TEAM_SIZE &&
+    isUsableRecommendationTeam(scoringTeam, combats) &&
     teamKey(scoringTeam.map((hero) => hero.id)) !== excludedTeamKey
   ) {
     return scoringTeam;
@@ -410,6 +435,7 @@ function findScoringAlternative(
       const candidateIds = candidate.map((hero) => hero.id);
       if (new Set(candidateIds).size !== TEAM_SIZE) continue;
       if (teamKey(candidateIds) === excludedTeamKey) continue;
+      if (!isUsableRecommendationTeam(candidate, combats)) continue;
       return candidate;
     }
   }
@@ -448,7 +474,7 @@ export function recommendTeamWithSource(
     candidateHeroes,
     excludedTeamKey ? excludedTeamKey.split("|") : []
   );
-  if (defeatHistoryTeam)
+  if (defeatHistoryTeam && isUsableRecommendationTeam(defeatHistoryTeam, combats))
     return { team: defeatHistoryTeam, source: "defeat-history" };
 
   const core4HistoryTeam = findBestEnabledCore4HistoryTeam(
@@ -458,7 +484,8 @@ export function recommendTeamWithSource(
     combats,
     excludedTeamKey
   );
-  if (core4HistoryTeam) return { team: core4HistoryTeam, source: "core4" };
+  if (core4HistoryTeam)
+    return { team: core4HistoryTeam, source: "core4" };
 
   const similarHistoryTeam = findBestEnabledSimilarHistoryTeam(
     enemyIds,
@@ -493,9 +520,14 @@ export function recommendTeamWithSource(
         source = detectedSource;
       });
   const validTeam = (team ?? []).filter((hero) => enabledIds.has(hero.id));
+  const usableTeam =
+    validTeam.length === TEAM_SIZE &&
+    isUsableRecommendationTeam(validTeam, combats)
+      ? validTeam
+      : [];
   return {
-    team: validTeam.length === TEAM_SIZE ? validTeam : [],
-    source: validTeam.length === TEAM_SIZE ? source : "fallback",
+    team: usableTeam,
+    source: usableTeam.length === TEAM_SIZE ? source : "fallback",
   };
 }
 
