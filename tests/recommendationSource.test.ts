@@ -127,4 +127,46 @@ describe("historical recommendation sources", () => {
       [...alternative].sort()
     );
   });
+
+  it("never proposes a team with a recorded 0% win rate", () => {
+    const badTeam = ["bad-1", "bad-2", "bad-3", "bad-4", "bad-5"];
+    const heroes = uniqueHeroes(heroesFor(target), heroesFor(badTeam));
+
+    const result = recommendTeamWithSource(
+      target,
+      heroes,
+      [combat(badTeam, target, false)]
+    );
+
+    expect(result.team).toEqual([]);
+  });
+
+  it("never proposes a 0% team for B when A is excluded", () => {
+    const primary = ["primary-1", "primary-2", "primary-3", "primary-4", "primary-5"];
+    const badAlternative = [
+      "bad-1",
+      "bad-2",
+      "bad-3",
+      "bad-4",
+      "bad-5",
+    ];
+    const heroes = uniqueHeroes(
+      heroesFor(target),
+      heroesFor(primary),
+      heroesFor(badAlternative)
+    );
+
+    const result = findHistoricalAlternativeTeam(
+      target,
+      heroes,
+      heroes,
+      [
+        combat(primary, target, true),
+        combat(badAlternative, target, false),
+      ],
+      primary
+    );
+
+    expect(result).toBeNull();
+  });
 });
