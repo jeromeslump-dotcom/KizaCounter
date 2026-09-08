@@ -16,6 +16,8 @@ interface CombatHistoryProps {
 interface Profile { id: string; display_name: string | null; }
 interface OrderEditorState { teamIds: string[]; title: string; }
 
+const COMBATS_PER_PAGE = 100;
+
 export default function CombatHistory({ open, combats, onClose, onBack }: CombatHistoryProps) {
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [teamOrders, setTeamOrders] = useState<Map<string, string[]>>(new Map());
@@ -23,6 +25,7 @@ export default function CombatHistory({ open, combats, onClose, onBack }: Combat
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [deletedIds, setDeletedIds] = useState<Set<string>>(new Set());
   const [orderEditor, setOrderEditor] = useState<OrderEditorState | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
 
   const visibleCombats = useMemo(
     () => combats.filter((combat) => !combat.id || !deletedIds.has(combat.id)),
@@ -31,6 +34,15 @@ export default function CombatHistory({ open, combats, onClose, onBack }: Combat
   const userIds = useMemo(() => Array.from(new Set(
     visibleCombats.map((combat) => combat.user_id).filter((id): id is string => Boolean(id))
   )), [visibleCombats]);
+  const totalPages = Math.max(1, Math.ceil(visibleCombats.length / COMBATS_PER_PAGE));
+  const paginatedCombats = useMemo(
+    () => visibleCombats.slice((currentPage - 1) * COMBATS_PER_PAGE, currentPage * COMBATS_PER_PAGE),
+    [visibleCombats, currentPage]
+  );
+
+  useEffect(() => {
+    setCurrentPage((page) => Math.min(page, totalPages));
+  }, [totalPages]);
 
   useEffect(() => {
     if (!open) return;
@@ -119,12 +131,13 @@ export default function CombatHistory({ open, combats, onClose, onBack }: Combat
       </div><button type="button" onClick={onClose} className="ui-action flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border text-lg transition" aria-label="Fermer">✕</button></div></header>
 
       <div className="min-h-0 overflow-y-auto p-4 sm:p-6">
-        {!visibleCombats.length ? <p className="ui-text-soft py-12 text-center text-sm">Aucun combat enregistré.</p> : <div className="space-y-3">{visibleCombats.map((combat, index) => {
+        {!visibleCombats.length ? <p className="ui-text-soft py-12 text-center text-sm">Aucun combat enregistré.</p> : <div className="space-y-3">{paginatedCombats.map((combat, index) => {
+          const combatNumber = (currentPage - 1) * COMBATS_PER_PAGE + index + 1;
           const enemyKnown = teamOrders.has(teamKey(combat.enemy_heroes));
           const teamKnown = teamOrders.has(teamKey(combat.my_heroes));
           const orderButton = (ids: string[], title: string, known: boolean) => <button type="button" onClick={() => openOrderEditor(ids, title)} disabled={teamOrdersLoading} className={teamOrdersLoading ? "cursor-wait rounded-md border ui-divider px-2 py-1 text-[9px] font-black ui-text-soft opacity-70" : known ? "rounded-md border border-emerald-400/30 px-2 py-1 text-[9px] font-black text-emerald-400 transition hover:bg-emerald-400/10" : "rounded-md border border-red-400/30 px-2 py-1 text-[9px] font-black text-red-400 transition hover:bg-red-400/10"}>{teamOrdersLoading ? "⏳ Vérification..." : known ? "✓ Ordre connu" : "✏️ Éditer l'ordre"}</button>;
           return <div key={combat.id ?? `${combat.created_at ?? "combat"}-${index}`} className="ui-action rounded-xl border p-3 sm:p-4">
-            <div className="flex items-start justify-between gap-3"><div><div className="flex flex-wrap items-center gap-2"><span className="ui-text-primary text-xs font-bold">Combat #{index + 1}</span><span className={combat.won ? "text-xs font-black text-emerald-400" : "text-xs font-black text-red-400"}>{combat.won ? "Victoire" : "Défaite"}</span></div><div className="ui-text-soft mt-1 text-[10px]">{combat.created_at ? new Date(combat.created_at).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" }) : "Date inconnue"}</div></div>
+            <div className="flex items-start justify-between gap-3"><div><div className="flex flex-wrap items-center gap-2"><span className="ui-text-primary text-xs font-bold">Combat #{combatNumber}</span><span className={combat.won ? "text-xs font-black text-emerald-400" : "text-xs font-black text-red-400"}>{combat.won ? "Victoire" : "Défaite"}</span></div><div className="ui-text-soft mt-1 text-[10px]">{combat.created_at ? new Date(combat.created_at).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" }) : "Date inconnue"}</div></div>
               <button type="button" onClick={() => handleDelete(combat)} disabled={!combat.id || deletingId === combat.id} className="rounded-lg border border-red-400/20 px-2.5 py-1.5 text-xs font-bold text-red-400 transition hover:bg-red-400/10 disabled:cursor-not-allowed disabled:opacity-40">{deletingId === combat.id ? "…" : "🗑️ Supprimer"}</button>
             </div>
             <div className="mt-3 grid gap-3 lg:grid-cols-2">
@@ -135,6 +148,14 @@ export default function CombatHistory({ open, combats, onClose, onBack }: Combat
           </div>;
         })}</div>}
       </div>
+
+      {totalPages > 1 && <nav className="flex flex-wrap items-center justify-between gap-2 border-t ui-divider px-4 py-3 sm:px-5 sm:py-4" aria-label="Pagination de l'historique">
+        <span className="ui-text-soft text-[10px] font-semibold">Page {currentPage} / {totalPages} · {COMBATS_PER_PAGE} combats max</span>
+        <div className="flex items-center gap-1.5">
+          <button type="button" onClick={() => setCurrentPage((page) => Math.max(1, page - 1))} disabled={currentPage === 1} className="ui-action rounded-lg border px-3 py-1.5 text-xs font-bold transition disabled:cursor-not-allowed disabled:opacity-40">← Précédente</button>
+          <button type="button" onClick={() => setCurrentPage((page) => Math.min(totalPages, page + 1))} disabled={currentPage === totalPages} className="ui-action rounded-lg border px-3 py-1.5 text-xs font-bold transition disabled:cursor-not-allowed disabled:opacity-40">Suivante →</button>
+        </div>
+      </nav>}
       <footer className="flex justify-end border-t ui-divider px-4 py-3 sm:px-5 sm:py-4"><button type="button" onClick={onBack} className="ui-action rounded-lg border px-4 py-2 text-xs font-bold transition">← Retour au Admin Panel</button></footer>
     </section>
   </div>;
