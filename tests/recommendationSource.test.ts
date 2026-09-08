@@ -141,6 +141,29 @@ describe("historical recommendation sources", () => {
     expect(result.team).toEqual([]);
   });
 
+  it("rejects a team that lost to this exact enemy even when it won elsewhere", () => {
+    const badTeam = ["bad-1", "bad-2", "bad-3", "bad-4", "bad-5"];
+    const similarEnemy = [...target.slice(0, 4), "other-enemy"];
+    const heroes = uniqueHeroes(
+      heroesFor(target),
+      heroesFor(similarEnemy),
+      heroesFor(badTeam)
+    );
+
+    const result = recommendTeamWithSource(
+      target,
+      heroes,
+      [
+        combat(badTeam, similarEnemy, true),
+        combat(badTeam, target, false),
+      ]
+    );
+
+    expect(result.team.map((hero) => hero.id).sort()).not.toEqual(
+      [...badTeam].sort()
+    );
+  });
+
   it("never proposes a 0% team for B when A is excluded", () => {
     const primary = ["primary-1", "primary-2", "primary-3", "primary-4", "primary-5"];
     const badAlternative = [
