@@ -474,7 +474,10 @@ export function recommendTeamWithSource(
     candidateHeroes,
     excludedTeamKey ? excludedTeamKey.split("|") : []
   );
-  if (defeatHistoryTeam && isUsableRecommendationTeam(defeatHistoryTeam, combats))
+  if (
+    defeatHistoryTeam &&
+    isUsableRecommendationTeam(defeatHistoryTeam, combats)
+  )
     return { team: defeatHistoryTeam, source: "defeat-history" };
 
   const core4HistoryTeam = findBestEnabledCore4HistoryTeam(
@@ -484,8 +487,7 @@ export function recommendTeamWithSource(
     combats,
     excludedTeamKey
   );
-  if (core4HistoryTeam)
-    return { team: core4HistoryTeam, source: "core4" };
+  if (core4HistoryTeam) return { team: core4HistoryTeam, source: "core4" };
 
   const similarHistoryTeam = findBestEnabledSimilarHistoryTeam(
     enemyIds,

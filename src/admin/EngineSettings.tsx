@@ -76,7 +76,9 @@ export default function EngineSettings({
   onClose,
   onBack,
 }: EngineSettingsProps) {
-  const [settings, setSettings] = useState<EngineSettings>(() => getEngineSettings());
+  const [settings, setSettings] = useState<EngineSettings>(() =>
+    getEngineSettings()
+  );
 
   if (!open) return null;
 
@@ -84,7 +86,10 @@ export default function EngineSettings({
     setSettings((current) => updater(current));
   }
 
-  function updateAdvanced(key: keyof EngineSettings["advanced"], value: number) {
+  function updateAdvanced(
+    key: keyof EngineSettings["advanced"],
+    value: number
+  ) {
     updateSetting((current) => ({
       ...current,
       advanced: {
@@ -121,7 +126,10 @@ export default function EngineSettings({
         <header className="border-b ui-divider p-5 sm:p-6">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <h2 id="engine-settings-title" className="ui-text-primary text-xl font-black">
+              <h2
+                id="engine-settings-title"
+                className="ui-text-primary text-xl font-black"
+              >
                 ⚙️ Réglages du moteur
               </h2>
               <p className="ui-text-secondary mt-1 text-xs sm:text-sm">
@@ -149,7 +157,9 @@ export default function EngineSettings({
               max={20}
               step={1}
               unit="combats"
-              onChange={(value) => updateAdvanced("historicalConfidenceBattles", value)}
+              onChange={(value) =>
+                updateAdvanced("historicalConfidenceBattles", value)
+              }
             />
 
             <AdvancedSettingRow
@@ -160,7 +170,9 @@ export default function EngineSettings({
               max={1}
               step={0.05}
               unit="×"
-              onChange={(value) => updateAdvanced("historicalReliabilityBase", value)}
+              onChange={(value) =>
+                updateAdvanced("historicalReliabilityBase", value)
+              }
             />
 
             <AdvancedSettingRow
@@ -195,7 +207,9 @@ export default function EngineSettings({
               max={20}
               step={1}
               unit="combats"
-              onChange={(value) => updateAdvanced("core4MinReplacementBattles", value)}
+              onChange={(value) =>
+                updateAdvanced("core4MinReplacementBattles", value)
+              }
             />
 
             <AdvancedSettingRow
@@ -206,7 +220,9 @@ export default function EngineSettings({
               max={20}
               step={1}
               unit="combats"
-              onChange={(value) => updateAdvanced("core4ConfidenceBattles", value)}
+              onChange={(value) =>
+                updateAdvanced("core4ConfidenceBattles", value)
+              }
             />
           </div>
 

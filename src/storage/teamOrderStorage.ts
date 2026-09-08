@@ -62,7 +62,9 @@ export async function saveTeamOrder(
     new Set(normalizedOrder).size !== 5 ||
     normalizedOrder.some((heroId) => !normalizedTeam.includes(heroId))
   ) {
-    throw new Error("L'ordre doit contenir les 5 héros de l'équipe, une seule fois chacun.");
+    throw new Error(
+      "L'ordre doit contenir les 5 héros de l'équipe, une seule fois chacun."
+    );
   }
 
   const { data, error } = await supabase

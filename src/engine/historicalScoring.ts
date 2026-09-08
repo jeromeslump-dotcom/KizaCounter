@@ -203,13 +203,21 @@ export function findBestHistoricalTeam(
   const heroesById = new Map(heroes.map((hero) => [hero.id, hero]));
   const enemyKey = context?.enemyKey ?? teamKey(enemyIds);
   const historicalCombats = context?.combats ?? combats;
-  const candidates = new Map<string, { heroIds: string[]; wins: number; losses: number; key: string }>();
+  const candidates = new Map<
+    string,
+    { heroIds: string[]; wins: number; losses: number; key: string }
+  >();
   for (const combat of historicalCombats) {
     if (!context && teamKey(combat.enemy_heroes ?? []) !== enemyKey) continue;
     const heroIds = uniqueIds(combat.my_heroes ?? []);
     if (heroIds.length !== TEAM_SIZE) continue;
     const key = teamKey(heroIds);
-    const candidate = candidates.get(key) ?? { heroIds, wins: 0, losses: 0, key };
+    const candidate = candidates.get(key) ?? {
+      heroIds,
+      wins: 0,
+      losses: 0,
+      key,
+    };
     combat.won ? candidate.wins++ : candidate.losses++;
     candidates.set(key, candidate);
   }
@@ -217,31 +225,50 @@ export function findBestHistoricalTeam(
     (candidate) => candidate.wins > 0 && candidate.wins >= candidate.losses
   );
   if (!winningCandidates.length) return null;
-  const confidenceBattles = Math.max(1, settings.advanced.historicalConfidenceBattles);
+  const confidenceBattles = Math.max(
+    1,
+    settings.advanced.historicalConfidenceBattles
+  );
   winningCandidates.sort((a, b) => {
     const aBattles = a.wins + a.losses;
     const bBattles = b.wins + b.losses;
     const aReliability = calculateHistoricalReliability(
-      a.wins, a.losses, confidenceBattles,
+      a.wins,
+      a.losses,
+      confidenceBattles,
       settings.advanced.historicalReliabilityBase,
       settings.advanced.historicalReliabilityConfidenceWeight
     );
     const bReliability = calculateHistoricalReliability(
-      b.wins, b.losses, confidenceBattles,
+      b.wins,
+      b.losses,
+      confidenceBattles,
       settings.advanced.historicalReliabilityBase,
       settings.advanced.historicalReliabilityConfidenceWeight
     );
-    return bReliability - aReliability || bBattles - aBattles || b.wins - a.wins || a.key.localeCompare(b.key);
+    return (
+      bReliability - aReliability ||
+      bBattles - aBattles ||
+      b.wins - a.wins ||
+      a.key.localeCompare(b.key)
+    );
   });
   for (const candidate of winningCandidates) {
-    const team = candidate.heroIds.map((id) => heroesById.get(id)).filter((hero): hero is Hero => Boolean(hero));
+    const team = candidate.heroIds
+      .map((id) => heroesById.get(id))
+      .filter((hero): hero is Hero => Boolean(hero));
     if (team.length === TEAM_SIZE) return team;
   }
   return null;
 }
 
-export function getEnemyClassKey(enemyIds: string[], heroesById: Map<string, Hero>): string | null {
-  let agi = 0, int = 0, str = 0;
+export function getEnemyClassKey(
+  enemyIds: string[],
+  heroesById: Map<string, Hero>
+): string | null {
+  let agi = 0,
+    int = 0,
+    str = 0;
   for (const id of enemyIds) {
     const cls = heroesById.get(id)?.cls;
     if (cls === "AGI") agi++;
@@ -267,10 +294,17 @@ export function evaluateEnemyClassHistory(
   const heroesById = new Map(heroes.map((hero) => [hero.id, hero]));
   const targetClassKey = getEnemyClassKey(enemyIds, heroesById);
   if (team.length !== TEAM_SIZE || !targetClassKey)
-    return { wins: 0, losses: 0, battles: 0, winRate: 0, classKey: targetClassKey };
+    return {
+      wins: 0,
+      losses: 0,
+      battles: 0,
+      winRate: 0,
+      classKey: targetClassKey,
+    };
   const teamKeyValue = teamKey(team);
   const classKeyCache = new Map<string, string | null>();
-  let wins = 0, losses = 0;
+  let wins = 0,
+    losses = 0;
   for (const combat of combats) {
     if (teamKey(combat.my_heroes ?? []) !== teamKeyValue) continue;
     const historicalEnemy = uniqueIds(combat.enemy_heroes ?? []);
@@ -285,7 +319,13 @@ export function evaluateEnemyClassHistory(
     combat.won ? wins++ : losses++;
   }
   const battles = wins + losses;
-  return { wins, losses, battles, winRate: calculateWinRate(wins, battles), classKey: targetClassKey };
+  return {
+    wins,
+    losses,
+    battles,
+    winRate: calculateWinRate(wins, battles),
+    classKey: targetClassKey,
+  };
 }
 
 export function findBestHistoricalClassTeam(
@@ -297,7 +337,10 @@ export function findBestHistoricalClassTeam(
   const targetClassKey = getEnemyClassKey(enemyIds, heroesById);
   if (!targetClassKey) return null;
   const classKeyCache = new Map<string, string | null>();
-  const candidates = new Map<string, { heroIds: string[]; wins: number; losses: number; key: string }>();
+  const candidates = new Map<
+    string,
+    { heroIds: string[]; wins: number; losses: number; key: string }
+  >();
   for (const combat of combats) {
     const historicalEnemy = uniqueIds(combat.enemy_heroes ?? []);
     if (historicalEnemy.length !== TEAM_SIZE) continue;
@@ -311,31 +354,52 @@ export function findBestHistoricalClassTeam(
     const heroIds = uniqueIds(combat.my_heroes ?? []);
     if (heroIds.length !== TEAM_SIZE) continue;
     const key = teamKey(heroIds);
-    const candidate = candidates.get(key) ?? { heroIds, wins: 0, losses: 0, key };
+    const candidate = candidates.get(key) ?? {
+      heroIds,
+      wins: 0,
+      losses: 0,
+      key,
+    };
     combat.won ? candidate.wins++ : candidate.losses++;
     candidates.set(key, candidate);
   }
   const settings = getEngineSettings();
-  const confidenceBattles = Math.max(1, settings.advanced.historicalConfidenceBattles);
+  const confidenceBattles = Math.max(
+    1,
+    settings.advanced.historicalConfidenceBattles
+  );
   const ordered = [...candidates.values()]
-    .filter((candidate) => candidate.wins > 0 && candidate.wins >= candidate.losses)
+    .filter(
+      (candidate) => candidate.wins > 0 && candidate.wins >= candidate.losses
+    )
     .sort((a, b) => {
       const aBattles = a.wins + a.losses;
       const bBattles = b.wins + b.losses;
       const aReliability = calculateHistoricalReliability(
-        a.wins, a.losses, confidenceBattles,
+        a.wins,
+        a.losses,
+        confidenceBattles,
         settings.advanced.historicalReliabilityBase,
         settings.advanced.historicalReliabilityConfidenceWeight
       );
       const bReliability = calculateHistoricalReliability(
-        b.wins, b.losses, confidenceBattles,
+        b.wins,
+        b.losses,
+        confidenceBattles,
         settings.advanced.historicalReliabilityBase,
         settings.advanced.historicalReliabilityConfidenceWeight
       );
-      return bReliability - aReliability || bBattles - aBattles || b.wins - a.wins || a.key.localeCompare(b.key);
+      return (
+        bReliability - aReliability ||
+        bBattles - aBattles ||
+        b.wins - a.wins ||
+        a.key.localeCompare(b.key)
+      );
     });
   for (const candidate of ordered) {
-    const team = candidate.heroIds.map((id) => heroesById.get(id)).filter((hero): hero is Hero => Boolean(hero));
+    const team = candidate.heroIds
+      .map((id) => heroesById.get(id))
+      .filter((hero): hero is Hero => Boolean(hero));
     if (team.length === TEAM_SIZE) return team;
   }
   return null;

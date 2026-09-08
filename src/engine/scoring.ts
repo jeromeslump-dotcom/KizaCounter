@@ -30,12 +30,10 @@ export {
 const TEAM_SIZE = 5;
 
 export type RecommendationSource =
-  | "exact-history"
-  | "class-history"
-  | "core4"
-  | "counter-usage"
-  | "fallback";
-export type RecommendationSourceCallback = (source: RecommendationSource) => void;
+  "exact-history" | "class-history" | "core4" | "counter-usage" | "fallback";
+export type RecommendationSourceCallback = (
+  source: RecommendationSource
+) => void;
 
 function core4ScoreForTeam(
   teamIds: string[],
@@ -73,13 +71,19 @@ export function evaluateTeam(
   const exactScore =
     exactHistory.battles > 0
       ? (exactHistory.winRate / 100) *
-        historicalConfidence(exactHistory.battles, settings.advanced.historicalConfidenceBattles)
+        historicalConfidence(
+          exactHistory.battles,
+          settings.advanced.historicalConfidenceBattles
+        )
       : 0;
   const coreScore = core4ScoreForTeam(teamIds, enemyIds, combats, settings);
   const generalScore =
     history.battles > 0
       ? (history.winRate / 100) *
-        historicalConfidence(history.battles, settings.advanced.historicalConfidenceBattles)
+        historicalConfidence(
+          history.battles,
+          settings.advanced.historicalConfidenceBattles
+        )
       : 0;
   return {
     score: Math.max(exactScore, coreScore, generalScore),
@@ -113,7 +117,12 @@ export function recommendTeam(
   }
   const settings = getEngineSettings();
   const historicalContext = buildHistoricalEnemyContext(enemyIds, combats);
-  const historicalTeam = findBestHistoricalTeam(enemyIds, combats, heroes, historicalContext);
+  const historicalTeam = findBestHistoricalTeam(
+    enemyIds,
+    combats,
+    heroes,
+    historicalContext
+  );
   if (historicalTeam && historicalTeam.length === TEAM_SIZE) {
     onSource?.("exact-history");
     return historicalTeam;
@@ -124,10 +133,19 @@ export function recommendTeam(
     return availableHeroes;
   }
   const heroesById = new Map(heroes.map((hero) => [hero.id, hero]));
-  const counterUsage = calculateCounterUsage(enemyIds, combats, historicalContext);
+  const counterUsage = calculateCounterUsage(
+    enemyIds,
+    combats,
+    historicalContext
+  );
   const ranked = availableHeroes
-    .map((hero) => ({ hero, score: counterHeroScore(hero, counterUsage, settings) }))
-    .sort((a, b) => b.score - a.score || a.hero.name.localeCompare(b.hero.name));
+    .map((hero) => ({
+      hero,
+      score: counterHeroScore(hero, counterUsage, settings),
+    }))
+    .sort(
+      (a, b) => b.score - a.score || a.hero.name.localeCompare(b.hero.name)
+    );
 
   const core4Analyses = analyzeCore4Plus1(enemyIds, combats, settings);
   if (core4Analyses.length > 0) {
@@ -176,7 +194,11 @@ export function recommendTeam(
     }
   }
 
-  const historicalClassTeam = findBestHistoricalClassTeam(enemyIds, combats, heroes);
+  const historicalClassTeam = findBestHistoricalClassTeam(
+    enemyIds,
+    combats,
+    heroes
+  );
   if (historicalClassTeam && historicalClassTeam.length === TEAM_SIZE) {
     onSource?.("class-history");
     return historicalClassTeam;

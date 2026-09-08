@@ -56,7 +56,10 @@ export default function CombatOrderEditor({
 
     try {
       setSaving(true);
-      await saveTeamOrder(heroes.map((hero) => hero.id), order);
+      await saveTeamOrder(
+        heroes.map((hero) => hero.id),
+        order
+      );
       onSaved(order);
     } catch (error) {
       console.error("Erreur enregistrement ordre équipe :", error);
