@@ -132,10 +132,7 @@ function isHistoricallyWinlessAgainstEnemy(
   enemyIds: string[],
   combats: Combat[]
 ): boolean {
-  if (
-    team.length !== TEAM_SIZE ||
-    uniqueIds(enemyIds).length !== TEAM_SIZE
-  ) {
+  if (team.length !== TEAM_SIZE || uniqueIds(enemyIds).length !== TEAM_SIZE) {
     return false;
   }
 
@@ -212,7 +209,8 @@ function findBestEnabledHistoricalTeam(
     sortBySimilarity
   )) {
     const team = resolveCandidateTeam(candidate.heroIds, candidateHeroesById);
-    if (team && isUsableRecommendationTeam(team, combats, enemyIds)) return team;
+    if (team && isUsableRecommendationTeam(team, combats, enemyIds))
+      return team;
   }
   return null;
 }
@@ -416,7 +414,8 @@ function findBestEnabledCore4HistoryTeam(
       if (teamKey(teamIds) === excludedTeamKey) continue;
 
       const team = resolveCandidateTeam(teamIds, candidateHeroesById);
-      if (team && isUsableRecommendationTeam(team, combats, enemyIds)) return team;
+      if (team && isUsableRecommendationTeam(team, combats, enemyIds))
+        return team;
     }
   }
 

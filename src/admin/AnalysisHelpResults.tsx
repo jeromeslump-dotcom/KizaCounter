@@ -169,9 +169,10 @@ export default function AnalysisHelpResults({
                       <b>{losses}</b>
                     </span>
                     <span>
-                      <span className="ui-text-muted">Taux historique</span>{" "}
+                      <span className="ui-text-muted">Taux de victoire</span>{" "}
                       <b>
-                        {count > 0 ? ((wins / count) * 100).toFixed(1) : "0.0"} %
+                        {count > 0 ? ((wins / count) * 100).toFixed(1) : "0.0"}{" "}
+                        %
                       </b>
                     </span>
                   </div>

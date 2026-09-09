@@ -7,7 +7,10 @@ import {
   evaluateExactTeamHistory,
   evaluateTeamHistory,
 } from "../engine/scoring";
-import { analyzeCore4Plus1, type Core4Analysis } from "../engine/historicalCore4";
+import {
+  analyzeCore4Plus1,
+  type Core4Analysis,
+} from "../engine/historicalCore4";
 import { findHistoricalDefeatCounters } from "../engine/defeatHistory";
 import { getEngineSettings } from "../engine/engineSettings";
 import {
@@ -197,9 +200,7 @@ export default function CounterModal({
 
   const core4Analyses = useMemo(
     () =>
-      open && enemyIds.length === 5
-        ? analyzeCore4Plus1(enemyIds, combats)
-        : [],
+      open && enemyIds.length === 5 ? analyzeCore4Plus1(enemyIds, combats) : [],
     [open, enemyIds, combats]
   );
 
@@ -295,17 +296,24 @@ export default function CounterModal({
 
     historyLabel = canViewDetailedHistory ? (
       <span>
-        Core4 : {formatCount(recommendedCore4.battles, "combat")} · {recommendedCore4.wins} V · {recommendedCore4.losses} D · {Math.round(recommendedCore4.winRate)} %
+        Core4 : {formatCount(recommendedCore4.battles, "combat")} ·{" "}
+        {recommendedCore4.wins} V · {recommendedCore4.losses} D ·{" "}
+        {Math.round(recommendedCore4.winRate)} %
         {replacement && (
           <>
-            {" · "}Remplacement : {formatCount(replacement.battles, "combat")} · {replacement.wins} V · {replacement.losses} D · {Math.round(replacement.winRate)} %
+            {" · "}Remplacement : {formatCount(replacement.battles, "combat")} ·{" "}
+            {replacement.wins} V · {replacement.losses} D ·{" "}
+            {Math.round(replacement.winRate)} %
           </>
         )}
       </span>
     ) : (
       <span>Core4 : {Math.round(recommendedCore4.winRate)} %</span>
     );
-  } else if (recommendationSource === "defeat-history" && recommendedDefeatHistory) {
+  } else if (
+    recommendationSource === "defeat-history" &&
+    recommendedDefeatHistory
+  ) {
     historyLabel = canViewDetailedHistory
       ? `${Math.round(recommendedDefeatHistory.lossRate * 100)} % · ${formatCount(recommendedDefeatHistory.battles, "combat")} · ${recommendedDefeatHistory.wins} V / ${recommendedDefeatHistory.losses} D`
       : `${Math.round(recommendedDefeatHistory.lossRate * 100)} %`;
@@ -332,11 +340,13 @@ export default function CounterModal({
       : undefined;
     alternativeHistoryLabel = canViewDetailedHistory ? (
       <span>
-        Core4 · {Math.round(alternativeCore4.winRate)} % · {formatCount(alternativeCore4.battles, "combat")}
+        Core4 · {Math.round(alternativeCore4.winRate)} % ·{" "}
+        {formatCount(alternativeCore4.battles, "combat")}
         {replacement && (
           <>
             {" · Remplacement "}
-            {Math.round(replacement.winRate)} % · {formatCount(replacement.battles, "combat")}
+            {Math.round(replacement.winRate)} % ·{" "}
+            {formatCount(replacement.battles, "combat")}
           </>
         )}
       </span>
@@ -358,7 +368,8 @@ export default function CounterModal({
         ? `${Math.round(recommendedClassHistory.winRate)} %`
         : recommendationSource === "core4" && recommendedCore4
           ? `${Math.round(recommendedCore4.winRate)} %`
-          : recommendationSource === "defeat-history" && recommendedDefeatHistory
+          : recommendationSource === "defeat-history" &&
+              recommendedDefeatHistory
             ? `${Math.round(recommendedDefeatHistory.lossRate * 100)} %`
             : null;
 
