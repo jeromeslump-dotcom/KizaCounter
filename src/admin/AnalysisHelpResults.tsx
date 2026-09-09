@@ -1,6 +1,6 @@
 import type { Hero } from "../data/heroes";
-import CompactTeam from "../components/CompactTeam";
 import type { TeamEvaluation } from "../types";
+import CompactTeam from "../components/CompactTeam";
 
 export interface HeroEvaluationGroup {
   team: Hero[];
@@ -115,19 +115,7 @@ export default function AnalysisHelpResults({
         ) : (
           <div className="space-y-3">
             {combatGroups.map(
-              (
-                {
-                  team,
-                  evaluation,
-                  scoreA,
-                  scoreB,
-                  count,
-                  wins,
-                  losses,
-                  latestDate,
-                },
-                index
-              ) => (
+              ({ team, count, wins, losses, latestDate }, index) => (
                 <article
                   key={`${teamKey(team.map((hero) => hero.id))}-${index}`}
                   className="ui-action rounded-xl border p-3 sm:p-4"
@@ -144,24 +132,6 @@ export default function AnalysisHelpResults({
                       <span className="ui-text-muted text-[10px]">
                         Dernier combat : {formatDate(latestDate)}
                       </span>
-                    </div>
-                    <div className="flex gap-2">
-                      <div className="rounded-lg border ui-divider px-3 py-2 text-right">
-                        <div className="ui-text-muted text-[9px] uppercase tracking-wider">
-                          Score moteur A
-                        </div>
-                        <div className="ui-text-primary text-xl font-black">
-                          {scoreA !== null ? scoreA.toFixed(1) : "—"}
-                        </div>
-                      </div>
-                      <div className="rounded-lg border ui-divider px-3 py-2 text-right">
-                        <div className="ui-text-muted text-[9px] uppercase tracking-wider">
-                          Score moteur B
-                        </div>
-                        <div className="ui-text-primary text-xl font-black">
-                          {scoreB !== null ? scoreB.toFixed(1) : "—"}
-                        </div>
-                      </div>
                     </div>
                   </div>
 
@@ -186,25 +156,25 @@ export default function AnalysisHelpResults({
                     ))}
                   </div>
 
-                  {evaluation && (
-                    <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1 text-[10px]">
-                      <span className="ui-text-primary font-black">
-                        ×{count} combats
-                      </span>
-                      <span>
-                        <span className="ui-text-muted">Victoires</span>{" "}
-                        <b>{wins}</b>
-                      </span>
-                      <span>
-                        <span className="ui-text-muted">Défaites</span>{" "}
-                        <b>{losses}</b>
-                      </span>
-                      <span>
-                        <span className="ui-text-muted">Taux historique</span>{" "}
-                        <b>{evaluation.historicalWinRate.toFixed(1)} %</b>
-                      </span>
-                    </div>
-                  )}
+                  <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1 text-[10px]">
+                    <span className="ui-text-primary font-black">
+                      ×{count} combats
+                    </span>
+                    <span>
+                      <span className="ui-text-muted">Victoires</span>{" "}
+                      <b>{wins}</b>
+                    </span>
+                    <span>
+                      <span className="ui-text-muted">Défaites</span>{" "}
+                      <b>{losses}</b>
+                    </span>
+                    <span>
+                      <span className="ui-text-muted">Taux historique</span>{" "}
+                      <b>
+                        {count > 0 ? ((wins / count) * 100).toFixed(1) : "0.0"} %
+                      </b>
+                    </span>
+                  </div>
                 </article>
               )
             )}
