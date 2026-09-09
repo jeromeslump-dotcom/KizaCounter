@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import type { Combat, HeroClassFilter, HeroSort } from "../types";
 import type { Hero } from "../data/heroes";
-import { evaluateTeam, calculateHeroUsage } from "../engine/scoring";
+import { calculateHeroUsage } from "../engine/scoring";
 import AnalysisHelpEnemySelection from "./AnalysisHelpEnemySelection";
 import AnalysisHelpResults, {
   type HeroEvaluationGroup,
@@ -79,11 +79,6 @@ export default function AnalysisHelp({
       const team = heroIds
         .map((id) => heroes.find((hero) => hero.id === id))
         .filter((hero): hero is Hero => Boolean(hero));
-      const evaluation =
-        team.length === TEAM_SIZE
-          ? evaluateTeam(team, combats, enemyIds)
-          : null;
-      const score = evaluation ? evaluation.score : null;
 
       if (existing) {
         existing.count += 1;
@@ -97,9 +92,9 @@ export default function AnalysisHelp({
       } else {
         groups.set(key, {
           team,
-          evaluation,
-          scoreA: score,
-          scoreB: score,
+          evaluation: null,
+          scoreA: null,
+          scoreB: null,
           count: 1,
           wins: combat.won ? 1 : 0,
           losses: combat.won ? 0 : 1,
@@ -108,17 +103,13 @@ export default function AnalysisHelp({
       }
     }
 
-    return [...groups.values()].sort((a, b) => {
-      const scoreA = a.scoreA ?? -Infinity;
-      const scoreB = b.scoreA ?? -Infinity;
-      return (
-        scoreB - scoreA ||
+    return [...groups.values()].sort(
+      (a, b) =>
         b.wins - a.wins ||
         b.count - a.count ||
         (b.latestDate ?? "").localeCompare(a.latestDate ?? "")
-      );
-    });
-  }, [combats, heroes, matchingCombats, enemyIds]);
+    );
+  }, [matchingCombats, heroes]);
 
   const toggleEnemy = (hero: Hero) => {
     setEnemyIds((current) => {
