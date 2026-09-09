@@ -500,12 +500,12 @@ export default function CounterModal({
           </div>
 
           <div className="mt-5">
-            <CombatForm
-              enemies={enemies}
-              myTeam={team}
-              onSave={onSave}
-              onCancel={onClose}
-            />
+<CombatForm
+  enemies={enemies}
+  myHeroes={team}
+  onSave={onSave}
+  onClose={onClose}
+/>
           </div>
         </div>
       </div>
