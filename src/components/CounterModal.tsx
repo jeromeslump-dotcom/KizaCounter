@@ -268,7 +268,7 @@ export default function CounterModal({
       <strong>Nouvelle équipe</strong>
     );
 
-  let historyLabel: ReactNode = "Aucune statistique historique affichée";
+  let historyLabel: ReactNode = "Pas d’historique disponible";
 
   if (recommendationSource === "exact-history") {
     historyLabel =
@@ -431,81 +431,113 @@ export default function CounterModal({
                 team.length === 5 ? currentTeamHistoryLabel : undefined
               }
               heroes={team}
-              selectedIds={team.map((hero) => hero.id)}
+              selectedIds={teamIds}
+              onHeroClick={onHeroClick}
               compactPortrait
             />
           </div>
 
           {hasRecommendations && (
-            <div className="mt-5 space-y-4">
-              <div className="ui-panel rounded-xl border p-4">
-                <div className="mb-3 flex items-center justify-between gap-3">
-                  <div>
-                    <h3 className="ui-text-primary text-sm font-black sm:text-base">
+            <div className="ui-recommendations mt-4 rounded-xl border p-2 sm:p-3">
+              {recommendedTeam.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => onSelectRecommendedTeam(recommendedIds)}
+                  className={[
+                    "ui-recommendation-team",
+                    recommendedIds.every((id) => teamIds.includes(id))
+                      ? "ui-recommendation-selected"
+                      : "",
+                  ].join(" ")}
+                >
+                  <div className="mb-2 flex items-center justify-between gap-3">
+                    <div className="whitespace-nowrap text-[10px] font-bold uppercase tracking-wide sm:text-xs">
                       Recommandation initiale
-                    </h3>
-                    <p className="ui-text-secondary mt-1 text-xs">
-                      {recommendationSourceText} · {historyLabel}
-                    </p>
+                    </div>
+                    <div className="shrink-0 text-right text-[10px] font-bold sm:text-xs">
+                      <span className="sm:hidden">
+                        {recommendationMobileHistoryLabel}
+                      </span>
+                      <span className="hidden sm:inline">
+                        {recommendationSourceText}
+                        <span className="ui-text-muted ml-1 font-normal">
+                          · {historyLabel}
+                        </span>
+                      </span>
+                    </div>
                   </div>
+                  <div className="grid grid-cols-5 gap-1.5 sm:gap-2">
+                    {recommendedTeam.map((hero) => (
+                      <span key={hero.id} className="ui-recommendation-hero">
+                        {hero.name}
+                      </span>
+                    ))}
+                  </div>
+                </button>
+              )}
+
+              {alternativeTeam.length > 0 && (
+                <div
+                  className={
+                    recommendedTeam.length > 0
+                      ? "mt-3 border-t ui-divider pt-3"
+                      : ""
+                  }
+                >
                   <button
                     type="button"
-                    onClick={() => onSelectRecommendedTeam(recommendedIds)}
-                    className="ui-button ui-primary shrink-0 rounded-lg px-3 py-2 text-xs font-bold transition"
+                    onClick={() => onSelectRecommendedTeam(alternativeIds)}
+                    className={[
+                      "ui-recommendation-team",
+                      alternativeIds.every((id) => teamIds.includes(id))
+                        ? "ui-recommendation-selected"
+                        : "",
+                    ].join(" ")}
                   >
-                    Utiliser
+                    <div className="mb-2 flex items-center justify-between gap-3">
+                      <div className="whitespace-nowrap text-[10px] font-bold uppercase tracking-wide sm:text-xs">
+                        Alternative
+                      </div>
+                      <div className="shrink-0 text-right text-[10px] font-bold sm:text-xs">
+                        <span className="sm:hidden">
+                          {alternativeMobileHistoryLabel}
+                        </span>
+                        <span className="hidden sm:inline">
+                          {alternativeHistoryLabel}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-5 gap-1.5 sm:gap-2">
+                      {alternativeTeam.map((hero) => (
+                        <span key={hero.id} className="ui-recommendation-hero">
+                          {hero.name}
+                        </span>
+                      ))}
+                    </div>
                   </button>
                 </div>
-                <CompactTeam
-                  title=""
-                  heroes={recommendedTeam}
-                  selectedIds={recommendedIds}
-                  compactPortrait
-                />
-              </div>
-
-              <div className="ui-panel rounded-xl border p-4">
-                <div className="mb-3">
-                  <h3 className="ui-text-primary text-sm font-black sm:text-base">
-                    Alternative
-                  </h3>
-                  <p className="ui-text-secondary mt-1 text-xs">
-                    {alternativeHistoryLabel}
-                  </p>
-                </div>
-                <CompactTeam
-                  title=""
-                  heroes={alternativeTeam}
-                  selectedIds={alternativeIds}
-                  compactPortrait
-                />
-              </div>
+              )}
             </div>
           )}
+
+          <div className="mt-4">
+            <CombatForm enemies={enemies} myHeroes={team} onSave={onSave} />
+          </div>
 
           <div className="mt-5">
             <HeroGrid
               heroes={heroes}
-              selectedIds={teamIds}
               enabledHeroIds={enabledHeroIds}
               activeClass={activeClass}
               query={query}
               sortBy={sortBy}
               usage={usage}
-              onHeroClick={onHeroClick}
+              selectedIds={teamIds}
               onQueryChange={onQueryChange}
               onClassChange={onClassChange}
               onSortChange={onSortChange}
+              onHeroClick={onHeroClick}
             />
-          </div>
-
-          <div className="mt-5">
-<CombatForm
-  enemies={enemies}
-  myHeroes={team}
-  onSave={onSave}
-  onClose={onClose}
-/>
           </div>
         </div>
       </div>
