@@ -1,4 +1,4 @@
-﻿// src/data/heroes.ts
+// src/data/heroes.ts
 
 // ============================================================
 // CLASSES DES HEROS
@@ -523,23 +523,3 @@ export const HEROES: Hero[] = [
 // ============================================================
 
 export const CLASSES: HeroClass[] = ["STR", "AGI", "INT"];
-
-export const CLASS_BEATS: Record<HeroClass, HeroClass> = {
-  AGI: "INT",
-  INT: "STR",
-  STR: "AGI",
-};
-
-export const CLASS_TEXT: Record<HeroClass, string> = {
-  STR: "text-rose-300",
-  AGI: "text-emerald-300",
-  INT: "text-sky-300",
-};
-
-// ============================================================
-// FORMATAGE DES STATISTIQUES
-// ============================================================
-
-export function formatStat(n: number): string {
-  return n.toLocaleString("fr-FR");
-}

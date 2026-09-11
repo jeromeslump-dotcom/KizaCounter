@@ -62,22 +62,6 @@ function normalizeIds(ids: string[]): string[] {
 // GÉNÉRATION DES CORE4
 // ============================================================
 
-function generateCore4s(teamIds: string[]): string[][] {
-  const team = normalizeIds(teamIds);
-
-  if (team.length !== 5) {
-    return [];
-  }
-
-  const cores: string[][] = [];
-
-  for (let index = 0; index < team.length; index++) {
-    cores.push(team.filter((_, currentIndex) => currentIndex !== index));
-  }
-
-  return cores;
-}
-
 function generateCore4Entries(teamIds: string[]): Core4Entry[] {
   const team = normalizeIds(teamIds);
 
@@ -282,7 +266,11 @@ export function analyzeCore4Plus1(
   const analyses: Core4Analysis[] = [];
 
   for (const accumulator of coreMap.values()) {
-    const analysis = buildCore4Analysis(normalizedEnemy, accumulator, settings);
+    const analysis = buildCore4Analysis(
+      normalizedEnemy,
+      accumulator,
+      settings
+    );
 
     if (analysis) {
       analyses.push(analysis);
@@ -423,16 +411,4 @@ export function core4ReplacementScore(
   }
 
   return 0;
-}
-
-// ============================================================
-// UTILITAIRES PUBLICS
-// ============================================================
-
-export function getPossibleCore4s(teamIds: string[]): string[][] {
-  return generateCore4s(teamIds);
-}
-
-export function core4Key(coreIds: string[]): string {
-  return coreIds.join("|");
 }

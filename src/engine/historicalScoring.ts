@@ -1,5 +1,5 @@
 import type { Hero } from "../data/heroes";
-import type { Combat, CoverageReport, HeroUsage } from "../types";
+import type { Combat, HeroUsage } from "../types";
 import { getEngineSettings } from "./engineSettings";
 import { teamKey, uniqueIds } from "./teamUtils";
 
@@ -93,87 +93,6 @@ export function calculateHeroUsage(
   for (const entry of Object.values(usage))
     entry.winRate = entry.total > 0 ? (entry.wins / entry.total) * 100 : 0;
   return usage;
-}
-
-export function coverageReport(
-  enemyIds: string[],
-  teamIds: string[],
-  combats: Combat[]
-): CoverageReport {
-  const normalizedEnemy = uniqueIds(enemyIds);
-  const team = uniqueIds(teamIds);
-  if (normalizedEnemy.length !== TEAM_SIZE || team.length === 0)
-    return {
-      enemyIds: normalizedEnemy,
-      covered: 0,
-      total: team.length,
-      percentage: 0,
-      heroes: [],
-    };
-  const enemyKey = teamKey(normalizedEnemy);
-  type ReplacementStats = { wins: number; losses: number };
-  const byHeroAndCore = new Map<string, Map<string, ReplacementStats>>();
-  for (const combat of combats) {
-    if (teamKey(combat.enemy_heroes ?? []) !== enemyKey) continue;
-    const myIds = uniqueIds(combat.my_heroes ?? []);
-    if (myIds.length !== TEAM_SIZE) continue;
-    for (const heroId of team) {
-      if (!myIds.includes(heroId)) continue;
-      const coreIds = myIds.filter((id) => id !== heroId);
-      if (coreIds.length !== TEAM_SIZE - 1) continue;
-      const coreKey = teamKey(coreIds);
-      const heroGroups =
-        byHeroAndCore.get(heroId) ?? new Map<string, ReplacementStats>();
-      const stats = heroGroups.get(coreKey) ?? { wins: 0, losses: 0 };
-      combat.won ? stats.wins++ : stats.losses++;
-      heroGroups.set(coreKey, stats);
-      byHeroAndCore.set(heroId, heroGroups);
-    }
-  }
-  const settings = getEngineSettings();
-  const heroes = team
-    .map((heroId) => {
-      let wins = 0,
-        losses = 0;
-      const heroGroups = byHeroAndCore.get(heroId);
-      if (heroGroups)
-        for (const stats of heroGroups.values()) {
-          const battles = stats.wins + stats.losses;
-          if (battles < settings.advanced.core4MinBattles) continue;
-          wins += stats.wins;
-          losses += stats.losses;
-        }
-      const battles = wins + losses;
-      const winRate = calculateWinRate(wins, battles);
-      const confidence = historicalConfidence(
-        battles,
-        settings.advanced.core4ConfidenceBattles
-      );
-      return {
-        heroId,
-        wins,
-        losses,
-        battles,
-        winRate,
-        confidence,
-        score: winRate * confidence,
-      };
-    })
-    .sort(
-      (a, b) =>
-        b.score - a.score ||
-        b.battles - a.battles ||
-        b.wins - a.wins ||
-        a.heroId.localeCompare(b.heroId)
-    );
-  const covered = heroes.filter((hero) => hero.wins > 0).length;
-  return {
-    enemyIds: normalizedEnemy,
-    covered,
-    total: team.length,
-    percentage: team.length > 0 ? (covered / team.length) * 100 : 0,
-    heroes,
-  };
 }
 
 export function evaluateTeamHistory(teamIds: string[], combats: Combat[]) {

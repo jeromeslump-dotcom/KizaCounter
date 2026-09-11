@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { HEROES } from "../data/heroes";
 import { supabase } from "../storage/supabase";
@@ -106,14 +106,8 @@ export default function useHeroManager() {
 
   const activeCount = enabledHeroIds.size;
 
-  const enabledHeroes = useMemo(
-    () => HEROES.filter((hero) => enabledHeroIds.has(hero.id)),
-    [enabledHeroIds]
-  );
-
   return {
     enabledHeroIds,
-    enabledHeroes,
     activeCount,
     totalCount: HEROES.length,
     loaded,

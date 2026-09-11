@@ -171,8 +171,6 @@ export default function AuthPanel() {
               }}
               onCombatHistory={openCombatHistory}
               onAnalysisHelp={openAnalysisHelp}
-              heroes={HEROES}
-              combats={adminCombats}
             />
 
             <UserManagement
