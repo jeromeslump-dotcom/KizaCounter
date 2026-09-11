@@ -11,7 +11,7 @@ import {
   findBestHistoricalTeam,
   historicalConfidence,
   calculateHeroUsage,
-  } from "./historicalScoring";
+} from "./historicalScoring";
 import { calculateCounterUsage, counterHeroScore } from "./counterUsage";
 import { teamKey } from "./teamUtils";
 
@@ -23,7 +23,7 @@ export {
   findBestHistoricalTeam,
   historicalConfidence,
   calculateHeroUsage,
-  };
+};
 
 const TEAM_SIZE = 5;
 

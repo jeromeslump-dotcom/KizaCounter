@@ -266,11 +266,7 @@ export function analyzeCore4Plus1(
   const analyses: Core4Analysis[] = [];
 
   for (const accumulator of coreMap.values()) {
-    const analysis = buildCore4Analysis(
-      normalizedEnemy,
-      accumulator,
-      settings
-    );
+    const analysis = buildCore4Analysis(normalizedEnemy, accumulator, settings);
 
     if (analysis) {
       analyses.push(analysis);

@@ -47,14 +47,7 @@ export interface TeamEvaluation {
 export type HeroClassFilter = "ALL" | HeroClass;
 
 export type HeroSort =
-  | "played"
-  | "hp"
-  | "atk"
-  | "matk"
-  | "totalAtk"
-  | "def"
-  | "mdef"
-  | "totalDef";
+  "played" | "hp" | "atk" | "matk" | "totalAtk" | "def" | "mdef" | "totalDef";
 
 // ============================================================
 // SCORE D'ÉQUIPE
