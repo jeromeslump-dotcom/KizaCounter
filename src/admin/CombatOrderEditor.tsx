@@ -107,7 +107,7 @@ export default function CombatOrderEditor({
                   onChange={(event) =>
                     setPosition(hero.id, Number(event.target.value))
                   }
-                  className="ui-input user-management-role min-w-[72px] w-full max-w-[72px] rounded-lg border px-2 py-1.5 text-center text-sm font-bold"
+                  className="ui-input w-full max-w-[72px] rounded-lg border px-2 py-1.5 text-center text-sm font-bold"
                   aria-label={`Position de ${hero.name}`}
                 >
                   {[1, 2, 3, 4, 5].map((position) => (
@@ -121,7 +121,13 @@ export default function CombatOrderEditor({
           })}
         </div>
 
-        <p className={isValid ? "combat-order-editor-valid" : "combat-order-editor-invalid"}>
+        <p
+          className={
+            isValid
+              ? "ui-success mt-4 text-center text-xs font-bold"
+              : "ui-score mt-4 text-center text-xs font-bold"
+          }
+        >
           {isValid
             ? "✓ Les 5 positions sont uniques"
             : "⚠️ Chaque position 1 à 5 doit être utilisée une seule fois"}
@@ -141,7 +147,7 @@ export default function CombatOrderEditor({
           type="button"
           onClick={handleSave}
           disabled={!isValid || saving}
-          className="combat-order-editor-save rounded-lg border px-4 py-2 text-xs font-black transition disabled:cursor-not-allowed disabled:opacity-40"
+          className="ui-success rounded-lg border px-4 py-2 text-xs font-black transition disabled:cursor-not-allowed disabled:opacity-40"
         >
           {saving ? "Enregistrement…" : "✓ Enregistrer"}
         </button>
