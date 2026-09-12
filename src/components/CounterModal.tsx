@@ -17,6 +17,7 @@ import {
   recommendationSourceLabel,
   type RecommendationSource,
 } from "../engine/recommendationSource";
+import { teamKey } from "../engine/teamUtils";
 
 import CompactTeam from "./CompactTeam";
 import CombatForm from "./CombatForm";
@@ -53,10 +54,6 @@ const EMPTY_HISTORY = {
   battles: 0,
   winRate: 0,
 };
-
-function teamKey(ids: string[]): string {
-  return [...new Set(ids)].sort().join("|");
-}
 
 function findMatchingCore4(
   teamIds: string[],
