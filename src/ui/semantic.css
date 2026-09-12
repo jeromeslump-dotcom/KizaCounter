@@ -7,12 +7,16 @@
    d'être répétés dans les TSX.
 
    Cette couche complète les couleurs/états définis dans index.css
-   avec les propriétés structurelles communes du design :
-   rayons, transitions, contours, ombres et finitions.
+   et reprend ici les couleurs génériques afin que les 15 tokens
+   centraux deviennent le véritable point de contrôle du design.
 
-   Pas de système de thème ici : cette couche consolide simplement
-   le design actuel et prépare une évolution future sans imposer
+   Pas de système de thème ici : cette couche prépare simplement
+   le design actuel à un futur changement de valeurs sans imposer
    de ThemeProvider ou de data-theme.
+   ============================================================ */
+
+/* ============================================================
+   SURFACES ET CONTENEURS
    ============================================================ */
 
 .ui-panel,
@@ -23,17 +27,28 @@
 
 .ui-panel {
   color: var(--ui-text-primary);
+  background: var(--ui-panel);
+  border-color: var(--ui-border);
   box-shadow: 0 8px 24px rgb(0 0 0 / 0.14);
 }
 
-.ui-panel-alt,
-.ui-panel-empty {
+.ui-panel-alt {
   color: var(--ui-text-primary);
+  background: var(--ui-panel-alt);
+  border-color: var(--ui-border);
+}
+
+.ui-panel-empty {
+  color: var(--ui-text-secondary);
+  background: var(--ui-card);
+  border-color: var(--ui-border);
 }
 
 .ui-card {
   border-radius: 0.75rem;
   color: var(--ui-text-primary);
+  background: var(--ui-card);
+  border-color: var(--ui-border);
 }
 
 .ui-card-hover {
@@ -43,17 +58,40 @@
     box-shadow 0.2s ease;
 }
 
+.ui-card-hover:hover {
+  border-color: var(--ui-border-hover);
+}
+
+/* ============================================================
+   CHAMPS ET ACTIONS
+   ============================================================ */
+
 .ui-input {
   border-radius: 0.5rem;
   outline: none;
+  border-color: var(--ui-border);
+  background: var(--ui-bg);
+  color: var(--ui-text-primary);
   transition:
     border-color 0.2s ease,
     box-shadow 0.2s ease,
     background-color 0.2s ease;
 }
 
+.ui-input::placeholder {
+  color: var(--ui-text-muted);
+}
+
+.ui-input:focus {
+  border-color: var(--ui-accent);
+  box-shadow: 0 0 0 1px rgb(245 158 11 / 0.15);
+}
+
 .ui-action {
   border-radius: 0.5rem;
+  border-color: var(--ui-border);
+  background: var(--ui-bg);
+  color: var(--ui-text-soft);
   transition:
     border-color 0.2s ease,
     background-color 0.2s ease,
@@ -61,8 +99,169 @@
     box-shadow 0.2s ease;
 }
 
+.ui-action:hover {
+  border-color: var(--ui-accent);
+  background: var(--ui-panel-alt);
+  color: var(--ui-accent-soft);
+}
+
+/* ============================================================
+   ÉTATS SÉMANTIQUES
+   ============================================================ */
+
+.ui-danger {
+  border-color: color-mix(in srgb, var(--ui-danger) 40%, transparent);
+  background: color-mix(in srgb, var(--ui-danger) 18%, transparent);
+  color: color-mix(in srgb, var(--ui-danger) 80%, white);
+}
+
+.ui-danger:hover {
+  border-color: var(--ui-danger);
+  background: color-mix(in srgb, var(--ui-danger) 30%, transparent);
+  color: color-mix(in srgb, var(--ui-danger) 88%, white);
+}
+
+.ui-success {
+  border-color: color-mix(in srgb, var(--ui-success) 40%, transparent);
+  background: color-mix(in srgb, var(--ui-success) 20%, transparent);
+  color: color-mix(in srgb, var(--ui-success) 72%, white);
+}
+
+.ui-success:hover {
+  border-color: var(--ui-success);
+  background: color-mix(in srgb, var(--ui-success) 30%, transparent);
+  color: color-mix(in srgb, var(--ui-success) 82%, white);
+}
+
+.ui-sky {
+  border-color: color-mix(in srgb, var(--ui-sky) 35%, transparent);
+  background: color-mix(in srgb, var(--ui-sky) 12%, transparent);
+  color: color-mix(in srgb, var(--ui-sky) 62%, white);
+}
+
+.ui-sky:hover {
+  border-color: color-mix(in srgb, var(--ui-sky) 70%, transparent);
+}
+
+.ui-score {
+  border-color: color-mix(in srgb, var(--ui-accent) 35%, transparent);
+  background: color-mix(in srgb, var(--ui-accent) 10%, transparent);
+  color: var(--ui-accent-soft);
+}
+
+.ui-error {
+  color: var(--ui-danger);
+}
+
+/* ============================================================
+   TEXTE ET SÉPARATEURS
+   ============================================================ */
+
+.ui-text-primary,
+.ui-stat-value {
+  color: var(--ui-text-primary);
+}
+
+.ui-text-secondary {
+  color: var(--ui-text-secondary);
+}
+
+.ui-text-muted {
+  color: var(--ui-text-muted);
+}
+
+.ui-text-soft {
+  color: var(--ui-text-soft);
+}
+
+.ui-divider {
+  border-color: var(--ui-border);
+}
+
+.ui-link-sky:hover {
+  color: var(--ui-sky);
+  border-color: color-mix(in srgb, var(--ui-sky) 50%, transparent);
+}
+
+.ui-muted-hover:hover {
+  color: var(--ui-text-soft);
+}
+
+.ui-hover-sky:hover {
+  border-color: color-mix(in srgb, var(--ui-sky) 70%, transparent);
+}
+
+.ui-hover-red:hover {
+  border-color: var(--ui-danger);
+}
+
+/* ============================================================
+   MODALES ET CONTENEUR GLOBAL
+   ============================================================ */
+
+.ui-modal-overlay {
+  background: rgb(0 0 0 / 0.78);
+}
+
 .ui-modal {
   border-radius: 1rem;
   color: var(--ui-text-primary);
+  border-color: var(--ui-border);
+  background: var(--ui-panel-alt);
   box-shadow: 0 24px 64px rgb(0 0 0 / 0.35);
+}
+
+.app-shell {
+  color: var(--ui-text-primary);
+  background: var(--ui-bg);
+}
+
+/* ============================================================
+   ÉLÉMENTS GÉNÉRIQUES DES GRILLES / SÉLECTIONS
+   ============================================================ */
+
+.selection-order-badge {
+  background: var(--ui-accent);
+  color: var(--ui-bg);
+  border-color: var(--ui-text-primary);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--ui-accent) 25%, transparent);
+}
+
+.hero-grid-panel {
+  border-color: var(--ui-border);
+  background: var(--ui-panel);
+}
+
+.hero-grid-input,
+.hero-grid-select {
+  border-color: var(--ui-border);
+  background: var(--ui-bg);
+  color: var(--ui-text-primary);
+}
+
+.hero-grid-input::placeholder {
+  color: var(--ui-text-muted);
+}
+
+.hero-grid-input:focus,
+.hero-grid-select:focus {
+  border-color: var(--ui-accent);
+}
+
+.hero-grid-label,
+.hero-grid-result-count {
+  color: var(--ui-text-muted);
+}
+
+.hero-grid-title {
+  color: var(--ui-text-soft);
+}
+
+.hero-grid-empty {
+  border-color: var(--ui-border);
+  background: var(--ui-card);
+}
+
+.hero-grid-empty-text {
+  color: var(--ui-text-secondary);
 }
