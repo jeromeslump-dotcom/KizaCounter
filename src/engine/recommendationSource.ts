@@ -8,7 +8,6 @@ import {
   type RecommendationSource as ScoringRecommendationSource,
 } from "./scoring";
 import { findBestHistoricalDefeatTeam } from "./defeatHistory";
-import { calculateCounterUsage, counterHeroScore } from "./counterUsage";
 import { findBestEnabledCore4HistoryTeam } from "./recommendationCore4";
 import {
   getClassKey,
@@ -201,47 +200,6 @@ function findBestEnabledClassHistoryTeam(
   );
 }
 
-function findScoringAlternative(
-  enemyIds: string[],
-  candidateHeroes: Hero[],
-  combats: Combat[],
-  excludedTeamKey: string
-): Hero[] | null {
-  const scoringTeam = recommendTeam(enemyIds, candidateHeroes, combats);
-  if (
-    isUsableRecommendationTeam(scoringTeam, combats, enemyIds) &&
-    teamKey(scoringTeam.map((hero) => hero.id)) !== excludedTeamKey
-  ) {
-    return scoringTeam;
-  }
-
-  const counterUsage = calculateCounterUsage(enemyIds, combats);
-  const ranked = candidateHeroes
-    .map((hero) => ({ hero, score: counterHeroScore(hero, counterUsage) }))
-    .sort(
-      (a, b) => b.score - a.score || a.hero.name.localeCompare(b.hero.name)
-    );
-
-  if (ranked.length < TEAM_SIZE) return null;
-
-  const base = ranked.slice(0, TEAM_SIZE).map((entry) => entry.hero);
-  const replacements = ranked.slice(TEAM_SIZE);
-
-  for (let index = 0; index < TEAM_SIZE; index++) {
-    for (const replacement of replacements) {
-      const candidate = [...base];
-      candidate[index] = replacement.hero;
-      const candidateIds = candidate.map((hero) => hero.id);
-      if (new Set(candidateIds).size !== TEAM_SIZE) continue;
-      if (teamKey(candidateIds) === excludedTeamKey) continue;
-      if (!isUsableRecommendationTeam(candidate, combats, enemyIds)) continue;
-      return candidate;
-    }
-  }
-
-  return null;
-}
-
 export function recommendTeamWithSource(
   enemyIds: string[],
   heroes: Hero[],
@@ -310,16 +268,15 @@ export function recommendTeamWithSource(
     return { team: historicalClassTeam, source: "class-history" };
 
   let source: RecommendationSource = "fallback";
-  const team = excludedTeamKey
-    ? findScoringAlternative(
-        enemyIds,
-        candidateHeroes,
-        combats,
-        excludedTeamKey
-      )
-    : recommendTeam(enemyIds, candidateHeroes, combats, (detectedSource) => {
-        source = detectedSource;
-      });
+  const team = recommendTeam(
+    enemyIds,
+    candidateHeroes,
+    combats,
+    (detectedSource) => {
+      source = detectedSource;
+    },
+    excludedTeamKey
+  );
   const validTeam = (team ?? []).filter((hero) => enabledIds.has(hero.id));
   const usableTeam =
     validTeam.length === TEAM_SIZE &&
