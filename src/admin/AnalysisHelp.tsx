@@ -92,9 +92,6 @@ export default function AnalysisHelp({
       } else {
         groups.set(key, {
           team,
-          evaluation: null,
-          scoreA: null,
-          scoreB: null,
           count: 1,
           wins: combat.won ? 1 : 0,
           losses: combat.won ? 0 : 1,
