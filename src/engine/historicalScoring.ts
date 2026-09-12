@@ -1,7 +1,7 @@
 import type { Hero } from "../data/heroes";
 import type { Combat, HeroUsage } from "../types";
 import { getEngineSettings } from "./engineSettings";
-import { teamKey, uniqueIds } from "./teamUtils";
+import { getClassKey, teamKey, uniqueIds } from "./teamUtils";
 
 const TEAM_SIZE = 5;
 
@@ -181,28 +181,6 @@ export function findBestHistoricalTeam(
   return null;
 }
 
-export function getEnemyClassKey(
-  enemyIds: string[],
-  heroesById: Map<string, Hero>
-): string | null {
-  let agi = 0,
-    int = 0,
-    str = 0;
-  for (const id of enemyIds) {
-    const cls = heroesById.get(id)?.cls;
-    if (cls === "AGI") agi++;
-    else if (cls === "INT") int++;
-    else if (cls === "STR") str++;
-    else return null;
-  }
-  if (agi + int + str !== TEAM_SIZE) return null;
-  return [
-    ...Array(agi).fill("AGI"),
-    ...Array(int).fill("INT"),
-    ...Array(str).fill("STR"),
-  ].join("|");
-}
-
 export function evaluateEnemyClassHistory(
   teamIds: string[],
   enemyIds: string[],
@@ -211,7 +189,7 @@ export function evaluateEnemyClassHistory(
 ) {
   const team = uniqueIds(teamIds);
   const heroesById = new Map(heroes.map((hero) => [hero.id, hero]));
-  const targetClassKey = getEnemyClassKey(enemyIds, heroesById);
+  const targetClassKey = getClassKey(enemyIds, heroesById);
   if (team.length !== TEAM_SIZE || !targetClassKey)
     return {
       wins: 0,
@@ -231,7 +209,7 @@ export function evaluateEnemyClassHistory(
     const historicalEnemyKey = teamKey(historicalEnemy);
     let historicalClassKey = classKeyCache.get(historicalEnemyKey);
     if (historicalClassKey === undefined) {
-      historicalClassKey = getEnemyClassKey(historicalEnemy, heroesById);
+      historicalClassKey = getClassKey(historicalEnemy, heroesById);
       classKeyCache.set(historicalEnemyKey, historicalClassKey);
     }
     if (historicalClassKey !== targetClassKey) continue;
@@ -253,7 +231,7 @@ export function findBestHistoricalClassTeam(
   heroes: Hero[]
 ): Hero[] | null {
   const heroesById = new Map(heroes.map((hero) => [hero.id, hero]));
-  const targetClassKey = getEnemyClassKey(enemyIds, heroesById);
+  const targetClassKey = getClassKey(enemyIds, heroesById);
   if (!targetClassKey) return null;
   const classKeyCache = new Map<string, string | null>();
   const candidates = new Map<
@@ -266,7 +244,7 @@ export function findBestHistoricalClassTeam(
     const historicalEnemyKey = teamKey(historicalEnemy);
     let historicalClassKey = classKeyCache.get(historicalEnemyKey);
     if (historicalClassKey === undefined) {
-      historicalClassKey = getEnemyClassKey(historicalEnemy, heroesById);
+      historicalClassKey = getClassKey(historicalEnemy, heroesById);
       classKeyCache.set(historicalEnemyKey, historicalClassKey);
     }
     if (historicalClassKey !== targetClassKey) continue;
