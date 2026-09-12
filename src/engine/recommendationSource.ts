@@ -106,20 +106,24 @@ function findBestEnabledHistoricalTeam(
     matchesHistoricalEnemy
   );
 
-  const enabledCandidates = [...historicalCandidates.values()].filter(
-    (candidate) =>
-      candidate.heroIds.every((id) => enabledIds.has(id)) &&
-      teamKey(candidate.heroIds) !== excludedTeamKey
+  const recommendationCandidates = [...historicalCandidates.values()].filter(
+    (candidate) => {
+      if (!candidate.heroIds.every((id) => enabledIds.has(id))) return false;
+      if (teamKey(candidate.heroIds) === excludedTeamKey) return false;
+      return true;
+    }
   );
 
   for (const candidate of orderHistoricalCandidates(
-    enabledCandidates,
+    recommendationCandidates,
     sortBySimilarity
   )) {
     const team = resolveTeamFromIds(candidate.heroIds, candidateHeroesById);
-    if (team && isUsableRecommendationTeam(team, combats, enemyIds))
+    if (team && isUsableRecommendationTeam(team, combats, enemyIds)) {
       return team;
+    }
   }
+
   return null;
 }
 
