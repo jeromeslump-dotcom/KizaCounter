@@ -1,6 +1,33 @@
-@tailwind base;
+﻿@tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ============================================================
+   PALETTE CENTRALE — UI
+   ============================================================ */
+
+:root {
+  --ui-bg: #030712;
+
+  --ui-panel: rgb(8 15 30 / 0.92);
+  --ui-panel-alt: rgb(7 12 25);
+  --ui-card: rgb(3 7 18 / 0.9);
+
+  --ui-border: rgb(30 41 59);
+  --ui-border-hover: rgb(71 85 105);
+
+  --ui-text-primary: rgb(241 245 249);
+  --ui-text-secondary: rgb(148 163 184);
+  --ui-text-muted: rgb(100 116 139);
+  --ui-text-soft: rgb(203 213 225);
+
+  --ui-accent: rgb(245 158 11);
+  --ui-accent-soft: rgb(252 211 77);
+
+  --ui-danger: rgb(248 113 113);
+  --ui-success: rgb(52 211 153);
+  --ui-sky: rgb(56 189 248);
+}
 
 html,
 body,
@@ -11,7 +38,7 @@ body,
 
 body {
   min-width: 320px;
-  background: #030712;
+  background: var(--ui-bg);
   color: white;
   font-family:
     Inter,
@@ -64,11 +91,13 @@ select {
   background: rgb(244 63 94 / 0.1);
   color: rgb(253 164 175);
 }
+
 .hero-class-agi {
   border-color: rgb(52 211 153 / 0.4);
   background: rgb(16 185 129 / 0.1);
   color: rgb(110 231 183);
 }
+
 .hero-class-int {
   border-color: rgb(56 189 248 / 0.4);
   background: rgb(14 165 233 / 0.1);
@@ -90,183 +119,228 @@ select {
       #030712;
     color: white;
   }
+
   .ui-panel {
-    border-color: rgb(30 41 59);
-    background: rgb(8 15 30 / 0.92);
+    border-color: var(--ui-border);
+    background: var(--ui-panel);
   }
+
   .ui-panel-alt {
-    border-color: rgb(30 41 59);
-    background: rgb(7 12 25);
+    border-color: var(--ui-border);
+    background: var(--ui-panel-alt);
   }
+
   .ui-panel-empty {
-    border-color: rgb(30 41 59);
+    border-color: var(--ui-border);
     background: rgb(3 7 18 / 0.7);
   }
+
   .ui-card {
-    border-color: rgb(30 41 59);
-    background: rgb(3 7 18 / 0.9);
+    border-color: var(--ui-border);
+    background: var(--ui-card);
   }
+
   .ui-card-hover:hover {
-    border-color: rgb(71 85 105);
+    border-color: var(--ui-border-hover);
   }
+
   .hero-card-base {
-    border-color: rgb(30 41 59);
+    border-color: var(--ui-border);
     background: rgb(7 12 25 / 0.96);
     color: white;
   }
+
   .hero-card-hover:hover {
-    border-color: rgb(71 85 105);
+    border-color: var(--ui-border-hover);
     background: rgb(10 18 35);
   }
+
   .hero-card-selected {
     border-color: rgb(251 191 36);
     box-shadow:
       0 0 0 2px rgb(251 191 36 / 0.35),
       0 0 22px rgb(245 158 11 / 0.12);
   }
+
   .hero-card-selection-locked {
     cursor: not-allowed;
     opacity: 0.48;
     filter: saturate(0.45);
   }
+
   .hero-card-selection-locked:hover {
     transform: none;
-    border-color: rgb(30 41 59);
+    border-color: var(--ui-border);
     background: rgb(7 12 25 / 0.96);
   }
+
   .hero-card-removed {
     animation: hero-card-removed 0.35s ease-out;
   }
+
   .ui-input {
-    border-color: rgb(30 41 59);
+    border-color: var(--ui-border);
     background: rgb(3 7 18);
     color: white;
   }
+
   .ui-input::placeholder {
-    color: rgb(100 116 139);
+    color: var(--ui-text-muted);
   }
+
   .ui-input:focus {
     border-color: rgb(245 158 11 / 0.7);
     box-shadow: 0 0 0 1px rgb(245 158 11 / 0.15);
   }
+
   .ui-text-primary {
     color: white;
   }
+
   .ui-text-secondary {
-    color: rgb(148 163 184);
+    color: var(--ui-text-secondary);
   }
+
   .ui-text-muted {
-    color: rgb(100 116 139);
+    color: var(--ui-text-muted);
   }
+
   .ui-text-soft {
-    color: rgb(203 213 225);
+    color: var(--ui-text-soft);
   }
+
   .ui-stat-value {
-    color: rgb(241 245 249);
+    color: var(--ui-text-primary);
   }
+
   .ui-divider {
-    border-color: rgb(30 41 59);
+    border-color: var(--ui-border);
   }
+
   .ui-link-sky:hover {
     color: rgb(125 211 252);
     border-color: rgb(56 189 248 / 0.5);
   }
+
   .ui-muted-hover:hover {
     color: rgb(226 232 240);
   }
+
   .ui-hover-sky:hover {
     border-color: rgb(56 189 248 / 0.7);
   }
+
   .ui-hover-red:hover {
     border-color: rgb(248 113 113);
   }
+
   .selection-order-badge {
     background: rgb(245 158 11);
     color: rgb(3 7 18);
     border-color: rgb(255 255 255 / 0.9);
     box-shadow: 0 0 10px rgb(245 158 11 / 0.25);
   }
+
   .hero-grid-panel {
-    border-color: rgb(30 41 59);
-    background: rgb(8 15 30 / 0.92);
+    border-color: var(--ui-border);
+    background: var(--ui-panel);
   }
+
   .hero-grid-input,
   .hero-grid-select {
-    border-color: rgb(30 41 59);
+    border-color: var(--ui-border);
     background: rgb(3 7 18);
     color: white;
   }
+
   .hero-grid-input::placeholder {
-    color: rgb(100 116 139);
+    color: var(--ui-text-muted);
   }
+
   .hero-grid-input:focus,
   .hero-grid-select:focus {
     border-color: rgb(245 158 11 / 0.7);
   }
+
   .hero-grid-label,
   .hero-grid-result-count {
-    color: rgb(100 116 139);
+    color: var(--ui-text-muted);
   }
+
   .hero-grid-title {
     color: rgb(226 232 240);
   }
+
   .hero-grid-empty {
-    border-color: rgb(30 41 59);
+    border-color: var(--ui-border);
     background: rgb(7 12 25 / 0.7);
   }
+
   .hero-grid-empty-text {
-    color: rgb(148 163 184);
+    color: var(--ui-text-secondary);
   }
+
   .ui-action {
-    border-color: rgb(30 41 59);
+    border-color: var(--ui-border);
     background: rgb(3 7 18);
-    color: rgb(203 213 225);
+    color: var(--ui-text-soft);
   }
+
   .ui-action:hover {
     border-color: rgb(245 158 11 / 0.6);
     color: rgb(252 211 77);
     background: rgb(15 23 42);
   }
+
   .ui-danger {
     border-color: rgb(248 113 113 / 0.4);
     background: rgb(127 29 29 / 0.18);
     color: rgb(252 165 165);
   }
+
   .ui-danger:hover {
     border-color: rgb(248 113 113);
     background: rgb(127 29 29 / 0.3);
     color: rgb(254 202 202);
   }
+
   .ui-success {
     border-color: rgb(52 211 153 / 0.4);
     background: rgb(6 78 59 / 0.2);
     color: rgb(110 231 183);
   }
+
   .ui-success:hover {
     border-color: rgb(52 211 153);
     background: rgb(6 78 59 / 0.3);
     color: rgb(167 243 208);
   }
+
   .ui-sky {
     border-color: rgb(56 189 248 / 0.35);
     background: rgb(7 89 133 / 0.12);
     color: rgb(186 230 253);
   }
+
   .ui-sky:hover {
     border-color: rgb(56 189 248 / 0.7);
   }
+
   .ui-score {
     border-color: rgb(245 158 11 / 0.35);
     background: rgb(245 158 11 / 0.1);
     color: rgb(252 211 77);
   }
+
   .ui-modal-overlay {
     background: rgb(0 0 0 / 0.78);
   }
+
   .ui-modal {
-    border-color: rgb(30 41 59);
-    background: rgb(7 12 25);
+    border-color: var(--ui-border);
+    background: var(--ui-panel-alt);
   }
+
   .ui-error {
     color: rgb(248 113 113);
   }
@@ -275,6 +349,7 @@ select {
      GESTION DES UTILISATEURS
      Palette cohérente avec les héros : bleu nuit + or + accents
      ---------------------------------------------------------- */
+
   .user-management-modal {
     background:
       radial-gradient(circle at 15% 0%, rgb(30 64 175 / 0.12), transparent 38%),
@@ -282,11 +357,11 @@ select {
   }
 
   .user-management-search {
-    background: rgb(3 7 18 / 0.9);
+    background: var(--ui-card);
   }
 
   .user-management-card {
-    border-color: rgb(30 41 59);
+    border-color: var(--ui-border);
     background: linear-gradient(
       135deg,
       rgb(15 23 42 / 0.82),
@@ -301,7 +376,7 @@ select {
   }
 
   .user-management-card:hover {
-    border-color: rgb(71 85 105);
+    border-color: var(--ui-border-hover);
     background: linear-gradient(
       135deg,
       rgb(20 32 55 / 0.92),
@@ -314,6 +389,7 @@ select {
   .user-management-card.is-active {
     border-left: 3px solid rgb(52 211 153 / 0.7);
   }
+
   .user-management-card.is-inactive {
     border-left: 3px solid rgb(100 116 139 / 0.45);
     opacity: 0.82;
@@ -328,16 +404,18 @@ select {
   .user-management-status.is-inactive {
     border-color: rgb(100 116 139 / 0.3);
     background: rgb(100 116 139 / 0.08);
-    color: rgb(148 163 184);
+    color: var(--ui-text-secondary);
   }
 
   .user-management-role {
-    background: rgb(3 7 18 / 0.9);
+    background: var(--ui-card);
   }
+
   .user-management-role:focus {
     border-color: rgb(245 158 11 / 0.7);
     box-shadow: 0 0 0 1px rgb(245 158 11 / 0.12);
   }
+
   .user-management-save:hover {
     border-color: rgb(245 158 11 / 0.7);
   }
@@ -348,10 +426,12 @@ select {
     transform: scale(0.97);
     opacity: 0.55;
   }
+
   60% {
     transform: scale(1.01);
     opacity: 0.9;
   }
+
   100% {
     transform: scale(1);
     opacity: 1;
@@ -366,6 +446,7 @@ select {
   background: transparent;
   border-color: var(--ui-border);
 }
+
 .ui-recommendation-team {
   display: block;
   width: 100%;
@@ -376,6 +457,7 @@ select {
   text-align: left;
   cursor: pointer;
 }
+
 .ui-recommendation-hero {
   display: block;
   min-width: 0;
@@ -405,17 +487,20 @@ select {
   line-clamp: 2;
   text-overflow: ellipsis;
 }
+
 .ui-recommendation-team:hover .ui-recommendation-hero {
-  border-color: var(--ui-gold);
-  background: var(--ui-gold-soft);
+  border-color: var(--ui-accent);
+  background: var(--ui-accent-soft);
 }
+
 .ui-recommendation-selected .ui-recommendation-hero {
-  border-color: var(--ui-gold);
-  background: var(--ui-gold-soft);
-  color: var(--ui-gold);
+  border-color: var(--ui-accent);
+  background: var(--ui-accent-soft);
+  color: var(--ui-accent);
 }
+
 .ui-recommendation-team:focus-visible {
-  outline: 2px solid var(--ui-gold);
+  outline: 2px solid var(--ui-accent);
   outline-offset: 2px;
 }
 
