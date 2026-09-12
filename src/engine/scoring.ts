@@ -1,5 +1,4 @@
 import type { Hero } from "../data/heroes";
-import type { TeamEvaluation, TeamScore } from "../types";
 import { analyzeCore4Plus1 } from "./historicalCore4";
 import { getEngineSettings } from "./engineSettings";
 import {
@@ -29,76 +28,6 @@ export type RecommendationSource =
 export type RecommendationSourceCallback = (
   source: RecommendationSource
 ) => void;
-
-function core4ScoreForTeam(
-  teamIds: string[],
-  enemyIds: string[],
-  combats: Parameters<typeof analyzeCore4Plus1>[1],
-  settings: ReturnType<typeof getEngineSettings>
-): number {
-  if (enemyIds.length !== TEAM_SIZE) return 0;
-  const analyses = analyzeCore4Plus1(enemyIds, combats, settings);
-  const teamSet = new Set(teamIds);
-  let bestScore = 0;
-  for (const analysis of analyses) {
-    if (!analysis.coreIds.every((id) => teamSet.has(id))) continue;
-    const confidence = historicalConfidence(
-      analysis.battles,
-      settings.advanced.core4ConfidenceBattles
-    );
-    bestScore = Math.max(bestScore, (analysis.winRate / 100) * confidence);
-  }
-  return bestScore;
-}
-
-export function evaluateTeam(
-  team: Hero[],
-  combats: Parameters<typeof evaluateTeamHistory>[1],
-  enemyIds: string[]
-): TeamEvaluation {
-  const settings = getEngineSettings();
-  const teamIds = team.map((hero) => hero.id);
-  const history = evaluateTeamHistory(teamIds, combats);
-  const exactHistory =
-    enemyIds.length === TEAM_SIZE
-      ? evaluateExactTeamHistory(teamIds, enemyIds, combats)
-      : { wins: 0, losses: 0, battles: 0, winRate: 0 };
-  const exactScore =
-    exactHistory.battles > 0
-      ? (exactHistory.winRate / 100) *
-        historicalConfidence(
-          exactHistory.battles,
-          settings.advanced.historicalConfidenceBattles
-        )
-      : 0;
-  const coreScore = core4ScoreForTeam(teamIds, enemyIds, combats, settings);
-  const generalScore =
-    history.battles > 0
-      ? (history.winRate / 100) *
-        historicalConfidence(
-          history.battles,
-          settings.advanced.historicalConfidenceBattles
-        )
-      : 0;
-  return {
-    score: Math.max(exactScore, coreScore, generalScore),
-    historicalWins: history.wins,
-    historicalLosses: history.losses,
-    historicalBattles: history.battles,
-    historicalWinRate: history.winRate,
-  };
-}
-
-export function scoreTeam(
-  team: Hero[],
-  combats: Parameters<typeof evaluateTeamHistory>[1],
-  enemyIds: string[]
-): TeamScore {
-  return {
-    heroIds: team.map((hero) => hero.id),
-    score: evaluateTeam(team, combats, enemyIds).score,
-  };
-}
 
 export function recommendTeam(
   enemyIds: string[],
