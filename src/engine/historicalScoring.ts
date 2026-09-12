@@ -194,7 +194,8 @@ export function findBestHistoricalTeam(
   enemyIds: string[],
   combats: Combat[],
   heroes: Hero[],
-  context?: HistoricalEnemyContext
+  context?: HistoricalEnemyContext,
+  excludedTeamKey?: string
 ): Hero[] | null {
   const heroesById = new Map(heroes.map((hero) => [hero.id, hero]));
   const enemyKey = context?.enemyKey ?? teamKey(enemyIds);
@@ -209,6 +210,7 @@ export function findBestHistoricalTeam(
   );
 
   for (const candidate of orderHistoricalCandidates(candidates.values())) {
+    if (teamKey(candidate.heroIds) === excludedTeamKey) continue;
     const team = candidate.heroIds
       .map((id) => heroesById.get(id))
       .filter((hero): hero is Hero => Boolean(hero));
@@ -264,7 +266,8 @@ export function evaluateEnemyClassHistory(
 export function findBestHistoricalClassTeam(
   enemyIds: string[],
   combats: Combat[],
-  heroes: Hero[]
+  heroes: Hero[],
+  excludedTeamKey?: string
 ): Hero[] | null {
   const heroesById = new Map(heroes.map((hero) => [hero.id, hero]));
   const targetClassKey = getClassKey(enemyIds, heroesById);
@@ -294,6 +297,7 @@ export function findBestHistoricalClassTeam(
     candidates.set(key, candidate);
   }
   for (const candidate of orderHistoricalCandidates(candidates.values())) {
+    if (teamKey(candidate.heroIds) === excludedTeamKey) continue;
     const team = candidate.heroIds
       .map((id) => heroesById.get(id))
       .filter((hero): hero is Hero => Boolean(hero));
