@@ -312,33 +312,27 @@ export default function CounterModal({
     ) : currentTeamGeneralHistory.battles > 0 ? (
       canViewDetailedHistory ? (
         <>
-          <strong>
-            Nouvelle rencontre · Équipe déjà victorieuse
-          </strong>{" "}
+          <strong>Nouvelle rencontre · Équipe déjà victorieuse</strong>{" "}
           <span className="font-normal">
             · {Math.round(currentTeamGeneralHistory.winRate)} % ·{" "}
             {formatCount(currentTeamGeneralHistory.battles, "combat")}
           </span>
         </>
       ) : (
-        <strong>
-          Nouvelle rencontre · Équipe déjà connue
-        </strong>
+        <strong>Nouvelle rencontre · Équipe déjà connue</strong>
       )
     ) : currentTeamClassHistory.battles > 0 ? (
       <>
         <strong>Nouvelle équipe</strong>{" "}
         <span className="font-normal">
-          · Confiance statistique :{" "}
-          {Math.round(currentTeamConfidence)} %
+          · Confiance statistique : {Math.round(currentTeamConfidence)} %
         </span>
       </>
     ) : (
       <strong>Nouvelle équipe</strong>
     );
 
-  let historyLabel: ReactNode =
-    "Pas d’historique disponible";
+  let historyLabel: ReactNode = "Pas d’historique disponible";
 
   if (recommendationSource === "exact-history") {
     historyLabel =
@@ -362,10 +356,7 @@ export default function CounterModal({
               recommendedClassHistory.battles
             )
           : "Historique classes";
-  } else if (
-    recommendationSource === "core4" &&
-    recommendedCore4
-  ) {
+  } else if (recommendationSource === "core4" && recommendedCore4) {
     const replacementId = recommendedIds.find(
       (id) => !recommendedCore4.coreIds.includes(id)
     );
@@ -382,27 +373,20 @@ export default function CounterModal({
         <span className="font-normal">
           {" · "}
           {formatCount(recommendedCore4.battles, "combat")} ·{" "}
-          {recommendedCore4.wins} V ·{" "}
-          {recommendedCore4.losses} D ·{" "}
+          {recommendedCore4.wins} V · {recommendedCore4.losses} D ·{" "}
           {Math.round(recommendedCore4.winRate)} %
           {replacement && (
             <>
               {" · Remplacement : "}
-              {formatCount(
-                replacement.battles,
-                "combat"
-              )}{" "}
-              · {replacement.wins} V ·{" "}
-              {replacement.losses} D ·{" "}
+              {formatCount(replacement.battles, "combat")} ·{" "}
+              {replacement.wins} V · {replacement.losses} D ·{" "}
               {Math.round(replacement.winRate)} %
             </>
           )}
         </span>
       </span>
     ) : (
-      <strong>
-        Core4 : {Math.round(recommendedCore4.winRate)} %
-      </strong>
+      <strong>Core4 : {Math.round(recommendedCore4.winRate)} %</strong>
     );
   } else if (
     recommendationSource === "defeat-history" &&
@@ -413,16 +397,9 @@ export default function CounterModal({
         <strong>Historique des défaites</strong>
         <span className="font-normal">
           {" · "}
-          {Math.round(
-            recommendedDefeatHistory.counterWinRate * 100
-          )}{" "}
-          % ·{" "}
-          {formatCount(
-            recommendedDefeatHistory.battles,
-            "combat"
-          )}{" "}
-          · {recommendedDefeatHistory.wins} V /{" "}
-          {recommendedDefeatHistory.losses} D
+          {Math.round(recommendedDefeatHistory.counterWinRate * 100)} % ·{" "}
+          {formatCount(recommendedDefeatHistory.battles, "combat")} ·{" "}
+          {recommendedDefeatHistory.wins} V / {recommendedDefeatHistory.losses} D
         </span>
       </>
     ) : (
@@ -434,14 +411,11 @@ export default function CounterModal({
     recommendationSource === "fallback"
   ) {
     historyLabel = (
-      <strong>
-        {recommendationSourceLabel(recommendationSource)}
-      </strong>
+      <strong>{recommendationSourceLabel(recommendationSource)}</strong>
     );
   }
 
-  let alternativeHistoryLabel: ReactNode =
-    "Pas d’historique disponible";
+  let alternativeHistoryLabel: ReactNode = "Pas d’historique disponible";
 
   if (alternativeHistory.battles > 0) {
     alternativeHistoryLabel = canViewDetailedHistory ? (
@@ -485,18 +459,13 @@ export default function CounterModal({
             <>
               {" · Remplacement "}
               {Math.round(replacement.winRate)} % ·{" "}
-              {formatCount(
-                replacement.battles,
-                "combat"
-              )}
+              {formatCount(replacement.battles, "combat")}
             </>
           )}
         </span>
       </span>
     ) : (
-      <strong>
-        Core4 · {Math.round(alternativeCore4.winRate)} %
-      </strong>
+      <strong>Core4 · {Math.round(alternativeCore4.winRate)} %</strong>
     );
   } else if (alternativeDefeatHistory) {
     alternativeHistoryLabel = canViewDetailedHistory ? (
@@ -504,14 +473,8 @@ export default function CounterModal({
         <strong>Historique des défaites</strong>
         <span className="font-normal">
           {" · "}
-          {Math.round(
-            alternativeDefeatHistory.counterWinRate * 100
-          )}{" "}
-          % ·{" "}
-          {formatCount(
-            alternativeDefeatHistory.battles,
-            "combat"
-          )}
+          {Math.round(alternativeDefeatHistory.counterWinRate * 100)} % ·{" "}
+          {formatCount(alternativeDefeatHistory.battles, "combat")}
         </span>
       </>
     ) : (
@@ -538,7 +501,7 @@ export default function CounterModal({
               )} %`
             : "";
 
-  const selectedIds = new Set(teamIds);
+  const selectedIds = teamIds;
 
   if (!open) return null;
 
@@ -563,8 +526,8 @@ export default function CounterModal({
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-3 py-3 sm:px-5 sm:py-4">
-          <div className="grid gap-3 lg:grid-cols-[1fr_1fr]">
+        <div className="min-h-0 flex-1 overflow-y-auto p-3 sm:p-5">
+          <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
             <section className="ui-panel rounded-xl border p-3 sm:p-4">
               <div className="mb-3 flex items-center justify-between gap-3">
                 <h3 className="text-sm font-bold text-white sm:text-base">
@@ -575,47 +538,31 @@ export default function CounterModal({
                 </span>
               </div>
 
-              {recommendedTeam.length > 0 ? (
-                <button
-                  type="button"
-                  onClick={() => onSelectRecommendedTeam(recommendedIds)}
-                  className="ui-recommendation-team ui-recommendation-selected w-full"
-                >
-                  <div className="grid grid-cols-5 gap-1.5 sm:gap-2">
-                    {recommendedTeam.map((hero) => (
-                      <span
-                        key={hero.id}
-                        className="ui-recommendation-hero"
-                      >
-                        {hero.name}
-                      </span>
-                    ))}
-                  </div>
-                </button>
-              ) : (
-                <div className="ui-panel-empty rounded-lg border p-4 text-center text-sm">
-                  Aucune équipe recommandée.
+              <button
+                type="button"
+                onClick={() => onSelectRecommendedTeam(recommendedIds)}
+                className="ui-recommendation-team w-full rounded-xl border p-2 text-left"
+              >
+                <div className="grid grid-cols-5 gap-1.5 sm:gap-2">
+                  {recommendedTeam.map((hero) => (
+                    <span
+                      key={hero.id}
+                      className="ui-recommendation-hero"
+                    >
+                      {hero.name}
+                    </span>
+                  ))}
                 </div>
-              )}
+              </button>
 
-              {alternativeTeam.length > 0 && (
-                <div
-                  className={
-                    recommendedTeam.length > 0
-                      ? "mt-3 border-t ui-divider pt-3"
-                      : ""
-                  }
-                >
+              {alternativeTeam.length === 5 && (
+                <div className="mt-3">
                   <button
                     type="button"
-                    onClick={() =>
-                      onSelectRecommendedTeam(alternativeIds)
-                    }
+                    onClick={() => onSelectRecommendedTeam(alternativeIds)}
                     className={[
-                      "ui-recommendation-team",
-                      alternativeIds.every((id) =>
-                        teamIds.includes(id)
-                      )
+                      "ui-recommendation-team w-full rounded-xl border p-2 text-left",
+                      teamKey(alternativeIds) === teamKey(teamIds)
                         ? "ui-recommendation-selected"
                         : "",
                     ].join(" ")}
