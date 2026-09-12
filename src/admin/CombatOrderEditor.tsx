@@ -92,7 +92,7 @@ export default function CombatOrderEditor({
             return (
               <div
                 key={hero.id}
-                className="ui-action flex min-w-0 flex-col items-center gap-2 rounded-xl border p-2.5 sm:p-3"
+                className="ui-card ui-card-hover flex min-w-0 flex-col items-center gap-2 rounded-xl border p-2.5 sm:p-3"
               >
                 <img
                   src={hero.img}
@@ -107,7 +107,7 @@ export default function CombatOrderEditor({
                   onChange={(event) =>
                     setPosition(hero.id, Number(event.target.value))
                   }
-                  className="ui-input w-full max-w-[72px] rounded-lg border px-2 py-1.5 text-center text-sm font-bold"
+                  className="ui-input user-management-role min-w-[72px] w-full max-w-[72px] rounded-lg border px-2 py-1.5 text-center text-sm font-bold"
                   aria-label={`Position de ${hero.name}`}
                 >
                   {[1, 2, 3, 4, 5].map((position) => (
@@ -121,13 +121,7 @@ export default function CombatOrderEditor({
           })}
         </div>
 
-        <p
-          className={
-            isValid
-              ? "mt-4 text-center text-xs font-bold text-emerald-400"
-              : "mt-4 text-center text-xs font-bold text-amber-400"
-          }
-        >
+        <p className={isValid ? "combat-order-editor-valid" : "combat-order-editor-invalid"}>
           {isValid
             ? "✓ Les 5 positions sont uniques"
             : "⚠️ Chaque position 1 à 5 doit être utilisée une seule fois"}
@@ -147,7 +141,7 @@ export default function CombatOrderEditor({
           type="button"
           onClick={handleSave}
           disabled={!isValid || saving}
-          className="rounded-lg border border-emerald-400/30 px-4 py-2 text-xs font-black text-emerald-400 transition hover:bg-emerald-400/10 disabled:cursor-not-allowed disabled:opacity-40"
+          className="combat-order-editor-save rounded-lg border px-4 py-2 text-xs font-black transition disabled:cursor-not-allowed disabled:opacity-40"
         >
           {saving ? "Enregistrement…" : "✓ Enregistrer"}
         </button>
