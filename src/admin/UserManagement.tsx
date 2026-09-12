@@ -140,7 +140,7 @@ export default function UserManagement({
           />
 
           {error && (
-            <p className="mb-4 rounded-lg border border-red-400/30 bg-red-500/10 px-3 py-2 text-sm text-red-300">
+            <p className="ui-danger mb-4 rounded-lg border px-3 py-2 text-sm">
               {error}
             </p>
           )}
@@ -158,7 +158,7 @@ export default function UserManagement({
                 return (
                   <div
                     key={user.id}
-                    className={`user-management-card rounded-2xl border p-4 ${
+                    className={`user-management-card rounded-2xl p-4 ${
                       user.active ? "is-active" : "is-inactive"
                     }`}
                   >
@@ -173,7 +173,7 @@ export default function UserManagement({
                       </div>
 
                       <span
-                        className={`user-management-status shrink-0 rounded-full border px-2.5 py-1 text-[10px] font-black uppercase tracking-wide ${
+                        className={`user-management-status shrink-0 rounded-full px-2.5 py-1 text-[10px] font-black uppercase tracking-wide ${
                           user.active ? "is-active" : "is-inactive"
                         }`}
                       >
