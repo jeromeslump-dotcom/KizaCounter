@@ -19,9 +19,6 @@ export {
   evaluateEnemyClassHistory,
   evaluateExactTeamHistory,
   evaluateTeamHistory,
-  findBestHistoricalClassTeam,
-  findBestHistoricalTeam,
-  historicalConfidence,
   calculateHeroUsage,
 };
 
