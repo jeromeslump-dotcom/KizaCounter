@@ -10,6 +10,16 @@ export function teamKey(ids: string[]): string {
   return [...new Set(ids)].sort().join("|");
 }
 
+export function resolveTeamFromIds(
+  heroIds: string[],
+  heroesById: Map<string, Hero>
+): Hero[] | null {
+  const team = heroIds
+    .map((id) => heroesById.get(id))
+    .filter((hero): hero is Hero => Boolean(hero));
+  return team.length === TEAM_SIZE ? team : null;
+}
+
 export function getClassKey(
   ids: string[],
   heroesById: Map<string, Hero>
