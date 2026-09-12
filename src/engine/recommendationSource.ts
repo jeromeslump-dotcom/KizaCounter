@@ -10,7 +10,12 @@ import {
 import { findBestHistoricalDefeatTeam } from "./defeatHistory";
 import { calculateCounterUsage, counterHeroScore } from "./counterUsage";
 import { findBestEnabledCore4HistoryTeam } from "./recommendationCore4";
-import { getClassKey, teamKey, uniqueIds } from "./teamUtils";
+import {
+  getClassKey,
+  resolveTeamFromIds,
+  teamKey,
+  uniqueIds,
+} from "./teamUtils";
 
 export type RecommendationSource =
   ScoringRecommendationSource | "similar-history" | "defeat-history";
@@ -22,16 +27,6 @@ export interface TeamRecommendation {
 
 const TEAM_SIZE = 5;
 const MIN_SIMILARITY = 3;
-
-function resolveCandidateTeam(
-  heroIds: string[],
-  candidateHeroesById: Map<string, Hero>
-): Hero[] | null {
-  const team = heroIds
-    .map((id) => candidateHeroesById.get(id))
-    .filter((hero): hero is Hero => Boolean(hero));
-  return team.length === TEAM_SIZE ? team : null;
-}
 
 /**
  * A team that has already been played but has never won must never be
@@ -121,7 +116,7 @@ function findBestEnabledHistoricalTeam(
     enabledCandidates,
     sortBySimilarity
   )) {
-    const team = resolveCandidateTeam(candidate.heroIds, candidateHeroesById);
+    const team = resolveTeamFromIds(candidate.heroIds, candidateHeroesById);
     if (team && isUsableRecommendationTeam(team, combats, enemyIds))
       return team;
   }
