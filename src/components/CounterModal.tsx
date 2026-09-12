@@ -15,6 +15,7 @@ import { findHistoricalDefeatCounters } from "../engine/defeatHistory";
 import { getEngineSettings } from "../engine/engineSettings";
 import {
   recommendationSourceLabel,
+  recommendTeamWithSource,
   type RecommendationSource,
 } from "../engine/recommendationSource";
 import { teamKey } from "../engine/teamUtils";
@@ -223,6 +224,36 @@ export default function CounterModal({
     [open, alternativeIds, enemyIds, combats, heroes]
   );
 
+  const alternativeRecommendation = useMemo(() => {
+    if (!open || alternativeIds.length !== 5) return null;
+
+    const candidateHeroes = heroes.filter((hero) =>
+      enabledHeroIds.has(hero.id)
+    );
+
+    if (candidateHeroes.length < 5) return null;
+
+    const recommendation = recommendTeamWithSource(
+      enemyIds,
+      heroes,
+      combats,
+      candidateHeroes,
+      recommendedIds.length === 5 ? teamKey(recommendedIds) : undefined
+    );
+
+    return teamKey(recommendation.team) === teamKey(alternativeIds)
+      ? recommendation
+      : null;
+  }, [
+    open,
+    alternativeIds,
+    enemyIds,
+    heroes,
+    enabledHeroIds,
+    combats,
+    recommendedIds,
+  ]);
+
   const core4Analyses = useMemo(
     () =>
       open && enemyIds.length === 5
@@ -395,6 +426,16 @@ export default function CounterModal({
     ) : (
       "Historique des défaites"
     );
+  } else if (
+    recommendationSource === "similar-history" ||
+    recommendationSource === "counter-usage" ||
+    recommendationSource === "fallback"
+  ) {
+    historyLabel = (
+      <strong>
+        {recommendationSourceLabel(recommendationSource)}
+      </strong>
+    );
   }
 
   let alternativeHistoryLabel: ReactNode =
@@ -473,6 +514,12 @@ export default function CounterModal({
       </>
     ) : (
       <strong>Historique des défaites</strong>
+    );
+  } else if (alternativeRecommendation) {
+    alternativeHistoryLabel = (
+      <strong>
+        {recommendationSourceLabel(alternativeRecommendation.source)}
+      </strong>
     );
   }
 
