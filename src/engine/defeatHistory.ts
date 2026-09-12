@@ -1,6 +1,10 @@
 import type { Combat, Hero } from "../types";
 import { getEngineSettings } from "./engineSettings";
-import { teamKey, uniqueIds } from "./teamUtils";
+import {
+  resolveTeamFromIds,
+  teamKey,
+  uniqueIds,
+} from "./teamUtils";
 
 const TEAM_SIZE = 5;
 
@@ -133,11 +137,8 @@ export function findBestHistoricalDefeatTeam(
   );
 
   for (const candidate of candidates) {
-    const team = candidate.heroIds
-      .map((id) => candidateHeroesById.get(id))
-      .filter((hero): hero is Hero => Boolean(hero));
-
-    if (team.length === TEAM_SIZE) return team;
+    const team = resolveTeamFromIds(candidate.heroIds, candidateHeroesById);
+    if (team) return team;
   }
 
   return null;
