@@ -1,10 +1,13 @@
 import type { Combat, Hero } from "../types";
 import {
+  collectHistoricalCandidates,
+  orderHistoricalCandidates,
+} from "./historicalScoring";
+import {
   recommendTeam,
   type RecommendationSource as ScoringRecommendationSource,
 } from "./scoring";
 import { getEngineSettings } from "./engineSettings";
-import { calculateHistoricalReliability } from "./historicalScoring";
 import { findBestHistoricalDefeatTeam } from "./defeatHistory";
 import { calculateCounterUsage, counterHeroScore } from "./counterUsage";
 import { getClassKey, teamKey, uniqueIds } from "./teamUtils";
@@ -20,53 +23,6 @@ export interface TeamRecommendation {
 const TEAM_SIZE = 5;
 const CORE_SIZE = 4;
 const MIN_SIMILARITY = 3;
-
-interface HistoricalCandidate {
-  heroIds: string[];
-  wins: number;
-  losses: number;
-  similarity: number;
-}
-
-function orderHistoricalCandidates(
-  candidates: Map<string, HistoricalCandidate>,
-  sortBySimilarity = false
-): HistoricalCandidate[] {
-  const settings = getEngineSettings();
-  const confidenceBattles = Math.max(
-    1,
-    settings.advanced.historicalConfidenceBattles
-  );
-
-  return [...candidates.values()]
-    .filter(
-      (candidate) => candidate.wins > 0 && candidate.wins >= candidate.losses
-    )
-    .map((candidate) => ({
-      candidate,
-      reliability: calculateHistoricalReliability(
-        candidate.wins,
-        candidate.losses,
-        confidenceBattles,
-        settings.advanced.historicalReliabilityBase,
-        settings.advanced.historicalReliabilityConfidenceWeight
-      ),
-      key: teamKey(candidate.heroIds),
-    }))
-    .sort(
-      (a, b) =>
-        (sortBySimilarity
-          ? b.candidate.similarity - a.candidate.similarity
-          : 0) ||
-        b.reliability - a.reliability ||
-        b.candidate.wins +
-          b.candidate.losses -
-          (a.candidate.wins + a.candidate.losses) ||
-        b.candidate.wins - a.candidate.wins ||
-        a.key.localeCompare(b.key)
-    )
-    .map(({ candidate }) => candidate);
-}
 
 function resolveCandidateTeam(
   heroIds: string[],
@@ -151,37 +107,19 @@ function findBestEnabledHistoricalTeam(
   sortBySimilarity = false
 ): Hero[] | null {
   const enabledIds = new Set(candidateHeroes.map((hero) => hero.id));
-  const candidates = new Map<string, HistoricalCandidate>();
+  const historicalCandidates = collectHistoricalCandidates(
+    combats,
+    matchesHistoricalEnemy
+  );
 
-  for (const combat of combats) {
-    const historicalEnemy = uniqueIds(combat.enemy_heroes ?? []);
-    const similarity = matchesHistoricalEnemy(historicalEnemy);
-    if (similarity === null) continue;
-
-    const heroIds = uniqueIds(combat.my_heroes ?? []);
-    if (
-      heroIds.length !== TEAM_SIZE ||
-      !heroIds.every((id) => enabledIds.has(id))
-    ) {
-      continue;
-    }
-
-    const key = teamKey(heroIds);
-    if (key === excludedTeamKey) continue;
-
-    const candidate = candidates.get(key) ?? {
-      heroIds,
-      wins: 0,
-      losses: 0,
-      similarity: 0,
-    };
-    candidate.similarity = Math.max(candidate.similarity, similarity);
-    combat.won ? candidate.wins++ : candidate.losses++;
-    candidates.set(key, candidate);
-  }
+  const enabledCandidates = [...historicalCandidates.values()].filter(
+    (candidate) =>
+      candidate.heroIds.every((id) => enabledIds.has(id)) &&
+      teamKey(candidate.heroIds) !== excludedTeamKey
+  );
 
   for (const candidate of orderHistoricalCandidates(
-    candidates,
+    enabledCandidates,
     sortBySimilarity
   )) {
     const team = resolveCandidateTeam(candidate.heroIds, candidateHeroesById);
