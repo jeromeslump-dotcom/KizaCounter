@@ -107,7 +107,8 @@ export function recommendTeam(
   enemyIds: string[],
   heroes: Hero[],
   combats: Parameters<typeof evaluateTeamHistory>[1],
-  onSource?: RecommendationSourceCallback
+  onSource?: RecommendationSourceCallback,
+  excludedTeamKey?: string
 ): Hero[] {
   if (!enemyIds.length) {
     onSource?.("fallback");
@@ -119,7 +120,8 @@ export function recommendTeam(
     enemyIds,
     combats,
     heroes,
-    historicalContext
+    historicalContext,
+    excludedTeamKey
   );
   if (historicalTeam && historicalTeam.length === TEAM_SIZE) {
     onSource?.("exact-history");
@@ -128,7 +130,9 @@ export function recommendTeam(
   const availableHeroes = heroes;
   if (availableHeroes.length <= TEAM_SIZE) {
     onSource?.("fallback");
-    return availableHeroes;
+    return excludedTeamKey && teamKey(availableHeroes.map((hero) => hero.id)) === excludedTeamKey
+      ? []
+      : availableHeroes;
   }
   const heroesById = new Map(heroes.map((hero) => [hero.id, hero]));
   const counterUsage = calculateCounterUsage(
@@ -172,6 +176,7 @@ export function recommendTeam(
         const replacementScore = replacement.score;
         const completeTeam = [...core4Heroes, candidate.hero];
         const completeTeamKey = teamKey(completeTeam.map((hero) => hero.id));
+        if (completeTeamKey === excludedTeamKey) continue;
         if (
           coreScore > bestCoreScore ||
           (coreScore === bestCoreScore &&
@@ -195,7 +200,8 @@ export function recommendTeam(
   const historicalClassTeam = findBestHistoricalClassTeam(
     enemyIds,
     combats,
-    heroes
+    heroes,
+    excludedTeamKey
   );
   if (historicalClassTeam && historicalClassTeam.length === TEAM_SIZE) {
     onSource?.("class-history");
@@ -204,16 +210,41 @@ export function recommendTeam(
 
   const recommended: Hero[] = [];
   const usedIds = new Set<string>();
-  while (recommended.length < TEAM_SIZE && ranked.length) {
-    const selected = ranked.shift()?.hero;
+  let rankedIndex = 0;
+  while (recommended.length < TEAM_SIZE && rankedIndex < ranked.length) {
+    const selected = ranked[rankedIndex++]?.hero;
     if (!selected || usedIds.has(selected.id)) continue;
     recommended.push(selected);
     usedIds.add(selected.id);
   }
+
+  if (
+    excludedTeamKey &&
+    recommended.length === TEAM_SIZE &&
+    teamKey(recommended.map((hero) => hero.id)) === excludedTeamKey
+  ) {
+    for (const replacement of ranked.slice(TEAM_SIZE)) {
+      const replacementIndex = recommended.length - 1;
+      const candidate = [...recommended];
+      candidate[replacementIndex] = replacement.hero;
+      const candidateIds = candidate.map((hero) => hero.id);
+      if (new Set(candidateIds).size !== TEAM_SIZE) continue;
+      if (teamKey(candidateIds) === excludedTeamKey) continue;
+      recommended.splice(0, recommended.length, ...candidate);
+      break;
+    }
+  }
+
   if (recommended.length < TEAM_SIZE) {
     for (const hero of availableHeroes) {
       if (recommended.length >= TEAM_SIZE) break;
       if (usedIds.has(hero.id)) continue;
+      if (excludedTeamKey && recommended.length === TEAM_SIZE - 1) {
+        const candidate = [...recommended, hero];
+        if (teamKey(candidate.map((entry) => entry.id)) === excludedTeamKey) {
+          continue;
+        }
+      }
       recommended.push(hero);
       usedIds.add(hero.id);
     }
