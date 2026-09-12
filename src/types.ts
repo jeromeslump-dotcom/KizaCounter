@@ -29,18 +29,6 @@ export interface HeroUsage {
 }
 
 // ============================================================
-// ÉVALUATION D'UNE ÉQUIPE
-// ============================================================
-
-export interface TeamEvaluation {
-  score: number;
-  historicalWins: number;
-  historicalLosses: number;
-  historicalBattles: number;
-  historicalWinRate: number;
-}
-
-// ============================================================
 // FILTRES / TRI DES HÉROS
 // ============================================================
 
@@ -48,12 +36,3 @@ export type HeroClassFilter = "ALL" | HeroClass;
 
 export type HeroSort =
   "played" | "hp" | "atk" | "matk" | "totalAtk" | "def" | "mdef" | "totalDef";
-
-// ============================================================
-// SCORE D'ÉQUIPE
-// ============================================================
-
-export interface TeamScore {
-  heroIds: string[];
-  score: number;
-}
