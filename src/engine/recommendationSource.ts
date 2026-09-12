@@ -7,7 +7,7 @@ import { getEngineSettings } from "./engineSettings";
 import { calculateHistoricalReliability } from "./historicalScoring";
 import { findBestHistoricalDefeatTeam } from "./defeatHistory";
 import { calculateCounterUsage, counterHeroScore } from "./counterUsage";
-import { teamKey, uniqueIds } from "./teamUtils";
+import { getClassKey, teamKey, uniqueIds } from "./teamUtils";
 
 export type RecommendationSource =
   ScoringRecommendationSource | "similar-history" | "defeat-history";
@@ -20,30 +20,6 @@ export interface TeamRecommendation {
 const TEAM_SIZE = 5;
 const CORE_SIZE = 4;
 const MIN_SIMILARITY = 3;
-
-function getClassKey(
-  ids: string[],
-  heroesById: Map<string, Hero>
-): string | null {
-  let agi = 0;
-  let int = 0;
-  let str = 0;
-
-  for (const id of ids) {
-    const cls = heroesById.get(id)?.cls;
-    if (cls === "AGI") agi++;
-    else if (cls === "INT") int++;
-    else if (cls === "STR") str++;
-    else return null;
-  }
-
-  if (agi + int + str !== TEAM_SIZE) return null;
-  return [
-    ...Array(agi).fill("AGI"),
-    ...Array(int).fill("INT"),
-    ...Array(str).fill("STR"),
-  ].join("|");
-}
 
 interface HistoricalCandidate {
   heroIds: string[];
