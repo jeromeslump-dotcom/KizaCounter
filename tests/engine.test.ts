@@ -2,10 +2,8 @@
 import { describe, expect, it } from "vitest";
 import type { Combat, Hero } from "../src/types";
 import {
-  calculateWinRate,
   evaluateEnemyClassHistory,
   evaluateExactTeamHistory,
-  evaluateTeam,
   recommendTeam,
 } from "../src/engine/scoring";
 import {
