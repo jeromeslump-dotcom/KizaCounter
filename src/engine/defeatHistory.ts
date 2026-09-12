@@ -9,7 +9,7 @@ export interface DefeatHistoryCandidate {
   losses: number;
   wins: number;
   battles: number;
-  lossRate: number;
+  counterWinRate: number;
   confidence: number;
   score: number;
 }
@@ -73,7 +73,7 @@ export function findHistoricalDefeatCounters(
       losses: 0,
       wins: 0,
       battles: 0,
-      lossRate: 0,
+      counterWinRate: 0,
       confidence: 0,
       score: 0,
     };
@@ -93,12 +93,12 @@ export function findHistoricalDefeatCounters(
       (candidate) => candidate.wins > 0 && candidate.wins >= candidate.losses
     )
     .map((candidate) => {
-      candidate.lossRate = candidate.wins / candidate.battles;
+      candidate.counterWinRate = candidate.wins / candidate.battles;
       candidate.confidence = confidenceForBattles(
         candidate.battles,
         confidenceBattles
       );
-      candidate.score = candidate.lossRate * candidate.confidence;
+      candidate.score = candidate.counterWinRate * candidate.confidence;
       return {
         candidate,
         key: teamKey(candidate.heroIds),
