@@ -63,7 +63,7 @@ export default function HeroManager({
                 plus proposés dans les équipes recommandées.
               </p>
 
-              <div className="mt-3 inline-flex items-center gap-2 rounded-lg border ui-divider px-3 py-1.5">
+              <div className="ui-card mt-3 inline-flex items-center gap-2 rounded-lg border px-3 py-1.5">
                 <span aria-hidden="true">☑️</span>
                 <span className="ui-text-primary text-xs font-bold">
                   {activeCount} / {totalCount} héros actifs
@@ -130,11 +130,8 @@ export default function HeroManager({
                   type="button"
                   onClick={() => onToggleHero(hero.id)}
                   className={[
-                    "relative overflow-hidden rounded-2xl border text-left transition-all",
-                    enabled
-                      ? "border-emerald-400/40 bg-emerald-500/[0.06]"
-                      : "border-white/10 bg-black/20 opacity-45",
-                    "hover:scale-[1.02]",
+                    "ui-card ui-card-hover relative overflow-hidden rounded-2xl border text-left transition-all hover:scale-[1.02]",
+                    enabled ? "ui-success" : "ui-danger opacity-45",
                   ].join(" ")}
                 >
                   <div className="relative p-2.5">
