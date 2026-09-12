@@ -3,23 +3,13 @@ import { analyzeCore4Plus1 } from "./historicalCore4";
 import { getEngineSettings } from "./engineSettings";
 import {
   buildHistoricalEnemyContext,
-  evaluateEnemyClassHistory,
-  evaluateExactTeamHistory,
   evaluateTeamHistory,
   findBestHistoricalClassTeam,
   findBestHistoricalTeam,
   historicalConfidence,
-  calculateHeroUsage,
 } from "./historicalScoring";
 import { calculateCounterUsage, counterHeroScore } from "./counterUsage";
 import { teamKey } from "./teamUtils";
-
-export {
-  evaluateEnemyClassHistory,
-  evaluateExactTeamHistory,
-  evaluateTeamHistory,
-  calculateHeroUsage,
-};
 
 const TEAM_SIZE = 5;
 
