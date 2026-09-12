@@ -202,11 +202,13 @@ export function findBestHistoricalTeam(
   const historicalCombats = context?.combats ?? combats;
   const candidates = collectHistoricalCandidates(
     historicalCombats,
-    context ? undefined : (historicalEnemy) =>
-      historicalEnemy.length === TEAM_SIZE &&
-      teamKey(historicalEnemy) === enemyKey
-        ? 0
-        : null
+    context
+      ? undefined
+      : (historicalEnemy) =>
+          historicalEnemy.length === TEAM_SIZE &&
+          teamKey(historicalEnemy) === enemyKey
+            ? 0
+            : null
   );
 
   for (const candidate of orderHistoricalCandidates(candidates.values())) {

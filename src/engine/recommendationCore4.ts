@@ -1,9 +1,7 @@
 import type { Combat, Hero } from "../types";
 import { getEngineSettings } from "./engineSettings";
 import { calculateHistoricalReliability } from "./historicalScoring";
-import {
-  isUsableRecommendationTeam,
-} from "./recommendationGuards";
+import { isUsableRecommendationTeam } from "./recommendationGuards";
 import { teamKey, uniqueIds } from "./teamUtils";
 
 const TEAM_SIZE = 5;

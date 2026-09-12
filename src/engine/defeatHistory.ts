@@ -1,10 +1,6 @@
 import type { Combat, Hero } from "../types";
 import { getEngineSettings } from "./engineSettings";
-import {
-  resolveTeamFromIds,
-  teamKey,
-  uniqueIds,
-} from "./teamUtils";
+import { resolveTeamFromIds, teamKey, uniqueIds } from "./teamUtils";
 
 const TEAM_SIZE = 5;
 

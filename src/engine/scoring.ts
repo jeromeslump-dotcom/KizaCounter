@@ -46,7 +46,8 @@ export function recommendTeam(
   const availableHeroes = heroes;
   if (availableHeroes.length <= TEAM_SIZE) {
     onSource?.("fallback");
-    return excludedTeamKey && teamKey(availableHeroes.map((hero) => hero.id)) === excludedTeamKey
+    return excludedTeamKey &&
+      teamKey(availableHeroes.map((hero) => hero.id)) === excludedTeamKey
       ? []
       : availableHeroes;
   }

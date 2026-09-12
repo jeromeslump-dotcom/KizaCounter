@@ -9,9 +9,7 @@ import {
 } from "./scoring";
 import { findBestHistoricalDefeatTeam } from "./defeatHistory";
 import { findBestEnabledCore4HistoryTeam } from "./recommendationCore4";
-import {
-  isUsableRecommendationTeam,
-} from "./recommendationGuards";
+import { isUsableRecommendationTeam } from "./recommendationGuards";
 import {
   getClassKey,
   resolveTeamFromIds,
