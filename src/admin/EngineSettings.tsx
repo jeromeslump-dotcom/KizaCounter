@@ -112,7 +112,7 @@ export default function EngineSettings({
 
   return (
     <div
-      className="fixed inset-0 z-[70] flex items-center justify-center bg-black/75 p-3 backdrop-blur-sm sm:p-4"
+      className="ui-modal-overlay fixed inset-0 z-[70] flex items-center justify-center p-3 backdrop-blur-sm sm:p-4"
       onClick={onClose}
       role="presentation"
     >
@@ -244,7 +244,7 @@ export default function EngineSettings({
             <button
               type="button"
               onClick={handleSave}
-              className="ui-primary rounded-xl px-4 py-2 text-sm font-black transition"
+              className="ui-success rounded-xl border px-4 py-2 text-sm font-black transition"
             >
               Enregistrer
             </button>
