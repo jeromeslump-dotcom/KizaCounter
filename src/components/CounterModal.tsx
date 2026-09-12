@@ -133,10 +133,12 @@ export default function CounterModal({
   onSave,
 }: CounterModalProps) {
   const enemyIds = useMemo(() => enemies.map((hero) => hero.id), [enemies]);
+
   const recommendedIds = useMemo(
     () => recommendedTeam.map((hero) => hero.id),
     [recommendedTeam]
   );
+
   const alternativeIds = useMemo(
     () => alternativeTeam.map((hero) => hero.id),
     [alternativeTeam]
@@ -190,7 +192,12 @@ export default function CounterModal({
   const recommendedClassHistory = useMemo(
     () =>
       open
-        ? evaluateEnemyClassHistory(recommendedIds, enemyIds, combats, heroes)
+        ? evaluateEnemyClassHistory(
+            recommendedIds,
+            enemyIds,
+            combats,
+            heroes
+          )
         : EMPTY_HISTORY,
     [open, recommendedIds, enemyIds, combats, heroes]
   );
@@ -206,14 +213,21 @@ export default function CounterModal({
   const alternativeClassHistory = useMemo(
     () =>
       open
-        ? evaluateEnemyClassHistory(alternativeIds, enemyIds, combats, heroes)
+        ? evaluateEnemyClassHistory(
+            alternativeIds,
+            enemyIds,
+            combats,
+            heroes
+          )
         : EMPTY_HISTORY,
     [open, alternativeIds, enemyIds, combats, heroes]
   );
 
   const core4Analyses = useMemo(
     () =>
-      open && enemyIds.length === 5 ? analyzeCore4Plus1(enemyIds, combats) : [],
+      open && enemyIds.length === 5
+        ? analyzeCore4Plus1(enemyIds, combats)
+        : [],
     [open, enemyIds, combats]
   );
 
@@ -229,18 +243,22 @@ export default function CounterModal({
 
   const recommendedDefeatHistory = useMemo(() => {
     if (!open || recommendedIds.length !== 5) return null;
+
     return (
       findHistoricalDefeatCounters(enemyIds, combats, heroes).find(
-        (candidate) => teamKey(candidate.heroIds) === teamKey(recommendedIds)
+        (candidate) =>
+          teamKey(candidate.heroIds) === teamKey(recommendedIds)
       ) ?? null
     );
   }, [open, recommendedIds, enemyIds, combats, heroes]);
 
   const alternativeDefeatHistory = useMemo(() => {
     if (!open || alternativeIds.length !== 5) return null;
+
     return (
       findHistoricalDefeatCounters(enemyIds, combats, heroes).find(
-        (candidate) => teamKey(candidate.heroIds) === teamKey(alternativeIds)
+        (candidate) =>
+          teamKey(candidate.heroIds) === teamKey(alternativeIds)
       ) ?? null
     );
   }, [open, alternativeIds, enemyIds, combats, heroes]);
@@ -261,27 +279,33 @@ export default function CounterModal({
     ) : currentTeamGeneralHistory.battles > 0 ? (
       canViewDetailedHistory ? (
         <>
-          <strong>Nouvelle rencontre · Équipe déjà victorieuse</strong>{" "}
+          <strong>
+            Nouvelle rencontre · Équipe déjà victorieuse
+          </strong>{" "}
           <span className="font-normal">
             · {Math.round(currentTeamGeneralHistory.winRate)} % ·{" "}
             {formatCount(currentTeamGeneralHistory.battles, "combat")}
           </span>
         </>
       ) : (
-        <strong>Nouvelle rencontre · Équipe déjà connue</strong>
+        <strong>
+          Nouvelle rencontre · Équipe déjà connue
+        </strong>
       )
     ) : currentTeamClassHistory.battles > 0 ? (
       <>
         <strong>Nouvelle équipe</strong>{" "}
         <span className="font-normal">
-          · Confiance statistique : {Math.round(currentTeamConfidence)} %
+          · Confiance statistique :{" "}
+          {Math.round(currentTeamConfidence)} %
         </span>
       </>
     ) : (
       <strong>Nouvelle équipe</strong>
     );
 
-  let historyLabel: ReactNode = "Pas d’historique disponible";
+  let historyLabel: ReactNode =
+    "Pas d’historique disponible";
 
   if (recommendationSource === "exact-history") {
     historyLabel =
@@ -305,10 +329,14 @@ export default function CounterModal({
               recommendedClassHistory.battles
             )
           : "Historique classes";
-  } else if (recommendationSource === "core4" && recommendedCore4) {
+  } else if (
+    recommendationSource === "core4" &&
+    recommendedCore4
+  ) {
     const replacementId = recommendedIds.find(
       (id) => !recommendedCore4.coreIds.includes(id)
     );
+
     const replacement = replacementId
       ? recommendedCore4.replacements.find(
           (entry) => entry.heroId === replacementId
@@ -320,19 +348,28 @@ export default function CounterModal({
         <strong>Core4</strong>
         <span className="font-normal">
           {" · "}
-          {formatCount(recommendedCore4.battles, "combat")} · {recommendedCore4.wins} V · {recommendedCore4.losses} D ·{" "}
+          {formatCount(recommendedCore4.battles, "combat")} ·{" "}
+          {recommendedCore4.wins} V ·{" "}
+          {recommendedCore4.losses} D ·{" "}
           {Math.round(recommendedCore4.winRate)} %
           {replacement && (
             <>
               {" · Remplacement : "}
-              {formatCount(replacement.battles, "combat")} · {replacement.wins} V · {replacement.losses} D ·{" "}
+              {formatCount(
+                replacement.battles,
+                "combat"
+              )}{" "}
+              · {replacement.wins} V ·{" "}
+              {replacement.losses} D ·{" "}
               {Math.round(replacement.winRate)} %
             </>
           )}
         </span>
       </span>
     ) : (
-      <strong>Core4 : {Math.round(recommendedCore4.winRate)} %</strong>
+      <strong>
+        Core4 : {Math.round(recommendedCore4.winRate)} %
+      </strong>
     );
   } else if (
     recommendationSource === "defeat-history" &&
@@ -343,7 +380,16 @@ export default function CounterModal({
         <strong>Historique des défaites</strong>
         <span className="font-normal">
           {" · "}
-          {Math.round(recommendedDefeatHistory.counterWinRate * 100)} % · {formatCount(recommendedDefeatHistory.battles, "combat")} · {recommendedDefeatHistory.wins} V / {recommendedDefeatHistory.losses} D
+          {Math.round(
+            recommendedDefeatHistory.counterWinRate * 100
+          )}{" "}
+          % ·{" "}
+          {formatCount(
+            recommendedDefeatHistory.battles,
+            "combat"
+          )}{" "}
+          · {recommendedDefeatHistory.wins} V /{" "}
+          {recommendedDefeatHistory.losses} D
         </span>
       </>
     ) : (
@@ -351,7 +397,8 @@ export default function CounterModal({
     );
   }
 
-  let alternativeHistoryLabel: ReactNode = "Pas d’historique disponible";
+  let alternativeHistoryLabel: ReactNode =
+    "Pas d’historique disponible";
 
   if (alternativeHistory.battles > 0) {
     alternativeHistoryLabel = canViewDetailedHistory ? (
@@ -377,27 +424,36 @@ export default function CounterModal({
     const replacementId = alternativeIds.find(
       (id) => !alternativeCore4.coreIds.includes(id)
     );
+
     const replacement = replacementId
       ? alternativeCore4.replacements.find(
           (entry) => entry.heroId === replacementId
         )
       : undefined;
+
     alternativeHistoryLabel = canViewDetailedHistory ? (
       <span>
         <strong>Core4</strong>
         <span className="font-normal">
           {" · "}
-          {Math.round(alternativeCore4.winRate)} % · {formatCount(alternativeCore4.battles, "combat")}
+          {Math.round(alternativeCore4.winRate)} % ·{" "}
+          {formatCount(alternativeCore4.battles, "combat")}
           {replacement && (
             <>
               {" · Remplacement "}
-              {Math.round(replacement.winRate)} % · {formatCount(replacement.battles, "combat")}
+              {Math.round(replacement.winRate)} % ·{" "}
+              {formatCount(
+                replacement.battles,
+                "combat"
+              )}
             </>
           )}
         </span>
       </span>
     ) : (
-      <strong>Core4 · {Math.round(alternativeCore4.winRate)} %</strong>
+      <strong>
+        Core4 · {Math.round(alternativeCore4.winRate)} %
+      </strong>
     );
   } else if (alternativeDefeatHistory) {
     alternativeHistoryLabel = canViewDetailedHistory ? (
@@ -405,7 +461,14 @@ export default function CounterModal({
         <strong>Historique des défaites</strong>
         <span className="font-normal">
           {" · "}
-          {Math.round(alternativeDefeatHistory.counterWinRate * 100)} % · {formatCount(alternativeDefeatHistory.battles, "combat")}
+          {Math.round(
+            alternativeDefeatHistory.counterWinRate * 100
+          )}{" "}
+          % ·{" "}
+          {formatCount(
+            alternativeDefeatHistory.battles,
+            "combat"
+          )}
         </span>
       </>
     ) : (
@@ -420,11 +483,14 @@ export default function CounterModal({
       : recommendationSource === "class-history" &&
           recommendedClassHistory.battles > 0
         ? `${Math.round(recommendedClassHistory.winRate)} %`
-        : recommendationSource === "core4" && recommendedCore4
+        : recommendationSource === "core4" &&
+            recommendedCore4
           ? `${Math.round(recommendedCore4.winRate)} %`
           : recommendationSource === "defeat-history" &&
               recommendedDefeatHistory
-            ? `${Math.round(recommendedDefeatHistory.counterWinRate * 100)} %`
+            ? `${Math.round(
+                recommendedDefeatHistory.counterWinRate * 100
+              )} %`
             : null;
 
   const alternativeMobileHistoryLabel =
@@ -435,11 +501,14 @@ export default function CounterModal({
         : alternativeCore4
           ? `${Math.round(alternativeCore4.winRate)} %`
           : alternativeDefeatHistory
-            ? `${Math.round(alternativeDefeatHistory.counterWinRate * 100)} %`
+            ? `${Math.round(
+                alternativeDefeatHistory.counterWinRate * 100
+              )} %`
             : null;
 
   const hasRecommendations =
-    recommendedTeam.length > 0 || alternativeTeam.length > 0;
+    recommendedTeam.length > 0 ||
+    alternativeTeam.length > 0;
 
   const recommendationSourceText = recommendationSource
     ? recommendationSourceLabel(recommendationSource)
@@ -455,10 +524,12 @@ export default function CounterModal({
             <h2 className="ui-text-primary text-lg font-black sm:text-xl">
               ⚔️ Contre recommandée
             </h2>
+
             <p className="ui-text-secondary mt-1 hidden text-xs sm:block">
               Modifiez les héros proposés si nécessaire.
             </p>
           </div>
+
           <button
             type="button"
             onClick={onClose}
@@ -482,7 +553,9 @@ export default function CounterModal({
             <CompactTeam
               title={`Votre équipe (${team.length}/5)`}
               titleRight={
-                team.length === 5 ? currentTeamHistoryLabel : undefined
+                team.length === 5
+                  ? currentTeamHistoryLabel
+                  : undefined
               }
               heroes={team}
               selectedIds={teamIds}
@@ -496,10 +569,14 @@ export default function CounterModal({
               {recommendedTeam.length > 0 && (
                 <button
                   type="button"
-                  onClick={() => onSelectRecommendedTeam(recommendedIds)}
+                  onClick={() =>
+                    onSelectRecommendedTeam(recommendedIds)
+                  }
                   className={[
                     "ui-recommendation-team",
-                    recommendedIds.every((id) => teamIds.includes(id))
+                    recommendedIds.every((id) =>
+                      teamIds.includes(id)
+                    )
                       ? "ui-recommendation-selected"
                       : "",
                   ].join(" ")}
@@ -508,21 +585,28 @@ export default function CounterModal({
                     <div className="whitespace-nowrap text-[10px] font-bold uppercase tracking-wide sm:text-xs">
                       Recommandation initiale
                     </div>
+
                     <div className="shrink-0 text-right text-[10px] font-bold sm:text-xs">
                       <span className="sm:hidden">
                         {recommendationMobileHistoryLabel}
                       </span>
+
                       <span className="hidden sm:inline">
                         {recommendationSourceText}
+
                         <span className="ui-text-muted ml-1 font-normal">
                           · {historyLabel}
                         </span>
                       </span>
                     </div>
                   </div>
+
                   <div className="grid grid-cols-5 gap-1.5 sm:gap-2">
                     {recommendedTeam.map((hero) => (
-                      <span key={hero.id} className="ui-recommendation-hero">
+                      <span
+                        key={hero.id}
+                        className="ui-recommendation-hero"
+                      >
                         {hero.name}
                       </span>
                     ))}
@@ -540,10 +624,14 @@ export default function CounterModal({
                 >
                   <button
                     type="button"
-                    onClick={() => onSelectRecommendedTeam(alternativeIds)}
+                    onClick={() =>
+                      onSelectRecommendedTeam(alternativeIds)
+                    }
                     className={[
                       "ui-recommendation-team",
-                      alternativeIds.every((id) => teamIds.includes(id))
+                      alternativeIds.every((id) =>
+                        teamIds.includes(id)
+                      )
                         ? "ui-recommendation-selected"
                         : "",
                     ].join(" ")}
@@ -552,18 +640,24 @@ export default function CounterModal({
                       <div className="whitespace-nowrap text-[10px] font-bold uppercase tracking-wide sm:text-xs">
                         Alternative
                       </div>
+
                       <div className="shrink-0 text-right text-[10px] font-bold sm:text-xs">
                         <span className="sm:hidden">
                           {alternativeMobileHistoryLabel}
                         </span>
+
                         <span className="hidden sm:inline">
                           {alternativeHistoryLabel}
                         </span>
                       </div>
                     </div>
+
                     <div className="grid grid-cols-5 gap-1.5 sm:gap-2">
                       {alternativeTeam.map((hero) => (
-                        <span key={hero.id} className="ui-recommendation-hero">
+                        <span
+                          key={hero.id}
+                          className="ui-recommendation-hero"
+                        >
                           {hero.name}
                         </span>
                       ))}
@@ -577,9 +671,8 @@ export default function CounterModal({
           <div className="mt-4">
             <CombatForm
               enemies={enemies}
-              myTeam={team}
+              myHeroes={team}
               onSave={onSave}
-              canViewDetailedHistory={canViewDetailedHistory}
             />
           </div>
 
