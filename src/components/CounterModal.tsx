@@ -241,7 +241,9 @@ export default function CounterModal({
       recommendedIds.length === 5 ? teamKey(recommendedIds) : undefined
     );
 
-    return teamKey(recommendation.team) === teamKey(alternativeIds)
+    return teamKey(recommendation.team.map((hero) => hero.id)) === teamKey(
+      alternativeIds
+    )
       ? recommendation
       : null;
   }, [
@@ -523,23 +525,6 @@ export default function CounterModal({
     );
   }
 
-  const recommendationMobileHistoryLabel =
-    recommendationSource === "exact-history" &&
-    recommendedExactHistory.battles > 0
-      ? `${Math.round(recommendedExactHistory.winRate)} %`
-      : recommendationSource === "class-history" &&
-          recommendedClassHistory.battles > 0
-        ? `${Math.round(recommendedClassHistory.winRate)} %`
-        : recommendationSource === "core4" &&
-            recommendedCore4
-          ? `${Math.round(recommendedCore4.winRate)} %`
-          : recommendationSource === "defeat-history" &&
-              recommendedDefeatHistory
-            ? `${Math.round(
-                recommendedDefeatHistory.counterWinRate * 100
-              )} %`
-            : null;
-
   const alternativeMobileHistoryLabel =
     alternativeHistory.battles > 0
       ? `${Math.round(alternativeHistory.winRate)} %`
@@ -551,103 +536,51 @@ export default function CounterModal({
             ? `${Math.round(
                 alternativeDefeatHistory.counterWinRate * 100
               )} %`
-            : null;
+            : "";
 
-  const hasRecommendations =
-    recommendedTeam.length > 0 ||
-    alternativeTeam.length > 0;
-
-  const recommendationSourceText = recommendationSource
-    ? recommendationSourceLabel(recommendationSource)
-    : "Source inconnue";
+  const selectedIds = new Set(teamIds);
 
   if (!open) return null;
 
   return (
-    <div className="ui-modal-overlay fixed inset-0 z-50 flex items-center justify-center p-2 backdrop-blur-sm sm:p-4">
-      <div className="ui-modal flex max-h-[96vh] w-full max-w-6xl flex-col overflow-hidden rounded-2xl border shadow-2xl">
-        <div className="flex items-center justify-between border-b ui-divider px-4 py-3 sm:px-5 sm:py-4">
+    <div className="ui-modal-overlay fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4">
+      <div className="ui-modal flex max-h-[95vh] w-full max-w-6xl flex-col overflow-hidden rounded-2xl border">
+        <div className="flex items-center justify-between gap-3 border-b ui-divider px-3 py-3 sm:px-5">
           <div>
-            <h2 className="ui-text-primary text-lg font-black sm:text-xl">
-              ⚔️ Contre recommandée
+            <h2 className="text-base font-bold text-white sm:text-lg">
+              Counter
             </h2>
-
-            <p className="ui-text-secondary mt-1 hidden text-xs sm:block">
-              Modifiez les héros proposés si nécessaire.
+            <p className="text-xs text-slate-400 sm:text-sm">
+              Configure ton équipe et enregistre le combat.
             </p>
           </div>
-
           <button
             type="button"
             onClick={onClose}
-            className="ui-action ui-danger flex h-9 w-9 items-center justify-center rounded-lg border text-lg transition"
-            aria-label="Fermer"
+            className="ui-action rounded-lg px-3 py-2 text-sm"
           >
-            ✕
+            Fermer
           </button>
         </div>
 
-        <div className="overflow-y-auto p-3 sm:p-5">
-          <CompactTeam
-            title={`Ennemis (${enemies.length}/5)`}
-            heroes={enemies}
-            selectedIds={enemies.map((hero) => hero.id)}
-            enemy
-            compactPortrait
-          />
+        <div className="flex-1 overflow-y-auto px-3 py-3 sm:px-5 sm:py-4">
+          <div className="grid gap-3 lg:grid-cols-[1fr_1fr]">
+            <section className="ui-panel rounded-xl border p-3 sm:p-4">
+              <div className="mb-3 flex items-center justify-between gap-3">
+                <h3 className="text-sm font-bold text-white sm:text-base">
+                  Équipe recommandée
+                </h3>
+                <span className="text-right text-[10px] text-slate-400 sm:text-xs">
+                  {historyLabel}
+                </span>
+              </div>
 
-          <div className="mt-4">
-            <CompactTeam
-              title={`Votre équipe (${team.length}/5)`}
-              titleRight={
-                team.length === 5
-                  ? currentTeamHistoryLabel
-                  : undefined
-              }
-              heroes={team}
-              selectedIds={teamIds}
-              onHeroClick={onHeroClick}
-              compactPortrait
-            />
-          </div>
-
-          {hasRecommendations && (
-            <div className="ui-panel-alt mt-4 rounded-xl border p-2 sm:p-3">
-              {recommendedTeam.length > 0 && (
+              {recommendedTeam.length > 0 ? (
                 <button
                   type="button"
-                  onClick={() =>
-                    onSelectRecommendedTeam(recommendedIds)
-                  }
-                  className={[
-                    "ui-recommendation-team",
-                    recommendedIds.every((id) =>
-                      teamIds.includes(id)
-                    )
-                      ? "ui-recommendation-selected"
-                      : "",
-                  ].join(" ")}
+                  onClick={() => onSelectRecommendedTeam(recommendedIds)}
+                  className="ui-recommendation-team ui-recommendation-selected w-full"
                 >
-                  <div className="mb-2 flex items-center justify-between gap-3">
-                    <div className="whitespace-nowrap text-[10px] font-bold uppercase tracking-wide sm:text-xs">
-                      Recommandation initiale
-                    </div>
-
-                    <div className="shrink-0 text-right text-[10px] font-bold sm:text-xs">
-                      <span className="sm:hidden">
-                        {recommendationMobileHistoryLabel}
-                      </span>
-
-                      <span className="hidden sm:inline">
-                        {recommendationSourceText}
-
-                        <span className="ui-text-muted ml-1 font-normal">
-                          · {historyLabel}
-                        </span>
-                      </span>
-                    </div>
-                  </div>
-
                   <div className="grid grid-cols-5 gap-1.5 sm:gap-2">
                     {recommendedTeam.map((hero) => (
                       <span
@@ -659,6 +592,10 @@ export default function CounterModal({
                     ))}
                   </div>
                 </button>
+              ) : (
+                <div className="ui-panel-empty rounded-lg border p-4 text-center text-sm">
+                  Aucune équipe recommandée.
+                </div>
               )}
 
               {alternativeTeam.length > 0 && (
@@ -712,8 +649,25 @@ export default function CounterModal({
                   </button>
                 </div>
               )}
-            </div>
-          )}
+            </section>
+
+            <section className="ui-panel rounded-xl border p-3 sm:p-4">
+              <div className="mb-3 flex items-center justify-between gap-3">
+                <h3 className="text-sm font-bold text-white sm:text-base">
+                  Ton équipe
+                </h3>
+                <span className="text-right text-[10px] text-slate-400 sm:text-xs">
+                  {currentTeamHistoryLabel}
+                </span>
+              </div>
+
+              <CompactTeam
+                heroes={team}
+                selectedIds={selectedIds}
+                onHeroClick={onHeroClick}
+              />
+            </section>
+          </div>
 
           <div className="mt-4">
             <CombatForm
@@ -723,19 +677,21 @@ export default function CounterModal({
             />
           </div>
 
-          <HeroGrid
-            heroes={heroes}
-            selectedIds={teamIds}
-            enabledHeroIds={enabledHeroIds}
-            activeClass={activeClass}
-            query={query}
-            sortBy={sortBy}
-            usage={usage}
-            onHeroClick={onHeroClick}
-            onQueryChange={onQueryChange}
-            onClassChange={onClassChange}
-            onSortChange={onSortChange}
-          />
+          <div className="mt-4">
+            <HeroGrid
+              heroes={heroes}
+              enabledHeroIds={enabledHeroIds}
+              activeClass={activeClass}
+              query={query}
+              sortBy={sortBy}
+              usage={usage}
+              selectedIds={selectedIds}
+              onHeroClick={onHeroClick}
+              onQueryChange={onQueryChange}
+              onClassChange={onClassChange}
+              onSortChange={onSortChange}
+            />
+          </div>
         </div>
       </div>
     </div>
