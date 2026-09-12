@@ -312,27 +312,33 @@ export default function CounterModal({
     ) : currentTeamGeneralHistory.battles > 0 ? (
       canViewDetailedHistory ? (
         <>
-          <strong>Nouvelle rencontre · Équipe déjà victorieuse</strong>{" "}
+          <strong>
+            Nouvelle rencontre · Équipe déjà victorieuse
+          </strong>{" "}
           <span className="font-normal">
             · {Math.round(currentTeamGeneralHistory.winRate)} % ·{" "}
             {formatCount(currentTeamGeneralHistory.battles, "combat")}
           </span>
         </>
       ) : (
-        <strong>Nouvelle rencontre · Équipe déjà connue</strong>
+        <strong>
+          Nouvelle rencontre · Équipe déjà connue
+        </strong>
       )
     ) : currentTeamClassHistory.battles > 0 ? (
       <>
         <strong>Nouvelle équipe</strong>{" "}
         <span className="font-normal">
-          · Confiance statistique : {Math.round(currentTeamConfidence)} %
+          · Confiance statistique :{" "}
+          {Math.round(currentTeamConfidence)} %
         </span>
       </>
     ) : (
       <strong>Nouvelle équipe</strong>
     );
 
-  let historyLabel: ReactNode = "Pas d’historique disponible";
+  let historyLabel: ReactNode =
+    "Pas d’historique disponible";
 
   if (recommendationSource === "exact-history") {
     historyLabel =
@@ -356,7 +362,10 @@ export default function CounterModal({
               recommendedClassHistory.battles
             )
           : "Historique classes";
-  } else if (recommendationSource === "core4" && recommendedCore4) {
+  } else if (
+    recommendationSource === "core4" &&
+    recommendedCore4
+  ) {
     const replacementId = recommendedIds.find(
       (id) => !recommendedCore4.coreIds.includes(id)
     );
@@ -373,20 +382,27 @@ export default function CounterModal({
         <span className="font-normal">
           {" · "}
           {formatCount(recommendedCore4.battles, "combat")} ·{" "}
-          {recommendedCore4.wins} V · {recommendedCore4.losses} D ·{" "}
+          {recommendedCore4.wins} V ·{" "}
+          {recommendedCore4.losses} D ·{" "}
           {Math.round(recommendedCore4.winRate)} %
           {replacement && (
             <>
               {" · Remplacement : "}
-              {formatCount(replacement.battles, "combat")} ·{" "}
-              {replacement.wins} V · {replacement.losses} D ·{" "}
+              {formatCount(
+                replacement.battles,
+                "combat"
+              )}{" "}
+              · {replacement.wins} V ·{" "}
+              {replacement.losses} D ·{" "}
               {Math.round(replacement.winRate)} %
             </>
           )}
         </span>
       </span>
     ) : (
-      <strong>Core4 : {Math.round(recommendedCore4.winRate)} %</strong>
+      <strong>
+        Core4 : {Math.round(recommendedCore4.winRate)} %
+      </strong>
     );
   } else if (
     recommendationSource === "defeat-history" &&
@@ -397,9 +413,16 @@ export default function CounterModal({
         <strong>Historique des défaites</strong>
         <span className="font-normal">
           {" · "}
-          {Math.round(recommendedDefeatHistory.counterWinRate * 100)} % ·{" "}
-          {formatCount(recommendedDefeatHistory.battles, "combat")} ·{" "}
-          {recommendedDefeatHistory.wins} V / {recommendedDefeatHistory.losses} D
+          {Math.round(
+            recommendedDefeatHistory.counterWinRate * 100
+          )}{" "}
+          % ·{" "}
+          {formatCount(
+            recommendedDefeatHistory.battles,
+            "combat"
+          )}{" "}
+          · {recommendedDefeatHistory.wins} V /{" "}
+          {recommendedDefeatHistory.losses} D
         </span>
       </>
     ) : (
@@ -411,11 +434,14 @@ export default function CounterModal({
     recommendationSource === "fallback"
   ) {
     historyLabel = (
-      <strong>{recommendationSourceLabel(recommendationSource)}</strong>
+      <strong>
+        {recommendationSourceLabel(recommendationSource)}
+      </strong>
     );
   }
 
-  let alternativeHistoryLabel: ReactNode = "Pas d’historique disponible";
+  let alternativeHistoryLabel: ReactNode =
+    "Pas d’historique disponible";
 
   if (alternativeHistory.battles > 0) {
     alternativeHistoryLabel = canViewDetailedHistory ? (
@@ -459,13 +485,18 @@ export default function CounterModal({
             <>
               {" · Remplacement "}
               {Math.round(replacement.winRate)} % ·{" "}
-              {formatCount(replacement.battles, "combat")}
+              {formatCount(
+                replacement.battles,
+                "combat"
+              )}
             </>
           )}
         </span>
       </span>
     ) : (
-      <strong>Core4 · {Math.round(alternativeCore4.winRate)} %</strong>
+      <strong>
+        Core4 · {Math.round(alternativeCore4.winRate)} %
+      </strong>
     );
   } else if (alternativeDefeatHistory) {
     alternativeHistoryLabel = canViewDetailedHistory ? (
@@ -473,8 +504,14 @@ export default function CounterModal({
         <strong>Historique des défaites</strong>
         <span className="font-normal">
           {" · "}
-          {Math.round(alternativeDefeatHistory.counterWinRate * 100)} % ·{" "}
-          {formatCount(alternativeDefeatHistory.battles, "combat")}
+          {Math.round(
+            alternativeDefeatHistory.counterWinRate * 100
+          )}{" "}
+          % ·{" "}
+          {formatCount(
+            alternativeDefeatHistory.battles,
+            "combat"
+          )}
         </span>
       </>
     ) : (
@@ -526,46 +563,103 @@ export default function CounterModal({
           </button>
         </div>
 
-        <div className="min-h-0 flex-1 overflow-y-auto p-3 sm:p-5">
-          <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+        <div className="overflow-y-auto p-3 sm:p-5">
+          <div className="grid gap-4 lg:grid-cols-2">
             <section className="ui-panel rounded-xl border p-3 sm:p-4">
               <div className="mb-3 flex items-center justify-between gap-3">
                 <h3 className="text-sm font-bold text-white sm:text-base">
-                  Équipe recommandée
+                  Ennemis
+                </h3>
+                <span className="text-right text-[10px] text-slate-400 sm:text-xs">
+                  {enemies.length}/5
+                </span>
+              </div>
+
+              {enemies.length === 0 ? (
+                <div className="ui-panel-empty rounded-lg border border-dashed p-4 text-center">
+                  <p className="ui-text-muted text-xs">
+                    Aucun héros ennemi sélectionné.
+                  </p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-5 gap-1.5 sm:gap-2">
+                  {enemies.map((hero) => (
+                    <button
+                      key={hero.id}
+                      type="button"
+                      className="ui-card group relative min-w-0 overflow-hidden rounded-lg border"
+                      onClick={() => onHeroClick(hero)}
+                    >
+                      <div className="relative aspect-square w-full overflow-hidden">
+                        <img
+                          src={hero.img}
+                          alt={hero.name}
+                          className="h-full w-full object-contain"
+                          loading="lazy"
+                        />
+                      </div>
+                      <div className="ui-divider ui-text-primary truncate border-t px-1 py-1.5 text-center text-[9px] font-bold leading-tight sm:px-2 sm:py-2 sm:text-xs">
+                        {hero.name}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </section>
+
+            <section className="ui-panel rounded-xl border p-3 sm:p-4">
+              <div className="mb-3 flex items-center justify-between gap-3">
+                <h3 className="text-sm font-bold text-white sm:text-base">
+                  Recommandations
                 </h3>
                 <span className="text-right text-[10px] text-slate-400 sm:text-xs">
                   {historyLabel}
                 </span>
               </div>
 
-              <button
-                type="button"
-                onClick={() => onSelectRecommendedTeam(recommendedIds)}
-                className="ui-recommendation-team w-full rounded-xl border p-2 text-left"
-              >
-                <div className="grid grid-cols-5 gap-1.5 sm:gap-2">
-                  {recommendedTeam.map((hero) => (
-                    <span
-                      key={hero.id}
-                      className="ui-recommendation-hero"
-                    >
-                      {hero.name}
-                    </span>
-                  ))}
-                </div>
-              </button>
+              <div className="grid gap-3">
+                {recommendedTeam.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => onSelectRecommendedTeam(recommendedIds)}
+                    className="ui-recommendation-team ui-card ui-card-hover w-full rounded-xl border p-3 text-left"
+                  >
+                    <div className="mb-2 flex items-center justify-between gap-3">
+                      <div className="text-[10px] font-bold uppercase tracking-wide sm:text-xs">
+                        Recommandation initiale
+                      </div>
+                      <div className="shrink-0 text-right text-[10px] font-bold sm:text-xs">
+                        <span className="sm:hidden">
+                          {recommendedExactHistory.battles > 0
+                            ? `${Math.round(recommendedExactHistory.winRate)} %`
+                            : recommendedClassHistory.battles > 0
+                              ? `${Math.round(recommendedClassHistory.winRate)} %`
+                              : recommendedCore4
+                                ? `${Math.round(recommendedCore4.winRate)} %`
+                                : recommendedDefeatHistory
+                                  ? `${Math.round(
+                                      recommendedDefeatHistory.counterWinRate * 100
+                                    )} %`
+                                  : ""}
+                        </span>
+                        <span className="hidden sm:inline">{historyLabel}</span>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-5 gap-1.5 sm:gap-2">
+                      {recommendedTeam.map((hero) => (
+                        <span key={hero.id} className="ui-recommendation-hero">
+                          {hero.name}
+                        </span>
+                      ))}
+                    </div>
+                  </button>
+                )}
 
-              {alternativeTeam.length === 5 && (
-                <div className="mt-3">
+                {alternativeTeam.length > 0 && (
                   <button
                     type="button"
                     onClick={() => onSelectRecommendedTeam(alternativeIds)}
-                    className={[
-                      "ui-recommendation-team w-full rounded-xl border p-2 text-left",
-                      teamKey(alternativeIds) === teamKey(teamIds)
-                        ? "ui-recommendation-selected"
-                        : "",
-                    ].join(" ")}
+                    className="ui-recommendation-team ui-card ui-card-hover w-full rounded-xl border p-3 text-left"
                   >
                     <div className="mb-2 flex items-center justify-between gap-3">
                       <div className="whitespace-nowrap text-[10px] font-bold uppercase tracking-wide sm:text-xs">
@@ -594,26 +688,17 @@ export default function CounterModal({
                       ))}
                     </div>
                   </button>
-                </div>
-              )}
-            </section>
-
-            <section className="ui-panel rounded-xl border p-3 sm:p-4">
-              <div className="mb-3 flex items-center justify-between gap-3">
-                <h3 className="text-sm font-bold text-white sm:text-base">
-                  Ton équipe
-                </h3>
-                <span className="text-right text-[10px] text-slate-400 sm:text-xs">
-                  {currentTeamHistoryLabel}
-                </span>
+                )}
               </div>
-
-              <CompactTeam
-                heroes={team}
-                selectedIds={selectedIds}
-                onHeroClick={onHeroClick}
-              />
             </section>
+
+            <CompactTeam
+              title="Ton équipe"
+              titleRight={currentTeamHistoryLabel}
+              heroes={team}
+              selectedIds={selectedIds}
+              onHeroClick={onHeroClick}
+            />
           </div>
 
           <div className="mt-4">
