@@ -150,7 +150,7 @@ export default function AuthPanel() {
             type="button"
             onClick={handleSignOut}
             disabled={submitting}
-            className="ui-action ui-danger rounded-md border px-2.5 py-1.5 text-[11px] font-bold transition disabled:opacity-50"
+            className="ui-action rounded-md border px-2.5 py-1.5 text-[11px] font-bold transition disabled:opacity-50"
           >
             {submitting ? "..." : "Déconnexion"}
           </button>
