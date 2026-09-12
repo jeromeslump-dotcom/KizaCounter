@@ -1,12 +1,8 @@
 import type { Hero } from "../data/heroes";
-import type { TeamEvaluation } from "../types";
 import CompactTeam from "../components/CompactTeam";
 
 export interface HeroEvaluationGroup {
   team: Hero[];
-  evaluation: TeamEvaluation | null;
-  scoreA: number | null;
-  scoreB: number | null;
   count: number;
   wins: number;
   losses: number;
