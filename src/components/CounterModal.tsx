@@ -312,8 +312,8 @@ export default function CounterModal({
     recommendedDefeatHistory
   ) {
     historyLabel = canViewDetailedHistory
-      ? `${Math.round(recommendedDefeatHistory.lossRate * 100)} % · ${formatCount(recommendedDefeatHistory.battles, "combat")} · ${recommendedDefeatHistory.wins} V / ${recommendedDefeatHistory.losses} D`
-      : `${Math.round(recommendedDefeatHistory.lossRate * 100)} %`;
+      ? `${Math.round(recommendedDefeatHistory.counterWinRate * 100)} % · ${formatCount(recommendedDefeatHistory.battles, "combat")} · ${recommendedDefeatHistory.wins} V / ${recommendedDefeatHistory.losses} D`
+      : `${Math.round(recommendedDefeatHistory.counterWinRate * 100)} %`;
   }
 
   let alternativeHistoryLabel: ReactNode = "Pas d’historique disponible";
@@ -352,7 +352,7 @@ export default function CounterModal({
     );
   } else if (alternativeDefeatHistory) {
     alternativeHistoryLabel = canViewDetailedHistory
-      ? `Historique des défaites · ${Math.round(alternativeDefeatHistory.lossRate * 100)} % · ${formatCount(alternativeDefeatHistory.battles, "combat")}`
+      ? `Historique des défaites · ${Math.round(alternativeDefeatHistory.counterWinRate * 100)} % · ${formatCount(alternativeDefeatHistory.battles, "combat")}`
       : "Historique des défaites";
   }
 
@@ -367,7 +367,7 @@ export default function CounterModal({
           ? `${Math.round(recommendedCore4.winRate)} %`
           : recommendationSource === "defeat-history" &&
               recommendedDefeatHistory
-            ? `${Math.round(recommendedDefeatHistory.lossRate * 100)} %`
+            ? `${Math.round(recommendedDefeatHistory.counterWinRate * 100)} %`
             : null;
 
   const alternativeMobileHistoryLabel =
@@ -378,7 +378,7 @@ export default function CounterModal({
         : alternativeCore4
           ? `${Math.round(alternativeCore4.winRate)} %`
           : alternativeDefeatHistory
-            ? `${Math.round(alternativeDefeatHistory.lossRate * 100)} %`
+            ? `${Math.round(alternativeDefeatHistory.counterWinRate * 100)} %`
             : null;
 
   const hasRecommendations =
