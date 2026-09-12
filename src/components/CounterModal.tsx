@@ -92,6 +92,22 @@ function formatCount(
   return `${value} ${value > 1 ? plural : singular}`;
 }
 
+function historyLabelWithStats(
+  source: string,
+  winRate: number,
+  battles: number
+): ReactNode {
+  return (
+    <>
+      <strong>{source}</strong>
+      <span className="font-normal">
+        {" · "}
+        {Math.round(winRate)} % · {formatCount(battles, "combat")}
+      </span>
+    </>
+  );
+}
+
 export default function CounterModal({
   open,
   enemies,
@@ -272,15 +288,23 @@ export default function CounterModal({
       recommendedExactHistory.battles === 0
         ? "Aucun historique exact"
         : canViewDetailedHistory
-          ? `${Math.round(recommendedExactHistory.winRate)} % · ${formatCount(recommendedExactHistory.battles, "combat")}`
-          : `${Math.round(recommendedExactHistory.winRate)} %`;
+          ? historyLabelWithStats(
+              "Historique exact",
+              recommendedExactHistory.winRate,
+              recommendedExactHistory.battles
+            )
+          : "Historique exact";
   } else if (recommendationSource === "class-history") {
     historyLabel =
       recommendedClassHistory.battles === 0
         ? "Aucun historique de classes"
         : canViewDetailedHistory
-          ? `${Math.round(recommendedClassHistory.winRate)} % · ${formatCount(recommendedClassHistory.battles, "combat")}`
-          : `${Math.round(recommendedClassHistory.winRate)} %`;
+          ? historyLabelWithStats(
+              "Historique classes",
+              recommendedClassHistory.winRate,
+              recommendedClassHistory.battles
+            )
+          : "Historique classes";
   } else if (recommendationSource === "core4" && recommendedCore4) {
     const replacementId = recommendedIds.find(
       (id) => !recommendedCore4.coreIds.includes(id)
@@ -293,39 +317,62 @@ export default function CounterModal({
 
     historyLabel = canViewDetailedHistory ? (
       <span>
-        Core4 : {formatCount(recommendedCore4.battles, "combat")} ·{" "}
-        {recommendedCore4.wins} V · {recommendedCore4.losses} D ·{" "}
-        {Math.round(recommendedCore4.winRate)} %
-        {replacement && (
-          <>
-            {" · "}Remplacement : {formatCount(replacement.battles, "combat")} ·{" "}
-            {replacement.wins} V · {replacement.losses} D ·{" "}
-            {Math.round(replacement.winRate)} %
-          </>
-        )}
+        <strong>Core4</strong>
+        <span className="font-normal">
+          {" · "}
+          {formatCount(recommendedCore4.battles, "combat")} · {recommendedCore4.wins} V · {recommendedCore4.losses} D ·{" "}
+          {Math.round(recommendedCore4.winRate)} %
+          {replacement && (
+            <>
+              {" · Remplacement : "}
+              {formatCount(replacement.battles, "combat")} · {replacement.wins} V · {replacement.losses} D ·{" "}
+              {Math.round(replacement.winRate)} %
+            </>
+          )}
+        </span>
       </span>
     ) : (
-      <span>Core4 : {Math.round(recommendedCore4.winRate)} %</span>
+      <strong>Core4 : {Math.round(recommendedCore4.winRate)} %</strong>
     );
   } else if (
     recommendationSource === "defeat-history" &&
     recommendedDefeatHistory
   ) {
-    historyLabel = canViewDetailedHistory
-      ? `${Math.round(recommendedDefeatHistory.counterWinRate * 100)} % · ${formatCount(recommendedDefeatHistory.battles, "combat")} · ${recommendedDefeatHistory.wins} V / ${recommendedDefeatHistory.losses} D`
-      : `${Math.round(recommendedDefeatHistory.counterWinRate * 100)} %`;
+    historyLabel = canViewDetailedHistory ? (
+      <>
+        <strong>Historique des défaites</strong>
+        <span className="font-normal">
+          {" · "}
+          {Math.round(recommendedDefeatHistory.counterWinRate * 100)} % · {formatCount(recommendedDefeatHistory.battles, "combat")} · {recommendedDefeatHistory.wins} V / {recommendedDefeatHistory.losses} D
+        </span>
+      </>
+    ) : (
+      "Historique des défaites"
+    );
   }
 
   let alternativeHistoryLabel: ReactNode = "Pas d’historique disponible";
 
   if (alternativeHistory.battles > 0) {
-    alternativeHistoryLabel = canViewDetailedHistory
-      ? `Historique exact · ${Math.round(alternativeHistory.winRate)} % · ${formatCount(alternativeHistory.battles, "combat")}`
-      : "Historique exact";
+    alternativeHistoryLabel = canViewDetailedHistory ? (
+      historyLabelWithStats(
+        "Historique exact",
+        alternativeHistory.winRate,
+        alternativeHistory.battles
+      )
+    ) : (
+      <strong>Historique exact</strong>
+    );
   } else if (alternativeClassHistory.battles > 0) {
-    alternativeHistoryLabel = canViewDetailedHistory
-      ? `Historique classes · ${Math.round(alternativeClassHistory.winRate)} % · ${formatCount(alternativeClassHistory.battles, "combat")}`
-      : "Historique classes";
+    alternativeHistoryLabel = canViewDetailedHistory ? (
+      historyLabelWithStats(
+        "Historique classes",
+        alternativeClassHistory.winRate,
+        alternativeClassHistory.battles
+      )
+    ) : (
+      <strong>Historique classes</strong>
+    );
   } else if (alternativeCore4) {
     const replacementId = alternativeIds.find(
       (id) => !alternativeCore4.coreIds.includes(id)
@@ -337,23 +384,33 @@ export default function CounterModal({
       : undefined;
     alternativeHistoryLabel = canViewDetailedHistory ? (
       <span>
-        Core4 · {Math.round(alternativeCore4.winRate)} % ·{" "}
-        {formatCount(alternativeCore4.battles, "combat")}
-        {replacement && (
-          <>
-            {" · Remplacement "}
-            {Math.round(replacement.winRate)} % ·{" "}
-            {formatCount(replacement.battles, "combat")}
-          </>
-        )}
+        <strong>Core4</strong>
+        <span className="font-normal">
+          {" · "}
+          {Math.round(alternativeCore4.winRate)} % · {formatCount(alternativeCore4.battles, "combat")}
+          {replacement && (
+            <>
+              {" · Remplacement "}
+              {Math.round(replacement.winRate)} % · {formatCount(replacement.battles, "combat")}
+            </>
+          )}
+        </span>
       </span>
     ) : (
-      `Core4 · ${Math.round(alternativeCore4.winRate)} %`
+      <strong>Core4 · {Math.round(alternativeCore4.winRate)} %</strong>
     );
   } else if (alternativeDefeatHistory) {
-    alternativeHistoryLabel = canViewDetailedHistory
-      ? `Historique des défaites · ${Math.round(alternativeDefeatHistory.counterWinRate * 100)} % · ${formatCount(alternativeDefeatHistory.battles, "combat")}`
-      : "Historique des défaites";
+    alternativeHistoryLabel = canViewDetailedHistory ? (
+      <>
+        <strong>Historique des défaites</strong>
+        <span className="font-normal">
+          {" · "}
+          {Math.round(alternativeDefeatHistory.counterWinRate * 100)} % · {formatCount(alternativeDefeatHistory.battles, "combat")}
+        </span>
+      </>
+    ) : (
+      <strong>Historique des défaites</strong>
+    );
   }
 
   const recommendationMobileHistoryLabel =
@@ -518,24 +575,27 @@ export default function CounterModal({
           )}
 
           <div className="mt-4">
-            <CombatForm enemies={enemies} myHeroes={team} onSave={onSave} />
-          </div>
-
-          <div className="mt-5">
-            <HeroGrid
-              heroes={heroes}
-              enabledHeroIds={enabledHeroIds}
-              activeClass={activeClass}
-              query={query}
-              sortBy={sortBy}
-              usage={usage}
-              selectedIds={teamIds}
-              onQueryChange={onQueryChange}
-              onClassChange={onClassChange}
-              onSortChange={onSortChange}
-              onHeroClick={onHeroClick}
+            <CombatForm
+              enemies={enemies}
+              myTeam={team}
+              onSave={onSave}
+              canViewDetailedHistory={canViewDetailedHistory}
             />
           </div>
+
+          <HeroGrid
+            heroes={heroes}
+            selectedIds={teamIds}
+            enabledHeroIds={enabledHeroIds}
+            activeClass={activeClass}
+            query={query}
+            sortBy={sortBy}
+            usage={usage}
+            onHeroClick={onHeroClick}
+            onQueryChange={onQueryChange}
+            onClassChange={onClassChange}
+            onSortChange={onSortChange}
+          />
         </div>
       </div>
     </div>
