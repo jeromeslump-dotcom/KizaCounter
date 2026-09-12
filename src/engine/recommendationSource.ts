@@ -1,5 +1,6 @@
 import type { Combat, Hero } from "../types";
 import {
+  calculateHistoricalReliability,
   collectHistoricalCandidates,
   orderHistoricalCandidates,
 } from "./historicalScoring";
