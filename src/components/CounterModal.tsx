@@ -6,7 +6,7 @@ import {
   evaluateEnemyClassHistory,
   evaluateExactTeamHistory,
   evaluateTeamHistory,
-} from "../engine/scoring";
+} from "../engine/historicalScoring";
 import {
   analyzeCore4Plus1,
   type Core4Analysis,
