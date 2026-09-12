@@ -165,7 +165,7 @@ export default function EncounteredTeams({
               Chargement des équipes rencontrées...
             </p>
           ) : error ? (
-            <p className="rounded-xl border border-red-400/30 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+            <p className="ui-danger rounded-xl px-4 py-3 text-sm">
               {error}
             </p>
           ) : rankedTeams.length === 0 ? (
@@ -180,11 +180,11 @@ export default function EncounteredTeams({
                 return (
                   <article
                     key={teamKey(team.heroIds)}
-                    className="ui-action rounded-2xl border p-4"
+                    className="ui-card ui-card-hover rounded-2xl p-4"
                   >
                     <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                       <div className="flex min-w-0 items-center gap-3">
-                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border ui-divider text-sm font-black">
+                        <div className="ui-card flex h-9 w-9 shrink-0 items-center justify-center rounded-full border text-sm font-black">
                           #{index + 1}
                         </div>
 
@@ -236,7 +236,7 @@ export default function EncounteredTeams({
                         </div>
                         <div>
                           <div className="ui-text-soft">Défaites</div>
-                          <div className="mt-0.5 font-black text-red-400">
+                          <div className="ui-error mt-0.5 font-black">
                             {lossPercentage.toFixed(1)}%
                           </div>
                         </div>
