@@ -85,14 +85,14 @@ export default function HeroGrid({
 
   return (
     <section className="w-full">
-      <div className="hero-grid-panel mb-3 rounded-xl border p-2 sm:mb-4 sm:p-3">
+      <div className="hero-grid-panel mb-3 p-2 sm:mb-4 sm:p-3">
         <div className="flex flex-col gap-2 sm:gap-3">
           <input
             type="text"
             value={query}
             onChange={(event) => onQueryChange(event.target.value)}
             placeholder="🔍 Rechercher un héros ou un pseudo..."
-            className="hero-grid-input h-9 w-full rounded-lg border px-3 text-xs outline-none transition sm:h-auto sm:py-2 sm:text-sm"
+            className="hero-grid-input h-9 w-full px-3 text-xs outline-none transition sm:h-auto sm:py-2 sm:text-sm"
           />
 
           <div className="grid grid-cols-2 gap-2 sm:gap-3">
@@ -105,7 +105,7 @@ export default function HeroGrid({
                 onChange={(event) =>
                   onClassChange(event.target.value as HeroClassFilter)
                 }
-                className="hero-grid-select h-8 w-full rounded-lg border px-2 text-xs font-semibold outline-none transition sm:h-auto sm:px-3 sm:py-2 sm:text-sm"
+                className="hero-grid-select h-8 w-full px-2 text-xs font-semibold outline-none transition sm:h-auto sm:px-3 sm:py-2 sm:text-sm"
               >
                 <option value="ALL">Toutes</option>
                 <option value="STR">STR</option>
@@ -123,7 +123,7 @@ export default function HeroGrid({
                 onChange={(event) =>
                   onSortChange(event.target.value as HeroSort)
                 }
-                className="hero-grid-select h-8 w-full rounded-lg border px-2 text-xs outline-none transition sm:h-auto sm:px-3 sm:py-2 sm:text-sm"
+                className="hero-grid-select h-8 w-full px-2 text-xs outline-none transition sm:h-auto sm:px-3 sm:py-2 sm:text-sm"
               >
                 <option value="played">Joué</option>
                 <option value="hp">PV</option>
@@ -148,7 +148,7 @@ export default function HeroGrid({
       </div>
 
       {filteredHeroes.length === 0 ? (
-        <div className="hero-grid-empty rounded-xl border border-dashed p-8 text-center">
+        <div className="hero-grid-empty p-8 text-center">
           <p className="hero-grid-empty-text text-sm">Aucun héros trouvé.</p>
         </div>
       ) : (
