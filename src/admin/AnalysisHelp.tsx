@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import type { Combat, HeroClassFilter, HeroSort } from "../types";
 import type { Hero } from "../data/heroes";
-import { calculateHeroUsage } from "../engine/scoring";
+import { calculateHeroUsage } from "../engine/historicalScoring";
 import AnalysisHelpEnemySelection from "./AnalysisHelpEnemySelection";
 import AnalysisHelpResults, {
   type HeroEvaluationGroup,
