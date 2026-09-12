@@ -11,105 +11,103 @@
    de ThemeProvider ou de data-theme.
    ============================================================ */
 
-@layer components {
-  .ui-panel,
-  .ui-panel-alt,
-  .ui-panel-empty {
-    border: 1px solid var(--ui-border);
-    border-radius: 0.75rem;
-  }
+.ui-panel,
+.ui-panel-alt,
+.ui-panel-empty {
+  border: 1px solid var(--ui-border);
+  border-radius: 0.75rem;
+}
 
-  .ui-panel {
-    background: var(--ui-panel);
-    color: var(--ui-text-primary);
-    box-shadow: 0 8px 24px rgb(0 0 0 / 0.14);
-  }
+.ui-panel {
+  background: var(--ui-panel);
+  color: var(--ui-text-primary);
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.14);
+}
 
-  .ui-panel-alt {
-    background: var(--ui-panel-alt);
-    color: var(--ui-text-primary);
-  }
+.ui-panel-alt {
+  background: var(--ui-panel-alt);
+  color: var(--ui-text-primary);
+}
 
-  .ui-panel-empty {
-    background: rgb(3 7 18 / 0.7);
-    color: var(--ui-text-secondary);
-  }
+.ui-panel-empty {
+  background: rgb(3 7 18 / 0.7);
+  color: var(--ui-text-secondary);
+}
 
-  .ui-card {
-    border: 1px solid var(--ui-border);
-    border-radius: 0.75rem;
-    background: var(--ui-card);
-    color: var(--ui-text-primary);
-  }
+.ui-card {
+  border: 1px solid var(--ui-border);
+  border-radius: 0.75rem;
+  background: var(--ui-card);
+  color: var(--ui-text-primary);
+}
 
-  .ui-card-hover {
-    transition:
-      border-color 0.2s ease,
-      background-color 0.2s ease,
-      box-shadow 0.2s ease;
-  }
+.ui-card-hover {
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
 
-  .ui-card-hover:hover {
-    border-color: var(--ui-border-hover);
-  }
+.ui-card-hover:hover {
+  border-color: var(--ui-border-hover);
+}
 
-  .ui-input {
-    border: 1px solid var(--ui-border);
-    border-radius: 0.5rem;
-    background: rgb(3 7 18);
-    color: var(--ui-text-primary);
-    outline: none;
-    transition:
-      border-color 0.2s ease,
-      box-shadow 0.2s ease,
-      background-color 0.2s ease;
-  }
+.ui-input {
+  border: 1px solid var(--ui-border);
+  border-radius: 0.5rem;
+  background: rgb(3 7 18);
+  color: var(--ui-text-primary);
+  outline: none;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background-color 0.2s ease;
+}
 
-  .ui-action {
-    border: 1px solid var(--ui-border);
-    border-radius: 0.5rem;
-    background: rgb(3 7 18);
-    color: var(--ui-text-soft);
-    transition:
-      border-color 0.2s ease,
-      background-color 0.2s ease,
-      color 0.2s ease,
-      box-shadow 0.2s ease;
-  }
+.ui-action {
+  border: 1px solid var(--ui-border);
+  border-radius: 0.5rem;
+  background: rgb(3 7 18);
+  color: var(--ui-text-soft);
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease,
+    color 0.2s ease,
+    box-shadow 0.2s ease;
+}
 
-  .ui-modal {
-    border: 1px solid var(--ui-border);
-    border-radius: 1rem;
-    background: var(--ui-panel-alt);
-    color: var(--ui-text-primary);
-    box-shadow: 0 24px 64px rgb(0 0 0 / 0.35);
-  }
+.ui-modal {
+  border: 1px solid var(--ui-border);
+  border-radius: 1rem;
+  background: var(--ui-panel-alt);
+  color: var(--ui-text-primary);
+  box-shadow: 0 24px 64px rgb(0 0 0 / 0.35);
+}
 
-  .ui-modal-overlay {
-    background: rgb(0 0 0 / 0.78);
-  }
+.ui-modal-overlay {
+  background: rgb(0 0 0 / 0.78);
+}
 
-  .ui-text-primary {
-    color: var(--ui-text-primary);
-  }
+.ui-text-primary {
+  color: var(--ui-text-primary);
+}
 
-  .ui-text-secondary {
-    color: var(--ui-text-secondary);
-  }
+.ui-text-secondary {
+  color: var(--ui-text-secondary);
+}
 
-  .ui-text-muted {
-    color: var(--ui-text-muted);
-  }
+.ui-text-muted {
+  color: var(--ui-text-muted);
+}
 
-  .ui-text-soft {
-    color: var(--ui-text-soft);
-  }
+.ui-text-soft {
+  color: var(--ui-text-soft);
+}
 
-  .ui-stat-value {
-    color: var(--ui-text-primary);
-  }
+.ui-stat-value {
+  color: var(--ui-text-primary);
+}
 
-  .ui-divider {
-    border-color: var(--ui-border);
-  }
+.ui-divider {
+  border-color: var(--ui-border);
 }
