@@ -84,7 +84,7 @@
 
 .ui-input:focus {
   border-color: var(--ui-accent);
-  box-shadow: 0 0 0 1px rgb(245 158 11 / 0.15);
+  box-shadow: 0 0 0 1px rgb(from var(--ui-accent) r g b / 0.15);
 }
 
 .ui-action {
@@ -345,7 +345,7 @@
 .ui-recommendation-selected {
   border-color: var(--ui-border-hover);
   background: var(--ui-panel-alt);
-  box-shadow: 0 0 0 1px rgb(71 85 105 / 0.35);
+  box-shadow: 0 0 0 1px rgb(from var(--ui-border-hover) r g b / 0.35);
 }
 
 .ui-recommendation-selected .ui-recommendation-hero {
