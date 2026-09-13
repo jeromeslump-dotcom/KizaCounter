@@ -7,6 +7,7 @@ import {
   recommendTeamWithSource,
   type RecommendationSource,
 } from "../engine/recommendationSource";
+import type { Core4HistoryStats } from "../engine/recommendationCore4";
 
 const TEAM_SIZE = 5;
 
@@ -46,6 +47,10 @@ export default function useCombatSelection({
     useState<RecommendationSource | null>(null);
   const [alternativeRecommendationSource, setAlternativeRecommendationSource] =
     useState<RecommendationSource | null>(null);
+  const [recommendationCore4History, setRecommendationCore4History] =
+    useState<Core4HistoryStats | null>(null);
+  const [alternativeCore4History, setAlternativeCore4History] =
+    useState<Core4HistoryStats | null>(null);
   const openedEnemyKeyRef = useRef<string | null>(null);
 
   const heroesById = useMemo(
@@ -99,6 +104,8 @@ export default function useCombatSelection({
         setAlternativeIds([]);
         setRecommendationSource(null);
         setAlternativeRecommendationSource(null);
+        setRecommendationCore4History(null);
+        setAlternativeCore4History(null);
         setTeamIds([]);
         setShowCounterModal(true);
         return;
@@ -126,6 +133,7 @@ export default function useCombatSelection({
 
       let bestAlternative: Hero[] = [];
       let bestAlternativeSource: RecommendationSource | null = null;
+      let bestAlternativeCore4History: Core4HistoryStats | null = null;
 
       if (primaryIds.length === TEAM_SIZE) {
         // B est une vraie seconde recommandation historique.
@@ -152,6 +160,8 @@ export default function useCombatSelection({
           if (!sameTeam) {
             bestAlternative = candidateTeam;
             bestAlternativeSource = alternativeRecommendation?.source ?? null;
+            bestAlternativeCore4History =
+              alternativeRecommendation?.core4History ?? null;
           }
         }
       }
@@ -160,6 +170,8 @@ export default function useCombatSelection({
       setAlternativeIds(bestAlternative.map((hero: Hero) => hero.id));
       setRecommendationSource(finalSource);
       setAlternativeRecommendationSource(bestAlternativeSource);
+      setRecommendationCore4History(recommendation.core4History ?? null);
+      setAlternativeCore4History(bestAlternativeCore4History);
       setTeamIds(finalRecommendation.map((hero: Hero) => hero.id));
       setShowCounterModal(true);
     },
@@ -245,6 +257,8 @@ export default function useCombatSelection({
     setAlternativeIds([]);
     setRecommendationSource(null);
     setAlternativeRecommendationSource(null);
+    setRecommendationCore4History(null);
+    setAlternativeCore4History(null);
     openedEnemyKeyRef.current = null;
   }, []);
 
@@ -254,6 +268,8 @@ export default function useCombatSelection({
     showCounterModal,
     recommendationSource,
     alternativeRecommendationSource,
+    recommendationCore4History,
+    alternativeCore4History,
     enemies,
     team,
     recommendedTeam,
