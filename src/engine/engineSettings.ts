@@ -1,4 +1,4 @@
-export interface EngineSettings {
+﻿export interface EngineSettings {
   advanced: {
     historicalConfidenceBattles: number;
     historicalReliabilityBase: number;
@@ -22,16 +22,6 @@ export const DEFAULT_ENGINE_SETTINGS: EngineSettings = {
 
 const STORAGE_KEY = "lords-mobile-counter-engine-settings";
 
-type LegacyAdvancedSettings = Partial<EngineSettings["advanced"]> & {
-  teamAHistoricalConfidenceBattles?: number;
-  teamAHistoricalReliabilityBase?: number;
-  teamAHistoricalReliabilityConfidenceWeight?: number;
-};
-
-type SavedEngineSettings = {
-  advanced?: LegacyAdvancedSettings;
-};
-
 function isBrowser(): boolean {
   return (
     typeof window !== "undefined" && typeof window.localStorage !== "undefined"
@@ -39,28 +29,12 @@ function isBrowser(): boolean {
 }
 
 function mergeSettings(
-  saved: SavedEngineSettings | null | undefined
+  saved: Partial<EngineSettings> | null | undefined
 ): EngineSettings {
-  const legacyAdvanced = saved?.advanced;
-  const savedAdvanced = legacyAdvanced
-    ? {
-        ...legacyAdvanced,
-        historicalConfidenceBattles:
-          legacyAdvanced.historicalConfidenceBattles ??
-          legacyAdvanced.teamAHistoricalConfidenceBattles,
-        historicalReliabilityBase:
-          legacyAdvanced.historicalReliabilityBase ??
-          legacyAdvanced.teamAHistoricalReliabilityBase,
-        historicalReliabilityConfidenceWeight:
-          legacyAdvanced.historicalReliabilityConfidenceWeight ??
-          legacyAdvanced.teamAHistoricalReliabilityConfidenceWeight,
-      }
-    : {};
-
   return {
     advanced: {
       ...DEFAULT_ENGINE_SETTINGS.advanced,
-      ...savedAdvanced,
+      ...saved?.advanced,
     },
   };
 }
@@ -72,7 +46,7 @@ export function getEngineSettings(): EngineSettings {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     if (!raw) return DEFAULT_ENGINE_SETTINGS;
 
-    return mergeSettings(JSON.parse(raw) as SavedEngineSettings);
+    return mergeSettings(JSON.parse(raw) as Partial<EngineSettings>);
   } catch {
     return DEFAULT_ENGINE_SETTINGS;
   }
