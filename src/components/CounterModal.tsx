@@ -103,13 +103,12 @@ export default function CounterModal({
     combats,
   });
 
-  const { orderedRecommendedTeam, orderedAlternativeTeam } =
-    useSavedTeamOrder({
-      recommendedTeam,
-      alternativeTeam,
-      recommendedIds,
-      alternativeIds,
-    });
+  const { orderedRecommendedTeam, orderedAlternativeTeam } = useSavedTeamOrder({
+    recommendedTeam,
+    alternativeTeam,
+    recommendedIds,
+    alternativeIds,
+  });
 
   const currentTeamHistoryLabel =
     currentTeamHistory.battles > 0 ? (
