@@ -41,7 +41,7 @@ export default function HeroManager({
 
   return (
     <div
-      className="fixed inset-0 z-[60] flex items-center justify-center bg-black/75 p-3 backdrop-blur-sm sm:p-4"
+      className="fixed inset-0 z-[60] flex items-center justify-center bg-[var(--ui-bg)]/75 p-3 backdrop-blur-sm sm:p-4"
       onClick={onClose}
     >
       <div
@@ -135,7 +135,7 @@ export default function HeroManager({
                   ].join(" ")}
                 >
                   <div className="relative p-2.5">
-                    <div className="relative aspect-square overflow-hidden rounded-xl bg-black/20">
+                    <div className="relative aspect-square overflow-hidden rounded-xl bg-[var(--ui-bg)]/20">
                       <img
                         src={hero.img}
                         alt={hero.name}
@@ -146,9 +146,9 @@ export default function HeroManager({
                         ].join(" ")}
                       />
 
-                      <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/90 to-transparent" />
+                      <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-[var(--ui-bg)]/90 to-transparent" />
 
-                      <span className="absolute bottom-2 left-2 right-2 line-clamp-1 text-center text-xs font-bold text-white drop-shadow-lg">
+                      <span className="absolute bottom-2 left-2 right-2 line-clamp-1 text-center text-xs font-bold ui-text-primary drop-shadow-lg">
                         {hero.name}
                       </span>
 
@@ -156,8 +156,8 @@ export default function HeroManager({
                         className={[
                           "absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-md",
                           enabled
-                            ? "bg-emerald-400 text-black"
-                            : "bg-black/75 text-white/40",
+                            ? "bg-[var(--ui-success)] text-[var(--ui-bg)]"
+                            : "bg-[var(--ui-bg)]/75 text-[var(--ui-text-primary)]/40",
                         ].join(" ")}
                       >
                         {enabled ? "✓" : "✕"}
