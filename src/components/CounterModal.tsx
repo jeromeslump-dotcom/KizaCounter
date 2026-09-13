@@ -1,12 +1,12 @@
-import { useEffect, useState, type ReactNode } from "react";
+import { type ReactNode } from "react";
 
 import type { Combat, Hero, HeroClassFilter, HeroSort } from "../types";
 
 import { type RecommendationSource } from "../engine/recommendationSource";
 import type { Core4HistoryStats } from "../engine/recommendationCore4";
-import { getTeamOrder } from "../storage/teamOrderStorage";
 
 import useCounterHistory from "../hooks/useCounterHistory";
+import useSavedTeamOrder from "../hooks/useSavedTeamOrder";
 
 import CompactTeam from "./CompactTeam";
 import CombatForm from "./CombatForm";
@@ -46,18 +46,6 @@ function formatCount(
   plural = `${singular}s`
 ): string {
   return `${value} ${value > 1 ? plural : singular}`;
-}
-
-function applySavedOrder(team: Hero[], savedOrder: string[] | null): Hero[] {
-  if (!savedOrder || team.length !== 5) return team;
-
-  const heroesById = new Map(team.map((hero) => [hero.id, hero]));
-
-  const ordered = savedOrder
-    .map((id) => heroesById.get(id))
-    .filter((hero): hero is Hero => Boolean(hero));
-
-  return ordered.length === team.length ? ordered : team;
 }
 
 export default function CounterModal({
@@ -115,48 +103,13 @@ export default function CounterModal({
     combats,
   });
 
-  const [orderedRecommendedTeam, setOrderedRecommendedTeam] =
-    useState<Hero[]>(recommendedTeam);
-
-  const [orderedAlternativeTeam, setOrderedAlternativeTeam] =
-    useState<Hero[]>(alternativeTeam);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    setOrderedRecommendedTeam(recommendedTeam);
-    setOrderedAlternativeTeam(alternativeTeam);
-
-    if (recommendedTeam.length !== 5 && alternativeTeam.length !== 5) {
-      return () => {
-        cancelled = true;
-      };
-    }
-
-    Promise.all([
-      recommendedTeam.length === 5
-        ? getTeamOrder(recommendedIds).catch(() => null)
-        : Promise.resolve(null),
-
-      alternativeTeam.length === 5
-        ? getTeamOrder(alternativeIds).catch(() => null)
-        : Promise.resolve(null),
-    ]).then(([recommendedOrder, alternativeOrder]) => {
-      if (cancelled) return;
-
-      setOrderedRecommendedTeam(
-        applySavedOrder(recommendedTeam, recommendedOrder)
-      );
-
-      setOrderedAlternativeTeam(
-        applySavedOrder(alternativeTeam, alternativeOrder)
-      );
+  const { orderedRecommendedTeam, orderedAlternativeTeam } =
+    useSavedTeamOrder({
+      recommendedTeam,
+      alternativeTeam,
+      recommendedIds,
+      alternativeIds,
     });
-
-    return () => {
-      cancelled = true;
-    };
-  }, [recommendedTeam, alternativeTeam, recommendedIds, alternativeIds]);
 
   const currentTeamHistoryLabel =
     currentTeamHistory.battles > 0 ? (
