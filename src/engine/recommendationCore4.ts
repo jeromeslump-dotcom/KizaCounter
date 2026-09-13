@@ -7,6 +7,13 @@ import { teamKey, uniqueIds } from "./teamUtils";
 const TEAM_SIZE = 5;
 const CORE_SIZE = 4;
 
+export interface Core4HistoryStats {
+  wins: number;
+  losses: number;
+  battles: number;
+  winRate: number;
+}
+
 function resolveCandidateTeam(
   heroIds: string[],
   candidateHeroesById: Map<string, Hero>
@@ -30,7 +37,8 @@ export function findBestEnabledCore4HistoryTeam(
   candidateHeroes: Hero[],
   candidateHeroesById: Map<string, Hero>,
   combats: Combat[],
-  excludedTeamKey?: string
+  excludedTeamKey?: string,
+  onSelectedCore?: (stats: Core4HistoryStats) => void
 ): Hero[] | null {
   const targetIds = uniqueIds(enemyIds);
   if (targetIds.length !== TEAM_SIZE) return null;
@@ -174,8 +182,16 @@ export function findBestEnabledCore4HistoryTeam(
       if (teamKey(teamIds) === excludedTeamKey) continue;
 
       const team = resolveCandidateTeam(teamIds, candidateHeroesById);
-      if (team && isUsableRecommendationTeam(team, combats, enemyIds))
+      if (team && isUsableRecommendationTeam(team, combats, enemyIds)) {
+        const battles = rankedCore.core.wins + rankedCore.core.losses;
+        onSelectedCore?.({
+          wins: rankedCore.core.wins,
+          losses: rankedCore.core.losses,
+          battles,
+          winRate: battles > 0 ? (rankedCore.core.wins / battles) * 100 : 0,
+        });
         return team;
+      }
     }
   }
 
