@@ -65,11 +65,66 @@ function applySavedOrder(team: Hero[], savedOrder: string[] | null): Hero[] {
   if (!savedOrder || team.length !== 5) return team;
 
   const heroesById = new Map(team.map((hero) => [hero.id, hero]));
+
   const ordered = savedOrder
     .map((id) => heroesById.get(id))
     .filter((hero): hero is Hero => Boolean(hero));
 
   return ordered.length === team.length ? ordered : team;
+}
+
+/**
+ * Statistiques de l'historique similaire.
+ *
+ * La recommandation "similar-history" est basée sur les combats dont
+ * l'équipe ennemie partage exactement 3 héros avec l'équipe ennemie actuelle.
+ *
+ * On reprend donc le même critère ici pour que les statistiques affichées
+ * correspondent bien aux combats ayant servi à trouver la recommandation.
+ */
+function evaluateSimilarTeamHistory(
+  teamIds: string[],
+  enemyIds: string[],
+  combats: Combat[]
+) {
+  const teamKeyValue = teamKey(teamIds);
+
+  if (teamIds.length !== 5 || enemyIds.length !== 5) {
+    return EMPTY_HISTORY;
+  }
+
+  let wins = 0;
+  let losses = 0;
+
+  for (const combat of combats) {
+    if (teamKey(combat.my_heroes ?? []) !== teamKeyValue) continue;
+
+    const historicalEnemy = [...new Set(combat.enemy_heroes ?? [])];
+
+    if (historicalEnemy.length !== 5) continue;
+
+    const sharedHeroes = historicalEnemy.reduce(
+      (count, heroId) => count + (enemyIds.includes(heroId) ? 1 : 0),
+      0
+    );
+
+    if (sharedHeroes !== 3) continue;
+
+    if (combat.won) {
+      wins++;
+    } else {
+      losses++;
+    }
+  }
+
+  const battles = wins + losses;
+
+  return {
+    wins,
+    losses,
+    battles,
+    winRate: battles > 0 ? (wins / battles) * 100 : 0,
+  };
 }
 
 export default function CounterModal({
@@ -113,6 +168,7 @@ export default function CounterModal({
 
   const [orderedRecommendedTeam, setOrderedRecommendedTeam] =
     useState<Hero[]>(recommendedTeam);
+
   const [orderedAlternativeTeam, setOrderedAlternativeTeam] =
     useState<Hero[]>(alternativeTeam);
 
@@ -132,6 +188,7 @@ export default function CounterModal({
       recommendedTeam.length === 5
         ? getTeamOrder(recommendedIds).catch(() => null)
         : Promise.resolve(null),
+
       alternativeTeam.length === 5
         ? getTeamOrder(alternativeIds).catch(() => null)
         : Promise.resolve(null),
@@ -141,6 +198,7 @@ export default function CounterModal({
       setOrderedRecommendedTeam(
         applySavedOrder(recommendedTeam, recommendedOrder)
       );
+
       setOrderedAlternativeTeam(
         applySavedOrder(alternativeTeam, alternativeOrder)
       );
@@ -204,6 +262,14 @@ export default function CounterModal({
     [open, recommendedIds, enemyIds, combats, heroes]
   );
 
+  const recommendedSimilarHistory = useMemo(
+    () =>
+      open && recommendationSource === "similar-history"
+        ? evaluateSimilarTeamHistory(recommendedIds, enemyIds, combats)
+        : EMPTY_HISTORY,
+    [open, recommendationSource, recommendedIds, enemyIds, combats]
+  );
+
   const alternativeHistory = useMemo(
     () =>
       open
@@ -218,6 +284,14 @@ export default function CounterModal({
         ? evaluateEnemyClassHistory(alternativeIds, enemyIds, combats, heroes)
         : EMPTY_HISTORY,
     [open, alternativeIds, enemyIds, combats, heroes]
+  );
+
+  const alternativeSimilarHistory = useMemo(
+    () =>
+      open && alternativeRecommendationSource === "similar-history"
+        ? evaluateSimilarTeamHistory(alternativeIds, enemyIds, combats)
+        : EMPTY_HISTORY,
+    [open, alternativeRecommendationSource, alternativeIds, enemyIds, combats]
   );
 
   const recommendedDefeatHistory = useMemo(() => {
@@ -328,6 +402,15 @@ export default function CounterModal({
     }
   } else if (recommendationSource === "similar-history") {
     recommendationSourceText = "Historique similaire";
+
+    if (recommendedSimilarHistory.battles > 0 && canViewDetailedHistory) {
+      historyLabel = (
+        <span className="font-normal">
+          {Math.round(recommendedSimilarHistory.winRate)} % ·{" "}
+          {formatCount(recommendedSimilarHistory.battles, "combat")}
+        </span>
+      );
+    }
   }
 
   let alternativeHistoryLabel: ReactNode = (
@@ -371,6 +454,15 @@ export default function CounterModal({
     }
   } else if (alternativeRecommendationSource === "similar-history") {
     alternativeSourceText = "Historique similaire";
+
+    if (alternativeSimilarHistory.battles > 0 && canViewDetailedHistory) {
+      alternativeHistoryLabel = (
+        <span className="font-normal">
+          {Math.round(alternativeSimilarHistory.winRate)} % ·{" "}
+          {formatCount(alternativeSimilarHistory.battles, "combat")}
+        </span>
+      );
+    }
   } else if (alternativeRecommendationSource === "class-history") {
     alternativeSourceText = "Historique classes";
 
@@ -389,11 +481,14 @@ export default function CounterModal({
       ? `${Math.round(recommendationCore4History.winRate)} %`
       : recommendationSource === "defeat-history" && recommendedDefeatHistory
         ? `${Math.round(recommendedDefeatHistory.counterWinRate * 100)} %`
-        : recommendedExactHistory.battles > 0
-          ? `${Math.round(recommendedExactHistory.winRate)} %`
-          : recommendedClassHistory.battles > 0
-            ? `${Math.round(recommendedClassHistory.winRate)} %`
-            : null;
+        : recommendationSource === "similar-history" &&
+            recommendedSimilarHistory.battles > 0
+          ? `${Math.round(recommendedSimilarHistory.winRate)} %`
+          : recommendedExactHistory.battles > 0
+            ? `${Math.round(recommendedExactHistory.winRate)} %`
+            : recommendedClassHistory.battles > 0
+              ? `${Math.round(recommendedClassHistory.winRate)} %`
+              : null;
 
   const alternativeMobileHistoryLabel =
     alternativeRecommendationSource === "core4" && alternativeCore4History
@@ -404,10 +499,13 @@ export default function CounterModal({
         : alternativeRecommendationSource === "defeat-history" &&
             alternativeDefeatHistory
           ? `${Math.round(alternativeDefeatHistory.counterWinRate * 100)} %`
-          : alternativeRecommendationSource === "class-history" &&
-              alternativeClassHistory.battles > 0
-            ? `${Math.round(alternativeClassHistory.winRate)} %`
-            : null;
+          : alternativeRecommendationSource === "similar-history" &&
+              alternativeSimilarHistory.battles > 0
+            ? `${Math.round(alternativeSimilarHistory.winRate)} %`
+            : alternativeRecommendationSource === "class-history" &&
+                alternativeClassHistory.battles > 0
+              ? `${Math.round(alternativeClassHistory.winRate)} %`
+              : null;
 
   const hasRecommendations =
     recommendedTeam.length > 0 || alternativeTeam.length > 0;
@@ -422,6 +520,7 @@ export default function CounterModal({
             <h2 className="ui-text-primary text-lg font-black sm:text-xl">
               ⚔️ Contre recommandée
             </h2>
+
             <p className="ui-text-secondary mt-1 hidden text-xs sm:block">
               Modifiez les héros proposés si nécessaire.
             </p>
@@ -484,6 +583,7 @@ export default function CounterModal({
 
                       <span className="hidden sm:inline">
                         <strong>{recommendationSourceText}</strong>
+
                         <span className="ui-text-muted ml-1">
                           · {historyLabel}
                         </span>
@@ -534,6 +634,7 @@ export default function CounterModal({
 
                         <span className="hidden sm:inline">
                           <strong>{alternativeSourceText}</strong>
+
                           <span className="ui-text-muted ml-1">
                             · {alternativeHistoryLabel}
                           </span>
