@@ -7,13 +7,12 @@ import {
   evaluateExactTeamHistory,
   evaluateTeamHistory,
 } from "../engine/historicalScoring";
-import {
-  analyzeCore4Plus1,
-  type Core4Analysis,
-} from "../engine/historicalCore4";
 import { findHistoricalDefeatCounters } from "../engine/defeatHistory";
 import { getEngineSettings } from "../engine/engineSettings";
-import { type RecommendationSource } from "../engine/recommendationSource";
+import {
+  type RecommendationSource,
+} from "../engine/recommendationSource";
+import type { Core4HistoryStats } from "../engine/recommendationCore4";
 import { teamKey } from "../engine/teamUtils";
 
 import CompactTeam from "./CompactTeam";
@@ -28,6 +27,8 @@ interface CounterModalProps {
   alternativeTeam: Hero[];
   recommendationSource: RecommendationSource | null;
   alternativeRecommendationSource: RecommendationSource | null;
+  recommendationCore4History: Core4HistoryStats | null;
+  alternativeCore4History: Core4HistoryStats | null;
   onSelectRecommendedTeam: (ids: string[]) => void;
   teamIds: string[];
   heroes: Hero[];
@@ -53,35 +54,6 @@ const EMPTY_HISTORY = {
   winRate: 0,
 };
 
-function findMatchingCore4(
-  teamIds: string[],
-  analyses: Core4Analysis[]
-): Core4Analysis | null {
-  const ids = new Set(teamIds);
-  if (ids.size !== 5) return null;
-
-  const matches = analyses.filter((analysis) => {
-    if (analysis.coreIds.length !== 4) return false;
-    if (!analysis.coreIds.every((id) => ids.has(id))) return false;
-
-    const replacementId = [...ids].find((id) => !analysis.coreIds.includes(id));
-    if (!replacementId) return false;
-
-    return analysis.replacements.some(
-      (replacement) => replacement.heroId === replacementId
-    );
-  });
-
-  if (matches.length === 0) return null;
-
-  return [...matches].sort(
-    (a, b) =>
-      b.winRate - a.winRate ||
-      b.battles - a.battles ||
-      teamKey(a.coreIds).localeCompare(teamKey(b.coreIds))
-  )[0];
-}
-
 function formatCount(
   value: number,
   singular: string,
@@ -98,6 +70,8 @@ export default function CounterModal({
   alternativeTeam,
   recommendationSource,
   alternativeRecommendationSource,
+  recommendationCore4History,
+  alternativeCore4History,
   onSelectRecommendedTeam,
   teamIds,
   heroes,
@@ -196,17 +170,6 @@ export default function CounterModal({
     [open, alternativeIds, enemyIds, combats, heroes]
   );
 
-  const core4Analyses = useMemo(
-    () =>
-      open && enemyIds.length === 5 ? analyzeCore4Plus1(enemyIds, combats) : [],
-    [open, enemyIds, combats]
-  );
-
-  const recommendedCore4 = useMemo(
-    () => findMatchingCore4(recommendedIds, core4Analyses),
-    [recommendedIds, core4Analyses]
-  );
-
   const recommendedDefeatHistory = useMemo(() => {
     if (!open || recommendedIds.length !== 5) return null;
 
@@ -281,11 +244,11 @@ export default function CounterModal({
   if (recommendationSource === "core4") {
     recommendationSourceText = "Core4 historique";
 
-    if (recommendedCore4 && canViewDetailedHistory) {
+    if (recommendationCore4History && canViewDetailedHistory) {
       historyLabel = (
         <span className="font-normal">
-          {Math.round(recommendedCore4.winRate)} % ·{" "}
-          {formatCount(recommendedCore4.battles, "combat")}
+          {Math.round(recommendationCore4History.winRate)} % ·{" "}
+          {formatCount(recommendationCore4History.battles, "combat")}
         </span>
       );
     }
@@ -356,6 +319,15 @@ export default function CounterModal({
     }
   } else if (alternativeRecommendationSource === "core4") {
     alternativeSourceText = "Core4 historique";
+
+    if (alternativeCore4History && canViewDetailedHistory) {
+      alternativeHistoryLabel = (
+        <span className="font-normal">
+          {Math.round(alternativeCore4History.winRate)} % ·{" "}
+          {formatCount(alternativeCore4History.battles, "combat")}
+        </span>
+      );
+    }
   } else if (alternativeRecommendationSource === "similar-history") {
     alternativeSourceText = "Historique similaire";
   } else if (alternativeRecommendationSource === "class-history") {
@@ -372,8 +344,8 @@ export default function CounterModal({
   }
 
   const recommendationMobileHistoryLabel =
-    recommendationSource === "core4" && recommendedCore4
-      ? `${Math.round(recommendedCore4.winRate)} %`
+    recommendationSource === "core4" && recommendationCore4History
+      ? `${Math.round(recommendationCore4History.winRate)} %`
       : recommendationSource === "defeat-history" && recommendedDefeatHistory
         ? `${Math.round(recommendedDefeatHistory.counterWinRate * 100)} %`
         : recommendedExactHistory.battles > 0
@@ -383,16 +355,18 @@ export default function CounterModal({
             : null;
 
   const alternativeMobileHistoryLabel =
-    alternativeRecommendationSource === "exact-history" &&
-    alternativeHistory.battles > 0
-      ? `${Math.round(alternativeHistory.winRate)} %`
-      : alternativeRecommendationSource === "defeat-history" &&
-          alternativeDefeatHistory
-        ? `${Math.round(alternativeDefeatHistory.counterWinRate * 100)} %`
-        : alternativeRecommendationSource === "class-history" &&
-            alternativeClassHistory.battles > 0
-          ? `${Math.round(alternativeClassHistory.winRate)} %`
-          : null;
+    alternativeRecommendationSource === "core4" && alternativeCore4History
+      ? `${Math.round(alternativeCore4History.winRate)} %`
+      : alternativeRecommendationSource === "exact-history" &&
+          alternativeHistory.battles > 0
+        ? `${Math.round(alternativeHistory.winRate)} %`
+        : alternativeRecommendationSource === "defeat-history" &&
+            alternativeDefeatHistory
+          ? `${Math.round(alternativeDefeatHistory.counterWinRate * 100)} %`
+          : alternativeRecommendationSource === "class-history" &&
+              alternativeClassHistory.battles > 0
+            ? `${Math.round(alternativeClassHistory.winRate)} %`
+            : null;
 
   const hasRecommendations =
     recommendedTeam.length > 0 || alternativeTeam.length > 0;
