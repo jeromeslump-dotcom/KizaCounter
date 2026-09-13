@@ -8,7 +8,10 @@ import {
   type RecommendationSource as ScoringRecommendationSource,
 } from "./scoring";
 import { findBestHistoricalDefeatTeam } from "./defeatHistory";
-import { findBestEnabledCore4HistoryTeam } from "./recommendationCore4";
+import {
+  findBestEnabledCore4HistoryTeam,
+  type Core4HistoryStats,
+} from "./recommendationCore4";
 import { isUsableRecommendationTeam } from "./recommendationGuards";
 import {
   getClassKey,
@@ -23,6 +26,7 @@ export type RecommendationSource =
 export interface TeamRecommendation {
   team: Hero[];
   source: RecommendationSource;
+  core4History?: Core4HistoryStats;
 }
 
 const TEAM_SIZE = 5;
@@ -151,8 +155,6 @@ export function recommendTeamWithSource(
     candidateHeroes.map((hero) => [hero.id, hero])
   );
 
-  // A et B suivent exactement la même hiérarchie.
-  // Pour B, seule la combinaison complète de 5 héros de A est interdite.
   const exactHistoryTeam = findBestEnabledExactHistoryTeam(
     enemyIds,
     candidateHeroes,
@@ -175,14 +177,23 @@ export function recommendTeamWithSource(
   )
     return { team: defeatHistoryTeam, source: "defeat-history" };
 
+  let core4History: Core4HistoryStats | undefined;
   const core4HistoryTeam = findBestEnabledCore4HistoryTeam(
     enemyIds,
     candidateHeroes,
     candidateHeroesById,
     combats,
-    excludedTeamKey
+    excludedTeamKey,
+    (stats) => {
+      core4History = stats;
+    }
   );
-  if (core4HistoryTeam) return { team: core4HistoryTeam, source: "core4" };
+  if (core4HistoryTeam)
+    return {
+      team: core4HistoryTeam,
+      source: "core4",
+      core4History,
+    };
 
   const similarHistoryTeam = findBestEnabledSimilarHistoryTeam(
     enemyIds,
