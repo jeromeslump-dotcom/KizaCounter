@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 
-import { findHistoricalAlternativeTeam, recommendTeamWithSource } from "../src/engine/recommendationSource";
+import {
+  findHistoricalAlternativeRecommendation,
+  recommendTeamWithSource,
+} from "../src/engine/recommendationSource";
 import type { Combat, Hero } from "../src/types";
 
 function combat(
@@ -112,7 +115,7 @@ describe("historical recommendation sources", () => {
       heroesFor(alternative)
     );
 
-    const result = findHistoricalAlternativeTeam(
+    const result = findHistoricalAlternativeRecommendation(
       target,
       heroes,
       heroes,
@@ -123,7 +126,7 @@ describe("historical recommendation sources", () => {
       recommended
     );
 
-    expect(result?.map((hero) => hero.id).sort()).toEqual(
+    expect(result?.team.map((hero) => hero.id).sort()).toEqual(
       [...alternative].sort()
     );
   });
@@ -179,7 +182,7 @@ describe("historical recommendation sources", () => {
       heroesFor(badAlternative)
     );
 
-    const result = findHistoricalAlternativeTeam(
+    const result = findHistoricalAlternativeRecommendation(
       target,
       heroes,
       heroes,
@@ -190,7 +193,7 @@ describe("historical recommendation sources", () => {
       primary
     );
 
-    expect(result?.map((hero) => hero.id).sort()).not.toEqual(
+    expect(result?.team.map((hero) => hero.id).sort()).not.toEqual(
       [...badAlternative].sort()
     );
   });
