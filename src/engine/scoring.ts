@@ -43,13 +43,12 @@ export function recommendTeam(
     onSource?.("exact-history");
     return historicalTeam;
   }
-  const availableHeroes = heroes;
-  if (availableHeroes.length <= TEAM_SIZE) {
+  if (heroes.length <= TEAM_SIZE) {
     onSource?.("fallback");
     return excludedTeamKey &&
-      teamKey(availableHeroes.map((hero) => hero.id)) === excludedTeamKey
+      teamKey(heroes.map((hero) => hero.id)) === excludedTeamKey
       ? []
-      : availableHeroes;
+      : heroes;
   }
   const heroesById = new Map(heroes.map((hero) => [hero.id, hero]));
   const counterUsage = calculateCounterUsage(
@@ -57,7 +56,7 @@ export function recommendTeam(
     combats,
     historicalContext
   );
-  const ranked = availableHeroes
+  const ranked = heroes
     .map((hero) => ({
       hero,
       score: counterHeroScore(hero, counterUsage, settings),
@@ -153,7 +152,7 @@ export function recommendTeam(
   }
 
   if (recommended.length < TEAM_SIZE) {
-    for (const hero of availableHeroes) {
+    for (const hero of heroes) {
       if (recommended.length >= TEAM_SIZE) break;
       if (usedIds.has(hero.id)) continue;
       if (excludedTeamKey && recommended.length === TEAM_SIZE - 1) {
