@@ -3,7 +3,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Combat, Hero } from "../types";
 
 import {
-  findHistoricalAlternativeTeam,
+  findHistoricalAlternativeRecommendation,
   recommendTeamWithSource,
   type RecommendationSource,
 } from "../engine/recommendationSource";
@@ -43,6 +43,8 @@ export default function useCombatSelection({
   const [recommendedIds, setRecommendedIds] = useState<string[]>([]);
   const [alternativeIds, setAlternativeIds] = useState<string[]>([]);
   const [recommendationSource, setRecommendationSource] =
+    useState<RecommendationSource | null>(null);
+  const [alternativeRecommendationSource, setAlternativeRecommendationSource] =
     useState<RecommendationSource | null>(null);
   const openedEnemyKeyRef = useRef<string | null>(null);
 
@@ -96,6 +98,7 @@ export default function useCombatSelection({
         setRecommendedIds([]);
         setAlternativeIds([]);
         setRecommendationSource(null);
+        setAlternativeRecommendationSource(null);
         setTeamIds([]);
         setShowCounterModal(true);
         return;
@@ -122,20 +125,24 @@ export default function useCombatSelection({
       const primaryIds = finalRecommendation.map((hero) => hero.id);
 
       let bestAlternative: Hero[] = [];
+      let bestAlternativeSource: RecommendationSource | null = null;
 
       if (primaryIds.length === TEAM_SIZE) {
         // B est une vraie seconde recommandation historique.
         // La seule contrainte : B doit être différent de A.
         // Aucun nombre de héros communs n'est imposé.
-        const candidateTeam = findHistoricalAlternativeTeam(
-          enemyTeamIds,
-          heroes,
-          availableHeroes,
-          combats,
-          primaryIds
-        );
+        const alternativeRecommendation =
+          findHistoricalAlternativeRecommendation(
+            enemyTeamIds,
+            heroes,
+            availableHeroes,
+            combats,
+            primaryIds
+          );
 
-        if (candidateTeam?.length === TEAM_SIZE) {
+        const candidateTeam = alternativeRecommendation?.team ?? [];
+
+        if (candidateTeam.length === TEAM_SIZE) {
           const sameTeam =
             candidateTeam.every((hero) => primaryIds.includes(hero.id)) &&
             primaryIds.every((id) =>
@@ -144,6 +151,7 @@ export default function useCombatSelection({
 
           if (!sameTeam) {
             bestAlternative = candidateTeam;
+            bestAlternativeSource = alternativeRecommendation?.source ?? null;
           }
         }
       }
@@ -151,6 +159,7 @@ export default function useCombatSelection({
       setRecommendedIds(finalRecommendation.map((hero: Hero) => hero.id));
       setAlternativeIds(bestAlternative.map((hero: Hero) => hero.id));
       setRecommendationSource(finalSource);
+      setAlternativeRecommendationSource(bestAlternativeSource);
       setTeamIds(finalRecommendation.map((hero: Hero) => hero.id));
       setShowCounterModal(true);
     },
@@ -235,6 +244,7 @@ export default function useCombatSelection({
     setRecommendedIds([]);
     setAlternativeIds([]);
     setRecommendationSource(null);
+    setAlternativeRecommendationSource(null);
     openedEnemyKeyRef.current = null;
   }, []);
 
@@ -243,6 +253,7 @@ export default function useCombatSelection({
     teamIds,
     showCounterModal,
     recommendationSource,
+    alternativeRecommendationSource,
     enemies,
     team,
     recommendedTeam,
