@@ -1,4 +1,4 @@
-import { useMemo, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 
 import type { Combat, Hero, HeroClassFilter, HeroSort } from "../types";
 
@@ -9,11 +9,10 @@ import {
 } from "../engine/historicalScoring";
 import { findHistoricalDefeatCounters } from "../engine/defeatHistory";
 import { getEngineSettings } from "../engine/engineSettings";
-import {
-  type RecommendationSource,
-} from "../engine/recommendationSource";
+import { type RecommendationSource } from "../engine/recommendationSource";
 import type { Core4HistoryStats } from "../engine/recommendationCore4";
 import { teamKey } from "../engine/teamUtils";
+import { getTeamOrder } from "../storage/teamOrderStorage";
 
 import CompactTeam from "./CompactTeam";
 import CombatForm from "./CombatForm";
@@ -62,6 +61,17 @@ function formatCount(
   return `${value} ${value > 1 ? plural : singular}`;
 }
 
+function applySavedOrder(team: Hero[], savedOrder: string[] | null): Hero[] {
+  if (!savedOrder || team.length !== 5) return team;
+
+  const heroesById = new Map(team.map((hero) => [hero.id, hero]));
+  const ordered = savedOrder
+    .map((id) => heroesById.get(id))
+    .filter((hero): hero is Hero => Boolean(hero));
+
+  return ordered.length === team.length ? ordered : team;
+}
+
 export default function CounterModal({
   open,
   enemies,
@@ -100,6 +110,46 @@ export default function CounterModal({
     () => alternativeTeam.map((hero) => hero.id),
     [alternativeTeam]
   );
+
+  const [orderedRecommendedTeam, setOrderedRecommendedTeam] =
+    useState<Hero[]>(recommendedTeam);
+  const [orderedAlternativeTeam, setOrderedAlternativeTeam] =
+    useState<Hero[]>(alternativeTeam);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    setOrderedRecommendedTeam(recommendedTeam);
+    setOrderedAlternativeTeam(alternativeTeam);
+
+    if (recommendedTeam.length !== 5 && alternativeTeam.length !== 5) {
+      return () => {
+        cancelled = true;
+      };
+    }
+
+    Promise.all([
+      recommendedTeam.length === 5
+        ? getTeamOrder(recommendedIds).catch(() => null)
+        : Promise.resolve(null),
+      alternativeTeam.length === 5
+        ? getTeamOrder(alternativeIds).catch(() => null)
+        : Promise.resolve(null),
+    ]).then(([recommendedOrder, alternativeOrder]) => {
+      if (cancelled) return;
+
+      setOrderedRecommendedTeam(
+        applySavedOrder(recommendedTeam, recommendedOrder)
+      );
+      setOrderedAlternativeTeam(
+        applySavedOrder(alternativeTeam, alternativeOrder)
+      );
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [recommendedTeam, alternativeTeam, recommendedIds, alternativeIds]);
 
   const currentTeamHistory = useMemo(
     () =>
@@ -226,15 +276,6 @@ export default function CounterModal({
       <strong>Nouvelle équipe</strong>
     );
 
-  /*
-   * Les statistiques sont séparées du nom de la source.
-   *
-   * Cela évite :
-   * "Nouvelle combinaison · Nouvelle combinaison · Pas de stats disponibles"
-   *
-   * Le rendu final est toujours :
-   * "Source" · statistiques
-   */
   let historyLabel: ReactNode = (
     <span className="font-normal">Pas de stats disponibles</span>
   );
@@ -451,7 +492,7 @@ export default function CounterModal({
                   </div>
 
                   <div className="grid grid-cols-5 gap-1.5 sm:gap-2">
-                    {recommendedTeam.map((hero) => (
+                    {orderedRecommendedTeam.map((hero) => (
                       <span
                         key={hero.id}
                         className="ui-recommendation-hero hover:!border-[var(--ui-accent)] hover:!bg-[var(--ui-panel-alt)] hover:!text-[var(--ui-accent-soft)]"
@@ -501,7 +542,7 @@ export default function CounterModal({
                     </div>
 
                     <div className="grid grid-cols-5 gap-1.5 sm:gap-2">
-                      {alternativeTeam.map((hero) => (
+                      {orderedAlternativeTeam.map((hero) => (
                         <span
                           key={hero.id}
                           className="ui-recommendation-hero hover:!border-[var(--ui-accent)] hover:!bg-[var(--ui-panel-alt)] hover:!text-[var(--ui-accent-soft)]"
