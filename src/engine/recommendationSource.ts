@@ -227,13 +227,13 @@ export function recommendTeamWithSource(
   };
 }
 
-export function findHistoricalAlternativeTeam(
+export function findHistoricalAlternativeRecommendation(
   enemyIds: string[],
   heroes: Hero[],
   candidateHeroes: Hero[],
   combats: Combat[],
   excludedTeamIds: string[]
-): Hero[] | null {
+): TeamRecommendation | null {
   const excludedKey = teamKey(excludedTeamIds);
   const recommendation = recommendTeamWithSource(
     enemyIds,
@@ -242,7 +242,7 @@ export function findHistoricalAlternativeTeam(
     candidateHeroes,
     excludedKey
   );
-  return recommendation.team.length === TEAM_SIZE ? recommendation.team : null;
+  return recommendation.team.length === TEAM_SIZE ? recommendation : null;
 }
 
 export function recommendationSourceLabel(
