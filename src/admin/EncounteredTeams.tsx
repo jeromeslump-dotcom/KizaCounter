@@ -165,9 +165,7 @@ export default function EncounteredTeams({
               Chargement des équipes rencontrées...
             </p>
           ) : error ? (
-            <p className="ui-danger rounded-xl px-4 py-3 text-sm">
-              {error}
-            </p>
+            <p className="ui-danger rounded-xl px-4 py-3 text-sm">{error}</p>
           ) : rankedTeams.length === 0 ? (
             <p className="ui-text-soft py-12 text-center text-sm">
               Aucune équipe ne possède encore {MIN_COMBATS} combats ou plus.

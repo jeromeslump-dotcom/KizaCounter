@@ -268,8 +268,19 @@
 
 /* ============================================================
    RECOMMANDATIONS
-   Les recommandations restent neutres. L'or sert uniquement
-   d'accent d'interaction/sélection, pas de fond principal.
+   ============================================================
+
+   Comportement :
+   - repos       : bloc neutre + 5 noms neutres
+   - survol      : bloc complet accentué + 5 noms accentués
+   - sélection   : état jaune permanent uniquement lorsqu'une
+                   recommandation est réellement sélectionnée
+
+   L'interaction se fait au niveau du bloc complet :
+   .ui-recommendation-team:hover .ui-recommendation-hero
+
+   Il ne faut donc pas mettre de couleur jaune par défaut sur
+   .ui-recommendation-hero.
    ============================================================ */
 
 .ui-recommendation-team {
@@ -287,10 +298,11 @@
     box-shadow 0.2s ease;
 }
 
+/* Le bloc complet devient jaune uniquement au survol. */
 .ui-recommendation-team:hover {
-  border-color: var(--ui-border-hover);
+  border-color: var(--ui-accent);
   background: var(--ui-panel-alt);
-  box-shadow: 0 6px 18px rgb(0 0 0 / 0.18);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--ui-accent) 25%, transparent);
 }
 
 .ui-recommendation-hero {
@@ -311,20 +323,33 @@
     color 0.2s ease;
 }
 
+/*
+ * Les 5 noms réagissent ensemble au survol du bloc parent.
+ * Peu importe où la souris se trouve dans la recommandation,
+ * les cinq noms prennent l'accent jaune.
+ */
 .ui-recommendation-team:hover .ui-recommendation-hero {
-  border-color: var(--ui-border-hover);
-  background: var(--ui-panel);
-  color: var(--ui-text-primary);
-}
-
-.ui-recommendation-selected {
-  border-color: var(--ui-accent);
-  background: var(--ui-panel-alt);
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--ui-accent) 25%, transparent);
-}
-
-.ui-recommendation-selected .ui-recommendation-hero {
   border-color: color-mix(in srgb, var(--ui-accent) 55%, var(--ui-border));
   background: color-mix(in srgb, var(--ui-accent) 10%, var(--ui-bg));
   color: var(--ui-accent-soft);
+}
+
+/*
+ * État de sélection réel.
+ *
+ * Cette classe est volontairement séparée du :hover.
+ * Elle peut donc être utilisée lorsqu'une recommandation est
+ * réellement sélectionnée sans rendre toutes les recommandations
+ * jaunes par défaut.
+ */
+.ui-recommendation-selected {
+  border-color: var(--ui-border-hover);
+  background: var(--ui-panel-alt);
+  box-shadow: 0 0 0 1px rgb(71 85 105 / 0.35);
+}
+
+.ui-recommendation-selected .ui-recommendation-hero {
+  border-color: var(--ui-border-hover);
+  background: var(--ui-panel);
+  color: var(--ui-text-soft);
 }
