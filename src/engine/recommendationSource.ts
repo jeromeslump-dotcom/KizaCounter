@@ -245,6 +245,28 @@ export function findHistoricalAlternativeRecommendation(
   return recommendation.team.length === TEAM_SIZE ? recommendation : null;
 }
 
+/**
+ * Backward-compatible helper kept for existing callers and tests.
+ * The application uses findHistoricalAlternativeRecommendation when it also
+ * needs to know which recommendation source produced the alternative team.
+ */
+export function findHistoricalAlternativeTeam(
+  enemyIds: string[],
+  heroes: Hero[],
+  candidateHeroes: Hero[],
+  combats: Combat[],
+  excludedTeamIds: string[]
+): Hero[] | null {
+  const recommendation = findHistoricalAlternativeRecommendation(
+    enemyIds,
+    heroes,
+    candidateHeroes,
+    combats,
+    excludedTeamIds
+  );
+  return recommendation?.team ?? null;
+}
+
 export function recommendationSourceLabel(
   source: RecommendationSource
 ): string {
