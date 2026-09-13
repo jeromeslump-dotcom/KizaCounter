@@ -41,6 +41,8 @@ export default function App() {
     alternativeTeam,
     recommendationSource,
     alternativeRecommendationSource,
+    recommendationCore4History,
+    alternativeCore4History,
     selectRecommendedTeam,
     toggleEnemy,
     selectCounterHero,
@@ -188,6 +190,8 @@ export default function App() {
         alternativeTeam={alternativeTeam}
         recommendationSource={recommendationSource}
         alternativeRecommendationSource={alternativeRecommendationSource}
+        recommendationCore4History={recommendationCore4History}
+        alternativeCore4History={alternativeCore4History}
         onSelectRecommendedTeam={selectRecommendedTeam}
         teamIds={teamIds}
         heroes={HEROES}
