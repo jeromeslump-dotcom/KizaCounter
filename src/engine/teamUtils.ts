@@ -1,6 +1,7 @@
 import type { Hero } from "../data/heroes";
 
 const TEAM_SIZE = 5;
+export const SIMILAR_HISTORY_SHARED_HEROES = 3;
 
 export function uniqueIds(ids: string[]): string[] {
   return [...new Set(ids)];

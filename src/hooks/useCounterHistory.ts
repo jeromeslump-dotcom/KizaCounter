@@ -10,7 +10,10 @@ import {
 import { findHistoricalDefeatCounters } from "../engine/defeatHistory";
 import { getEngineSettings } from "../engine/engineSettings";
 import { type RecommendationSource } from "../engine/recommendationSource";
-import { teamKey } from "../engine/teamUtils";
+import {
+  SIMILAR_HISTORY_SHARED_HEROES,
+  teamKey,
+} from "../engine/teamUtils";
 
 const EMPTY_HISTORY = {
   wins: 0,
@@ -45,7 +48,7 @@ function evaluateSimilarTeamHistory(
       0
     );
 
-    if (sharedHeroes !== 3) continue;
+    if (sharedHeroes !== SIMILAR_HISTORY_SHARED_HEROES) continue;
 
     if (combat.won) {
       wins++;

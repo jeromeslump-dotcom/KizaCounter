@@ -13,6 +13,7 @@ import { isUsableRecommendationTeam } from "./recommendationGuards";
 import {
   getClassKey,
   resolveTeamFromIds,
+  SIMILAR_HISTORY_SHARED_HEROES,
   teamKey,
   uniqueIds,
 } from "./teamUtils";
@@ -21,7 +22,7 @@ export type RecommendationSource =
   | "exact-history"
   | "class-history"
   | "core4"
-  | "counter-usage"
+ 
   | "fallback"
   | "similar-history"
   | "defeat-history";
@@ -33,7 +34,7 @@ export interface TeamRecommendation {
 }
 
 const TEAM_SIZE = 5;
-const MIN_SIMILARITY = 3;
+const MIN_SIMILARITY = SIMILAR_HISTORY_SHARED_HEROES;
 
 function findBestEnabledHistoricalTeam(
   enemyIds: string[],
@@ -307,8 +308,7 @@ export function recommendationSourceLabel(
       return "Historique des défaites";
     case "core4":
       return "Core4 historique";
-    case "counter-usage":
-      return "Counter usage / score";
+ 
     case "fallback":
       return "Fallback";
   }
