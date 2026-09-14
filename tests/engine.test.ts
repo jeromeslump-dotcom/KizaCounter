@@ -1,8 +1,7 @@
-
 import { describe, expect, it } from "vitest";
 import type { Combat, Hero } from "../src/types";
 import { evaluateEnemyClassHistory, evaluateExactTeamHistory } from "../src/engine/historicalScoring";
-import { recommendTeam } from "../src/engine/scoring";
+import { recommendTeamWithSource } from "../src/engine/recommendationSource";
 import {
   analyzeCore4Plus1,
   core4ReplacementScore,
@@ -169,15 +168,16 @@ describe("recommendation engine history", () => {
         core4MinBattles: 100,
       });
 
-      const result = recommendTeam(
+      const result = recommendTeamWithSource(
         targetEnemy,
         heroes,
         combats
       );
 
-      expect(result.map((hero) => hero.id).sort()).toEqual(
+      expect(result.team.map((hero) => hero.id).sort()).toEqual(
         [...teamB].sort()
       );
+      expect(result.source).toBe("class-history");
 
       const teamAHistory = evaluateEnemyClassHistory(
         teamA,
@@ -239,7 +239,7 @@ describe("recommendation engine history", () => {
   });
 });
 
-describe("recommendTeam priority", () => {
+describe("recommendTeamWithSource priority", () => {
   it("prefers an exact historical winning team before other recommendation sources", () => {
     const heroes = [
       ...teamA.map((id) => hero(id, "STR")),
@@ -247,20 +247,15 @@ describe("recommendTeam priority", () => {
       ...enemy.map((id) => hero(id, "AGI")),
     ];
 
-    let source: string | undefined;
-
-    const result = recommendTeam(
+    const result = recommendTeamWithSource(
       enemy,
       heroes,
-      [combat(teamA, true)],
-      (value) => {
-        source = value;
-      }
+      [combat(teamA, true)]
     );
 
-    expect(source).toBe("exact-history");
+    expect(result.source).toBe("exact-history");
 
-    expect(result.map((hero) => hero.id).sort()).toEqual(
+    expect(result.team.map((hero) => hero.id).sort()).toEqual(
       [...teamA].sort()
     );
   });
@@ -407,9 +402,7 @@ describe("recommendTeam priority", () => {
       hero("fallback-a", "AGI"),
     ];
 
-    let source: string | undefined;
-
-    const result = recommendTeam(
+    const result = recommendTeamWithSource(
       targetEnemy,
       heroes,
       [
@@ -418,15 +411,12 @@ describe("recommendTeam priority", () => {
           true,
           historicalEnemy
         ),
-      ],
-      (value) => {
-        source = value;
-      }
+      ]
     );
 
-    expect(source).toBe("class-history");
+    expect(result.source).toBe("class-history");
 
-    expect(result.map((hero) => hero.id).sort()).toEqual(
+    expect(result.team.map((hero) => hero.id).sort()).toEqual(
       [...historicalTeam].sort()
     );
   });
