@@ -290,7 +290,7 @@ export const HEROES: Hero[] = [
     alias: "Reyna",
     cls: "AGI",
     img: "/heroes_portrait/holy_sword.png",
-    stats: { hp: 17500, atk: 2500, matk: 0, def: 200, mdef: 350 },
+    stats: { hp: 16484, atk: 2654, matk: 324, def: 241, mdef: 415 },
   },
   {
     id: "incinerator",
@@ -514,7 +514,7 @@ export const HEROES: Hero[] = [
     alias: "Stellina",
     cls: "AGI",
     img: "/heroes_portrait/stellina_unicorno.png",
-    stats: { hp: 17200, atk: 2500, matk: 0, def: 200, mdef: 350 },
+    stats: { hp: 14064, atk: 2566, matk: 419, def: 167, mdef: 665 },
   },
 ];
 

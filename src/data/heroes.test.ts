@@ -1,3 +1,4 @@
+
 import { describe, expect, it } from "vitest";
 
 import { HEROES } from "./heroes";
@@ -30,4 +31,24 @@ describe("hero data integrity", () => {
       }
     }
   });
+
+  it("contains unique hero ids", () => {
+    const ids = HEROES.map((hero) => hero.id);
+
+    expect(new Set(ids).size).toBe(ids.length);
+  });
+
+  it("contains no zero hero stats", () => {
+    for (const hero of HEROES) {
+      for (const stat of REQUIRED_STATS) {
+        const value = hero.stats?.[stat];
+
+        expect(
+          value,
+          `${hero.id}: statistique ${stat} ne doit pas être à 0`
+        ).toBeGreaterThan(0);
+      }
+    }
+  });
 });
+
