@@ -306,7 +306,7 @@ export function recommendationSourceLabel(
     case "defeat-history":
       return "Historique des défaites";
     case "core4":
-      return "Core4 historique";
+      return "Historique Core4";
 
     case "fallback":
       return "Fallback";
