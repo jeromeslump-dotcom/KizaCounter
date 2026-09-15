@@ -17,6 +17,7 @@ import {
   teamKey,
   uniqueIds,
 } from "./teamUtils";
+import { RECOMMENDATION_SOURCE_LABELS } from "./recommendationLabels";
 
 export type RecommendationSource =
   | "exact-history"
@@ -298,17 +299,16 @@ export function recommendationSourceLabel(
 ): string {
   switch (source) {
     case "exact-history":
-      return "Historique exact";
+      return RECOMMENDATION_SOURCE_LABELS.exact;
     case "class-history":
-      return "Historique classes";
+      return RECOMMENDATION_SOURCE_LABELS.class;
     case "similar-history":
-      return "Historique similaire";
+      return RECOMMENDATION_SOURCE_LABELS.similar;
     case "defeat-history":
-      return "Historique des défaites";
+      return RECOMMENDATION_SOURCE_LABELS.defeat;
     case "core4":
-      return "Historique Core4";
-
+      return RECOMMENDATION_SOURCE_LABELS.core4;
     case "fallback":
-      return "Fallback";
+      return RECOMMENDATION_SOURCE_LABELS.fallback;
   }
 }
