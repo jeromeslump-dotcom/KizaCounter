@@ -48,6 +48,109 @@ function formatCount(
   return `${value} ${value > 1 ? plural : singular}`;
 }
 
+interface RecommendationDisplay {
+  sourceText: string;
+  historyLabel: ReactNode;
+}
+
+function getRecommendationDisplay({
+  source,
+  core4History,
+  defeatHistory,
+  exactHistory,
+  classHistory,
+  similarHistory,
+  canViewDetailedHistory,
+}: {
+  source: RecommendationSource | null;
+  core4History: Core4HistoryStats | null;
+  defeatHistory: {
+    counterWinRate: number;
+    battles: number;
+  } | null;
+  exactHistory: {
+    winRate: number;
+    battles: number;
+  };
+  classHistory: {
+    winRate: number;
+    battles: number;
+  };
+  similarHistory: {
+    winRate: number;
+    battles: number;
+  };
+  canViewDetailedHistory: boolean;
+}): RecommendationDisplay {
+  let sourceText = "Nouvelle combinaison";
+
+  let historyLabel: ReactNode = (
+    <span className="font-normal">Pas de stats disponibles</span>
+  );
+
+  if (source === "core4") {
+    sourceText = "Core4 historique";
+
+    if (core4History && canViewDetailedHistory) {
+      historyLabel = (
+        <span className="font-normal">
+          {Math.round(core4History.winRate)} % ·{" "}
+          {formatCount(core4History.battles, "combat")}
+        </span>
+      );
+    }
+  } else if (source === "defeat-history") {
+    sourceText = "Historique des défaites";
+
+    if (defeatHistory && canViewDetailedHistory) {
+      historyLabel = (
+        <span className="font-normal">
+          {Math.round(defeatHistory.counterWinRate * 100)} % ·{" "}
+          {formatCount(defeatHistory.battles, "combat")}
+        </span>
+      );
+    }
+  } else if (source === "exact-history") {
+    sourceText = "Historique exact";
+
+    if (exactHistory.battles > 0 && canViewDetailedHistory) {
+      historyLabel = (
+        <span className="font-normal">
+          {Math.round(exactHistory.winRate)} % ·{" "}
+          {formatCount(exactHistory.battles, "combat")}
+        </span>
+      );
+    }
+  } else if (source === "class-history") {
+    sourceText = "Historique classes";
+
+    if (classHistory.battles > 0 && canViewDetailedHistory) {
+      historyLabel = (
+        <span className="font-normal">
+          {Math.round(classHistory.winRate)} % ·{" "}
+          {formatCount(classHistory.battles, "combat")}
+        </span>
+      );
+    }
+  } else if (source === "similar-history") {
+    sourceText = "Historique similaire";
+
+    if (similarHistory.battles > 0 && canViewDetailedHistory) {
+      historyLabel = (
+        <span className="font-normal">
+          {Math.round(similarHistory.winRate)} % ·{" "}
+          {formatCount(similarHistory.battles, "combat")}
+        </span>
+      );
+    }
+  }
+
+  return {
+    sourceText,
+    historyLabel,
+  };
+}
+
 export default function CounterModal({
   open,
   enemies,
@@ -146,131 +249,25 @@ export default function CounterModal({
       <strong>Nouvelle équipe</strong>
     );
 
-  let historyLabel: ReactNode = (
-    <span className="font-normal">Pas de stats disponibles</span>
-  );
+  const recommendationDisplay = getRecommendationDisplay({
+    source: recommendationSource,
+    core4History: recommendationCore4History,
+    defeatHistory: recommendedDefeatHistory,
+    exactHistory: recommendedExactHistory,
+    classHistory: recommendedClassHistory,
+    similarHistory: recommendedSimilarHistory,
+    canViewDetailedHistory,
+  });
 
-  let recommendationSourceText = "Nouvelle combinaison";
-
-  if (recommendationSource === "core4") {
-    recommendationSourceText = "Core4 historique";
-
-    if (recommendationCore4History && canViewDetailedHistory) {
-      historyLabel = (
-        <span className="font-normal">
-          {Math.round(recommendationCore4History.winRate)} % ·{" "}
-          {formatCount(recommendationCore4History.battles, "combat")}
-        </span>
-      );
-    }
-  } else if (recommendationSource === "defeat-history") {
-    recommendationSourceText = "Historique des défaites";
-
-    if (recommendedDefeatHistory && canViewDetailedHistory) {
-      historyLabel = (
-        <span className="font-normal">
-          {Math.round(recommendedDefeatHistory.counterWinRate * 100)} % ·{" "}
-          {formatCount(recommendedDefeatHistory.battles, "combat")}
-        </span>
-      );
-    }
-  } else if (recommendationSource === "exact-history") {
-    recommendationSourceText = "Historique exact";
-
-    if (recommendedExactHistory.battles > 0 && canViewDetailedHistory) {
-      historyLabel = (
-        <span className="font-normal">
-          {Math.round(recommendedExactHistory.winRate)} % ·{" "}
-          {formatCount(recommendedExactHistory.battles, "combat")}
-        </span>
-      );
-    }
-  } else if (recommendationSource === "class-history") {
-    recommendationSourceText = "Historique classes";
-
-    if (recommendedClassHistory.battles > 0 && canViewDetailedHistory) {
-      historyLabel = (
-        <span className="font-normal">
-          {Math.round(recommendedClassHistory.winRate)} % ·{" "}
-          {formatCount(recommendedClassHistory.battles, "combat")}
-        </span>
-      );
-    }
-  } else if (recommendationSource === "similar-history") {
-    recommendationSourceText = "Historique similaire";
-
-    if (recommendedSimilarHistory.battles > 0 && canViewDetailedHistory) {
-      historyLabel = (
-        <span className="font-normal">
-          {Math.round(recommendedSimilarHistory.winRate)} % ·{" "}
-          {formatCount(recommendedSimilarHistory.battles, "combat")}
-        </span>
-      );
-    }
-  }
-
-  let alternativeHistoryLabel: ReactNode = (
-    <span className="font-normal">Pas de stats disponibles</span>
-  );
-
-  let alternativeSourceText = "Nouvelle combinaison";
-
-  if (alternativeRecommendationSource === "exact-history") {
-    alternativeSourceText = "Historique exact";
-
-    if (alternativeHistory.battles > 0 && canViewDetailedHistory) {
-      alternativeHistoryLabel = (
-        <span className="font-normal">
-          {Math.round(alternativeHistory.winRate)} % ·{" "}
-          {formatCount(alternativeHistory.battles, "combat")}
-        </span>
-      );
-    }
-  } else if (alternativeRecommendationSource === "defeat-history") {
-    alternativeSourceText = "Historique des défaites";
-
-    if (alternativeDefeatHistory && canViewDetailedHistory) {
-      alternativeHistoryLabel = (
-        <span className="font-normal">
-          {Math.round(alternativeDefeatHistory.counterWinRate * 100)} % ·{" "}
-          {formatCount(alternativeDefeatHistory.battles, "combat")}
-        </span>
-      );
-    }
-  } else if (alternativeRecommendationSource === "core4") {
-    alternativeSourceText = "Core4 historique";
-
-    if (alternativeCore4History && canViewDetailedHistory) {
-      alternativeHistoryLabel = (
-        <span className="font-normal">
-          {Math.round(alternativeCore4History.winRate)} % ·{" "}
-          {formatCount(alternativeCore4History.battles, "combat")}
-        </span>
-      );
-    }
-  } else if (alternativeRecommendationSource === "similar-history") {
-    alternativeSourceText = "Historique similaire";
-
-    if (alternativeSimilarHistory.battles > 0 && canViewDetailedHistory) {
-      alternativeHistoryLabel = (
-        <span className="font-normal">
-          {Math.round(alternativeSimilarHistory.winRate)} % ·{" "}
-          {formatCount(alternativeSimilarHistory.battles, "combat")}
-        </span>
-      );
-    }
-  } else if (alternativeRecommendationSource === "class-history") {
-    alternativeSourceText = "Historique classes";
-
-    if (alternativeClassHistory.battles > 0 && canViewDetailedHistory) {
-      alternativeHistoryLabel = (
-        <span className="font-normal">
-          {Math.round(alternativeClassHistory.winRate)} % ·{" "}
-          {formatCount(alternativeClassHistory.battles, "combat")}
-        </span>
-      );
-    }
-  }
+  const alternativeDisplay = getRecommendationDisplay({
+    source: alternativeRecommendationSource,
+    core4History: alternativeCore4History,
+    defeatHistory: alternativeDefeatHistory,
+    exactHistory: alternativeHistory,
+    classHistory: alternativeClassHistory,
+    similarHistory: alternativeSimilarHistory,
+    canViewDetailedHistory,
+  });
 
   const recommendationMobileHistoryLabel =
     recommendationSource === "core4" && recommendationCore4History
@@ -378,10 +375,10 @@ export default function CounterModal({
                       </span>
 
                       <span className="hidden sm:inline">
-                        <strong>{recommendationSourceText}</strong>
+                        <strong>{recommendationDisplay.sourceText}</strong>
 
                         <span className="ui-text-muted ml-1">
-                          · {historyLabel}
+                          · {recommendationDisplay.historyLabel}
                         </span>
                       </span>
                     </div>
@@ -429,10 +426,10 @@ export default function CounterModal({
                         </span>
 
                         <span className="hidden sm:inline">
-                          <strong>{alternativeSourceText}</strong>
+                          <strong>{alternativeDisplay.sourceText}</strong>
 
                           <span className="ui-text-muted ml-1">
-                            · {alternativeHistoryLabel}
+                            · {alternativeDisplay.historyLabel}
                           </span>
                         </span>
                       </div>

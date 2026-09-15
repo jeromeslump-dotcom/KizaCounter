@@ -10,10 +10,7 @@ import {
 import { findHistoricalDefeatCounters } from "../engine/defeatHistory";
 import { getEngineSettings } from "../engine/engineSettings";
 import { type RecommendationSource } from "../engine/recommendationSource";
-import {
-  SIMILAR_HISTORY_SHARED_HEROES,
-  teamKey,
-} from "../engine/teamUtils";
+import { SIMILAR_HISTORY_SHARED_HEROES, teamKey } from "../engine/teamUtils";
 
 const EMPTY_HISTORY = {
   wins: 0,
@@ -187,25 +184,34 @@ export default function useCounterHistory({
     [open, alternativeRecommendationSource, alternativeIds, enemyIds, combats]
   );
 
+  // ============================================================
+  // HISTORIQUE DES DÉFAITES — calculé une seule fois
+  // ============================================================
+
+  const defeatCountersHistory = useMemo(
+    () => (open ? findHistoricalDefeatCounters(enemyIds, combats, heroes) : []),
+    [open, enemyIds, combats, heroes]
+  );
+
   const recommendedDefeatHistory = useMemo(() => {
-    if (!open || recommendedIds.length !== 5) return null;
+    if (recommendedIds.length !== 5) return null;
 
     return (
-      findHistoricalDefeatCounters(enemyIds, combats, heroes).find(
+      defeatCountersHistory.find(
         (candidate) => teamKey(candidate.heroIds) === teamKey(recommendedIds)
       ) ?? null
     );
-  }, [open, recommendedIds, enemyIds, combats, heroes]);
+  }, [recommendedIds, defeatCountersHistory]);
 
   const alternativeDefeatHistory = useMemo(() => {
-    if (!open || alternativeIds.length !== 5) return null;
+    if (alternativeIds.length !== 5) return null;
 
     return (
-      findHistoricalDefeatCounters(enemyIds, combats, heroes).find(
+      defeatCountersHistory.find(
         (candidate) => teamKey(candidate.heroIds) === teamKey(alternativeIds)
       ) ?? null
     );
-  }, [open, alternativeIds, enemyIds, combats, heroes]);
+  }, [alternativeIds, defeatCountersHistory]);
 
   return {
     enemyIds,

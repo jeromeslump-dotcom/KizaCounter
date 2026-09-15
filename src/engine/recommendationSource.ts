@@ -22,7 +22,6 @@ export type RecommendationSource =
   | "exact-history"
   | "class-history"
   | "core4"
- 
   | "fallback"
   | "similar-history"
   | "defeat-history";
@@ -308,7 +307,7 @@ export function recommendationSourceLabel(
       return "Historique des défaites";
     case "core4":
       return "Core4 historique";
- 
+
     case "fallback":
       return "Fallback";
   }
