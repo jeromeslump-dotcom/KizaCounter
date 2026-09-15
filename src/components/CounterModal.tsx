@@ -3,6 +3,7 @@ import { type ReactNode } from "react";
 import type { Combat, Hero, HeroClassFilter, HeroSort } from "../types";
 
 import { type RecommendationSource } from "../engine/recommendationSource";
+import { RECOMMENDATION_SOURCE_LABELS } from "../engine/recommendationLabels";
 import type { Core4HistoryStats } from "../engine/recommendationCore4";
 
 import useCounterHistory from "../hooks/useCounterHistory";
@@ -82,14 +83,14 @@ function getRecommendationDisplay({
   };
   canViewDetailedHistory: boolean;
 }): RecommendationDisplay {
-  let sourceText = "Nouvelle combinaison";
+  let sourceText = RECOMMENDATION_SOURCE_LABELS.fallback;
 
   let historyLabel: ReactNode = (
     <span className="font-normal">Pas de stats disponibles</span>
   );
 
   if (source === "core4") {
-    sourceText = "Historique Core4";
+    sourceText = RECOMMENDATION_SOURCE_LABELS.core4;
 
     if (core4History && canViewDetailedHistory) {
       historyLabel = (
@@ -100,7 +101,7 @@ function getRecommendationDisplay({
       );
     }
   } else if (source === "defeat-history") {
-    sourceText = "Historique des défaites";
+    sourceText = RECOMMENDATION_SOURCE_LABELS.defeat;
 
     if (defeatHistory && canViewDetailedHistory) {
       historyLabel = (
@@ -111,7 +112,7 @@ function getRecommendationDisplay({
       );
     }
   } else if (source === "exact-history") {
-    sourceText = "Historique exact";
+    sourceText = RECOMMENDATION_SOURCE_LABELS.exact;
 
     if (exactHistory.battles > 0 && canViewDetailedHistory) {
       historyLabel = (
@@ -122,7 +123,7 @@ function getRecommendationDisplay({
       );
     }
   } else if (source === "class-history") {
-    sourceText = "Historique classes";
+    sourceText = RECOMMENDATION_SOURCE_LABELS.class;
 
     if (classHistory.battles > 0 && canViewDetailedHistory) {
       historyLabel = (
@@ -133,7 +134,7 @@ function getRecommendationDisplay({
       );
     }
   } else if (source === "similar-history") {
-    sourceText = "Historique similaire";
+    sourceText = RECOMMENDATION_SOURCE_LABELS.similar;
 
     if (similarHistory.battles > 0 && canViewDetailedHistory) {
       historyLabel = (
