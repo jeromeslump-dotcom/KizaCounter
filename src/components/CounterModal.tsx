@@ -83,7 +83,8 @@ function getRecommendationDisplay({
   };
   canViewDetailedHistory: boolean;
 }): RecommendationDisplay {
-  let sourceText = RECOMMENDATION_SOURCE_LABELS.fallback;
+  let sourceText: (typeof RECOMMENDATION_SOURCE_LABELS)[keyof typeof RECOMMENDATION_SOURCE_LABELS] =
+    RECOMMENDATION_SOURCE_LABELS.fallback;
 
   let historyLabel: ReactNode = (
     <span className="font-normal">Pas de stats disponibles</span>

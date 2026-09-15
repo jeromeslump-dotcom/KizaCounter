@@ -1,4 +1,3 @@
-
 import { describe, expect, it } from "vitest";
 
 import { HEROES } from "./heroes";
@@ -51,4 +50,3 @@ describe("hero data integrity", () => {
     }
   });
 });
-
