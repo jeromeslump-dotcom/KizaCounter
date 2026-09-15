@@ -89,7 +89,7 @@ function getRecommendationDisplay({
   );
 
   if (source === "core4") {
-    sourceText = "Core4 historique";
+    sourceText = "Historique Core4";
 
     if (core4History && canViewDetailedHistory) {
       historyLabel = (
