@@ -345,30 +345,3 @@ select {
   border-color: var(--ui-border);
 }
 
-.ui-recommendation-team {
-  display: block;
-  width: 100%;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  color: inherit;
-  text-align: left;
-  cursor: pointer;
-}
-
-
-.ui-recommendation-team:hover .ui-recommendation-hero {
-  border-color: var(--ui-accent);
-  background: var(--ui-accent-soft);
-}
-
-.ui-recommendation-selected .ui-recommendation-hero {
-  border-color: var(--ui-accent);
-  background: var(--ui-accent-soft);
-  color: var(--ui-accent);
-}
-
-.ui-recommendation-team:focus-visible {
-  outline: 2px solid var(--ui-accent);
-  outline-offset: 2px;
-}
