@@ -359,7 +359,6 @@ select {
 .ui-recommendation-hero {
   display: block;
   min-width: 0;
-  overflow: hidden;
   border: 1px solid var(--ui-border);
   border-radius: 0.5rem;
   padding: 0.5rem 0.25rem;
@@ -374,16 +373,10 @@ select {
     background-color 0.2s ease,
     color 0.2s ease;
 
-  /* Sur mobile : 2 lignes permettent d'afficher les noms moyens
-     (ex. Rose Knight) en entier, avec ... uniquement si le nom
-     dépasse réellement la place disponible. */
+  /* Sur mobile : les noms peuvent revenir à la ligne sans être tronqués. */
   white-space: normal;
+  overflow-wrap: anywhere;
   min-height: 2.75rem;
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
-  text-overflow: ellipsis;
 }
 
 .ui-recommendation-team:hover .ui-recommendation-hero {
