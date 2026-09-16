@@ -356,28 +356,6 @@ select {
   cursor: pointer;
 }
 
-.ui-recommendation-hero {
-  display: block;
-  min-width: 0;
-  border: 1px solid var(--ui-border);
-  border-radius: 0.5rem;
-  padding: 0.5rem 0.25rem;
-  color: var(--ui-text-primary);
-  background: transparent;
-  font-size: 0.75rem;
-  font-weight: 600;
-  line-height: 1.25;
-  text-align: center;
-  transition:
-    border-color 0.2s ease,
-    background-color 0.2s ease,
-    color 0.2s ease;
-
-  /* Sur mobile : les noms peuvent revenir à la ligne sans être tronqués. */
-  white-space: normal;
-  overflow-wrap: anywhere;
-  min-height: 2.75rem;
-}
 
 .ui-recommendation-team:hover .ui-recommendation-hero {
   border-color: var(--ui-accent);
@@ -393,14 +371,4 @@ select {
 .ui-recommendation-team:focus-visible {
   outline: 2px solid var(--ui-accent);
   outline-offset: 2px;
-}
-
-@media (min-width: 640px) {
-  .ui-recommendation-hero {
-    min-height: 0;
-    white-space: nowrap;
-    display: block;
-    -webkit-line-clamp: unset;
-    line-clamp: unset;
-  }
 }
