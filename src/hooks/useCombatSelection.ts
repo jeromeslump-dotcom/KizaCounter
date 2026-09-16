@@ -97,9 +97,7 @@ export default function useCombatSelection({
 
   const openCounterModal = useCallback(
     (enemyTeamIds: string[]) => {
-      const availableHeroes = enabledHeroes;
-
-      if (availableHeroes.length < TEAM_SIZE) {
+      if (enabledHeroes.length < TEAM_SIZE) {
         setRecommendedIds([]);
         setAlternativeIds([]);
         setRecommendationSource(null);
@@ -115,7 +113,7 @@ export default function useCombatSelection({
         enemyTeamIds,
         heroes,
         combats,
-        availableHeroes
+        enabledHeroes
       );
 
       const validRecommendation =
@@ -137,13 +135,13 @@ export default function useCombatSelection({
 
       if (primaryIds.length === TEAM_SIZE) {
         // B est une vraie seconde recommandation historique.
-        // La seule contrainte : B doit être différent de A.
+        // La seule contrainte : B doit etre différent de A.
         // Aucun nombre de héros communs n'est imposé.
         const alternativeRecommendation =
           findHistoricalAlternativeRecommendation(
             enemyTeamIds,
             heroes,
-            availableHeroes,
+            enabledHeroes,
             combats,
             primaryIds
           );

@@ -17,19 +17,6 @@ export interface HistoricalCandidate {
   similarity: number;
 }
 
-export function buildHistoricalEnemyContext(
-  enemyIds: string[],
-  combats: Combat[]
-): HistoricalEnemyContext {
-  const enemyKey = teamKey(enemyIds);
-  const matchingCombats: Combat[] = [];
-  for (const combat of combats) {
-    if (teamKey(combat.enemy_heroes ?? []) === enemyKey)
-      matchingCombats.push(combat);
-  }
-  return { enemyKey, combats: matchingCombats };
-}
-
 export function historicalConfidence(
   battles: number,
   confidenceBattles: number
@@ -190,37 +177,6 @@ export function orderHistoricalCandidates(
     .map(({ candidate }) => candidate);
 }
 
-export function findBestHistoricalTeam(
-  enemyIds: string[],
-  combats: Combat[],
-  heroes: Hero[],
-  context?: HistoricalEnemyContext,
-  excludedTeamKey?: string
-): Hero[] | null {
-  const heroesById = new Map(heroes.map((hero) => [hero.id, hero]));
-  const enemyKey = context?.enemyKey ?? teamKey(enemyIds);
-  const historicalCombats = context?.combats ?? combats;
-  const candidates = collectHistoricalCandidates(
-    historicalCombats,
-    context
-      ? undefined
-      : (historicalEnemy) =>
-          historicalEnemy.length === TEAM_SIZE &&
-          teamKey(historicalEnemy) === enemyKey
-            ? 0
-            : null
-  );
-
-  for (const candidate of orderHistoricalCandidates(candidates.values())) {
-    if (teamKey(candidate.heroIds) === excludedTeamKey) continue;
-    const team = candidate.heroIds
-      .map((id) => heroesById.get(id))
-      .filter((hero): hero is Hero => Boolean(hero));
-    if (team.length === TEAM_SIZE) return team;
-  }
-  return null;
-}
-
 export function evaluateEnemyClassHistory(
   teamIds: string[],
   enemyIds: string[],
@@ -263,38 +219,4 @@ export function evaluateEnemyClassHistory(
     winRate: calculateWinRate(wins, battles),
     classKey: targetClassKey,
   };
-}
-
-export function findBestHistoricalClassTeam(
-  enemyIds: string[],
-  combats: Combat[],
-  heroes: Hero[],
-  excludedTeamKey?: string
-): Hero[] | null {
-  const heroesById = new Map(heroes.map((hero) => [hero.id, hero]));
-  const targetClassKey = getClassKey(enemyIds, heroesById);
-  if (!targetClassKey) return null;
-
-  const classKeyCache = new Map<string, string | null>();
-  const candidates = collectHistoricalCandidates(combats, (historicalEnemy) => {
-    if (historicalEnemy.length !== TEAM_SIZE) return null;
-
-    const historicalEnemyKey = teamKey(historicalEnemy);
-    let historicalClassKey = classKeyCache.get(historicalEnemyKey);
-    if (historicalClassKey === undefined) {
-      historicalClassKey = getClassKey(historicalEnemy, heroesById);
-      classKeyCache.set(historicalEnemyKey, historicalClassKey);
-    }
-
-    return historicalClassKey === targetClassKey ? 0 : null;
-  });
-
-  for (const candidate of orderHistoricalCandidates(candidates.values())) {
-    if (teamKey(candidate.heroIds) === excludedTeamKey) continue;
-    const team = candidate.heroIds
-      .map((id) => heroesById.get(id))
-      .filter((hero): hero is Hero => Boolean(hero));
-    if (team.length === TEAM_SIZE) return team;
-  }
-  return null;
 }
