@@ -2,7 +2,7 @@ import type { Combat, Hero } from "../types";
 import { getEngineSettings } from "./engineSettings";
 import { calculateHistoricalReliability } from "./historicalScoring";
 import { isUsableRecommendationTeam } from "./recommendationGuards";
-import { teamKey, uniqueIds } from "./teamUtils";
+import { resolveTeamFromIds, teamKey, uniqueIds } from "./teamUtils";
 
 const TEAM_SIZE = 5;
 const CORE_SIZE = 4;
@@ -12,16 +12,6 @@ export interface Core4HistoryStats {
   losses: number;
   battles: number;
   winRate: number;
-}
-
-function resolveCandidateTeam(
-  heroIds: string[],
-  candidateHeroesById: Map<string, Hero>
-): Hero[] | null {
-  const team = heroIds
-    .map((id) => candidateHeroesById.get(id))
-    .filter((hero): hero is Hero => Boolean(hero));
-  return team.length === TEAM_SIZE ? team : null;
 }
 
 /**
@@ -181,7 +171,7 @@ export function findBestEnabledCore4HistoryTeam(
       if (teamIds.length !== TEAM_SIZE) continue;
       if (teamKey(teamIds) === excludedTeamKey) continue;
 
-      const team = resolveCandidateTeam(teamIds, candidateHeroesById);
+      const team = resolveTeamFromIds(teamIds, candidateHeroesById);
       if (team && isUsableRecommendationTeam(team, combats, enemyIds)) {
         const battles = rankedCore.core.wins + rankedCore.core.losses;
         onSelectedCore?.({
