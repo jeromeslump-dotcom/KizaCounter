@@ -201,7 +201,7 @@ export default function EngineSettings({
 
             <AdvancedSettingRow
               icon="🧩"
-              label="Combats minimum pour un remplacement"
+              label="Combats minimum pour prendre en compte un remplaçant Core4"
               value={advanced.core4MinReplacementBattles}
               min={1}
               max={20}
