@@ -476,11 +476,7 @@ export default function CombatHistory({
         )}
 
         <footer className="flex justify-end border-t ui-divider px-4 py-3 sm:px-5 sm:py-4">
-          <button
-            type="button"
-            onClick={onBack}
-            className="ui-button"
-          >
+          <button type="button" onClick={onBack} className="ui-button">
             ← Retour au Admin Panel
           </button>
         </footer>

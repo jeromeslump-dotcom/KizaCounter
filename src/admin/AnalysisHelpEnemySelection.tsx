@@ -39,11 +39,7 @@ export default function AnalysisHelpEnemySelection({
           <div className="ui-text-primary text-sm font-black">
             Équipe ennemie à analyser ({enemyIds.length}/5)
           </div>
-          <button
-            type="button"
-            onClick={onClear}
-            className="ui-button-sm"
-          >
+          <button type="button" onClick={onClear} className="ui-button-sm">
             Effacer tout
           </button>
         </div>

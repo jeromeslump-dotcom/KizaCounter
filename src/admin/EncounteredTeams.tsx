@@ -254,11 +254,7 @@ export default function EncounteredTeams({
         </div>
 
         <footer className="flex items-center justify-end gap-3 border-t ui-divider px-4 py-3 sm:px-5 sm:py-4">
-          <button
-            type="button"
-            onClick={onBack}
-            className="ui-button"
-          >
+          <button type="button" onClick={onBack} className="ui-button">
             ← Retour au Admin Panel
           </button>
         </footer>

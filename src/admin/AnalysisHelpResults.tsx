@@ -50,11 +50,7 @@ export default function AnalysisHelpResults({
               L'ordre des héros ne compte pas.
             </div>
           </div>
-          <button
-            type="button"
-            onClick={onEdit}
-            className="ui-button-sm"
-          >
+          <button type="button" onClick={onEdit} className="ui-button-sm">
             ← Modifier les ennemis
           </button>
         </div>

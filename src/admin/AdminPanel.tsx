@@ -166,11 +166,7 @@ export default function AdminPanel({
         </div>
 
         <footer className="flex justify-end border-t ui-divider px-4 py-3 sm:px-5 sm:py-4">
-          <button
-            type="button"
-            onClick={onClose}
-            className="ui-button"
-          >
+          <button type="button" onClick={onClose} className="ui-button">
             Fermer
           </button>
         </footer>

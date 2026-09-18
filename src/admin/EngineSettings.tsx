@@ -227,18 +227,10 @@ export default function EngineSettings({
           </div>
 
           <div className="mt-5 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-            <button
-              type="button"
-              onClick={onBack}
-              className="ui-button"
-            >
+            <button type="button" onClick={onBack} className="ui-button">
               ← Retour
             </button>
-            <button
-              type="button"
-              onClick={handleReset}
-              className="ui-button"
-            >
+            <button type="button" onClick={handleReset} className="ui-button">
               Réinitialiser
             </button>
             <button

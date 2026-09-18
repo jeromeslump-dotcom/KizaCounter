@@ -21,24 +21,24 @@
   --ui-text-muted: rgb(100 116 139);
   --ui-text-soft: rgb(203 213 225);
 
-/* ============================================================
+  /* ============================================================
    VARIANTES DU THÈME GLOBAL
    ============================================================ */
 
-[data-theme="agi"] {
-  --ui-theme: rgb(52 211 153);
-  --ui-theme-soft: rgb(110 231 183);
-}
+  [data-theme="agi"] {
+    --ui-theme: rgb(52 211 153);
+    --ui-theme-soft: rgb(110 231 183);
+  }
 
-[data-theme="str"] {
-  --ui-theme: rgb(244 63 94);
-  --ui-theme-soft: rgb(253 164 175);
-}
+  [data-theme="str"] {
+    --ui-theme: rgb(244 63 94);
+    --ui-theme-soft: rgb(253 164 175);
+  }
 
-[data-theme="int"] {
-  --ui-theme: rgb(56 189 248);
-  --ui-theme-soft: rgb(125 211 252);
-}
+  [data-theme="int"] {
+    --ui-theme: rgb(56 189 248);
+    --ui-theme-soft: rgb(125 211 252);
+  }
 
   /* ============================================================
      THÈME GLOBAL
@@ -212,10 +212,10 @@ select {
   .user-management-card.is-active {
     border-left: 3px solid rgb(from var(--ui-theme) r g b / 0.7);
   }
-  
+
   .user-ranking-card {
-  border-left: 3px solid rgb(from var(--ui-theme) r g b / 0.7) !important;
-}
+    border-left: 3px solid rgb(from var(--ui-theme) r g b / 0.7) !important;
+  }
 
   .user-management-card.is-inactive {
     border-left: 3px solid rgb(from var(--ui-text-muted) r g b / 0.45);
@@ -223,8 +223,8 @@ select {
   }
 
   .user-management-status.is-active {
-border-color: rgb(from var(--ui-theme) r g b / 0.35);
-background: color-mix(in srgb, var(--ui-theme) 10%, var(--ui-bg));
+    border-color: rgb(from var(--ui-theme) r g b / 0.35);
+    background: color-mix(in srgb, var(--ui-theme) 10%, var(--ui-bg));
     color: var(--ui-theme-soft);
   }
 
@@ -238,13 +238,11 @@ background: color-mix(in srgb, var(--ui-theme) 10%, var(--ui-bg));
     background: var(--ui-card);
   }
 
-.user-management-role:focus {
-  outline: none;
-  border-color: var(--ui-theme);
-  box-shadow: 0 0 0 1px rgb(from var(--ui-theme) r g b / 0.12);
-}
-
-
+  .user-management-role:focus {
+    outline: none;
+    border-color: var(--ui-theme);
+    box-shadow: 0 0 0 1px rgb(from var(--ui-theme) r g b / 0.12);
+  }
 
   /* ----------------------------------------------------------
      HISTORIQUE DES COMBATS
@@ -258,10 +256,10 @@ background: color-mix(in srgb, var(--ui-theme) 10%, var(--ui-bg));
     color: var(--ui-text-soft);
   }
 
-.combat-history-card:hover {
-border-color: var(--ui-theme);
-  background: rgb(15 23 42);
-}
+  .combat-history-card:hover {
+    border-color: var(--ui-theme);
+    background: rgb(15 23 42);
+  }
 
   @media (min-width: 640px) {
     .combat-history-card {
@@ -294,14 +292,14 @@ border-color: var(--ui-theme);
     opacity: 0.7;
   }
 
-.combat-history-order-button-known {
-  border-color: rgb(from var(--ui-theme) r g b / 0.3);
-  color: var(--ui-theme);
-}
+  .combat-history-order-button-known {
+    border-color: rgb(from var(--ui-theme) r g b / 0.3);
+    color: var(--ui-theme);
+  }
 
-.combat-history-order-button-known:hover {
-  background: rgb(from var(--ui-theme) r g b / 0.1);
-}
+  .combat-history-order-button-known:hover {
+    background: rgb(from var(--ui-theme) r g b / 0.1);
+  }
 
   .combat-history-order-button-unknown {
     border-color: rgb(from var(--ui-danger) r g b / 0.3);
@@ -312,10 +310,9 @@ border-color: var(--ui-theme);
     background: rgb(from var(--ui-danger) r g b / 0.1);
   }
 
-.combat-history-delete {
-  cursor: pointer;
-}
-
+  .combat-history-delete {
+    cursor: pointer;
+  }
 
   .combat-history-result-success {
     font-size: 0.75rem;

@@ -135,11 +135,13 @@ export default function HeroManager({
                   ].join(" ")}
                 >
                   <div className="relative p-2.5">
-                   <div
-  className={`relative aspect-square overflow-hidden rounded-xl bg-[var(--ui-bg)]/20 ${
-    enabled ? `hero-card-wallpaper-${hero.cls.toLowerCase()}` : ""
-  }`}
-> 
+                    <div
+                      className={`relative aspect-square overflow-hidden rounded-xl bg-[var(--ui-bg)]/20 ${
+                        enabled
+                          ? `hero-card-wallpaper-${hero.cls.toLowerCase()}`
+                          : ""
+                      }`}
+                    >
                       <img
                         src={hero.img}
                         alt={hero.name}
@@ -189,11 +191,7 @@ export default function HeroManager({
             La configuration est sauvegardée automatiquement.
           </span>
 
-          <button
-            type="button"
-            onClick={onClose}
-            className="ui-button"
-          >
+          <button type="button" onClick={onClose} className="ui-button">
             Terminé
           </button>
         </div>
@@ -201,4 +199,3 @@ export default function HeroManager({
     </div>
   );
 }
-

@@ -193,11 +193,7 @@ export default function AnalysisHelp({
           >
             {showResults ? "← Modifier les ennemis" : "← Retour au Admin Panel"}
           </button>
-          <button
-            type="button"
-            onClick={onClose}
-            className="ui-button"
-          >
+          <button type="button" onClick={onClose} className="ui-button">
             Fermer
           </button>
         </footer>
