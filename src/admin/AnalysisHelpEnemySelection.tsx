@@ -42,7 +42,7 @@ export default function AnalysisHelpEnemySelection({
           <button
             type="button"
             onClick={onClear}
-            className="ui-action rounded-lg border px-3 py-1.5 text-[10px] font-bold transition"
+            className="ui-button-sm"
           >
             Effacer tout
           </button>

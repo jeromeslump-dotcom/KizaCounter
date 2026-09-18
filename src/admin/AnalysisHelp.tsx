@@ -153,7 +153,7 @@ export default function AnalysisHelp({
           <button
             type="button"
             onClick={onClose}
-            className="ui-action flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border text-lg transition"
+            className="ui-button-icon"
             aria-label="Fermer"
           >
             ✕
@@ -189,14 +189,14 @@ export default function AnalysisHelp({
           <button
             type="button"
             onClick={showResults ? () => setShowResults(false) : onBack}
-            className="ui-action rounded-lg border px-4 py-2 text-xs font-bold transition"
+            className="ui-button"
           >
             {showResults ? "← Modifier les ennemis" : "← Retour au Admin Panel"}
           </button>
           <button
             type="button"
             onClick={onClose}
-            className="ui-action rounded-lg border px-4 py-2 text-xs font-bold transition"
+            className="ui-button"
           >
             Fermer
           </button>

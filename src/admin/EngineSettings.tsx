@@ -139,7 +139,7 @@ export default function EngineSettings({
             <button
               type="button"
               onClick={onClose}
-              className="ui-action flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border text-lg transition"
+              className="ui-button-icon"
               aria-label="Fermer"
             >
               ✕
@@ -230,21 +230,21 @@ export default function EngineSettings({
             <button
               type="button"
               onClick={onBack}
-              className="ui-action rounded-xl border px-4 py-2 text-sm font-black transition"
+              className="ui-button"
             >
               ← Retour
             </button>
             <button
               type="button"
               onClick={handleReset}
-              className="ui-action rounded-xl border px-4 py-2 text-sm font-black transition"
+              className="ui-button"
             >
               Réinitialiser
             </button>
             <button
               type="button"
               onClick={handleSave}
-              className="ui-success rounded-xl border px-4 py-2 text-sm font-black transition"
+              className="ui-button ui-button-success"
             >
               Enregistrer
             </button>

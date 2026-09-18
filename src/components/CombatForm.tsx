@@ -47,7 +47,7 @@ export default function CombatForm({
           type="button"
           disabled={saving}
           onClick={() => handleResult(true)}
-          className="ui-success rounded-lg border px-3 py-3 text-sm font-bold transition disabled:cursor-not-allowed disabled:opacity-50"
+          className="ui-button ui-result-success disabled:cursor-not-allowed disabled:opacity-50"
         >
           👍 Victoire
         </button>
@@ -56,7 +56,7 @@ export default function CombatForm({
           type="button"
           disabled={saving}
           onClick={() => handleResult(false)}
-          className="ui-danger rounded-lg border px-3 py-3 text-sm font-bold transition disabled:cursor-not-allowed disabled:opacity-50"
+          className="ui-button ui-result-danger disabled:cursor-not-allowed disabled:opacity-50"
         >
           👎 Défaite
         </button>
@@ -67,7 +67,7 @@ export default function CombatForm({
           type="button"
           disabled={saving}
           onClick={onClose}
-          className="ui-action mt-2 w-full rounded-lg border px-4 py-2 text-sm font-semibold transition disabled:opacity-50"
+          className="ui-button mt-2 w-full disabled:opacity-50"
         >
           Annuler
         </button>

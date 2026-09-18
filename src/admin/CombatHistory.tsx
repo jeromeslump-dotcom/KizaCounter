@@ -289,7 +289,7 @@ export default function CombatHistory({
             <button
               type="button"
               onClick={onClose}
-              className="ui-action flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border text-lg transition"
+              className="ui-button-icon"
               aria-label="Fermer"
             >
               ✕
@@ -379,7 +379,7 @@ export default function CombatHistory({
                         type="button"
                         onClick={() => handleDelete(combat)}
                         disabled={!combat.id || deletingId === combat.id}
-                        className="combat-history-delete"
+                        className="ui-button-sm combat-history-delete"
                       >
                         {deletingId === combat.id ? "…" : "🗑️ Supprimer"}
                       </button>
@@ -456,7 +456,7 @@ export default function CombatHistory({
                 type="button"
                 onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
                 disabled={currentPage === 1}
-                className="ui-action rounded-lg border px-3 py-1.5 text-xs font-bold transition disabled:cursor-not-allowed disabled:opacity-40"
+                className="ui-button-sm disabled:cursor-not-allowed disabled:opacity-40"
               >
                 ← Précédente
               </button>
@@ -467,7 +467,7 @@ export default function CombatHistory({
                   setCurrentPage((page) => Math.min(totalPages, page + 1))
                 }
                 disabled={currentPage === totalPages}
-                className="ui-action rounded-lg border px-3 py-1.5 text-xs font-bold transition disabled:cursor-not-allowed disabled:opacity-40"
+                className="ui-button-sm disabled:cursor-not-allowed disabled:opacity-40"
               >
                 Suivante →
               </button>
@@ -479,7 +479,7 @@ export default function CombatHistory({
           <button
             type="button"
             onClick={onBack}
-            className="ui-action rounded-lg border px-4 py-2 text-xs font-bold transition"
+            className="ui-button"
           >
             ← Retour au Admin Panel
           </button>

@@ -124,7 +124,7 @@ export default function UserManagement({
           <button
             type="button"
             onClick={onClose}
-            className="ui-action flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border text-lg transition"
+            className="ui-button-icon"
             aria-label="Fermer"
           >
             ✕
@@ -204,7 +204,7 @@ export default function UserManagement({
                         type="button"
                         disabled={!changed || savingId === user.id}
                         onClick={() => saveRole(user)}
-                        className="ui-action user-management-save ml-auto rounded-lg border px-3 py-1.5 text-xs font-bold transition disabled:cursor-not-allowed disabled:opacity-40"
+                        className="ui-button-sm user-management-save ml-auto disabled:cursor-not-allowed disabled:opacity-40"
                       >
                         {savingId === user.id
                           ? "Enregistrement..."
@@ -228,7 +228,7 @@ export default function UserManagement({
           <button
             type="button"
             onClick={onBack}
-            className="ui-action rounded-lg border px-4 py-2 text-xs font-bold transition"
+            className="ui-button"
           >
             ← Retour au Admin Panel
           </button>

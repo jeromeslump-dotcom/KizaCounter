@@ -151,7 +151,7 @@ export default function EncounteredTeams({
             <button
               type="button"
               onClick={onClose}
-              className="ui-action flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border text-lg transition"
+              className="ui-button-icon"
               aria-label="Fermer"
             >
               ✕
@@ -178,11 +178,11 @@ export default function EncounteredTeams({
                 return (
                   <article
                     key={teamKey(team.heroIds)}
-                    className="ui-card ui-card-hover rounded-2xl p-4"
+                    className="ui-card ui-card-hover user-ranking-card rounded-2xl p-4"
                   >
                     <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                       <div className="flex min-w-0 items-center gap-3">
-                        <div className="ui-card flex h-9 w-9 shrink-0 items-center justify-center rounded-full border text-sm font-black">
+                        <div className="ui-card encountered-team-rank flex h-9 w-9 shrink-0 items-center justify-center rounded-full border text-sm font-black">
                           #{index + 1}
                         </div>
 
@@ -257,7 +257,7 @@ export default function EncounteredTeams({
           <button
             type="button"
             onClick={onBack}
-            className="ui-action rounded-lg border px-4 py-2 text-xs font-bold transition"
+            className="ui-button"
           >
             ← Retour au Admin Panel
           </button>

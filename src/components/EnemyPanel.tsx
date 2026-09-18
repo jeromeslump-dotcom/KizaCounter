@@ -27,7 +27,7 @@ export default function EnemyPanel({
           <button
             type="button"
             onClick={onClear}
-            className="ui-action ui-danger rounded-lg border px-3 py-1.5 text-xs font-semibold transition"
+            className="ui-button-sm ui-button-danger"
           >
             Effacer tout
           </button>

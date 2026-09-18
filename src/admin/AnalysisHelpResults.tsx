@@ -53,7 +53,7 @@ export default function AnalysisHelpResults({
           <button
             type="button"
             onClick={onEdit}
-            className="ui-action rounded-lg border px-3 py-2 text-xs font-bold transition"
+            className="ui-button-sm"
           >
             ← Modifier les ennemis
           </button>

@@ -113,7 +113,7 @@ export default function App() {
   const canViewDetailedHistory = profile?.role === "admin";
 
   return (
-    <main className="app-shell min-h-screen">
+    <main className="app-shell min-h-screen" data-theme="int">
       <HeroManager
         open={showHeroManager}
         enabledHeroIds={enabledHeroIds}
@@ -144,7 +144,7 @@ export default function App() {
                 <button
                   type="button"
                   onClick={() => setShowHeroManager(true)}
-                  className="ui-action rounded-lg border px-3 py-2 text-xs font-bold transition"
+                  className="ui-button-sm"
                 >
                   ⚙️ Gérer les héros
                 </button>

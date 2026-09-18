@@ -63,7 +63,7 @@ export default function HeroManager({
                 plus proposés dans les équipes recommandées.
               </p>
 
-              <div className="ui-card mt-3 inline-flex items-center gap-2 rounded-lg border px-3 py-1.5">
+              <div className="ui-card ui-active-heroes mt-3 inline-flex items-center gap-2 rounded-lg border px-3 py-1.5">
                 <span aria-hidden="true">☑️</span>
                 <span className="ui-text-primary text-xs font-bold">
                   {activeCount} / {totalCount} héros actifs
@@ -74,7 +74,7 @@ export default function HeroManager({
             <button
               type="button"
               onClick={onClose}
-              className="ui-action flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border text-lg transition"
+              className="ui-button-icon"
               aria-label="Fermer"
             >
               ✕
@@ -85,7 +85,7 @@ export default function HeroManager({
             <button
               type="button"
               onClick={onEnableAll}
-              className="ui-action rounded-lg border px-3 py-2 text-xs font-bold transition"
+              className="ui-button-sm"
             >
               <span className="inline-flex items-center gap-2">
                 ☑️ Tout cocher
@@ -95,7 +95,7 @@ export default function HeroManager({
             <button
               type="button"
               onClick={onDisableAll}
-              className="ui-action rounded-lg border px-3 py-2 text-xs font-bold transition"
+              className="ui-button-sm"
             >
               <span className="inline-flex items-center gap-2">
                 ☐ Tout décocher
@@ -131,11 +131,15 @@ export default function HeroManager({
                   onClick={() => onToggleHero(hero.id)}
                   className={[
                     "ui-card ui-card-hover relative overflow-hidden rounded-2xl border text-left transition-all hover:scale-[1.02]",
-                    enabled ? "ui-success" : "ui-danger opacity-45",
+                    enabled ? "" : "opacity-45",
                   ].join(" ")}
                 >
                   <div className="relative p-2.5">
-                    <div className="relative aspect-square overflow-hidden rounded-xl bg-[var(--ui-bg)]/20">
+                   <div
+  className={`relative aspect-square overflow-hidden rounded-xl bg-[var(--ui-bg)]/20 ${
+    enabled ? `hero-card-wallpaper-${hero.cls.toLowerCase()}` : ""
+  }`}
+> 
                       <img
                         src={hero.img}
                         alt={hero.name}
@@ -188,7 +192,7 @@ export default function HeroManager({
           <button
             type="button"
             onClick={onClose}
-            className="ui-action rounded-lg border px-4 py-2 text-xs font-bold transition"
+            className="ui-button"
           >
             Terminé
           </button>
@@ -197,3 +201,4 @@ export default function HeroManager({
     </div>
   );
 }
+

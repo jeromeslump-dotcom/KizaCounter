@@ -134,7 +134,7 @@ export default function AuthPanel() {
             <button
               type="button"
               onClick={() => setShowAdminPanel(true)}
-              className="ui-action rounded-md border px-2.5 py-1.5 text-xs font-bold transition"
+              className="ui-button-sm"
               aria-haspopup="dialog"
               aria-expanded={showAdminPanel}
             >
@@ -150,7 +150,7 @@ export default function AuthPanel() {
             type="button"
             onClick={handleSignOut}
             disabled={submitting}
-            className="ui-action rounded-md border px-2.5 py-1.5 text-[11px] font-bold transition disabled:opacity-50"
+            className="ui-button-sm disabled:opacity-50"
           >
             {submitting ? "..." : "Déconnexion"}
           </button>
@@ -213,7 +213,7 @@ export default function AuthPanel() {
           setError("");
           setShowLogin(true);
         }}
-        className="ui-action ui-link-sky rounded-md border px-3 py-1.5 text-xs font-bold transition"
+        className="ui-button-sm ui-button-sky"
       >
         Connexion
       </button>
@@ -246,7 +246,7 @@ export default function AuthPanel() {
       <button
         type="submit"
         disabled={submitting}
-        className="ui-sky rounded-md border px-3 py-1.5 text-xs font-black transition disabled:opacity-50"
+        className="ui-button-sm ui-button-sky disabled:opacity-50"
       >
         {submitting ? "..." : "OK"}
       </button>

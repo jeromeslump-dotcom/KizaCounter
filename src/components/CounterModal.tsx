@@ -324,7 +324,7 @@ export default function CounterModal({
           <button
             type="button"
             onClick={onClose}
-            className="ui-action ui-danger flex h-9 w-9 items-center justify-center rounded-lg border text-lg transition"
+            className="ui-button-icon ui-button-danger"
             aria-label="Fermer"
           >
             ✕
@@ -390,7 +390,9 @@ export default function CounterModal({
                     {orderedRecommendedTeam.map((hero) => (
                       <span
                         key={hero.id}
-                        className="ui-recommendation-hero hover:!border-[var(--ui-accent)] hover:!bg-[var(--ui-panel-alt)] hover:!text-[var(--ui-accent-soft)]"
+                        className="ui-recommendation-hero hover:!border-[var(--ui-theme)]
+hover:!bg-[var(--ui-panel-alt)]
+hover:!text-[var(--ui-theme-soft)]"
                       >
                         {hero.name}
                       </span>
@@ -441,7 +443,9 @@ export default function CounterModal({
                       {orderedAlternativeTeam.map((hero) => (
                         <span
                           key={hero.id}
-                          className="ui-recommendation-hero hover:!border-[var(--ui-accent)] hover:!bg-[var(--ui-panel-alt)] hover:!text-[var(--ui-accent-soft)]"
+                          className="ui-recommendation-hero hover:!border-[var(--ui-theme)]
+hover:!bg-[var(--ui-panel-alt)]
+hover:!text-[var(--ui-theme-soft)]"
                         >
                           {hero.name}
                         </span>

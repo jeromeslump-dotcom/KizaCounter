@@ -139,7 +139,7 @@ export default function CombatOrderEditor({
           type="button"
           onClick={onBack}
           disabled={saving}
-          className="ui-action rounded-lg border px-4 py-2 text-xs font-bold transition disabled:opacity-50"
+          className="ui-button disabled:opacity-50"
         >
           ← Retour
         </button>
@@ -147,7 +147,7 @@ export default function CombatOrderEditor({
           type="button"
           onClick={handleSave}
           disabled={!isValid || saving}
-          className="ui-success rounded-lg border px-4 py-2 text-xs font-black transition disabled:cursor-not-allowed disabled:opacity-40"
+          className="ui-button ui-button-success disabled:cursor-not-allowed disabled:opacity-40"
         >
           {saving ? "Enregistrement…" : "✓ Enregistrer"}
         </button>
