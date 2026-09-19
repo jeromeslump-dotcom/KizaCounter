@@ -59,7 +59,7 @@ export default function CompactTeam({
   })();
 
   return (
-    <section className="ui-panel w-full rounded-xl border p-3">
+    <section className="ui-panel is-active w-full rounded-xl border p-3">
       <div className="mb-3 flex items-center justify-between gap-3">
         <h3 className="ui-text-primary min-w-0 truncate text-sm font-bold sm:text-base">
           {title}
@@ -92,7 +92,7 @@ export default function CompactTeam({
                 disabled={!onHeroClick}
                 onClick={() => onHeroClick?.(hero)}
                 className={[
-                  "ui-card ui-card-hover ui-hover-sky group relative min-w-0 overflow-hidden rounded-lg border transition",
+                  "ui-card ui-hover-sky group relative min-w-0 overflow-hidden rounded-lg border transition",
                   isSelected ? "hero-card-selected" : "",
                   onHeroClick ? "cursor-pointer" : "cursor-default",
                 ].join(" ")}

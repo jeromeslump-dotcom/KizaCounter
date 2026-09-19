@@ -279,8 +279,13 @@ export default function CombatHistory({
                 Historique commun des combats enregistrés.
               </p>
 
-              <div className="mt-3 inline-flex items-center rounded-lg border ui-divider px-3 py-1.5">
-                <span className="ui-text-primary text-xs font-bold">
+              <div
+                className="mt-3 inline-flex items-center rounded-lg border px-3 py-1.5"
+                style={{
+                  borderColor: "rgb(from var(--ui-theme) r g b / 0.7)",
+                }}
+              >
+                <span className="text-xs font-bold text-white">
                   {totalCombats} combats · {victories} victoires
                 </span>
               </div>
@@ -342,7 +347,7 @@ export default function CombatHistory({
                     key={
                       combat.id ?? `${combat.created_at ?? "combat"}-${index}`
                     }
-                    className="combat-history-card"
+                    className="ui-card is-active rounded-2xl p-4"
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div>

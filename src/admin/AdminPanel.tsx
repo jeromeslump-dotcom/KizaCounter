@@ -27,7 +27,7 @@ function AdminAction({ icon, title, description, onClick }: AdminActionProps) {
     <button
       type="button"
       onClick={onClick}
-      className="ui-action w-full rounded-xl border p-4 text-left transition hover:scale-[1.01]"
+      className="ui-card is-active w-full rounded-xl p-4 text-left transition hover:scale-[1.01]"
     >
       <span className="flex items-start gap-3">
         <span

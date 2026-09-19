@@ -130,7 +130,7 @@ export default function HeroManager({
                   type="button"
                   onClick={() => onToggleHero(hero.id)}
                   className={[
-                    "ui-card ui-card-hover relative overflow-hidden rounded-2xl border text-left transition-all hover:scale-[1.02]",
+                    "ui-card relative overflow-hidden rounded-2xl border text-left transition-all hover:scale-[1.02]",
                     enabled ? "" : "opacity-45",
                   ].join(" ")}
                 >

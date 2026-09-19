@@ -85,7 +85,7 @@ export default function HeroGrid({
 
   return (
     <section className="w-full">
-      <div className="hero-grid-panel mb-3 rounded-xl border p-2 sm:mb-4 sm:p-3">
+      <div className="hero-grid-panel is-active mb-3 rounded-xl border p-2 sm:mb-4 sm:p-3">
         <div className="flex flex-col gap-2 sm:gap-3">
           <input
             type="text"

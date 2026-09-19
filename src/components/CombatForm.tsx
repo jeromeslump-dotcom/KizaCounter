@@ -35,7 +35,7 @@ export default function CombatForm({
   }
 
   return (
-    <section className="ui-panel w-full rounded-xl border p-4">
+    <section className="ui-panel is-active w-full rounded-xl border p-4">
       <div className="mb-3">
         <h2 className="ui-text-primary text-sm font-bold sm:text-base">
           Résultat du combat

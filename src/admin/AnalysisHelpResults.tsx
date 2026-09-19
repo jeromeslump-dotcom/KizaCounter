@@ -110,7 +110,6 @@ export default function AnalysisHelpResults({
               ({ team, count, wins, losses, latestDate }, index) => (
                 <article
                   key={`${teamKey(team.map((hero) => hero.id))}-${index}`}
-                  className="ui-card ui-card-hover rounded-xl border p-3 sm:p-4"
                 >
                   <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
                     <div className="flex items-center gap-2">

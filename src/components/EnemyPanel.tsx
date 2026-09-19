@@ -17,7 +17,7 @@ export default function EnemyPanel({
   compact = false,
 }: EnemyPanelProps) {
   return (
-    <section className="ui-panel w-full rounded-xl border p-4">
+    <section className="ui-panel is-active w-full rounded-xl border p-4">
       <div className="mb-4 flex items-center justify-between gap-3">
         <h2 className="ui-text-primary text-base font-bold">
           Ennemis ({heroes.length}/{maxHeroes})

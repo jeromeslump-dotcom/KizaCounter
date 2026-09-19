@@ -178,11 +178,11 @@ export default function EncounteredTeams({
                 return (
                   <article
                     key={teamKey(team.heroIds)}
-                    className="ui-card ui-card-hover user-ranking-card rounded-2xl p-4"
+                    className="ui-card is-active rounded-2xl p-4"
                   >
                     <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                       <div className="flex min-w-0 items-center gap-3">
-                        <div className="ui-card encountered-team-rank flex h-9 w-9 shrink-0 items-center justify-center rounded-full border text-sm font-black">
+                        <div className="encountered-team-rank flex h-9 w-9 shrink-0 items-center justify-center rounded-full border text-sm font-black">
                           #{index + 1}
                         </div>
 

@@ -11,10 +11,22 @@ import { HEROES } from "../data/heroes";
 import { loadCombats } from "../storage/combatStorage";
 import { signIn, signOut } from "./auth";
 import useAuthSession from "./useAuthSession";
+import UserPanel from "./UserPanel";
 
-export default function AuthPanel() {
+interface AuthPanelProps {
+  onManageHeroes: () => void;
+  theme: "agi" | "str" | "int";
+  onThemeChange: (theme: "agi" | "str" | "int") => void;
+}
+
+export default function AuthPanel({
+  onManageHeroes,
+  theme,
+  onThemeChange,
+}: AuthPanelProps) {
   const { session, profile, loading } = useAuthSession();
   const [showAdminPanel, setShowAdminPanel] = useState(false);
+  const [showUserPanel, setShowUserPanel] = useState(false);
   const [showUserManagement, setShowUserManagement] = useState(false);
   const [showEncounteredTeams, setShowEncounteredTeams] = useState(false);
   const [showCombatHistory, setShowCombatHistory] = useState(false);
@@ -46,6 +58,7 @@ export default function AuthPanel() {
 
   function closeAdminArea() {
     setShowAdminPanel(false);
+    setShowUserPanel(false);
     setShowUserManagement(false);
     setShowEncounteredTeams(false);
     setShowCombatHistory(false);
@@ -123,6 +136,11 @@ export default function AuthPanel() {
   }
 
   const isAdmin = profile?.role === "admin" && profile.active;
+  const canManageHeroes =
+    profile?.active === true &&
+    (profile.role === "user" ||
+      profile.role === "contributor" ||
+      profile.role === "admin");
 
   if (loading) return null;
 
@@ -130,31 +148,37 @@ export default function AuthPanel() {
     return (
       <>
         <div className="flex items-center gap-2">
-          {isAdmin ? (
-            <button
-              type="button"
-              onClick={() => setShowAdminPanel(true)}
-              className="ui-button-sm"
-              aria-haspopup="dialog"
-              aria-expanded={showAdminPanel}
-            >
-              👤 {getUserName()}
-            </button>
-          ) : (
-            <span className="ui-text-soft text-xs font-bold">
-              👤 {getUserName()}
-            </span>
-          )}
-
           <button
             type="button"
-            onClick={handleSignOut}
-            disabled={submitting}
-            className="ui-button-sm disabled:opacity-50"
+            onClick={() => setShowUserPanel(true)}
+            className="ui-button"
+            aria-haspopup="dialog"
+            aria-expanded={showUserPanel}
           >
-            {submitting ? "..." : "Déconnexion"}
+            <span className="ui-text-primary text-xs font-bold">
+              👤 {getUserName()}
+            </span>
           </button>
         </div>
+
+        <UserPanel
+          open={showUserPanel}
+          onClose={() => setShowUserPanel(false)}
+          onManageHeroes={() => {
+            setShowUserPanel(false);
+            onManageHeroes();
+          }}
+          theme={theme}
+          onThemeChange={onThemeChange}
+          userName={getUserName()}
+          isAdmin={isAdmin}
+          onOpenAdminPanel={() => {
+            setShowUserPanel(false);
+            setShowAdminPanel(true);
+          }}
+          onSignOut={handleSignOut}
+          submitting={submitting}
+        />
 
         {isAdmin && (
           <>

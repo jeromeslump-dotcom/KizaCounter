@@ -19,6 +19,7 @@ const BUILD_VERSION = __BUILD_VERSION__;
 export default function App() {
   const [combats, setCombats] = useState<Combat[]>([]);
   const [showHeroManager, setShowHeroManager] = useState(false);
+  const [theme, setTheme] = useState<"agi" | "str" | "int">("int");
   const { session, profile } = useAuthSession();
   const isAuthenticated = Boolean(session);
 
@@ -113,7 +114,7 @@ export default function App() {
   const canViewDetailedHistory = profile?.role === "admin";
 
   return (
-    <main className="app-shell min-h-screen" data-theme="int">
+    <main className="app-shell min-h-screen" data-theme={theme}>
       <HeroManager
         open={showHeroManager}
         enabledHeroIds={enabledHeroIds}
@@ -140,16 +141,11 @@ export default function App() {
               </div>
             </div>
             <div className="flex items-center gap-2">
-              {canManageHeroes && (
-                <button
-                  type="button"
-                  onClick={() => setShowHeroManager(true)}
-                  className="ui-button-sm"
-                >
-                  ⚙️ Gérer les héros
-                </button>
-              )}
-              <AuthPanel />
+              <AuthPanel
+                onManageHeroes={() => setShowHeroManager(true)}
+                theme={theme}
+                onThemeChange={setTheme}
+              />
             </div>
           </div>
         </header>

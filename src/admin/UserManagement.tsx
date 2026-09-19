@@ -158,7 +158,7 @@ export default function UserManagement({
                 return (
                   <div
                     key={user.id}
-                    className={`user-management-card rounded-2xl p-4 ${
+                    className={`ui-card rounded-2xl p-4 ${
                       user.active ? "is-active" : "is-inactive"
                     }`}
                   >

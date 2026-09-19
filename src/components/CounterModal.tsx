@@ -354,7 +354,7 @@ export default function CounterModal({
           </div>
 
           {hasRecommendations && (
-            <div className="ui-recommendations mt-4 rounded-xl border p-2 sm:p-3">
+            <div className="ui-recommendations is-active mt-4 rounded-xl border p-2 sm:p-3">
               {recommendedTeam.length > 0 && (
                 <button
                   type="button"

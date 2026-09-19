@@ -90,10 +90,7 @@ export default function CombatOrderEditor({
             const currentPosition = getHeroPosition(hero.id);
 
             return (
-              <div
-                key={hero.id}
-                className="ui-card ui-card-hover flex min-w-0 flex-col items-center gap-2 rounded-xl border p-2.5 sm:p-3"
-              >
+              <div key={hero.id}>
                 <img
                   src={hero.img}
                   alt={hero.name}

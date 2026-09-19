@@ -146,9 +146,9 @@ select {
   }
 
   .hero-card-selected {
-    border-color: rgb(251 191 36);
+    border-color: rgb(from var(--ui-theme) r g b / 0.7);
     box-shadow:
-      0 0 0 2px rgb(251 191 36 / 0.35),
+      0 0 0 2px rgb(from var(--ui-theme) r g b / 0.35),
       0 0 22px rgb(from var(--ui-theme) r g b / 0.12);
   }
 
@@ -183,43 +183,8 @@ select {
     background: var(--ui-card);
   }
 
-  .user-management-card {
-    border-color: var(--ui-border);
-    background: linear-gradient(
-      135deg,
-      rgb(15 23 42 / 0.82),
-      rgb(from var(--ui-panel-alt) r g b / 0.96)
-    );
-    box-shadow: 0 8px 24px rgb(0 0 0 / 0.16);
-    transition:
-      border-color 0.2s ease,
-      background 0.2s ease,
-      box-shadow 0.2s ease,
-      transform 0.2s ease;
-  }
-
-  .user-management-card:hover {
-    border-color: var(--ui-border-hover);
-    background: linear-gradient(
-      135deg,
-      rgb(20 32 55 / 0.92),
-      rgb(8 15 30 / 0.98)
-    );
-    box-shadow: 0 10px 28px rgb(0 0 0 / 0.22);
-    transform: translateY(-1px);
-  }
-
-  .user-management-card.is-active {
-    border-left: 3px solid rgb(from var(--ui-theme) r g b / 0.7);
-  }
-
   .user-ranking-card {
     border-left: 3px solid rgb(from var(--ui-theme) r g b / 0.7) !important;
-  }
-
-  .user-management-card.is-inactive {
-    border-left: 3px solid rgb(from var(--ui-text-muted) r g b / 0.45);
-    opacity: 0.82;
   }
 
   .user-management-status.is-active {
@@ -247,25 +212,6 @@ select {
   /* ----------------------------------------------------------
      HISTORIQUE DES COMBATS
      ---------------------------------------------------------- */
-
-  .combat-history-card {
-    border: 1px solid var(--ui-border);
-    border-radius: 0.75rem;
-    padding: 0.75rem;
-    background: var(--ui-bg);
-    color: var(--ui-text-soft);
-  }
-
-  .combat-history-card:hover {
-    border-color: var(--ui-theme);
-    background: rgb(15 23 42);
-  }
-
-  @media (min-width: 640px) {
-    .combat-history-card {
-      padding: 1rem;
-    }
-  }
 
   .combat-history-section {
     border: 1px solid var(--ui-border);
@@ -351,6 +297,10 @@ select {
 .ui-recommendations {
   background: transparent;
   border-color: var(--ui-border);
+}
+
+.ui-recommendations.is-active {
+  border-left: 3px solid rgb(from var(--ui-theme) r g b / 0.7);
 }
 
 .user-ranking-card {
