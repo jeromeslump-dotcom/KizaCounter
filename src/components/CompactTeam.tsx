@@ -92,7 +92,7 @@ export default function CompactTeam({
                 disabled={!onHeroClick}
                 onClick={() => onHeroClick?.(hero)}
                 className={[
-                  "ui-card ui-hover-sky group relative min-w-0 overflow-hidden rounded-lg border transition",
+                  "ui-card ui-hover-theme group relative min-w-0 overflow-hidden rounded-lg border transition",
                   isSelected ? "hero-card-selected" : "",
                   onHeroClick ? "cursor-pointer" : "cursor-default",
                 ].join(" ")}
