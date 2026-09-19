@@ -85,7 +85,14 @@ export default function UserPanel({
                 id="user-panel-title"
                 className="ui-text-primary text-xl font-black"
               >
-                👤 {userName}
+                <span
+                  aria-hidden="true"
+                  className="mr-1"
+                  style={{ color: "var(--ui-theme)" }}
+                >
+                  👤︎
+                </span>
+                {userName}
               </h2>
 
               <p className="ui-text-secondary mt-1 text-xs sm:text-sm">
