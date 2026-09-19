@@ -157,8 +157,6 @@ export default function UserManagement({
               {filteredUsers.map((user) => {
                 const selectedRole = draftRoles[user.id] ?? user.role;
                 const changed = selectedRole !== user.role;
-                const showActivityStats =
-                  user.role === "contributor" || user.role === "admin";
                 const lastSignIn = user.last_sign_in_at
                   ? new Intl.DateTimeFormat("fr-FR", {
                       dateStyle: "short",
@@ -181,13 +179,15 @@ export default function UserManagement({
                         <div className="ui-text-secondary mt-1 text-xs">
                           Rôle actuel : {ROLE_LABELS[user.role] ?? user.role}
                         </div>
-                        {showActivityStats && (
-                          <div className="ui-text-secondary mt-1 text-xs">
-                            Dernière connexion : {lastSignIn}
-                            <span className="mx-1.5">•</span>
-                            Combats enregistrés : {user.combat_count}
-                          </div>
-                        )}
+                        <div className="ui-text-secondary mt-1 text-xs">
+                          Dernière connexion : {lastSignIn}
+                          {user.combat_count > 0 && (
+                            <>
+                              <span className="mx-1.5">•</span>
+                              Combats enregistrés : {user.combat_count}
+                            </>
+                          )}
+                        </div>
                       </div>
 
                       <span
