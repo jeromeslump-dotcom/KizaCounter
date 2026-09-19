@@ -265,7 +265,7 @@ export default function CombatHistory({
         aria-labelledby="combat-history-title"
         onClick={(e) => e.stopPropagation()}
       >
-        <header className="border-b ui-divider p-5 sm:p-6">
+        <header className="ui-modal-header p-5 sm:p-6">
           <div className="flex items-start justify-between gap-4">
             <div>
               <h2
@@ -480,7 +480,7 @@ export default function CombatHistory({
           </nav>
         )}
 
-        <footer className="flex justify-end border-t ui-divider px-4 py-3 sm:px-5 sm:py-4">
+        <footer className="ui-modal-footer flex justify-end px-4 py-3 sm:px-5 sm:py-4">
           <button type="button" onClick={onBack} className="ui-button">
             ← Retour au Admin Panel
           </button>

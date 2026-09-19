@@ -136,7 +136,7 @@ export default function AnalysisHelp({
         aria-modal="true"
         aria-labelledby="analysis-help-title"
       >
-        <header className="flex items-start justify-between gap-4 border-b ui-divider p-5 sm:p-6">
+        <header className="ui-modal-header flex items-start justify-between gap-4 p-5 sm:p-6">
           <div>
             <h2
               id="analysis-help-title"
@@ -185,7 +185,7 @@ export default function AnalysisHelp({
           />
         )}
 
-        <footer className="flex justify-between gap-2 border-t ui-divider px-4 py-3 sm:px-5 sm:py-4">
+        <footer className="ui-modal-footer flex justify-between gap-2 px-4 py-3 sm:px-5 sm:py-4">
           <button
             type="button"
             onClick={showResults ? () => setShowResults(false) : onBack}

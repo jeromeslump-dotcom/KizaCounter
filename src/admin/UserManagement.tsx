@@ -111,7 +111,7 @@ export default function UserManagement({
   return (
     <div className="fixed inset-0 z-[80] flex items-center justify-center bg-black/75 p-3 backdrop-blur-sm sm:p-4">
       <div className="ui-modal user-management-modal flex max-h-[92vh] w-full max-w-3xl flex-col overflow-hidden rounded-3xl border shadow-2xl">
-        <div className="flex items-start justify-between gap-4 border-b ui-divider p-4 sm:p-6">
+        <div className="ui-modal-header flex items-start justify-between gap-4 p-4 sm:p-6">
           <div>
             <h2 className="ui-text-primary text-xl font-black">
               Gestion des utilisateurs
@@ -224,7 +224,7 @@ export default function UserManagement({
           )}
         </div>
 
-        <div className="flex items-center justify-end gap-3 border-t ui-divider px-4 py-3 sm:px-6 sm:py-4">
+        <div className="ui-modal-footer flex items-center justify-end gap-3 px-4 py-3 sm:px-6 sm:py-4">
           <button type="button" onClick={onBack} className="ui-button">
             ← Retour au Admin Panel
           </button>

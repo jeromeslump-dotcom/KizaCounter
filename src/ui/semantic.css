@@ -345,6 +345,18 @@
   box-shadow: 0 24px 64px rgb(0 0 0 / 0.35);
 }
 
+.ui-modal-header {
+  border-bottom: 1px solid var(--ui-border);
+}
+
+.ui-modal-body {
+  min-width: 0;
+}
+
+.ui-modal-footer {
+  border-top: 1px solid var(--ui-border);
+}
+
 .app-shell {
   color: var(--ui-text-primary);
   background: var(--ui-bg);

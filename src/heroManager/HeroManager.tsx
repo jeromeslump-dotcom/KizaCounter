@@ -48,7 +48,7 @@ export default function HeroManager({
         className="ui-modal flex max-h-[92vh] w-full max-w-5xl flex-col overflow-hidden rounded-3xl border shadow-2xl"
         onClick={(event) => event.stopPropagation()}
       >
-        <div className="border-b ui-divider p-4 sm:p-6">
+        <div className="ui-modal-header p-4 sm:p-6">
           <div className="flex items-start justify-between gap-4">
             <div>
               <div className="flex items-center gap-2">
@@ -186,7 +186,7 @@ export default function HeroManager({
           )}
         </div>
 
-        <div className="flex items-center justify-between gap-3 border-t ui-divider px-4 py-3 sm:px-6 sm:py-4">
+        <div className="ui-modal-footer flex items-center justify-between gap-3 px-4 py-3 sm:px-6 sm:py-4">
           <span className="ui-text-soft text-[10px]">
             La configuration est sauvegardée automatiquement.
           </span>

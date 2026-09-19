@@ -123,7 +123,7 @@ export default function EngineSettings({
         aria-labelledby="engine-settings-title"
         onClick={(event) => event.stopPropagation()}
       >
-        <header className="border-b ui-divider p-5 sm:p-6">
+        <header className="ui-modal-header p-5 sm:p-6">
           <div className="flex items-start justify-between gap-4">
             <div>
               <h2
