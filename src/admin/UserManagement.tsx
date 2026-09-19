@@ -8,6 +8,8 @@ interface UserProfile {
   display_name: string;
   role: UserRole;
   active: boolean;
+  last_sign_in_at: string | null;
+  combat_count: number;
 }
 
 interface UserManagementProps {
@@ -45,10 +47,9 @@ export default function UserManagement({
       setLoading(true);
       setError(null);
 
-      const { data, error: loadError } = await supabase
-        .from("profiles")
-        .select("id, display_name, role, active")
-        .order("created_at", { ascending: true });
+      const { data, error: loadError } = await supabase.rpc(
+        "get_user_management_stats"
+      );
 
       if (!mounted) return;
 
@@ -156,6 +157,14 @@ export default function UserManagement({
               {filteredUsers.map((user) => {
                 const selectedRole = draftRoles[user.id] ?? user.role;
                 const changed = selectedRole !== user.role;
+                const showActivityStats =
+                  user.role === "contributor" || user.role === "admin";
+                const lastSignIn = user.last_sign_in_at
+                  ? new Intl.DateTimeFormat("fr-FR", {
+                      dateStyle: "short",
+                      timeStyle: "short",
+                    }).format(new Date(user.last_sign_in_at))
+                  : "Jamais";
 
                 return (
                   <div
@@ -172,6 +181,13 @@ export default function UserManagement({
                         <div className="ui-text-secondary mt-1 text-xs">
                           Rôle actuel : {ROLE_LABELS[user.role] ?? user.role}
                         </div>
+                        {showActivityStats && (
+                          <div className="ui-text-secondary mt-1 text-xs">
+                            Dernière connexion : {lastSignIn}
+                            <span className="mx-1.5">•</span>
+                            Combats enregistrés : {user.combat_count}
+                          </div>
+                        )}
                       </div>
 
                       <span
