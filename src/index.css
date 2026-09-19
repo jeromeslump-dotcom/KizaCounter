@@ -141,7 +141,7 @@ select {
   }
 
   .hero-card-hover:hover {
-    border-color: var(--ui-border-hover);
+    border-color: var(--ui-theme);
     background: rgb(10 18 35);
   }
 
