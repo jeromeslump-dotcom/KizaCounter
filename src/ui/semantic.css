@@ -305,7 +305,13 @@
 
 .ui-hover-theme:hover {
   border-color: var(--ui-theme);
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--ui-theme) 25%, transparent);
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--ui-theme) 35%, transparent),
+    0 0 14px color-mix(in srgb, var(--ui-theme) 14%, transparent);
+}
+
+.ui-hover-theme:hover .ui-divider {
+  border-color: color-mix(in srgb, var(--ui-theme) 55%, var(--ui-border));
 }
 
 .ui-hover-red:hover {
