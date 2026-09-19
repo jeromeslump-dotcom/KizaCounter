@@ -33,7 +33,8 @@
 }
 
 .ui-panel.is-active {
-  border-left: 3px solid rgb(from var(--ui-theme) r g b / 0.7);
+  border-color: rgb(from var(--ui-theme) r g b / 0.7);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--ui-theme) 18%, transparent);
 }
 
 .ui-panel-alt {
