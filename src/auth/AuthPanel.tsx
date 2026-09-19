@@ -150,7 +150,10 @@ export default function AuthPanel({
             aria-haspopup="dialog"
             aria-expanded={showUserPanel}
           >
-            <span className="ui-text-primary text-xs font-bold">
+            <span
+              className="text-xs font-bold"
+              style={{ color: "var(--ui-theme)" }}
+            >
               👤 {getUserName()}
             </span>
           </button>
