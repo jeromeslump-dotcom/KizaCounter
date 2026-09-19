@@ -113,23 +113,23 @@ export default function UserManagement({
       <div className="ui-modal user-management-modal flex max-h-[92vh] w-full max-w-3xl flex-col overflow-hidden rounded-3xl border shadow-2xl">
         <div className="ui-modal-header p-4 sm:p-6">
           <div className="ui-modal-header-inner">
-          <div>
-            <h2 className="ui-text-primary text-xl font-black">
-              Gestion des utilisateurs
-            </h2>
-            <p className="ui-text-secondary mt-1 text-sm">
-              Gestion des rôles utilisateurs
-            </p>
-          </div>
+            <div>
+              <h2 className="ui-text-primary text-xl font-black">
+                Gestion des utilisateurs
+              </h2>
+              <p className="ui-text-secondary mt-1 text-sm">
+                Gestion des rôles utilisateurs
+              </p>
+            </div>
 
-          <button
-            type="button"
-            onClick={onClose}
-            className="ui-button-icon"
-            aria-label="Fermer"
-          >
-            ✕
-          </button>
+            <button
+              type="button"
+              onClick={onClose}
+              className="ui-button-icon"
+              aria-label="Fermer"
+            >
+              ✕
+            </button>
           </div>
         </div>
 

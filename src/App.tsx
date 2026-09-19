@@ -20,12 +20,12 @@ export default function App() {
   const [combats, setCombats] = useState<Combat[]>([]);
   const [showHeroManager, setShowHeroManager] = useState(false);
   const [theme, setTheme] = useState<"agi" | "str" | "int">(() => {
-  const savedTheme = localStorage.getItem("lords-mobile-counter-theme");
+    const savedTheme = localStorage.getItem("lords-mobile-counter-theme");
 
-  return savedTheme === "agi" || savedTheme === "str" || savedTheme === "int"
-    ? savedTheme
-    : "int";
-});
+    return savedTheme === "agi" || savedTheme === "str" || savedTheme === "int"
+      ? savedTheme
+      : "int";
+  });
   const { session, profile } = useAuthSession();
   const isAuthenticated = Boolean(session);
 
@@ -60,10 +60,10 @@ export default function App() {
   const [activeClass, setActiveClass] = useState<HeroClassFilter>("ALL");
   const [query, setQuery] = useState("");
   const [sortBy, setSortBy] = useState<HeroSort>("played");
-  
+
   useEffect(() => {
-  localStorage.setItem("lords-mobile-counter-theme", theme);
-}, [theme]);
+    localStorage.setItem("lords-mobile-counter-theme", theme);
+  }, [theme]);
 
   useEffect(() => {
     if (!session) {
@@ -113,13 +113,6 @@ export default function App() {
       throw error;
     }
   }
-
-  const canManageHeroes =
-    isAuthenticated &&
-    Boolean(profile?.active) &&
-    (profile?.role === "user" ||
-      profile?.role === "contributor" ||
-      profile?.role === "admin");
 
   const canViewDetailedHistory = profile?.role === "admin";
 

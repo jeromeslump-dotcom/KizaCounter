@@ -11,7 +11,6 @@ export default function useHeroManager() {
     () => new Set(ALL_HERO_IDS)
   );
   const [userId, setUserId] = useState<string | null>(null);
-  const [loaded, setLoaded] = useState(false);
   const [preferencesReady, setPreferencesReady] = useState(false);
   const loadRequestRef = useRef(0);
 
@@ -20,7 +19,6 @@ export default function useHeroManager() {
 
     async function loadForUser(nextUserId: string | null) {
       const requestId = ++loadRequestRef.current;
-      setLoaded(false);
       setPreferencesReady(false);
       setUserId(nextUserId);
 
@@ -39,10 +37,6 @@ export default function useHeroManager() {
         // En cas d'erreur Supabase, on ne réutilise jamais la sélection
         // d'un autre utilisateur et on n'autorise pas une sauvegarde.
         setEnabledHeroIds(new Set(ALL_HERO_IDS));
-      } finally {
-        if (!cancelled && requestId === loadRequestRef.current) {
-          setLoaded(true);
-        }
       }
     }
 
@@ -75,12 +69,12 @@ export default function useHeroManager() {
   }, []);
 
   useEffect(() => {
-    if (!loaded || !preferencesReady || !userId) return;
+    if (!preferencesReady || !userId) return;
 
     void saveHeroPreferences(userId, enabledHeroIds).catch((error) => {
       console.error("Impossible de sauvegarder les préférences héros :", error);
     });
-  }, [enabledHeroIds, loaded, preferencesReady, userId]);
+  }, [enabledHeroIds, preferencesReady, userId]);
 
   const toggleHero = useCallback((heroId: string) => {
     setEnabledHeroIds((current) => {
@@ -110,7 +104,6 @@ export default function useHeroManager() {
     enabledHeroIds,
     activeCount,
     totalCount: HEROES.length,
-    loaded,
     toggleHero,
     enableAll,
     disableAll,

@@ -312,24 +312,24 @@ export default function CounterModal({
       <div className="ui-modal flex max-h-[96vh] w-full max-w-6xl flex-col overflow-hidden rounded-2xl border shadow-2xl">
         <div className="ui-modal-header px-4 py-3 sm:px-5 sm:py-4">
           <div className="ui-modal-header-inner is-centered">
-          <div>
-            <h2 className="ui-text-primary text-lg font-black sm:text-xl">
-              ⚔️ Contre recommandée
-            </h2>
+            <div>
+              <h2 className="ui-text-primary text-lg font-black sm:text-xl">
+                ⚔️ Contre recommandée
+              </h2>
 
-            <p className="ui-text-secondary mt-1 hidden text-xs sm:block">
-              Modifiez les héros proposés si nécessaire.
-            </p>
-          </div>
+              <p className="ui-text-secondary mt-1 hidden text-xs sm:block">
+                Modifiez les héros proposés si nécessaire.
+              </p>
+            </div>
 
-          <button
-            type="button"
-            onClick={onClose}
-            className="ui-button-icon ui-button-danger"
-            aria-label="Fermer"
-          >
-            ✕
-          </button>
+            <button
+              type="button"
+              onClick={onClose}
+              className="ui-button-icon ui-button-danger"
+              aria-label="Fermer"
+            >
+              ✕
+            </button>
           </div>
         </div>
 

@@ -138,27 +138,27 @@ export default function AnalysisHelp({
       >
         <header className="ui-modal-header p-5 sm:p-6">
           <div className="ui-modal-header-inner">
-          <div>
-            <h2
-              id="analysis-help-title"
-              className="ui-text-primary text-xl font-black"
+            <div>
+              <h2
+                id="analysis-help-title"
+                className="ui-text-primary text-xl font-black"
+              >
+                🔎 Aide à l'analyse du moteur
+              </h2>
+              <p className="ui-text-secondary mt-1 text-xs sm:text-sm">
+                {showResults
+                  ? "Résultats des combats correspondant exactement à l'équipe ennemie."
+                  : "Sélectionnez exactement les 5 ennemis à analyser."}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={onClose}
+              className="ui-button-icon"
+              aria-label="Fermer"
             >
-              🔎 Aide à l'analyse du moteur
-            </h2>
-            <p className="ui-text-secondary mt-1 text-xs sm:text-sm">
-              {showResults
-                ? "Résultats des combats correspondant exactement à l'équipe ennemie."
-                : "Sélectionnez exactement les 5 ennemis à analyser."}
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="ui-button-icon"
-            aria-label="Fermer"
-          >
-            ✕
-          </button>
+              ✕
+            </button>
           </div>
         </header>
 

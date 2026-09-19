@@ -1,3 +1,4 @@
+
 import { describe, expect, it } from "vitest";
 
 import {
@@ -51,7 +52,7 @@ describe("historical recommendation sources", () => {
     );
   });
 
-  it("keeps similar history ahead of the later sources", () => {
+  it("keeps Core4 history ahead of the later sources", () => {
     const similarEnemy = [...target.slice(0, 4), "other-enemy"];
     const heroes = uniqueHeroes(
       heroesFor(target),
@@ -71,8 +72,14 @@ describe("historical recommendation sources", () => {
     );
   });
 
-  it("uses class history when exact and similar histories are unavailable", () => {
-    const classMatchedEnemy = ["class-1", "class-2", "class-3", "class-4", "class-5"];
+  it("uses class history when exact and Core4 histories are unavailable", () => {
+    const classMatchedEnemy = [
+      "class-1",
+      "class-2",
+      "class-3",
+      "class-4",
+      "class-5",
+    ];
     const classes: Hero["cls"][] = ["STR", "AGI", "INT", "STR", "AGI"];
     const heroes = uniqueHeroes(
       heroesFor(target, classes),
@@ -168,7 +175,13 @@ describe("historical recommendation sources", () => {
   });
 
   it("never proposes a 0% team for B when A is excluded", () => {
-    const primary = ["primary-1", "primary-2", "primary-3", "primary-4", "primary-5"];
+    const primary = [
+      "primary-1",
+      "primary-2",
+      "primary-3",
+      "primary-4",
+      "primary-5",
+    ];
     const badAlternative = [
       "bad-1",
       "bad-2",
