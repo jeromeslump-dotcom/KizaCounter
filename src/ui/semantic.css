@@ -349,6 +349,17 @@
   border-bottom: 1px solid var(--ui-border);
 }
 
+.ui-modal-header-inner {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.ui-modal-header-inner.is-centered {
+  align-items: center;
+}
+
 .ui-modal-body {
   min-width: 0;
 }
