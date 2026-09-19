@@ -136,7 +136,8 @@ export default function AnalysisHelp({
         aria-modal="true"
         aria-labelledby="analysis-help-title"
       >
-        <header className="ui-modal-header flex items-start justify-between gap-4 p-5 sm:p-6">
+        <header className="ui-modal-header p-5 sm:p-6">
+          <div className="ui-modal-header-inner">
           <div>
             <h2
               id="analysis-help-title"
@@ -158,6 +159,7 @@ export default function AnalysisHelp({
           >
             ✕
           </button>
+          </div>
         </header>
 
         {!showResults ? (
