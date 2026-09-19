@@ -131,41 +131,59 @@ export default function UserPanel({
                 </div>
 
                 <div className="mt-3 grid grid-cols-3 gap-2">
-                  <button
-                    type="button"
-                    onClick={() => onThemeChange("agi")}
-                    className={`rounded-lg border px-3 py-2 text-xs font-black transition ${
-                      theme === "agi"
-                        ? "border-emerald-400 bg-emerald-400/10 text-emerald-300"
-                        : "ui-divider ui-text-secondary"
-                    }`}
-                  >
-                    🟢 AGI
-                  </button>
+<button
+  type="button"
+  onClick={() => onThemeChange("agi")}
+  className={`rounded-lg border px-3 py-2 text-xs font-black transition ${
+    theme === "agi"
+      ? "bg-white/5"
+      : "ui-divider ui-text-secondary"
+  }`}
+  style={theme === "agi" ? { borderColor: "var(--ui-theme)" } : undefined}
+>
+  <img
+    src="/temp-colors/AGI.webp"
+    alt="AGI"
+    className="mx-auto h-6 w-6 object-contain"
+  />
+  <span className="mt-1 block">AGI</span>
+</button>
 
-                  <button
-                    type="button"
-                    onClick={() => onThemeChange("str")}
-                    className={`rounded-lg border px-3 py-2 text-xs font-black transition ${
-                      theme === "str"
-                        ? "border-rose-400 bg-rose-400/10 text-rose-300"
-                        : "ui-divider ui-text-secondary"
-                    }`}
-                  >
-                    🔴 STR
-                  </button>
+<button
+  type="button"
+  onClick={() => onThemeChange("str")}
+  className={`rounded-lg border px-3 py-2 text-xs font-black transition ${
+    theme === "str"
+      ? "bg-white/5"
+      : "ui-divider ui-text-secondary"
+  }`}
+  style={theme === "str" ? { borderColor: "var(--ui-theme)" } : undefined}
+>
+  <img
+    src="/temp-colors/STR.webp"
+    alt="STR"
+    className="mx-auto h-6 w-6 object-contain"
+  />
+  <span className="mt-1 block">STR</span>
+</button>
 
-                  <button
-                    type="button"
-                    onClick={() => onThemeChange("int")}
-                    className={`rounded-lg border px-3 py-2 text-xs font-black transition ${
-                      theme === "int"
-                        ? "border-sky-400 bg-sky-400/10 text-sky-300"
-                        : "ui-divider ui-text-secondary"
-                    }`}
-                  >
-                    🔵 INT
-                  </button>
+<button
+  type="button"
+  onClick={() => onThemeChange("int")}
+  className={`rounded-lg border px-3 py-2 text-xs font-black transition ${
+    theme === "int"
+      ? "bg-white/5"
+      : "ui-divider ui-text-secondary"
+  }`}
+  style={theme === "int" ? { borderColor: "var(--ui-theme)" } : undefined}
+>
+  <img
+    src="/temp-colors/INT.webp"
+    alt="INT"
+    className="mx-auto h-6 w-6 object-contain"
+  />
+  <span className="mt-1 block">INT</span>
+</button>
                 </div>
               </div>
             </div>
