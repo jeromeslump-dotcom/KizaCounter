@@ -310,7 +310,8 @@ export default function CounterModal({
   return (
     <div className="ui-modal-overlay fixed inset-0 z-50 flex items-center justify-center p-2 backdrop-blur-sm sm:p-4">
       <div className="ui-modal flex max-h-[96vh] w-full max-w-6xl flex-col overflow-hidden rounded-2xl border shadow-2xl">
-        <div className="ui-modal-header flex items-center justify-between px-4 py-3 sm:px-5 sm:py-4">
+        <div className="ui-modal-header px-4 py-3 sm:px-5 sm:py-4">
+          <div className="ui-modal-header-inner is-centered">
           <div>
             <h2 className="ui-text-primary text-lg font-black sm:text-xl">
               ⚔️ Contre recommandée
@@ -329,6 +330,7 @@ export default function CounterModal({
           >
             ✕
           </button>
+          </div>
         </div>
 
         <div className="overflow-y-auto p-3 sm:p-5">
