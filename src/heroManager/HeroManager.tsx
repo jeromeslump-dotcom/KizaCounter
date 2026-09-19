@@ -49,7 +49,7 @@ export default function HeroManager({
         onClick={(event) => event.stopPropagation()}
       >
         <div className="ui-modal-header p-4 sm:p-6">
-          <div className="flex items-start justify-between gap-4">
+          <div className="ui-modal-header-inner">
             <div>
               <div className="flex items-center gap-2">
                 <span aria-hidden="true">⚙️</span>
