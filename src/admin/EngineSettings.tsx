@@ -124,7 +124,7 @@ export default function EngineSettings({
         onClick={(event) => event.stopPropagation()}
       >
         <header className="ui-modal-header p-5 sm:p-6">
-          <div className="flex items-start justify-between gap-4">
+          <div className="ui-modal-header-inner">
             <div>
               <h2
                 id="engine-settings-title"
