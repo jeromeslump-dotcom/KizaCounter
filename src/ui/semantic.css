@@ -303,6 +303,11 @@
   border-color: color-mix(in srgb, var(--ui-sky) 70%, transparent);
 }
 
+.ui-hover-theme:hover {
+  border-color: var(--ui-theme);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--ui-theme) 25%, transparent);
+}
+
 .ui-hover-red:hover {
   border-color: var(--ui-danger);
 }
