@@ -136,11 +136,6 @@ export default function AuthPanel({
   }
 
   const isAdmin = profile?.role === "admin" && profile.active;
-  const canManageHeroes =
-    profile?.active === true &&
-    (profile.role === "user" ||
-      profile.role === "contributor" ||
-      profile.role === "admin");
 
   if (loading) return null;
 

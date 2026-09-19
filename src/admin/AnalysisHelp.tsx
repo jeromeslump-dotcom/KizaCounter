@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import type { Combat, HeroClassFilter, HeroSort } from "../types";
 import type { Hero } from "../data/heroes";
 import { calculateHeroUsage } from "../engine/historicalScoring";
+import { teamKey } from "../engine/teamUtils";
 import AnalysisHelpEnemySelection from "./AnalysisHelpEnemySelection";
 import AnalysisHelpResults, {
   type HeroEvaluationGroup,
@@ -16,18 +17,6 @@ interface AnalysisHelpProps {
 }
 
 const TEAM_SIZE = 5;
-
-function sameTeam(first: string[], second: string[]): boolean {
-  if (first.length !== second.length) return false;
-  return (
-    [...new Set(first)].sort().join("|") ===
-    [...new Set(second)].sort().join("|")
-  );
-}
-
-function teamKey(ids: string[]): string {
-  return [...new Set(ids)].sort().join("|");
-}
 
 export default function AnalysisHelp({
   open,
@@ -60,8 +49,8 @@ export default function AnalysisHelp({
   const matchingCombats = useMemo(
     () =>
       enemyIds.length === TEAM_SIZE
-        ? combats.filter((combat) =>
-            sameTeam(enemyIds, combat.enemy_heroes ?? [])
+        ? combats.filter(
+            (combat) => teamKey(enemyIds) === teamKey(combat.enemy_heroes ?? [])
           )
         : [],
     [combats, enemyIds]

@@ -111,28 +111,6 @@
 }
 
 /* ------------------------------------------------------------
-   ACTIONS
-   ------------------------------------------------------------ */
-
-.ui-action {
-  border-radius: 0.5rem;
-  border-color: color-mix(in srgb, var(--ui-theme) 40%, transparent);
-  background: color-mix(in srgb, var(--ui-theme) 10%, var(--ui-bg));
-  color: color-mix(in srgb, var(--ui-theme) 78%, white);
-  transition:
-    border-color 0.2s ease,
-    background-color 0.2s ease,
-    color 0.2s ease,
-    box-shadow 0.2s ease;
-}
-
-.ui-action:hover {
-  border-color: var(--ui-theme);
-  background: color-mix(in srgb, var(--ui-theme) 16%, var(--ui-bg));
-  color: color-mix(in srgb, var(--ui-theme) 88%, white);
-}
-
-/* ------------------------------------------------------------
    BOUTONS UI — VERT GLOBAL
    ------------------------------------------------------------ */
 
