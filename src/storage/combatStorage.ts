@@ -1,7 +1,75 @@
-// src/storage/combatStorage.ts
-
+import { HEROES } from "../data/heroes";
 import type { Combat } from "../types";
 import { supabase } from "./supabase";
+
+const COMBAT_SELECT = `
+  id, user_id, enemy_heroes, my_heroes, won, created_at, status,
+  my_str, my_agi, my_int, enemy_str, enemy_agi, enemy_int,
+  my_hp, my_atk, my_matk, my_def, my_mdef, my_atk_total, my_def_total,
+  enemy_hp, enemy_atk, enemy_matk, enemy_def, enemy_mdef,
+  enemy_atk_total, enemy_def_total
+`;
+
+function calculateTeamData(heroIds: string[]) {
+  const heroesById = new Map(HEROES.map((hero) => [hero.id, hero]));
+  const selectedHeroes = heroIds
+    .map((heroId) => heroesById.get(heroId))
+    .filter((hero): hero is (typeof HEROES)[number] => Boolean(hero));
+
+  const classes = {
+    STR: selectedHeroes.filter((hero) => hero.cls === "STR").length,
+    AGI: selectedHeroes.filter((hero) => hero.cls === "AGI").length,
+    INT: selectedHeroes.filter((hero) => hero.cls === "INT").length,
+  };
+
+  const hp = selectedHeroes.reduce((sum, hero) => sum + hero.stats.hp, 0);
+  const atk = selectedHeroes.reduce((sum, hero) => sum + hero.stats.atk, 0);
+  const matk = selectedHeroes.reduce((sum, hero) => sum + hero.stats.matk, 0);
+  const def = selectedHeroes.reduce((sum, hero) => sum + hero.stats.def, 0);
+  const mdef = selectedHeroes.reduce((sum, hero) => sum + hero.stats.mdef, 0);
+
+  return {
+    classes,
+    hp,
+    atk,
+    matk,
+    def,
+    mdef,
+    atkTotal: atk + matk,
+    defTotal: def + mdef,
+  };
+}
+
+function enrichCombat(combat: Omit<Combat, "id" | "created_at">, userId: string): Combat {
+  const my = calculateTeamData(combat.my_heroes);
+  const enemy = calculateTeamData(combat.enemy_heroes);
+
+  return {
+    ...combat,
+    user_id: userId,
+    status: "active",
+    my_str: my.classes.STR,
+    my_agi: my.classes.AGI,
+    my_int: my.classes.INT,
+    enemy_str: enemy.classes.STR,
+    enemy_agi: enemy.classes.AGI,
+    enemy_int: enemy.classes.INT,
+    my_hp: my.hp,
+    my_atk: my.atk,
+    my_matk: my.matk,
+    my_def: my.def,
+    my_mdef: my.mdef,
+    my_atk_total: my.atkTotal,
+    my_def_total: my.defTotal,
+    enemy_hp: enemy.hp,
+    enemy_atk: enemy.atk,
+    enemy_matk: enemy.matk,
+    enemy_def: enemy.def,
+    enemy_mdef: enemy.mdef,
+    enemy_atk_total: enemy.atkTotal,
+    enemy_def_total: enemy.defTotal,
+  };
+}
 
 // ============================================================
 // CHARGER LES COMBATS
@@ -10,15 +78,12 @@ import { supabase } from "./supabase";
 export async function loadCombats(): Promise<Combat[]> {
   const { data, error } = await supabase
     .from("combats")
-    .select("id, user_id, enemy_heroes, my_heroes, won, created_at, status")
+    .select(COMBAT_SELECT)
     .eq("status", "active")
-    .order("created_at", {
-      ascending: false,
-    });
+    .order("created_at", { ascending: false });
 
   if (error) {
     console.error("Erreur chargement combats :", error);
-
     throw error;
   }
 
@@ -32,10 +97,6 @@ export async function loadCombats(): Promise<Combat[]> {
 export async function addCombat(
   combat: Omit<Combat, "id" | "created_at">
 ): Promise<Combat> {
-  // ----------------------------------------------------------
-  // Vérifier la session
-  // ----------------------------------------------------------
-
   const {
     data: { user },
     error: userError,
@@ -43,7 +104,6 @@ export async function addCombat(
 
   if (userError) {
     console.error("Erreur récupération utilisateur Supabase :", userError);
-
     throw userError;
   }
 
@@ -53,34 +113,16 @@ export async function addCombat(
     );
   }
 
-  // ----------------------------------------------------------
-  // Préparer le combat
-  // ----------------------------------------------------------
-
-  const combatToInsert = {
-    ...combat,
-
-    // L'utilisateur connecté devient automatiquement
-    // le propriétaire du combat.
-    user_id: user.id,
-
-    // Les nouveaux combats sont actifs.
-    status: "active" as const,
-  };
-
-  // ----------------------------------------------------------
-  // INSERT
-  // ----------------------------------------------------------
+  const enrichedCombat = enrichCombat(combat, user.id);
 
   const { data, error } = await supabase
     .from("combats")
-    .insert(combatToInsert)
-    .select("id, user_id, enemy_heroes, my_heroes, won, created_at, status")
+    .insert(enrichedCombat)
+    .select(COMBAT_SELECT)
     .single();
 
   if (error) {
     console.error("Erreur ajout combat :", error);
-
     throw error;
   }
 
@@ -96,7 +138,6 @@ export async function deleteCombat(combatId: string): Promise<void> {
 
   if (error) {
     console.error("Erreur suppression combat :", error);
-
     throw error;
   }
 }
