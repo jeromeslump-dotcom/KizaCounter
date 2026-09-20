@@ -14,6 +14,26 @@ export interface Combat {
   created_at?: string;
   user_id?: string | null;
   status?: string | null;
+  my_str?: number;
+  my_agi?: number;
+  my_int?: number;
+  enemy_str?: number;
+  enemy_agi?: number;
+  enemy_int?: number;
+  my_hp?: number;
+  my_atk?: number;
+  my_matk?: number;
+  my_def?: number;
+  my_mdef?: number;
+  my_atk_total?: number;
+  my_def_total?: number;
+  enemy_hp?: number;
+  enemy_atk?: number;
+  enemy_matk?: number;
+  enemy_def?: number;
+  enemy_mdef?: number;
+  enemy_atk_total?: number;
+  enemy_def_total?: number;
 }
 
 // ============================================================
