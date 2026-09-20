@@ -176,16 +176,13 @@ export default function AnalysisHelp({
           />
         )}
 
-        <footer className="ui-modal-footer flex justify-between gap-2 px-4 py-3 sm:px-5 sm:py-4">
+        <footer className="ui-modal-footer flex justify-end px-4 py-3 sm:px-5 sm:py-4">
           <button
             type="button"
             onClick={showResults ? () => setShowResults(false) : onBack}
             className="ui-button"
           >
             {showResults ? "← Modifier les ennemis" : "← Retour au Admin Panel"}
-          </button>
-          <button type="button" onClick={onClose} className="ui-button">
-            Fermer
           </button>
         </footer>
       </section>

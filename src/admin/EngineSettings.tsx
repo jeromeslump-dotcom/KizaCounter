@@ -228,7 +228,7 @@ export default function EngineSettings({
 
           <div className="mt-5 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
             <button type="button" onClick={onBack} className="ui-button">
-              ← Retour
+              ← Retour au Admin Panel
             </button>
             <button type="button" onClick={handleReset} className="ui-button">
               Réinitialiser

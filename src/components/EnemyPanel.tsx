@@ -42,13 +42,13 @@ export default function EnemyPanel({
             </p>
           </div>
         ) : (
-          <div className="flex flex-wrap justify-center gap-2">
+          <div className="grid grid-cols-5 justify-center gap-2 sm:flex sm:justify-center sm:gap-3">
             {heroes.map((hero, index) => (
               <button
                 key={hero.id}
                 type="button"
                 onClick={() => onHeroClick?.(hero)}
-                className="ui-card ui-hover-red group relative w-[calc((100%-1.5rem)/4)] min-w-0 max-w-[220px] overflow-hidden rounded-xl border transition sm:w-[180px]"
+                className="ui-card ui-hover-red group relative w-full max-w-[180px] min-w-0 justify-self-center overflow-hidden rounded-xl border transition"
                 title={`Retirer ${hero.name}`}
               >
                 <div className="relative z-10 aspect-square w-full overflow-hidden">

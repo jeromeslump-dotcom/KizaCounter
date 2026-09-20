@@ -309,7 +309,7 @@ export default function CounterModal({
 
   return (
     <div className="ui-modal-overlay fixed inset-0 z-50 flex items-center justify-center p-2 backdrop-blur-sm sm:p-4">
-      <div className="ui-modal flex max-h-[96vh] w-full max-w-6xl flex-col overflow-hidden rounded-2xl border shadow-2xl">
+      <div className="ui-modal flex h-[calc(100vh-1rem)] w-[calc(100vw-1rem)] max-h-none max-w-none flex-col overflow-hidden rounded-2xl border shadow-2xl sm:h-[calc(100vh-2rem)] sm:w-[calc(100vw-2rem)]">
         <div className="ui-modal-header px-4 py-3 sm:px-5 sm:py-4">
           <div className="ui-modal-header-inner is-centered">
             <div>
@@ -333,7 +333,7 @@ export default function CounterModal({
           </div>
         </div>
 
-        <div className="overflow-y-auto p-3 sm:p-5">
+        <div className="ui-modal-scroll overflow-y-auto p-3 sm:p-5">
           <CompactTeam
             title={`Ennemis (${enemies.length}/5)`}
             heroes={enemies}

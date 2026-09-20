@@ -28,16 +28,25 @@
   [data-theme="agi"] {
     --ui-theme: rgb(50 178 163);
     --ui-theme-soft: rgb(95 210 196);
+
+    --ui-theme-secondary: rgb(193 141 65);
+    --ui-theme-tertiary: rgb(130 55 180);
   }
 
   [data-theme="str"] {
     --ui-theme: rgb(193 141 65);
     --ui-theme-soft: rgb(212 175 122);
+
+    --ui-theme-secondary: rgb(130 55 180);
+    --ui-theme-tertiary: rgb(50 178 163);
   }
 
   [data-theme="int"] {
     --ui-theme: rgb(130 55 180);
     --ui-theme-soft: rgb(167 103 208);
+
+    --ui-theme-secondary: rgb(50 178 163);
+    --ui-theme-tertiary: rgb(193 141 65);
   }
 
   /* ============================================================

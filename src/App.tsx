@@ -117,7 +117,7 @@ export default function App() {
   const canViewDetailedHistory = profile?.role === "admin";
 
   return (
-    <main className="app-shell min-h-screen" data-theme={theme}>
+    <main className="app-shell h-screen overflow-y-auto" data-theme={theme}>
       <HeroManager
         open={showHeroManager}
         enabledHeroIds={enabledHeroIds}
@@ -133,14 +133,21 @@ export default function App() {
         <header className="mb-4 sm:mb-6">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div>
-              <h1 className="ui-text-primary text-xl font-black tracking-tight sm:text-2xl">
+              <h1
+                className="text-xl font-black tracking-tight sm:text-2xl"
+                style={{ color: "var(--ui-theme)" }}
+              >
                 Lords Mobile Counter
               </h1>
-              <div className="ui-text-muted mt-0.5 text-[11px] font-normal">
-                by kikoine
+
+              <div className="mt-0.5 text-[11px] font-normal">
+                <span style={{ color: "var(--ui-theme-secondary)" }}>
+                  by kikoine
+                </span>
+
                 <span
                   className="ml-2 font-normal"
-                  style={{ color: "var(--ui-theme)" }}
+                  style={{ color: "var(--ui-theme-tertiary)" }}
                 >
                   BUILD {BUILD_VERSION}
                 </span>

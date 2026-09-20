@@ -77,7 +77,7 @@ export default function CompactTeam({
           <p className="ui-text-muted text-xs">Aucun héros sélectionné.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-5 gap-2 sm:gap-3">
+        <div className="grid grid-cols-5 justify-center gap-2 sm:flex sm:justify-center sm:gap-3">
           {orderedHeroes.map((hero, index) => {
             const isSelected = selectedIds.includes(hero.id);
 
@@ -92,7 +92,7 @@ export default function CompactTeam({
                 disabled={!onHeroClick}
                 onClick={() => onHeroClick?.(hero)}
                 className={[
-                  "ui-card ui-hover-theme group relative min-w-0 overflow-hidden rounded-lg border transition",
+                  "ui-card ui-hover-theme group relative w-full max-w-[180px] justify-self-center min-w-0 overflow-hidden rounded-lg border transition",
                   isSelected ? "hero-card-selected" : "",
                   onHeroClick ? "cursor-pointer" : "cursor-default",
                 ].join(" ")}

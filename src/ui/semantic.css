@@ -329,9 +329,11 @@
 .ui-modal {
   border-radius: 1rem;
   color: var(--ui-text-primary);
-  border-color: var(--ui-border);
+  border-color: color-mix(in srgb, var(--ui-theme) 55%, var(--ui-border));
   background: var(--ui-panel-alt);
-  box-shadow: 0 24px 64px rgb(0 0 0 / 0.35);
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--ui-theme) 12%, transparent),
+    0 24px 64px rgb(0 0 0 / 0.35);
 }
 
 .ui-modal-header {
@@ -357,9 +359,53 @@
   border-top: 1px solid var(--ui-border);
 }
 
+/* Scrollbar interne des modales */
+.ui-modal-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: var(--ui-theme) var(--ui-panel-alt);
+}
+
+.ui-modal-scroll::-webkit-scrollbar {
+  width: 8px;
+}
+
+.ui-modal-scroll::-webkit-scrollbar-track {
+  background: var(--ui-panel-alt);
+}
+
+.ui-modal-scroll::-webkit-scrollbar-thumb {
+  background: var(--ui-theme);
+  border-radius: 999px;
+  border: 2px solid var(--ui-panel-alt);
+}
+
+.ui-modal-scroll::-webkit-scrollbar-thumb:hover {
+  background: var(--ui-theme-soft);
+}
+
 .app-shell {
   color: var(--ui-text-primary);
   background: var(--ui-bg);
+  scrollbar-width: thin;
+  scrollbar-color: var(--ui-theme) var(--ui-panel-alt);
+}
+
+.app-shell::-webkit-scrollbar {
+  width: 8px;
+}
+
+.app-shell::-webkit-scrollbar-track {
+  background: var(--ui-panel-alt);
+}
+
+.app-shell::-webkit-scrollbar-thumb {
+  background: var(--ui-theme);
+  border-radius: 999px;
+  border: 2px solid var(--ui-panel-alt);
+}
+
+.app-shell::-webkit-scrollbar-thumb:hover {
+  background: var(--ui-theme-soft);
 }
 
 /* ============================================================
