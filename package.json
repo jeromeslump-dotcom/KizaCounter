@@ -11,7 +11,8 @@
     "preview": "vite preview",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "duplicates": "jscpd src && node scripts/check-redundancy.mjs"
+    "duplicates": "jscpd src && node scripts/check-redundancy.mjs",
+    "analyze:winning": "node --experimental-strip-types scripts/analyze-winning-patterns.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.57.4",
