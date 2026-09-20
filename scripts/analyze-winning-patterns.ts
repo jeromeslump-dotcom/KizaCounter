@@ -9,6 +9,41 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const projectRoot = path.resolve(__dirname, "..");
 
+function loadLocalEnv() {
+  for (const filename of [".env.local", ".env"]) {
+    const envPath = path.join(projectRoot, filename);
+
+    if (!fs.existsSync(envPath)) {
+      continue;
+    }
+
+    for (const rawLine of fs.readFileSync(envPath, "utf8").split(/\\r?\\n/)) {
+      const line = rawLine.trim();
+
+      if (!line || line.startsWith("#") || !line.includes("=")) {
+        continue;
+      }
+
+      const separator = line.indexOf("=");
+      const key = line.slice(0, separator).trim();
+      let value = line.slice(separator + 1).trim();
+
+      if (
+        (value.startsWith("\\\"") && value.endsWith("\\\"")) ||
+        (value.startsWith("'") && value.endsWith("'"))
+      ) {
+        value = value.slice(1, -1);
+      }
+
+      if (!process.env[key]) {
+        process.env[key] = value;
+      }
+    }
+  }
+}
+
+loadLocalEnv();
+
 const zonesPath = path.join(projectRoot, "data", "theoretical-zones.json");
 const outputPath = path.join(projectRoot, "data", "winning-patterns.json");
 
