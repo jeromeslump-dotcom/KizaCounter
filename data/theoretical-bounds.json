@@ -1,0 +1,441 @@
+{
+  "generatedAt": "2026-09-20T16:04:36.354Z",
+  "heroCount": 60,
+  "teamSize": 5,
+  "stats": {
+    "hp": {
+      "min": {
+        "value": 53401,
+        "heroes": [
+          {
+            "id": "prima_donna",
+            "name": "Prima Donna",
+            "value": 10447
+          },
+          {
+            "id": "elementalist",
+            "name": "Elementalist",
+            "value": 10466
+          },
+          {
+            "id": "snow_queen",
+            "name": "Snow Queen",
+            "value": 10521
+          },
+          {
+            "id": "incinerator",
+            "name": "Incinerator",
+            "value": 10899
+          },
+          {
+            "id": "petite_devil",
+            "name": "Petite Devil",
+            "value": 11068
+          }
+        ]
+      },
+      "max": {
+        "value": 177892,
+        "heroes": [
+          {
+            "id": "flower_maiden",
+            "name": "Flower Maiden",
+            "value": 37310
+          },
+          {
+            "id": "watchman",
+            "name": "Watcher",
+            "value": 37172
+          },
+          {
+            "id": "death_knight",
+            "name": "Death Knight",
+            "value": 35561
+          },
+          {
+            "id": "barbarian",
+            "name": "Barbarian",
+            "value": 34089
+          },
+          {
+            "id": "steambot",
+            "name": "Steambot",
+            "value": 33760
+          }
+        ]
+      }
+    },
+    "atk": {
+      "min": {
+        "value": 1417,
+        "heroes": [
+          {
+            "id": "elementalist",
+            "name": "Elementalist",
+            "value": 246
+          },
+          {
+            "id": "snow_queen",
+            "name": "Snow Queen",
+            "value": 276
+          },
+          {
+            "id": "bombin_goblin",
+            "name": "Bombin' Goblin",
+            "value": 287
+          },
+          {
+            "id": "twilight_priestess",
+            "name": "Twilight Priestess",
+            "value": 292
+          },
+          {
+            "id": "sage_of_storms",
+            "name": "Sage of Storms",
+            "value": 316
+          }
+        ]
+      },
+      "max": {
+        "value": 14178,
+        "heroes": [
+          {
+            "id": "mastercook",
+            "name": "Mastercook",
+            "value": 2947
+          },
+          {
+            "id": "chaos_dragon",
+            "name": "Chaos Dragon",
+            "value": 2935
+          },
+          {
+            "id": "lightweaver",
+            "name": "Lightweaver",
+            "value": 2796
+          },
+          {
+            "id": "death_archer",
+            "name": "Death Archer",
+            "value": 2792
+          },
+          {
+            "id": "trickster",
+            "name": "Trickster",
+            "value": 2708
+          }
+        ]
+      }
+    },
+    "matk": {
+      "min": {
+        "value": 1287,
+        "heroes": [
+          {
+            "id": "boommeister",
+            "name": "Boommeister",
+            "value": 238
+          },
+          {
+            "id": "grove_guardian",
+            "name": "Grove Guardian",
+            "value": 248
+          },
+          {
+            "id": "soul_forger",
+            "name": "Soul Forger",
+            "value": 264
+          },
+          {
+            "id": "steambot",
+            "name": "Steambot",
+            "value": 264
+          },
+          {
+            "id": "tracker",
+            "name": "Tracker",
+            "value": 273
+          }
+        ]
+      },
+      "max": {
+        "value": 14004,
+        "heroes": [
+          {
+            "id": "petite_devil",
+            "name": "Petite Devil",
+            "value": 3195
+          },
+          {
+            "id": "incinerator",
+            "name": "Incinerator",
+            "value": 2813
+          },
+          {
+            "id": "dark_magister",
+            "name": "Dark Magister",
+            "value": 2670
+          },
+          {
+            "id": "sand_sage",
+            "name": "Sand Sage",
+            "value": 2663
+          },
+          {
+            "id": "storm_fox",
+            "name": "Storm Fox",
+            "value": 2663
+          }
+        ]
+      }
+    },
+    "def": {
+      "min": {
+        "value": 409,
+        "heroes": [
+          {
+            "id": "elementalist",
+            "name": "Elementalist",
+            "value": 62
+          },
+          {
+            "id": "snow_queen",
+            "name": "Snow Queen",
+            "value": 77
+          },
+          {
+            "id": "sage_of_storms",
+            "name": "Sage of Storms",
+            "value": 89
+          },
+          {
+            "id": "petite_devil",
+            "name": "Petite Devil",
+            "value": 90
+          },
+          {
+            "id": "incinerator",
+            "name": "Incinerator",
+            "value": 91
+          }
+        ]
+      },
+      "max": {
+        "value": 3885,
+        "heroes": [
+          {
+            "id": "soul_forger",
+            "name": "Soul Forger",
+            "value": 928
+          },
+          {
+            "id": "barbarian",
+            "name": "Barbarian",
+            "value": 781
+          },
+          {
+            "id": "the_big_guy",
+            "name": "The Big Guy",
+            "value": 755
+          },
+          {
+            "id": "shape_shifter",
+            "name": "Shape Shifter",
+            "value": 723
+          },
+          {
+            "id": "steambot",
+            "name": "Steambot",
+            "value": 698
+          }
+        ]
+      }
+    },
+    "mdef": {
+      "min": {
+        "value": 714,
+        "heroes": [
+          {
+            "id": "shade",
+            "name": "Shade",
+            "value": 131
+          },
+          {
+            "id": "black_crow",
+            "name": "Black Crow",
+            "value": 137
+          },
+          {
+            "id": "shield_maiden",
+            "name": "Shield Maiden",
+            "value": 146
+          },
+          {
+            "id": "pegasus",
+            "name": "Pegasus",
+            "value": 149
+          },
+          {
+            "id": "femme_fatale",
+            "name": "Femme Fatale",
+            "value": 151
+          }
+        ]
+      },
+      "max": {
+        "value": 3534,
+        "heroes": [
+          {
+            "id": "rose_knight",
+            "name": "Rose Knight",
+            "value": 913
+          },
+          {
+            "id": "child_of_light",
+            "name": "Child of Light",
+            "value": 719
+          },
+          {
+            "id": "stellina_unicorno",
+            "name": "Stellina Unicorno",
+            "value": 665
+          },
+          {
+            "id": "magmaroid",
+            "name": "Magmaroid",
+            "value": 632
+          },
+          {
+            "id": "berserker",
+            "name": "Berserker",
+            "value": 605
+          }
+        ]
+      }
+    },
+    "atkTotal": {
+      "min": {
+        "value": 7307,
+        "heroes": [
+          {
+            "id": "soul_forger",
+            "name": "Soul Forger",
+            "value": 1398
+          },
+          {
+            "id": "watchman",
+            "name": "Watcher",
+            "value": 1424
+          },
+          {
+            "id": "oath_keeper",
+            "name": "Oath Keeper",
+            "value": 1435
+          },
+          {
+            "id": "rose_knight",
+            "name": "Rose Knight",
+            "value": 1482
+          },
+          {
+            "id": "child_of_light",
+            "name": "Child of Light",
+            "value": 1568
+          }
+        ]
+      },
+      "max": {
+        "value": 16440,
+        "heroes": [
+          {
+            "id": "petite_devil",
+            "name": "Petite Devil",
+            "value": 3555
+          },
+          {
+            "id": "mastercook",
+            "name": "Mastercook",
+            "value": 3293
+          },
+          {
+            "id": "chaos_dragon",
+            "name": "Chaos Dragon",
+            "value": 3293
+          },
+          {
+            "id": "incinerator",
+            "name": "Incinerator",
+            "value": 3151
+          },
+          {
+            "id": "lightweaver",
+            "name": "Lightweaver",
+            "value": 3148
+          }
+        ]
+      }
+    },
+    "defTotal": {
+      "min": {
+        "value": 1634,
+        "heroes": [
+          {
+            "id": "shade",
+            "name": "Shade",
+            "value": 292
+          },
+          {
+            "id": "black_crow",
+            "name": "Black Crow",
+            "value": 295
+          },
+          {
+            "id": "ethereal_guide",
+            "name": "Ethereal Guide",
+            "value": 337
+          },
+          {
+            "id": "trickster",
+            "name": "Trickster",
+            "value": 346
+          },
+          {
+            "id": "cursed_hunter",
+            "name": "Cursed Hunter",
+            "value": 364
+          }
+        ]
+      },
+      "max": {
+        "value": 6563,
+        "heroes": [
+          {
+            "id": "rose_knight",
+            "name": "Rose Knight",
+            "value": 1459
+          },
+          {
+            "id": "soul_forger",
+            "name": "Soul Forger",
+            "value": 1442
+          },
+          {
+            "id": "child_of_light",
+            "name": "Child of Light",
+            "value": 1308
+          },
+          {
+            "id": "oath_keeper",
+            "name": "Oath Keeper",
+            "value": 1237
+          },
+          {
+            "id": "berserker",
+            "name": "Berserker",
+            "value": 1117
+          }
+        ]
+      }
+    }
+  }
+}
