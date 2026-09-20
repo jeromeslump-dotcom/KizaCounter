@@ -271,36 +271,72 @@ export default function CounterModal({
     canViewDetailedHistory,
   });
 
-  const recommendationMobileHistoryLabel =
-    recommendationSource === "core4" && recommendationCore4History
-      ? `${Math.round(recommendationCore4History.winRate)} %`
-      : recommendationSource === "defeat-history" && recommendedDefeatHistory
-        ? `${Math.round(recommendedDefeatHistory.counterWinRate * 100)} %`
-        : recommendationSource === "similar-history" &&
-            recommendedSimilarHistory.battles > 0
-          ? `${Math.round(recommendedSimilarHistory.winRate)} %`
-          : recommendedExactHistory.battles > 0
-            ? `${Math.round(recommendedExactHistory.winRate)} %`
-            : recommendedClassHistory.battles > 0
-              ? `${Math.round(recommendedClassHistory.winRate)} %`
-              : null;
+const getMobileHistoryLabel = (
+  source: RecommendationSource | null,
+  canViewDetailedHistory: boolean,
+  exactHistory: { winRate: number; battles: number },
+  classHistory: { winRate: number; battles: number },
+  similarHistory: { winRate: number; battles: number },
+  defeatHistory: {
+    counterWinRate: number;
+    battles: number;
+  } | null,
+  core4History: Core4HistoryStats | null,
+) => {
+  if (!canViewDetailedHistory) {
+    return source === "fallback" ? "NC" : "Impossible";
+  }
 
-  const alternativeMobileHistoryLabel =
-    alternativeRecommendationSource === "core4" && alternativeCore4History
-      ? `${Math.round(alternativeCore4History.winRate)} %`
-      : alternativeRecommendationSource === "exact-history" &&
-          alternativeHistory.battles > 0
-        ? `${Math.round(alternativeHistory.winRate)} %`
-        : alternativeRecommendationSource === "defeat-history" &&
-            alternativeDefeatHistory
-          ? `${Math.round(alternativeDefeatHistory.counterWinRate * 100)} %`
-          : alternativeRecommendationSource === "similar-history" &&
-              alternativeSimilarHistory.battles > 0
-            ? `${Math.round(alternativeSimilarHistory.winRate)} %`
-            : alternativeRecommendationSource === "class-history" &&
-                alternativeClassHistory.battles > 0
-              ? `${Math.round(alternativeClassHistory.winRate)} %`
-              : null;
+  switch (source) {
+    case "core4":
+      return core4History ? `${Math.round(core4History.winRate)} %` : "Impossible";
+
+    case "defeat-history":
+      return defeatHistory && defeatHistory.battles > 0
+        ? `${Math.round(defeatHistory.counterWinRate * 100)} %`
+        : "Impossible";
+
+    case "exact-history":
+      return exactHistory.battles > 0
+        ? `${Math.round(exactHistory.winRate)} %`
+        : "Impossible";
+
+    case "class-history":
+      return classHistory.battles > 0
+        ? `${Math.round(classHistory.winRate)} %`
+        : "Impossible";
+
+    case "similar-history":
+      return similarHistory.battles > 0
+        ? `${Math.round(similarHistory.winRate)} %`
+        : "Impossible";
+
+    case "fallback":
+    default:
+      return "NC";
+  }
+};
+
+const recommendationMobileHistoryLabel = getMobileHistoryLabel(
+  recommendationSource,
+  canViewDetailedHistory,
+  recommendedExactHistory,
+  recommendedClassHistory,
+  recommendedSimilarHistory,
+  recommendedDefeatHistory,
+  recommendationCore4History,
+);
+
+const alternativeMobileHistoryLabel = getMobileHistoryLabel(
+  alternativeRecommendationSource,
+  canViewDetailedHistory,
+  alternativeHistory,
+  alternativeClassHistory,
+  alternativeSimilarHistory,
+  alternativeDefeatHistory,
+  alternativeCore4History,
+);
+
 
   const hasRecommendations =
     recommendedTeam.length > 0 || alternativeTeam.length > 0;
@@ -373,7 +409,7 @@ export default function CounterModal({
                       Recommandation initiale
                     </div>
 
-                    <div className="shrink-0 text-right text-[10px] font-bold sm:text-xs">
+                    <div className="shrink-0 whitespace-nowrap text-right text-[10px] font-bold sm:text-xs">
                       <span className="sm:hidden">
                         {recommendationMobileHistoryLabel}
                       </span>
@@ -426,7 +462,7 @@ hover:!text-[var(--ui-theme-soft)]"
                         Alternative
                       </div>
 
-                      <div className="shrink-0 text-right text-[10px] font-bold sm:text-xs">
+                      <div className="shrink-0 whitespace-nowrap text-right text-[10px] font-bold sm:text-xs">
                         <span className="sm:hidden">
                           {alternativeMobileHistoryLabel}
                         </span>
