@@ -229,34 +229,34 @@ export default function CounterModal({
         <strong>Historique exact</strong>
       )
     ) : currentTeamGeneralHistory.battles > 0 ? (
-canViewDetailedHistory ? (
-  <>
-    <span className="hidden sm:inline">
-      <strong>Nouvelle rencontre · Équipe déjà victorieuse</strong>{" "}
-      <span className="font-normal">
-        · {Math.round(currentTeamGeneralHistory.winRate)} % ·{" "}
-        {formatCount(currentTeamGeneralHistory.battles, "combat")}
-      </span>
-    </span>
+      canViewDetailedHistory ? (
+        <>
+          <span className="hidden sm:inline">
+            <strong>Nouvelle rencontre · Équipe déjà victorieuse</strong>{" "}
+            <span className="font-normal">
+              · {Math.round(currentTeamGeneralHistory.winRate)} % ·{" "}
+              {formatCount(currentTeamGeneralHistory.battles, "combat")}
+            </span>
+          </span>
 
-    <span className="sm:hidden">
-      <strong>Équipe déjà victorieuse</strong>{" "}
-      <span className="font-normal">
-        · {Math.round(currentTeamGeneralHistory.winRate)} %
-      </span>
-    </span>
-  </>
-) : (
-  <>
-    <span className="hidden sm:inline">
-      <strong>Nouvelle rencontre · Équipe déjà connue</strong>
-    </span>
+          <span className="sm:hidden">
+            <strong>Équipe déjà victorieuse</strong>{" "}
+            <span className="font-normal">
+              · {Math.round(currentTeamGeneralHistory.winRate)} %
+            </span>
+          </span>
+        </>
+      ) : (
+        <>
+          <span className="hidden sm:inline">
+            <strong>Nouvelle rencontre · Équipe déjà connue</strong>
+          </span>
 
-    <span className="sm:hidden">
-      <strong>Équipe déjà connue</strong>
-    </span>
-  </>
-)
+          <span className="sm:hidden">
+            <strong>Équipe déjà connue</strong>
+          </span>
+        </>
+      )
     ) : currentTeamClassHistory.battles > 0 ? (
       <>
         <strong>Nouvelle équipe</strong>{" "}

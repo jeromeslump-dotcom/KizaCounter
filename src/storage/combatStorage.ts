@@ -40,7 +40,10 @@ function calculateTeamData(heroIds: string[]) {
   };
 }
 
-function enrichCombat(combat: Omit<Combat, "id" | "created_at">, userId: string): Combat {
+function enrichCombat(
+  combat: Omit<Combat, "id" | "created_at">,
+  userId: string
+): Combat {
   const my = calculateTeamData(combat.my_heroes);
   const enemy = calculateTeamData(combat.enemy_heroes);
 

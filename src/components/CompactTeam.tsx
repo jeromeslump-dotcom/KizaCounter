@@ -66,7 +66,7 @@ export default function CompactTeam({
         </h3>
 
         {titleRight && (
-         <div className="ui-text-primary min-w-0 text-right text-[10px] font-bold sm:text-xs">
+          <div className="ui-text-primary min-w-0 text-right text-[10px] font-bold sm:text-xs">
             {titleRight}
           </div>
         )}

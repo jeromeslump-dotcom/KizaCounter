@@ -17,7 +17,7 @@ function loadLocalEnv() {
       continue;
     }
 
-    for (const rawLine of fs.readFileSync(envPath, "utf8").split(/\\r?\\n/)) {
+    for (const rawLine of fs.readFileSync(envPath, "utf8").split(/\r?\n/)) {
       const line = rawLine.trim();
 
       if (!line || line.startsWith("#") || !line.includes("=")) {
@@ -48,15 +48,15 @@ const zonesPath = path.join(projectRoot, "data", "theoretical-zones.json");
 const outputPath = path.join(projectRoot, "data", "winning-patterns.json");
 
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL;
-const SUPABASE_ANON_KEY = process.env.VITE_SUPABASE_ANON_KEY;
+const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
   throw new Error(
-    "Variables Supabase manquantes : VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY"
+    "Variables Supabase manquantes : VITE_SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY"
   );
 }
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
 
 const PAGE_SIZE = 1000;
 
@@ -187,7 +187,7 @@ function getClasses(heroIds: string[]) {
     const hero = heroesById.get(heroId);
 
     if (!hero) {
-      throw new Error(`Héros inconnu dans Supabase : ${heroId}`);
+      throw new Error(`Heros inconnu dans Supabase : ${heroId}`);
     }
 
     classes[hero.cls]++;
@@ -599,7 +599,7 @@ const result = {
     distinctLosingFormations: losingFormations.length,
   },
   note:
-    "Chaque combat produit deux observations d'équipe : côté joueur et côté ennemi. Les observations WIN/LOSS sont donc symétriques à l'échelle globale.",
+    "Chaque combat produit deux observations d'Equipe. Les observations WIN/LOSS sont donc symétriques à  l'échelle globale.",
   formations: {
     all: formations,
     winning: winningFormations,
@@ -624,7 +624,7 @@ fs.writeFileSync(
 );
 
 console.log(`Combats actifs      : ${combats.length}`);
-console.log(`Observations équipe : ${observations.length}`);
+console.log(`Observations Equipe : ${observations.length}`);
 console.log(`Formations distinctes : ${formations.length}`);
 console.log(`Formations avec WIN : ${winningFormations.length}`);
 console.log(`Formations avec LOSS: ${losingFormations.length}`);
