@@ -120,6 +120,227 @@ type CombatRow = {
   enemy_def_total: number;
 };
 
+type DiagnosticBand =
+  | "very-unfavorable"
+  | "unfavorable"
+  | "neutral"
+  | "favorable"
+  | "very-favorable";
+
+type RelationKey = "atkVsDef" | "matkVsMdef" | "defVsAtk" | "mdefVsMatk";
+
+const VALIDATED_FORMATION_MIN_COMBATS = 5;
+
+const RELATION_LABELS: Record<RelationKey, string> = {
+  atkVsDef: "ATK vs DEF",
+  matkVsMdef: "MATK vs MDEF",
+  defVsAtk: "DEF vs ATK",
+  mdefVsMatk: "MDEF vs MATK",
+};
+
+function getDiagnosticBand(difference: number): DiagnosticBand {
+  if (difference <= -5) {
+    return "very-unfavorable";
+  }
+
+  if (difference <= -2) {
+    return "unfavorable";
+  }
+
+  if (difference <= 1) {
+    return "neutral";
+  }
+
+  if (difference <= 4) {
+    return "favorable";
+  }
+
+  return "very-favorable";
+}
+
+function getRelationDifferences(
+  observation: TeamObservation,
+  opponent: TeamObservation
+): Record<RelationKey, number> {
+  return {
+    atkVsDef: observation.zones.atk - opponent.zones.def,
+    matkVsMdef: observation.zones.matk - opponent.zones.mdef,
+    defVsAtk: observation.zones.def - opponent.zones.atk,
+    mdefVsMatk: observation.zones.mdef - opponent.zones.matk,
+  };
+}
+
+function summarizeValidatedFormationProfiles(
+  formations: ReturnType<typeof summarizeFormations>,
+  observations: TeamObservation[]
+) {
+  const observationsByCombat = new Map<string, TeamObservation[]>();
+
+  for (const observation of observations) {
+    const existing = observationsByCombat.get(observation.combatId) ?? [];
+    existing.push(observation);
+    observationsByCombat.set(observation.combatId, existing);
+  }
+
+  const winningRelationBands = new Map<
+    string,
+    Record<RelationKey, Record<DiagnosticBand, number>>
+  >();
+
+  for (const observation of observations) {
+    if (observation.result !== "WIN") {
+      continue;
+    }
+
+    const combatObservations = observationsByCombat.get(observation.combatId) ?? [];
+    const opponent = combatObservations.find(
+      (candidate) => candidate.side !== observation.side
+    );
+
+    if (!opponent) {
+      continue;
+    }
+
+    if (!winningRelationBands.has(observation.formation)) {
+      winningRelationBands.set(observation.formation, {
+        atkVsDef: {
+          "very-unfavorable": 0,
+          unfavorable: 0,
+          neutral: 0,
+          favorable: 0,
+          "very-favorable": 0,
+        },
+        matkVsMdef: {
+          "very-unfavorable": 0,
+          unfavorable: 0,
+          neutral: 0,
+          favorable: 0,
+          "very-favorable": 0,
+        },
+        defVsAtk: {
+          "very-unfavorable": 0,
+          unfavorable: 0,
+          neutral: 0,
+          favorable: 0,
+          "very-favorable": 0,
+        },
+        mdefVsMatk: {
+          "very-unfavorable": 0,
+          unfavorable: 0,
+          neutral: 0,
+          favorable: 0,
+          "very-favorable": 0,
+        },
+      });
+    }
+
+    const bands = winningRelationBands.get(observation.formation)!;
+    const differences = getRelationDifferences(observation, opponent);
+
+    for (const relation of Object.keys(RELATION_LABELS) as RelationKey[]) {
+      bands[relation][getDiagnosticBand(differences[relation])]++;
+    }
+  }
+
+  const profiles = formations
+    .filter(
+      (formation) =>
+        formation.observations >= VALIDATED_FORMATION_MIN_COMBATS &&
+        formation.wins > 0 &&
+        winningRelationBands.has(formation.formation)
+    )
+    .map((formation) => {
+      const bands = winningRelationBands.get(formation.formation)!;
+
+      const dominantBands = {} as Record<RelationKey, DiagnosticBand | "mixed">;
+      const counts = {
+        "very-favorable": 0,
+        favorable: 0,
+        neutral: 0,
+        unfavorable: 0,
+        "very-unfavorable": 0,
+        mixed: 0,
+      };
+
+      for (const relation of Object.keys(RELATION_LABELS) as RelationKey[]) {
+        const entries = Object.entries(bands[relation]) as [
+          DiagnosticBand,
+          number
+        ][];
+        const maxCount = Math.max(...entries.map(([, count]) => count));
+        const topBands = entries
+          .filter(([, count]) => count === maxCount)
+          .map(([band]) => band);
+
+        if (topBands.length !== 1) {
+          dominantBands[relation] = "mixed";
+          counts.mixed++;
+        } else {
+          const dominantBand = topBands[0];
+          dominantBands[relation] = dominantBand;
+          counts[dominantBand]++;
+        }
+      }
+
+      return {
+        formation: formation.formation,
+        heroes: formation.heroes,
+        names: formation.names,
+        classes: formation.classes,
+        combats: formation.observations,
+        wins: formation.wins,
+        losses: formation.losses,
+        winningCombatsUsed: Object.values(bands.atkVsDef).reduce(
+          (sum, count) => sum + count,
+          0
+        ),
+        relations: Object.fromEntries(
+          (Object.keys(RELATION_LABELS) as RelationKey[]).map((relation) => [
+            relation,
+            {
+              label: RELATION_LABELS[relation],
+              band: dominantBands[relation],
+              bandCounts: bands[relation],
+            },
+          ])
+        ),
+        profile: {
+          veryFavorable: counts["very-favorable"],
+          favorable: counts.favorable,
+          neutral: counts.neutral,
+          unfavorable: counts.unfavorable,
+          veryUnfavorable: counts["very-unfavorable"],
+          mixed: counts.mixed,
+        },
+      };
+    })
+    .sort(
+      (a, b) =>
+        b.profile.veryFavorable - a.profile.veryFavorable ||
+        b.profile.favorable - a.profile.favorable ||
+        a.profile.neutral - b.profile.neutral ||
+        a.profile.unfavorable - b.profile.unfavorable ||
+        a.profile.veryUnfavorable - b.profile.veryUnfavorable ||
+        a.profile.mixed - b.profile.mixed ||
+        a.formation.localeCompare(b.formation)
+    );
+
+  return {
+    minimumCombats: VALIDATED_FORMATION_MIN_COMBATS,
+    weighting: "Chaque formation validee compte une fois, quel que soit son nombre de combats.",
+    relations: RELATION_LABELS,
+    bands: {
+      "very-unfavorable": "difference <= -5",
+      unfavorable: "difference -4 a -2",
+      neutral: "difference -1 a +1",
+      favorable: "difference +2 a +4",
+      "very-favorable": "difference >= +5",
+    },
+    ranking: "Nombre de tres favorables, puis favorables, puis neutres, puis defavorables.",
+    formations: profiles,
+  };
+}
+
 type TeamObservation = {
   formation: string;
   heroes: string[];
@@ -614,6 +835,10 @@ const result = {
     winningFormations,
     observations
   ),
+  validatedFormationProfiles: summarizeValidatedFormationProfiles(
+    formations,
+    observations
+  ),
 };
 
 fs.mkdirSync(path.dirname(outputPath), { recursive: true });
@@ -628,5 +853,8 @@ console.log(`Observations Equipe : ${observations.length}`);
 console.log(`Formations distinctes : ${formations.length}`);
 console.log(`Formations avec WIN : ${winningFormations.length}`);
 console.log(`Formations avec LOSS: ${losingFormations.length}`);
+console.log(
+  `Formations validees (>= ${VALIDATED_FORMATION_MIN_COMBATS} combats) : ${result.validatedFormationProfiles.formations.length}`
+);
 console.log("");
 console.log(`Fichier créé : ${outputPath}`);
