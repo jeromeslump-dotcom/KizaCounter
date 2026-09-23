@@ -116,10 +116,13 @@ function ZoneChart({
   const chartWidth = width - left - right;
   const chartHeight = height - top - bottom;
 
-  const maxValue = Math.max(
-    1,
-    ...rows.flatMap((row) => [row.winObservations, row.lossObservations])
+  const valueKey = mode === "combats" ? "Observations" : "Formations";
+  const values = rows.flatMap((row) =>
+    mode === "combats"
+      ? [row.winObservations, row.lossObservations]
+      : [row.winFormations, row.lossFormations]
   );
+  const maxValue = Math.max(1, ...values);
 
   const slotWidth = chartWidth / rows.length;
   const barWidth = Math.max(5, slotWidth * 0.31);
@@ -171,9 +174,10 @@ function ZoneChart({
         {rows.map((row, index) => {
           const center = left + index * slotWidth + slotWidth / 2;
 
-          const winHeight = (row.winObservations / maxValue) * chartHeight;
-
-          const lossHeight = (row.lossObservations / maxValue) * chartHeight;
+          const winValue = mode === "combats" ? row.winObservations : row.winFormations;
+          const lossValue = mode === "combats" ? row.lossObservations : row.lossFormations;
+          const winHeight = (winValue / maxValue) * chartHeight;
+          const lossHeight = (lossValue / maxValue) * chartHeight;
 
           const winX = center - barWidth - gap / 2;
 
@@ -329,6 +333,8 @@ export default function WinningPatternsLab({
   onClose,
   onBack,
 }: WinningPatternsLabProps) {
+  const [mode, setMode] = useState<"combats" | "formations">("combats");
+
   if (!open) return null;
 
   return (
@@ -351,11 +357,13 @@ export default function WinningPatternsLab({
                 id="winning-patterns-lab-title"
                 className="ui-text-primary text-xl font-black"
               >
-                🧪 Team Lab — Étape 1
+                🧪 Team Lab — Étape {mode === "combats" ? "1" : "2"}
               </h2>
 
               <p className="ui-text-secondary mt-1 text-xs sm:text-sm">
-                Répartition réelle des combats enregistrés dans les 20 zones
+                {mode === "combats"
+                  ? "Répartition réelle des combats enregistrés dans les 20 zones"
+                  : "Répartition réelle des formations enregistrées dans les 20 zones"}
               </p>
             </div>
 
@@ -369,6 +377,29 @@ export default function WinningPatternsLab({
             </button>
           </div>
         </header>
+
+        <div className="px-4 pt-4 sm:px-6 sm:pt-6">
+          <div className="flex flex-wrap gap-2" role="tablist" aria-label="Étapes du Team Lab">
+            <button
+              type="button"
+              role="tab"
+              aria-selected={mode === "combats"}
+              onClick={() => setMode("combats")}
+              className={mode === "combats" ? "ui-button-success" : "ui-button"}
+            >
+              Étape 1 — Combats
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={mode === "formations"}
+              onClick={() => setMode("formations")}
+              className={mode === "formations" ? "ui-button-success" : "ui-button"}
+            >
+              Étape 2 — Formations
+            </button>
+          </div>
+        </div>
 
         <div className="min-h-0 flex-1 overflow-y-auto p-4 sm:p-6">
           <div className="mb-5 flex flex-wrap items-center gap-4 text-xs">
@@ -419,6 +450,7 @@ export default function WinningPatternsLab({
                     theoreticalMin={theoreticalMin}
                     theoreticalMax={theoreticalMax}
                     rows={completeZones(zoneSummary[key] ?? [])}
+                    mode={mode}
                   />
                 </section>
               )
@@ -428,7 +460,7 @@ export default function WinningPatternsLab({
           <div className="ui-panel-alt mt-5 rounded-xl border p-4">
             <p className="ui-text-secondary text-xs leading-relaxed">
               Cette étape est descriptive uniquement. Les graphiques montrent
-              les combats enregistrés dans chaque zone, sans comparaison entre
+              les {mode === "combats" ? "combats" : "formations"} enregistrés dans chaque zone, sans comparaison entre
               statistiques, sans score et sans classement.
             </p>
           </div>
