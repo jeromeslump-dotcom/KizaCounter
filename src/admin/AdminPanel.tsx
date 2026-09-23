@@ -1,7 +1,7 @@
 import { useEffect, useState, type ReactNode } from "react";
 import EngineSettings from "./EngineSettings";
 import AnalysisHelp from "./AnalysisHelp";
-import WinningPatternsLab from "./WinningPatternsLab";
+import TeamLab from "./teamLab/TeamLab";
 import type { Combat } from "../types";
 import type { Hero } from "../data/heroes";
 
