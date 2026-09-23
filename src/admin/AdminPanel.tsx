@@ -1,6 +1,7 @@
 import { useEffect, useState, type ReactNode } from "react";
 import EngineSettings from "./EngineSettings";
 import AnalysisHelp from "./AnalysisHelp";
+import WinningPatternsLab from "./WinningPatternsLab";
 import type { Combat } from "../types";
 import type { Hero } from "../data/heroes";
 
@@ -11,6 +12,7 @@ interface AdminPanelProps {
   onEncounteredTeams: () => void;
   onCombatHistory: () => void;
   onAnalysisHelp: () => void;
+  onWinningPatternsLab: () => void;
   heroes?: Hero[];
   combats?: Combat[];
 }
@@ -58,6 +60,7 @@ export default function AdminPanel({
   onEncounteredTeams,
   onCombatHistory,
   onAnalysisHelp,
+  onWinningPatternsLab,
   heroes = [],
   combats = [],
 }: AdminPanelProps) {
@@ -156,6 +159,12 @@ export default function AdminPanel({
             title="Aide à l'analyse"
             description="Analyser les combats correspondant exactement à une équipe ennemie"
             onClick={onAnalysisHelp}
+          />
+          <AdminAction
+            icon="🧪"
+            title="Team Lab — zones"
+            description="Visualiser les 4 répartitions ATK, MATK, DEF et MDEF sur les 20 zones"
+            onClick={onWinningPatternsLab}
           />
           <AdminAction
             icon="⚙️"
