@@ -1,3 +1,4 @@
+import { useState } from "react";
 import winningPatterns from "../../data/winning-patterns.json";
 
 type ZoneRow = {
@@ -103,6 +104,7 @@ function ZoneChart({
   theoreticalMin: number;
   theoreticalMax: number;
   rows: ZoneRow[];
+  mode: "combats" | "formations";
 }) {
   const width = 980;
   const height = 390;
@@ -135,7 +137,7 @@ function ZoneChart({
         viewBox={`0 0 ${width} ${height}`}
         className="min-w-[760px] w-full"
         role="img"
-        aria-label={`Répartition des combats enregistrés WIN et LOSS selon la ${xLabel}, zones Z1 à Z20`}
+        aria-label={`Répartition des ${valueKey.toLowerCase()} enregistrés WIN et LOSS selon la ${xLabel}, zones Z1 à Z20`}
       >
         {[0, 0.25, 0.5, 0.75, 1].map((ratio) => {
           const y = top + chartHeight * (1 - ratio);
@@ -189,7 +191,7 @@ function ZoneChart({
                 opacity="0.9"
               >
                 <title>
-                  {`Z${row.zone} — WIN: ${row.winObservations} combats enregistrés`}
+                  {`Z${row.zone} — WIN: ${winValue} ${valueKey.toLowerCase()} enregistrés`}
                 </title>
               </rect>
 
@@ -203,7 +205,7 @@ function ZoneChart({
                 opacity="0.72"
               >
                 <title>
-                  {`Z${row.zone} — LOSS: ${row.lossObservations} combats enregistrés`}
+                  {`Z${row.zone} — LOSS: ${lossValue} ${valueKey.toLowerCase()} enregistrés`}
                 </title>
               </rect>
 
@@ -315,7 +317,7 @@ function ZoneChart({
           fill="var(--ui-text-secondary)"
           transform={`rotate(-90 12 ${top + chartHeight / 2})`}
         >
-          Y → Nombre de combats enregistrés (observations)
+          Y → Nombre de ${valueKey.toLowerCase()} enregistrés
         </text>
       </svg>
     </div>
@@ -389,7 +391,7 @@ export default function WinningPatternsLab({
             </span>
 
             <span className="ui-text-muted">
-              WIN / LOSS = combats enregistrés
+              WIN / LOSS = {mode === "combats" ? "combats enregistrés" : "formations enregistrées"}
             </span>
 
             <span className="ui-text-muted">
