@@ -1,4 +1,4 @@
-import winningPatterns from "../../data/winning-patterns.json";
+import winningPatterns from "../../../data/winning-patterns.json";
 
 export type ZoneRow = {
   zone: number;
