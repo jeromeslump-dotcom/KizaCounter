@@ -6,7 +6,7 @@ import CombatHistory from "../admin/CombatHistory";
 import EncounteredTeams from "../admin/EncounteredTeams";
 import UserManagement from "../admin/UserManagement";
 import AnalysisHelp from "../admin/AnalysisHelp";
-import WinningPatternsLab from "../admin/WinningPatternsLab";
+import TeamLab from "../admin/teamLab/TeamLab";
 import type { Combat } from "../types";
 import { HEROES } from "../data/heroes";
 import { loadCombats } from "../storage/combatStorage";
@@ -234,7 +234,7 @@ export default function AuthPanel({
               onBack={backToAdminPanel}
             />
 
-            <WinningPatternsLab
+            <TeamLab
               open={showWinningPatternsLab}
               onClose={closeAdminArea}
               onBack={backToAdminPanel}
