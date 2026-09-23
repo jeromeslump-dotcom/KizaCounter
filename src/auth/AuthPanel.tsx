@@ -6,6 +6,7 @@ import CombatHistory from "../admin/CombatHistory";
 import EncounteredTeams from "../admin/EncounteredTeams";
 import UserManagement from "../admin/UserManagement";
 import AnalysisHelp from "../admin/AnalysisHelp";
+import WinningPatternsLab from "../admin/WinningPatternsLab";
 import type { Combat } from "../types";
 import { HEROES } from "../data/heroes";
 import { loadCombats } from "../storage/combatStorage";
@@ -31,6 +32,7 @@ export default function AuthPanel({
   const [showEncounteredTeams, setShowEncounteredTeams] = useState(false);
   const [showCombatHistory, setShowCombatHistory] = useState(false);
   const [showAnalysisHelp, setShowAnalysisHelp] = useState(false);
+  const [showWinningPatternsLab, setShowWinningPatternsLab] = useState(false);
   const [adminCombats, setAdminCombats] = useState<Combat[]>([]);
   const [showLogin, setShowLogin] = useState(false);
   const [email, setEmail] = useState("");
@@ -63,6 +65,7 @@ export default function AuthPanel({
     setShowEncounteredTeams(false);
     setShowCombatHistory(false);
     setShowAnalysisHelp(false);
+    setShowWinningPatternsLab(false);
   }
 
   function backToAdminPanel() {
@@ -70,6 +73,7 @@ export default function AuthPanel({
     setShowEncounteredTeams(false);
     setShowCombatHistory(false);
     setShowAnalysisHelp(false);
+    setShowWinningPatternsLab(false);
     setShowAdminPanel(true);
   }
 
@@ -197,6 +201,10 @@ export default function AuthPanel({
               }}
               onCombatHistory={openCombatHistory}
               onAnalysisHelp={openAnalysisHelp}
+              onWinningPatternsLab={() => {
+                setShowAdminPanel(false);
+                setShowWinningPatternsLab(true);
+              }}
             />
 
             <UserManagement
@@ -222,6 +230,12 @@ export default function AuthPanel({
               open={showAnalysisHelp}
               heroes={HEROES}
               combats={adminCombats}
+              onClose={closeAdminArea}
+              onBack={backToAdminPanel}
+            />
+
+            <WinningPatternsLab
+              open={showWinningPatternsLab}
               onClose={closeAdminArea}
               onBack={backToAdminPanel}
             />
