@@ -321,7 +321,7 @@ function ZoneChart({
           fill="var(--ui-text-secondary)"
           transform={`rotate(-90 12 ${top + chartHeight / 2})`}
         >
-          Y → Nombre de ${valueKey.toLowerCase()} enregistrés
+          {`Y → Nombre de ${valueKey.toLowerCase()} enregistrés`}
         </text>
       </svg>
     </div>
