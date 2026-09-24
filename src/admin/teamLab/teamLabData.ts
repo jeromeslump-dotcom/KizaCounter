@@ -8,7 +8,7 @@ export type ZoneRow = {
   lossFormations: number;
 };
 
-export type MetricKey = "atk" | "matk" | "def" | "mdef";
+export type MetricKey = "atk" | "matk" | "def" | "mdef" | "hp";
 export type TeamLabMode = "combats" | "formations";
 
 export const METRICS = [
@@ -16,6 +16,7 @@ export const METRICS = [
   { key: "matk" as MetricKey, label: "MATK", xLabel: "MATK totale de l'équipe", theoreticalMin: 1287, theoreticalMax: 14004 },
   { key: "def" as MetricKey, label: "DEF", xLabel: "DEF totale de l'équipe", theoreticalMin: 409, theoreticalMax: 3885 },
   { key: "mdef" as MetricKey, label: "MDEF", xLabel: "MDEF totale de l'équipe", theoreticalMin: 714, theoreticalMax: 3534 },
+  { key: "hp" as MetricKey, label: "PV", xLabel: "PV totaux de l'équipe", theoreticalMin: 53401, theoreticalMax: 177892 },
 ];
 
 export const zoneSummary = winningPatterns.zoneSummary as Record<MetricKey, ZoneRow[]>;
