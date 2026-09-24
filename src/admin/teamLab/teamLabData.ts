@@ -1,4 +1,5 @@
 import winningPatterns from "../../../data/winning-patterns.json";
+import theoreticalFormations from "../../../data/theoretical-formations.json";
 
 export type ZoneRow = {
   zone: number;
@@ -9,7 +10,19 @@ export type ZoneRow = {
 };
 
 export type MetricKey = "atk" | "matk" | "def" | "mdef" | "hp";
-export type TeamLabMode = "combats" | "formations";
+export type TeamLabMode = "combats" | "formations" | "theoretical";
+
+export type TheoreticalZoneRow = {
+  zone: number;
+  possibleFormations: number;
+};
+
+export type TheoreticalMetric = {
+  theoreticalMin: number;
+  theoreticalMax: number;
+  zones: TheoreticalZoneRow[];
+  total: number;
+};
 
 export const METRICS = [
   { key: "atk" as MetricKey, label: "ATK", xLabel: "ATK totale de l'équipe", theoreticalMin: 1417, theoreticalMax: 14178 },
@@ -20,6 +33,8 @@ export const METRICS = [
 ];
 
 export const zoneSummary = winningPatterns.zoneSummary as Record<MetricKey, ZoneRow[]>;
+
+export const theoreticalSummary = theoreticalFormations.metrics as Record<MetricKey, TheoreticalMetric>;
 
 export function completeZones(rows: ZoneRow[]): ZoneRow[] {
   const byZone = new Map(rows.map((row) => [row.zone, row]));
