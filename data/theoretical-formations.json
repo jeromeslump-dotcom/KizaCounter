@@ -1,0 +1,445 @@
+{
+  "version": 1,
+  "generatedFrom": "src/data/heroes.ts",
+  "heroCount": 60,
+  "teamSize": 5,
+  "formationCount": 5461512,
+  "zoneCount": 20,
+  "metrics": {
+    "atk": {
+      "theoreticalMin": 1417,
+      "theoreticalMax": 14178,
+      "zones": [
+        {
+          "zone": 1,
+          "possibleFormations": 26488
+        },
+        {
+          "zone": 2,
+          "possibleFormations": 44756
+        },
+        {
+          "zone": 3,
+          "possibleFormations": 102903
+        },
+        {
+          "zone": 4,
+          "possibleFormations": 213688
+        },
+        {
+          "zone": 5,
+          "possibleFormations": 304434
+        },
+        {
+          "zone": 6,
+          "possibleFormations": 441431
+        },
+        {
+          "zone": 7,
+          "possibleFormations": 526729
+        },
+        {
+          "zone": 8,
+          "possibleFormations": 657561
+        },
+        {
+          "zone": 9,
+          "possibleFormations": 655223
+        },
+        {
+          "zone": 10,
+          "possibleFormations": 619595
+        },
+        {
+          "zone": 11,
+          "possibleFormations": 580051
+        },
+        {
+          "zone": 12,
+          "possibleFormations": 455476
+        },
+        {
+          "zone": 13,
+          "possibleFormations": 334857
+        },
+        {
+          "zone": 14,
+          "possibleFormations": 227169
+        },
+        {
+          "zone": 15,
+          "possibleFormations": 144544
+        },
+        {
+          "zone": 16,
+          "possibleFormations": 72515
+        },
+        {
+          "zone": 17,
+          "possibleFormations": 34484
+        },
+        {
+          "zone": 18,
+          "possibleFormations": 14973
+        },
+        {
+          "zone": 19,
+          "possibleFormations": 4311
+        },
+        {
+          "zone": 20,
+          "possibleFormations": 324
+        }
+      ],
+      "total": 5461512
+    },
+    "matk": {
+      "theoreticalMin": 1287,
+      "theoreticalMax": 14004,
+      "zones": [
+        {
+          "zone": 1,
+          "possibleFormations": 324370
+        },
+        {
+          "zone": 2,
+          "possibleFormations": 157488
+        },
+        {
+          "zone": 3,
+          "possibleFormations": 20051
+        },
+        {
+          "zone": 4,
+          "possibleFormations": 307260
+        },
+        {
+          "zone": 5,
+          "possibleFormations": 1082031
+        },
+        {
+          "zone": 6,
+          "possibleFormations": 222174
+        },
+        {
+          "zone": 7,
+          "possibleFormations": 80401
+        },
+        {
+          "zone": 8,
+          "possibleFormations": 1225830
+        },
+        {
+          "zone": 9,
+          "possibleFormations": 574402
+        },
+        {
+          "zone": 10,
+          "possibleFormations": 81403
+        },
+        {
+          "zone": 11,
+          "possibleFormations": 307293
+        },
+        {
+          "zone": 12,
+          "possibleFormations": 619640
+        },
+        {
+          "zone": 13,
+          "possibleFormations": 146857
+        },
+        {
+          "zone": 14,
+          "possibleFormations": 28095
+        },
+        {
+          "zone": 15,
+          "possibleFormations": 165932
+        },
+        {
+          "zone": 16,
+          "possibleFormations": 82034
+        },
+        {
+          "zone": 17,
+          "possibleFormations": 9910
+        },
+        {
+          "zone": 18,
+          "possibleFormations": 9319
+        },
+        {
+          "zone": 19,
+          "possibleFormations": 13524
+        },
+        {
+          "zone": 20,
+          "possibleFormations": 3498
+        }
+      ],
+      "total": 5461512
+    },
+    "def": {
+      "theoreticalMin": 409,
+      "theoreticalMax": 3885,
+      "zones": [
+        {
+          "zone": 1,
+          "possibleFormations": 3256
+        },
+        {
+          "zone": 2,
+          "possibleFormations": 77541
+        },
+        {
+          "zone": 3,
+          "possibleFormations": 376543
+        },
+        {
+          "zone": 4,
+          "possibleFormations": 707335
+        },
+        {
+          "zone": 5,
+          "possibleFormations": 813769
+        },
+        {
+          "zone": 6,
+          "possibleFormations": 841669
+        },
+        {
+          "zone": 7,
+          "possibleFormations": 811376
+        },
+        {
+          "zone": 8,
+          "possibleFormations": 654505
+        },
+        {
+          "zone": 9,
+          "possibleFormations": 469987
+        },
+        {
+          "zone": 10,
+          "possibleFormations": 315687
+        },
+        {
+          "zone": 11,
+          "possibleFormations": 193632
+        },
+        {
+          "zone": 12,
+          "possibleFormations": 105065
+        },
+        {
+          "zone": 13,
+          "possibleFormations": 52190
+        },
+        {
+          "zone": 14,
+          "possibleFormations": 24353
+        },
+        {
+          "zone": 15,
+          "possibleFormations": 9687
+        },
+        {
+          "zone": 16,
+          "possibleFormations": 3435
+        },
+        {
+          "zone": 17,
+          "possibleFormations": 1131
+        },
+        {
+          "zone": 18,
+          "possibleFormations": 281
+        },
+        {
+          "zone": 19,
+          "possibleFormations": 58
+        },
+        {
+          "zone": 20,
+          "possibleFormations": 12
+        }
+      ],
+      "total": 5461512
+    },
+    "mdef": {
+      "theoreticalMin": 714,
+      "theoreticalMax": 3534,
+      "zones": [
+        {
+          "zone": 1,
+          "possibleFormations": 9342
+        },
+        {
+          "zone": 2,
+          "possibleFormations": 93998
+        },
+        {
+          "zone": 3,
+          "possibleFormations": 312272
+        },
+        {
+          "zone": 4,
+          "possibleFormations": 588423
+        },
+        {
+          "zone": 5,
+          "possibleFormations": 798768
+        },
+        {
+          "zone": 6,
+          "possibleFormations": 868107
+        },
+        {
+          "zone": 7,
+          "possibleFormations": 810638
+        },
+        {
+          "zone": 8,
+          "possibleFormations": 672761
+        },
+        {
+          "zone": 9,
+          "possibleFormations": 501754
+        },
+        {
+          "zone": 10,
+          "possibleFormations": 343076
+        },
+        {
+          "zone": 11,
+          "possibleFormations": 214995
+        },
+        {
+          "zone": 12,
+          "possibleFormations": 125584
+        },
+        {
+          "zone": 13,
+          "possibleFormations": 67109
+        },
+        {
+          "zone": 14,
+          "possibleFormations": 32454
+        },
+        {
+          "zone": 15,
+          "possibleFormations": 14303
+        },
+        {
+          "zone": 16,
+          "possibleFormations": 5482
+        },
+        {
+          "zone": 17,
+          "possibleFormations": 1818
+        },
+        {
+          "zone": 18,
+          "possibleFormations": 507
+        },
+        {
+          "zone": 19,
+          "possibleFormations": 104
+        },
+        {
+          "zone": 20,
+          "possibleFormations": 17
+        }
+      ],
+      "total": 5461512
+    },
+    "hp": {
+      "theoreticalMin": 53401,
+      "theoreticalMax": 177892,
+      "zones": [
+        {
+          "zone": 1,
+          "possibleFormations": 10517
+        },
+        {
+          "zone": 2,
+          "possibleFormations": 190310
+        },
+        {
+          "zone": 3,
+          "possibleFormations": 330953
+        },
+        {
+          "zone": 4,
+          "possibleFormations": 307527
+        },
+        {
+          "zone": 5,
+          "possibleFormations": 604964
+        },
+        {
+          "zone": 6,
+          "possibleFormations": 767469
+        },
+        {
+          "zone": 7,
+          "possibleFormations": 595266
+        },
+        {
+          "zone": 8,
+          "possibleFormations": 669461
+        },
+        {
+          "zone": 9,
+          "possibleFormations": 655061
+        },
+        {
+          "zone": 10,
+          "possibleFormations": 437072
+        },
+        {
+          "zone": 11,
+          "possibleFormations": 331513
+        },
+        {
+          "zone": 12,
+          "possibleFormations": 259425
+        },
+        {
+          "zone": 13,
+          "possibleFormations": 145173
+        },
+        {
+          "zone": 14,
+          "possibleFormations": 76570
+        },
+        {
+          "zone": 15,
+          "possibleFormations": 47251
+        },
+        {
+          "zone": 16,
+          "possibleFormations": 21374
+        },
+        {
+          "zone": 17,
+          "possibleFormations": 7245
+        },
+        {
+          "zone": 18,
+          "possibleFormations": 3141
+        },
+        {
+          "zone": 19,
+          "possibleFormations": 1062
+        },
+        {
+          "zone": 20,
+          "possibleFormations": 158
+        }
+      ],
+      "total": 5461512
+    }
+  }
+}
