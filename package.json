@@ -12,7 +12,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "duplicates": "jscpd src && node scripts/check-redundancy.mjs",
-    "analyze:winning": "node --experimental-strip-types scripts/analyze-winning-patterns.ts"
+    "analyze:winning": "node --experimental-strip-types scripts/analyze-winning-patterns.ts",
+    "generate:theoretical": "node --experimental-strip-types scripts/generate-theoretical-formations.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.57.4",
