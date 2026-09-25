@@ -39,6 +39,15 @@ export default function TeamLabTabs({ mode, onChange }: TeamLabTabsProps) {
       >
         Étape 3 — Théorique
       </button>
+      <button
+        type="button"
+        role="tab"
+        aria-selected={mode === "generator"}
+        onClick={() => onChange("generator")}
+        className={mode === "generator" ? "ui-button-success" : "ui-button"}
+      >
+        Étape 4 — Générateur de team
+      </button>
     </div>
   );
 }
