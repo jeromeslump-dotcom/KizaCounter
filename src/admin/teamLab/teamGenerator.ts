@@ -98,37 +98,34 @@ function getTeamZones(heroes: Hero[]): GeneratorTargets {
   };
 }
 
-function getRelaxationDistance(
-  zones: GeneratorTargets,
-  targets: GeneratorTargets
-): { distance: number; metric: GeneratorMetricKey } | null {
-  for (let distance = 1; distance < ZONE_COUNT; distance++) {
-    for (const metric of SEARCH_ORDER) {
-      const matchesOtherMetrics = GENERATOR_METRICS.every(
-        ({ key }) => key === metric || zones[key] === targets[key]
-      );
-
-      if (
-        matchesOtherMetrics &&
-        Math.abs(zones[metric] - targets[metric]) === distance
-      ) {
-        return { distance, metric };
-      }
-    }
-  }
-
-  return null;
-}
-
 function getMatchRank(
   zones: GeneratorTargets,
   targets: GeneratorTargets
 ): { distance: number; metric: GeneratorMetricKey | null } | null {
-  if (GENERATOR_METRICS.every(({ key }) => zones[key] === targets[key])) {
+  let differentMetric: GeneratorMetricKey | null = null;
+
+  for (const { key } of GENERATOR_METRICS) {
+    if (zones[key] !== targets[key]) {
+      if (differentMetric !== null) return null;
+      differentMetric = key;
+    }
+  }
+
+  if (differentMetric === null) {
     return { distance: 0, metric: null };
   }
 
-  return getRelaxationDistance(zones, targets);
+  if (!SEARCH_ORDER.includes(differentMetric)) {
+    return null;
+  }
+
+  const distance = Math.abs(
+    zones[differentMetric] - targets[differentMetric]
+  );
+
+  return distance > 0 && distance < ZONE_COUNT
+    ? { distance, metric: differentMetric }
+    : null;
 }
 
 export async function generateTeams(
