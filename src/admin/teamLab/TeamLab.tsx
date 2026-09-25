@@ -2,6 +2,7 @@ import { useState } from "react";
 import TeamLabTabs from "./TeamLabTabs";
 import TheoreticalChart from "./TheoreticalChart";
 import ZoneChart from "./ZoneChart";
+import TeamGenerator from "./TeamGenerator";
 import {
   completeZones,
   METRICS,
@@ -22,13 +23,21 @@ export default function TeamLab({ open, onClose, onBack }: TeamLabProps) {
   if (!open) return null;
 
   const stepLabel =
-    mode === "combats" ? "1" : mode === "formations" ? "2" : "3";
+    mode === "combats"
+      ? "1"
+      : mode === "formations"
+        ? "2"
+        : mode === "theoretical"
+          ? "3"
+          : "4";
   const description =
     mode === "combats"
       ? "Répartition réelle des combats enregistrés dans les 20 zones"
       : mode === "formations"
         ? "Répartition réelle des formations enregistrées dans les 20 zones"
-        : "Distribution théorique des 5 461 512 formations possibles dans les 20 zones";
+        : mode === "theoretical"
+          ? "Distribution théorique des 5 461 512 formations possibles dans les 20 zones"
+          : "Génération d'équipes à partir de zones cibles et de relaxations progressives";
 
   return (
     <div
@@ -73,7 +82,9 @@ export default function TeamLab({ open, onClose, onBack }: TeamLabProps) {
         </div>
 
         <div className="min-h-0 flex-1 overflow-y-auto p-4 sm:p-6">
-          {mode === "theoretical" ? (
+          {mode === "generator" ? (
+            <TeamGenerator />
+          ) : mode === "theoretical" ? (
             <>
               <div className="mb-5 flex flex-wrap items-center gap-4 text-xs">
                 <span className="flex items-center gap-2">
