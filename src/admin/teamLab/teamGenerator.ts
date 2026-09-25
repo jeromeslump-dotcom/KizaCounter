@@ -29,10 +29,10 @@ export const GENERATOR_METRICS: Array<{
 
 const SEARCH_ORDER: GeneratorMetricKey[] = [
   "atk",
+  "matk",
   "def",
   "mdef",
   "hp",
-  "matk",
 ];
 
 const ZONE_COUNT = 20;
@@ -101,39 +101,59 @@ function getTeamZones(heroes: Hero[]): GeneratorTargets {
 function getMatchRank(
   zones: GeneratorTargets,
   targets: GeneratorTargets
-): { distance: number; metric: GeneratorMetricKey | null } | null {
-  let differentMetric: GeneratorMetricKey | null = null;
+): {
+  stage: number;
+  distance: number;
+  metric: GeneratorMetricKey | null;
+} | null {
+  const distances = SEARCH_ORDER.map((key) =>
+    Math.abs(zones[key] - targets[key])
+  );
 
-  for (const { key } of GENERATOR_METRICS) {
-    if (zones[key] !== targets[key]) {
-      if (differentMetric !== null) return null;
-      differentMetric = key;
-    }
+  const distance = Math.max(...distances);
+
+  if (distance === 0) {
+    return { stage: 0, distance: 0, metric: null };
   }
 
-  if (differentMetric === null) {
-    return { distance: 0, metric: null };
-  }
-
-  if (!SEARCH_ORDER.includes(differentMetric)) {
+  if (distance >= ZONE_COUNT) {
     return null;
   }
 
-  const distance = Math.abs(
-    zones[differentMetric] - targets[differentMetric]
-  );
+  // Progression cumulative :
+  // 0 0 0 0 0
+  // 1 0 0 0 0
+  // 1 1 0 0 0
+  // ...
+  // 1 1 1 1 1
+  // 2 1 1 1 1
+  // ...
+  // The last metric whose distance reaches the current maximum
+  // determines the exact step inside that progression.
+  let lastMaxIndex = -1;
 
-  return distance > 0 && distance < ZONE_COUNT
-    ? { distance, metric: differentMetric }
-    : null;
+  for (let index = 0; index < distances.length; index++) {
+    if (distances[index] === distance) {
+      lastMaxIndex = index;
+    }
+  }
+
+  if (lastMaxIndex < 0) {
+    return null;
+  }
+
+  return {
+    stage: (distance - 1) * SEARCH_ORDER.length + lastMaxIndex + 1,
+    distance,
+    metric: SEARCH_ORDER[lastMaxIndex],
+  };
 }
 
 export async function generateTeams(
   targets: GeneratorTargets,
   onProgress?: (progress: GeneratorProgress) => void
 ): Promise<GeneratorTeam[]> {
-  let bestDistance = Number.POSITIVE_INFINITY;
-  let bestMetricIndex = Number.POSITIVE_INFINITY;
+  let bestStage = Number.POSITIVE_INFINITY;
   let results: GeneratorTeam[] = [];
   let checked = 0;
 
@@ -156,19 +176,10 @@ export async function generateTeams(
             const match = getMatchRank(zones, targets);
 
             if (match) {
-              const metricIndex =
-                match.metric === null
-                  ? -1
-                  : SEARCH_ORDER.indexOf(match.metric);
-
-              const isBetter =
-                match.distance < bestDistance ||
-                (match.distance === bestDistance &&
-                  metricIndex < bestMetricIndex);
+              const isBetter = match.stage < bestStage;
 
               if (isBetter) {
-                bestDistance = match.distance;
-                bestMetricIndex = metricIndex;
+                bestStage = match.stage;
                 results = [
                   {
                     heroes,
@@ -177,10 +188,7 @@ export async function generateTeams(
                     relaxedMetric: match.metric,
                   },
                 ];
-              } else if (
-                match.distance === bestDistance &&
-                metricIndex === bestMetricIndex
-              ) {
+              } else if (match.stage === bestStage) {
                 results.push({
                   heroes,
                   zones,
@@ -212,11 +220,20 @@ export function getRelaxationLabel(team: GeneratorTeam): string {
     return "Correspondance exacte — les 5 caractéristiques sont dans la zone demandée";
   }
 
-  const metricLabel =
-    GENERATOR_METRICS.find(({ key }) => key === team.relaxedMetric)?.label ??
-    team.relaxedMetric;
+  const metricIndex = SEARCH_ORDER.indexOf(team.relaxedMetric);
 
-  return `${metricLabel} relâchée de ±${team.relaxationDistance} zone${
-    team.relaxationDistance > 1 ? "s" : ""
-  } — les 4 autres caractéristiques restent exactes`;
+  if (metricIndex < 0) {
+    return "Correspondance exacte — les 5 caractéristiques sont dans la zone demandée";
+  }
+
+  const tolerance = SEARCH_ORDER.slice(0, metricIndex + 1)
+    .map((key) => {
+      const label =
+        GENERATOR_METRICS.find((metric) => metric.key === key)?.label ?? key;
+
+      return `${label} ±${team.relaxationDistance}`;
+    })
+    .join(", ");
+
+  return `Tolérance cumulative : ${tolerance}`;
 }
