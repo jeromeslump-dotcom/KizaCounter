@@ -219,7 +219,7 @@ export function getRelaxationLabel(team: GeneratorTeam): string {
     GENERATOR_METRICS.find(({ key }) => key === team.relaxedMetric)?.label ??
     team.relaxedMetric;
 
-  return \`\${metricLabel} relâchée de ±\${team.relaxationDistance} zone\${
+  return `${metricLabel} relâchée de ±${team.relaxationDistance} zone${
     team.relaxationDistance > 1 ? "s" : ""
-  } — les 4 autres caractéristiques restent exactes\`;
+  } — les 4 autres caractéristiques restent exactes`;
 }
