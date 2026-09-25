@@ -144,7 +144,7 @@ export async function generateTeams(
 
   for (let i = 0; i < HEROES.length - 4; i++) {
     for (let j = i + 1; j < HEROES.length - 3; j++) {
-      for (let k = i + 2; k < HEROES.length - 2; k++) {
+      for (let k = j + 1; k < HEROES.length - 2; k++) {
         for (let l = k + 1; l < HEROES.length - 1; l++) {
           for (let m = l + 1; m < HEROES.length; m++) {
             const heroes = [
