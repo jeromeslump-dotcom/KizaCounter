@@ -94,10 +94,10 @@ export default function TeamGenerator() {
             Zones recherchées
           </h3>
           <p className="ui-text-secondary mt-1 text-xs leading-relaxed">
-            Le générateur cherche d&apos;abord les 5 zones exactes. S&apos;il
-            n&apos;en trouve aucune, il relâche une seule caractéristique à la
-            fois dans l&apos;ordre ATK → DEF → MDEF → PV → MATK, puis passe à
-            ±2, ±3, etc.
+            Le générateur cherche d&apos;abord les 5 zones exactes, puis élargit
+            progressivement les tolérances dans l&apos;ordre ATK → MATK → DEF →
+            MDEF → PV. Il passe par exemple de 0 0 0 0 0 à 1 0 0 0 0, puis
+            1 1 0 0 0, jusqu&apos;à 1 1 1 1 1, avant de passer à 2 1 1 1 1.
           </p>
         </div>
 
@@ -170,7 +170,7 @@ export default function TeamGenerator() {
                 Aucune formation trouvée.
               </p>
               <p className="ui-text-secondary mt-1 text-xs">
-                Même après avoir relâché une seule caractéristique à la fois
+                Même après avoir élargi progressivement les 5 caractéristiques
                 jusqu&apos;à ±19 zones, aucune des 5 461 512 formations ne
                 correspond à cette progression.
               </p>
