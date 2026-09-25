@@ -6,7 +6,7 @@ import {
   TOTAL_FORMATIONS,
   type GeneratorTargets,
   type GeneratorTeam,
-} from "./teamGenerator";
+} from "./teamGeneratorEngine";
 
 const INITIAL_TARGETS: GeneratorTargets = {
   atk: 20,
@@ -96,8 +96,8 @@ export default function TeamGenerator() {
           <p className="ui-text-secondary mt-1 text-xs leading-relaxed">
             Le générateur cherche d&apos;abord les 5 zones exactes, puis élargit
             progressivement les tolérances dans l&apos;ordre ATK → MATK → DEF →
-            MDEF → PV. Il passe par exemple de 0 0 0 0 0 à 1 0 0 0 0, puis
-            1 1 0 0 0, jusqu&apos;à 1 1 1 1 1, avant de passer à 2 1 1 1 1.
+            MDEF → PV. Il passe par exemple de 0 0 0 0 0 à 1 0 0 0 0, puis 1 1 0
+            0 0, jusqu&apos;à 1 1 1 1 1, avant de passer à 2 1 1 1 1.
           </p>
         </div>
 

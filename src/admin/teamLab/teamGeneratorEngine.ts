@@ -1,7 +1,6 @@
 import { HEROES, type Hero } from "../../data/heroes";
 
 export type GeneratorMetricKey = "atk" | "matk" | "def" | "mdef" | "hp";
-
 export type GeneratorTargets = Record<GeneratorMetricKey, number>;
 
 export type GeneratorTeam = {
@@ -9,6 +8,7 @@ export type GeneratorTeam = {
   zones: GeneratorTargets;
   relaxationDistance: number;
   relaxedMetric: GeneratorMetricKey | null;
+  relaxationStage: number;
 };
 
 export type GeneratorProgress = {
@@ -27,45 +27,32 @@ export const GENERATOR_METRICS: Array<{
   { key: "hp", label: "PV" },
 ];
 
-const SEARCH_ORDER: GeneratorMetricKey[] = [
-  "atk",
-  "matk",
-  "def",
-  "mdef",
-  "hp",
-];
+const SEARCH_ORDER: GeneratorMetricKey[] = ["atk", "matk", "def", "mdef", "hp"];
 
 const ZONE_COUNT = 20;
 export const TOTAL_FORMATIONS = 5_461_512;
 
-const METRIC_BOUNDS: Record<
-  GeneratorMetricKey,
-  { min: number; max: number }
-> = {
-  atk: { min: 1417, max: 14178 },
-  matk: { min: 1287, max: 14004 },
-  def: { min: 409, max: 3885 },
-  mdef: { min: 714, max: 3534 },
-  hp: { min: 53401, max: 177892 },
-};
+const METRIC_BOUNDS: Record<GeneratorMetricKey, { min: number; max: number }> =
+  {
+    atk: { min: 1417, max: 14178 },
+    matk: { min: 1287, max: 14004 },
+    def: { min: 409, max: 3885 },
+    mdef: { min: 714, max: 3534 },
+    hp: { min: 53401, max: 177892 },
+  };
 
 function getZone(
   value: number,
   theoreticalMin: number,
   theoreticalMax: number
 ): number {
-  const zoneWidth = Math.ceil(
-    (theoreticalMax - theoreticalMin) / ZONE_COUNT
-  );
+  const zoneWidth = Math.ceil((theoreticalMax - theoreticalMin) / ZONE_COUNT);
 
   if (value >= theoreticalMax) return ZONE_COUNT;
 
   return Math.max(
     1,
-    Math.min(
-      ZONE_COUNT,
-      Math.floor((value - theoreticalMin) / zoneWidth) + 1
-    )
+    Math.min(ZONE_COUNT, Math.floor((value - theoreticalMin) / zoneWidth) + 1)
   );
 }
 
@@ -83,17 +70,9 @@ function getTeamZones(heroes: Hero[]): GeneratorTargets {
 
   return {
     atk: getZone(totals.atk, METRIC_BOUNDS.atk.min, METRIC_BOUNDS.atk.max),
-    matk: getZone(
-      totals.matk,
-      METRIC_BOUNDS.matk.min,
-      METRIC_BOUNDS.matk.max
-    ),
+    matk: getZone(totals.matk, METRIC_BOUNDS.matk.min, METRIC_BOUNDS.matk.max),
     def: getZone(totals.def, METRIC_BOUNDS.def.min, METRIC_BOUNDS.def.max),
-    mdef: getZone(
-      totals.mdef,
-      METRIC_BOUNDS.mdef.min,
-      METRIC_BOUNDS.mdef.max
-    ),
+    mdef: getZone(totals.mdef, METRIC_BOUNDS.mdef.min, METRIC_BOUNDS.mdef.max),
     hp: getZone(totals.hp, METRIC_BOUNDS.hp.min, METRIC_BOUNDS.hp.max),
   };
 }
@@ -120,16 +99,6 @@ function getMatchRank(
     return null;
   }
 
-  // Progression cumulative :
-  // 0 0 0 0 0
-  // 1 0 0 0 0
-  // 1 1 0 0 0
-  // ...
-  // 1 1 1 1 1
-  // 2 1 1 1 1
-  // ...
-  // The last metric whose distance reaches the current maximum
-  // determines the exact step inside that progression.
   let lastMaxIndex = -1;
 
   for (let index = 0; index < distances.length; index++) {
@@ -146,6 +115,29 @@ function getMatchRank(
     stage: (distance - 1) * SEARCH_ORDER.length + lastMaxIndex + 1,
     distance,
     metric: SEARCH_ORDER[lastMaxIndex],
+  };
+}
+
+function getToleranceVector(stage: number): GeneratorTargets {
+  if (stage <= 0) {
+    return {
+      atk: 0,
+      matk: 0,
+      def: 0,
+      mdef: 0,
+      hp: 0,
+    };
+  }
+
+  const level = Math.floor((stage - 1) / SEARCH_ORDER.length) + 1;
+  const lastIndex = (stage - 1) % SEARCH_ORDER.length;
+
+  return {
+    atk: level,
+    matk: lastIndex >= 1 ? level : level - 1,
+    def: lastIndex >= 2 ? level : level - 1,
+    mdef: lastIndex >= 3 ? level : level - 1,
+    hp: lastIndex >= 4 ? level : level - 1,
   };
 }
 
@@ -186,6 +178,7 @@ export async function generateTeams(
                     zones,
                     relaxationDistance: match.distance,
                     relaxedMetric: match.metric,
+                    relaxationStage: match.stage,
                   },
                 ];
               } else if (match.stage === bestStage) {
@@ -194,6 +187,7 @@ export async function generateTeams(
                   zones,
                   relaxationDistance: match.distance,
                   relaxedMetric: match.metric,
+                  relaxationStage: match.stage,
                 });
               }
             }
@@ -216,24 +210,15 @@ export async function generateTeams(
 }
 
 export function getRelaxationLabel(team: GeneratorTeam): string {
-  if (!team.relaxedMetric) {
+  if (team.relaxationStage === 0) {
     return "Correspondance exacte — les 5 caractéristiques sont dans la zone demandée";
   }
 
-  const metricIndex = SEARCH_ORDER.indexOf(team.relaxedMetric);
+  const tolerances = getToleranceVector(team.relaxationStage);
 
-  if (metricIndex < 0) {
-    return "Correspondance exacte — les 5 caractéristiques sont dans la zone demandée";
-  }
-
-  const tolerance = SEARCH_ORDER.slice(0, metricIndex + 1)
-    .map((key) => {
-      const label =
-        GENERATOR_METRICS.find((metric) => metric.key === key)?.label ?? key;
-
-      return `${label} ±${team.relaxationDistance}`;
-    })
-    .join(", ");
+  const tolerance = GENERATOR_METRICS.map(({ key, label }) => {
+    return `${label} ±${tolerances[key]}`;
+  }).join(", ");
 
   return `Tolérance cumulative : ${tolerance}`;
 }
