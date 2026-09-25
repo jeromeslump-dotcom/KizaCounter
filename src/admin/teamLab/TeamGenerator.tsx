@@ -153,7 +153,7 @@ export default function TeamGenerator() {
               <div
                 className="h-full rounded-full transition-[width]"
                 style={{
-                  width: \`\${progress}%\`,
+                  width: `${progress}%`,
                   background: "var(--ui-theme-primary)",
                 }}
               />
