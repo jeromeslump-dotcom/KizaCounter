@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   generateTeams,
   GENERATOR_METRICS,
+  getGeneratorCandidateTotal,
   getRelaxationLabel,
-  TOTAL_FORMATIONS,
   type GeneratorTargets,
   type GeneratorTeam,
 } from "./teamGeneratorEngine";
@@ -17,6 +17,11 @@ const INITIAL_TARGETS: GeneratorTargets = {
 };
 
 const DISPLAY_LIMIT = 24;
+
+interface TeamGeneratorProps {
+  enabledHeroIds: Set<string>;
+  requiredHeroIds: Set<string>;
+}
 
 function TeamCard({ team }: { team: GeneratorTeam }) {
   return (
@@ -55,12 +60,26 @@ function TeamCard({ team }: { team: GeneratorTeam }) {
   );
 }
 
-export default function TeamGenerator() {
+export default function TeamGenerator({
+  enabledHeroIds,
+  requiredHeroIds,
+}: TeamGeneratorProps) {
   const [targets, setTargets] = useState<GeneratorTargets>(INITIAL_TARGETS);
   const [results, setResults] = useState<GeneratorTeam[]>([]);
   const [searched, setSearched] = useState(false);
   const [searching, setSearching] = useState(false);
   const [progress, setProgress] = useState(0);
+
+  const candidateTotal = getGeneratorCandidateTotal(
+    enabledHeroIds,
+    requiredHeroIds
+  );
+
+  useEffect(() => {
+    setSearched(false);
+    setResults([]);
+    setProgress(0);
+  }, [enabledHeroIds, requiredHeroIds]);
 
   const updateTarget = (key: keyof GeneratorTargets, value: number) => {
     setTargets((current) => ({ ...current, [key]: value }));
@@ -75,9 +94,14 @@ export default function TeamGenerator() {
     setProgress(0);
 
     try {
-      const generated = await generateTeams(targets, ({ checked, total }) => {
-        setProgress(Math.round((checked / total) * 100));
-      });
+      const generated = await generateTeams(
+        targets,
+        enabledHeroIds,
+        requiredHeroIds,
+        ({ checked, total }) => {
+          setProgress(total === 0 ? 0 : Math.round((checked / total) * 100));
+        }
+      );
 
       setResults(generated);
       setSearched(true);
@@ -131,22 +155,35 @@ export default function TeamGenerator() {
           <button
             type="button"
             onClick={handleGenerate}
-            disabled={searching}
+            disabled={searching || candidateTotal === 0}
             className="ui-button-success"
           >
             {searching ? "Recherche en cours…" : "Générer les teams"}
           </button>
 
           <span className="ui-text-muted text-xs">
-            {TOTAL_FORMATIONS.toLocaleString("fr-FR")} formations théoriques
-            parcourues
+            {candidateTotal.toLocaleString("fr-FR")} formations candidates
+          </span>
+
+          <span className="ui-text-muted text-xs">
+            {requiredHeroIds.size} héros obligatoire
+            {requiredHeroIds.size > 1 ? "s" : ""}
           </span>
         </div>
+
+        {candidateTotal === 0 && (
+          <p className="ui-error mt-3 text-xs">
+            Impossible de former une équipe de 5 avec la configuration actuelle.
+            Vérifiez les héros disponibles et les héros obligatoires.
+          </p>
+        )}
 
         {searching && (
           <div className="mt-4">
             <div className="mb-1 flex justify-between text-[11px]">
-              <span className="ui-text-secondary">Analyse des formations</span>
+              <span className="ui-text-secondary">
+                Analyse des formations candidates
+              </span>
               <span className="ui-text-muted">{progress}%</span>
             </div>
             <div className="h-2 overflow-hidden rounded-full bg-black/30">
@@ -171,8 +208,8 @@ export default function TeamGenerator() {
               </p>
               <p className="ui-text-secondary mt-1 text-xs">
                 Même après avoir élargi progressivement les 5 caractéristiques
-                jusqu&apos;à ±19 zones, aucune des 5 461 512 formations ne
-                correspond à cette progression.
+                jusqu&apos;à ±19 zones, aucune formation candidate ne correspond
+                à cette progression.
               </p>
             </div>
           ) : (
