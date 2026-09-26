@@ -1,5 +1,5 @@
 import { HEROES, type Hero } from "../../data/heroes";
-import winningPatterns from "../../data/winning-patterns.json";
+import winningPatterns from "../../../data/winning-patterns.json";
 
 export type GeneratorMetricKey = "atk" | "matk" | "def" | "mdef" | "hp";
 export type GeneratorTargets = Record<GeneratorMetricKey, number>;
@@ -197,10 +197,7 @@ export async function generateTeams(
     requiredHeroIds
   );
   const neededOptional = 5 - required.length;
-  const total = getGeneratorCandidateTotal(
-    availableHeroIds,
-    requiredHeroIds
-  );
+  const total = getGeneratorCandidateTotal(availableHeroIds, requiredHeroIds);
 
   if (neededOptional < 0 || total === 0) {
     onProgress?.({ checked: 0, total });

@@ -44,9 +44,7 @@ export default function TeamLabTabs({ mode, onChange }: TeamLabTabsProps) {
         role="tab"
         aria-selected={mode === "customization"}
         onClick={() => onChange("customization")}
-        className={
-          mode === "customization" ? "ui-button-success" : "ui-button"
-        }
+        className={mode === "customization" ? "ui-button-success" : "ui-button"}
       >
         Étape 4 — Personnalisation
       </button>

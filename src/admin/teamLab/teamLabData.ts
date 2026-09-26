@@ -11,11 +11,7 @@ export type ZoneRow = {
 
 export type MetricKey = "atk" | "matk" | "def" | "mdef" | "hp";
 export type TeamLabMode =
-  | "combats"
-  | "formations"
-  | "theoretical"
-  | "generator"
-  | "customization";
+  "combats" | "formations" | "theoretical" | "generator" | "customization";
 
 export type TheoreticalZoneRow = {
   zone: number;
