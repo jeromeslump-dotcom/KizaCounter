@@ -119,7 +119,7 @@ export default function TeamGeneratorCustomization({
               <span
                 className={[
                   "ui-card rounded-lg border px-3 py-1.5 text-xs font-bold",
-                  "border-[var(--ui-theme-primary)]",
+                  "border-[var(--ui-theme)]",
                 ].join(" ")}
               >
                 <span className="ui-text-primary">{enabledHeroIds.size}</span>
@@ -132,7 +132,7 @@ export default function TeamGeneratorCustomization({
               <span
                 className={[
                   "ui-card rounded-lg border px-3 py-1.5 text-xs font-bold",
-                  "border-[var(--ui-theme-primary)]",
+                  "border-[var(--ui-theme)]",
                 ].join(" ")}
               >
                 <span className="ui-text-primary">{requiredHeroIds.size}</span>
@@ -200,7 +200,7 @@ export default function TeamGeneratorCustomization({
                         ? "ui-card hover:scale-[1.02]"
                         : "ui-card cursor-not-allowed opacity-35",
                       required
-                        ? "border-[var(--ui-theme-primary)] ring-2 ring-[var(--ui-theme-primary)]"
+                        ? "border-[var(--ui-theme)] ring-2 ring-[var(--ui-theme)]"
                         : "",
                     ].join(" ")}
                   >
@@ -233,7 +233,7 @@ export default function TeamGeneratorCustomization({
                           className={[
                             "absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-md",
                             required
-                              ? "bg-[var(--ui-theme-primary)] text-[var(--ui-bg)]"
+                              ? "bg-[var(--ui-theme)] text-[var(--ui-bg)]"
                               : "bg-[var(--ui-bg)]/75 text-[var(--ui-text-primary)]/50",
                           ].join(" ")}
                         >
