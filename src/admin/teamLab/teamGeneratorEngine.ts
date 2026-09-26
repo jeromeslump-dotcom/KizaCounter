@@ -210,10 +210,11 @@ export async function generateTeams(
   const reportEvery = 50_000;
 
   const evaluate = (optionalSelection: Hero[]) => {
-    const heroes = [...required, ...optionalSelection].sort((a, b) =>
-      a.id.localeCompare(b.id)
-    );
-    const formation = heroes.map((hero) => hero.id).join(",");
+    const heroes = [...required, ...optionalSelection];
+    const formation = [...heroes]
+      .sort((a, b) => a.id.localeCompare(b.id))
+      .map((hero) => hero.id)
+      .join(",");
 
     if (neverTestedOnly && TESTED_FORMATIONS.has(formation)) {
       checked++;
