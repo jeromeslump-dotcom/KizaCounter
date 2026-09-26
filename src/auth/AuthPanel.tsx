@@ -289,7 +289,7 @@ export default function AuthPanel({
       <button
         type="submit"
         disabled={submitting}
-        className="ui-button-sm ui-button-sky"
+        className="ui-button-sm ui-button-sky disabled:opacity-50"
       >
         {submitting ? "..." : "OK"}
       </button>
