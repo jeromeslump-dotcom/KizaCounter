@@ -139,7 +139,8 @@ export function collectHistoricalCandidates(
 
 export function orderHistoricalCandidates(
   candidates: Iterable<HistoricalCandidate>,
-  sortBySimilarity = false
+  sortBySimilarity = false,
+  allowLosingCandidates = false
 ): HistoricalCandidate[] {
   const settings = getEngineSettings();
   const confidenceBattles = Math.max(
@@ -149,7 +150,9 @@ export function orderHistoricalCandidates(
 
   return [...candidates]
     .filter(
-      (candidate) => candidate.wins > 0 && candidate.wins >= candidate.losses
+      (candidate) =>
+        candidate.wins > 0 &&
+        (allowLosingCandidates || candidate.wins >= candidate.losses)
     )
     .map((candidate) => ({
       candidate,
