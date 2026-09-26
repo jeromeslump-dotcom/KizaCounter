@@ -63,7 +63,7 @@ export default function TeamGeneratorCustomization({
               aria-pressed={neverTestedOnly}
               onClick={() => onNeverTestedChange(true)}
               className={
-                neverTestedOnly ? "ui-button-success" : "ui-button"
+                neverTestedOnly ? "ui-button is-selected" : "ui-button"
               }
             >
               Formation jamais testée : activé
@@ -74,7 +74,7 @@ export default function TeamGeneratorCustomization({
               aria-pressed={!neverTestedOnly}
               onClick={() => onNeverTestedChange(false)}
               className={
-                !neverTestedOnly ? "ui-button-success" : "ui-button"
+                !neverTestedOnly ? "ui-button is-selected" : "ui-button"
               }
             >
               Formation jamais testée : désactivé
