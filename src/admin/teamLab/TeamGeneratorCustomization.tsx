@@ -26,7 +26,7 @@ export default function TeamGeneratorCustomization({
     return HEROES.filter(
       (hero) =>
         hero.name.toLowerCase().includes(normalizedQuery) ||
-        hero.alias.toLowerCase().includes(normalizedQuery)
+        hero.alias.toLowerCase().includes(normalizedQuery),
     );
   }, [query]);
 
@@ -44,6 +44,10 @@ export default function TeamGeneratorCustomization({
     onRequiredChange(next);
   };
 
+  const handleNeverTestedChange = (enabled: boolean) => {
+    onNeverTestedChange(enabled);
+  };
+
   return (
     <div className="space-y-5">
       <section className="ui-panel rounded-2xl border p-4 sm:p-5">
@@ -57,19 +61,25 @@ export default function TeamGeneratorCustomization({
             formations de 5 héros déjà présentes dans l&apos;historique.
           </p>
 
-          <div className="mt-3 flex flex-wrap gap-2">
+          <div className="relative z-10 mt-3 flex flex-wrap gap-2">
             <button
               type="button"
-              onClick={() => onNeverTestedChange(true)}
-              className={neverTestedOnly ? "ui-button-success" : "ui-button"}
+              onClick={() => handleNeverTestedChange(true)}
+              className={
+                neverTestedOnly ? "ui-button-success" : "ui-button"
+              }
+              style={{ pointerEvents: "auto" }}
             >
               Formation jamais testée : activé
             </button>
 
             <button
               type="button"
-              onClick={() => onNeverTestedChange(false)}
-              className={!neverTestedOnly ? "ui-button-success" : "ui-button"}
+              onClick={() => handleNeverTestedChange(false)}
+              className={
+                !neverTestedOnly ? "ui-button-success" : "ui-button"
+              }
+              style={{ pointerEvents: "auto" }}
             >
               Formation jamais testée : désactivé
             </button>
@@ -83,8 +93,8 @@ export default function TeamGeneratorCustomization({
             </h3>
 
             <p className="ui-text-secondary mt-1 text-xs leading-relaxed">
-              Le générateur utilise automatiquement les héros activés dans «
-              Gérer les héros ». Les héros désactivés ne peuvent jamais être
+              Le générateur utilise automatiquement les héros activés dans
+              « Gérer les héros ». Les héros désactivés ne peuvent jamais être
               proposés.
             </p>
 
@@ -162,7 +172,9 @@ export default function TeamGeneratorCustomization({
                       available
                         ? "ui-card hover:scale-[1.02]"
                         : "ui-card cursor-not-allowed opacity-35",
-                      required ? "ring-2 ring-[var(--ui-theme-primary)]" : "",
+                      required
+                        ? "ring-2 ring-[var(--ui-theme-primary)]"
+                        : "",
                     ].join(" ")}
                   >
                     <div className="relative p-2.5">
