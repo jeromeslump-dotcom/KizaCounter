@@ -30,7 +30,6 @@ export const GENERATOR_METRICS: Array<{
 const SEARCH_ORDER: GeneratorMetricKey[] = ["atk", "matk", "def", "mdef", "hp"];
 
 const ZONE_COUNT = 20;
-export const TOTAL_FORMATIONS = 5_461_512;
 
 const METRIC_BOUNDS: Record<GeneratorMetricKey, { min: number; max: number }> =
   {
@@ -141,70 +140,127 @@ function getToleranceVector(stage: number): GeneratorTargets {
   };
 }
 
+function combinationCount(n: number, k: number): number {
+  if (k < 0 || k > n) return 0;
+  if (k === 0 || k === n) return 1;
+
+  const r = Math.min(k, n - k);
+  let result = 1;
+
+  for (let i = 1; i <= r; i++) {
+    result = (result * (n - r + i)) / i;
+  }
+
+  return Math.round(result);
+}
+
+function getCandidateHeroes(
+  availableHeroIds: Set<string>,
+  requiredHeroIds: Set<string>
+): { required: Hero[]; optional: Hero[] } {
+  const available = HEROES.filter((hero) => availableHeroIds.has(hero.id));
+  const required = available.filter((hero) => requiredHeroIds.has(hero.id));
+  const requiredIds = new Set(required.map((hero) => hero.id));
+  const optional = available.filter((hero) => !requiredIds.has(hero.id));
+
+  return { required, optional };
+}
+
+export function getGeneratorCandidateTotal(
+  availableHeroIds: Set<string>,
+  requiredHeroIds: Set<string>
+): number {
+  const { required, optional } = getCandidateHeroes(
+    availableHeroIds,
+    requiredHeroIds
+  );
+
+  if (required.length > 5) return 0;
+
+  return combinationCount(optional.length, 5 - required.length);
+}
+
 export async function generateTeams(
   targets: GeneratorTargets,
+  availableHeroIds: Set<string> = new Set(HEROES.map((hero) => hero.id)),
+  requiredHeroIds: Set<string> = new Set(),
   onProgress?: (progress: GeneratorProgress) => void
 ): Promise<GeneratorTeam[]> {
+  const { required, optional } = getCandidateHeroes(
+    availableHeroIds,
+    requiredHeroIds
+  );
+  const neededOptional = 5 - required.length;
+  const total = getGeneratorCandidateTotal(
+    availableHeroIds,
+    requiredHeroIds
+  );
+
+  if (neededOptional < 0 || total === 0) {
+    onProgress?.({ checked: 0, total });
+    return [];
+  }
+
   let bestStage = Number.POSITIVE_INFINITY;
   let results: GeneratorTeam[] = [];
   let checked = 0;
-
   const reportEvery = 50_000;
 
-  for (let i = 0; i < HEROES.length - 4; i++) {
-    for (let j = i + 1; j < HEROES.length - 3; j++) {
-      for (let k = j + 1; k < HEROES.length - 2; k++) {
-        for (let l = k + 1; l < HEROES.length - 1; l++) {
-          for (let m = l + 1; m < HEROES.length; m++) {
-            const heroes = [
-              HEROES[i],
-              HEROES[j],
-              HEROES[k],
-              HEROES[l],
-              HEROES[m],
-            ];
+  const evaluate = (optionalSelection: Hero[]) => {
+    const heroes = [...required, ...optionalSelection].sort((a, b) =>
+      a.id.localeCompare(b.id)
+    );
+    const zones = getTeamZones(heroes);
+    const match = getMatchRank(zones, targets);
 
-            const zones = getTeamZones(heroes);
-            const match = getMatchRank(zones, targets);
-
-            if (match) {
-              const isBetter = match.stage < bestStage;
-
-              if (isBetter) {
-                bestStage = match.stage;
-                results = [
-                  {
-                    heroes,
-                    zones,
-                    relaxationDistance: match.distance,
-                    relaxedMetric: match.metric,
-                    relaxationStage: match.stage,
-                  },
-                ];
-              } else if (match.stage === bestStage) {
-                results.push({
-                  heroes,
-                  zones,
-                  relaxationDistance: match.distance,
-                  relaxedMetric: match.metric,
-                  relaxationStage: match.stage,
-                });
-              }
-            }
-
-            checked++;
-
-            if (checked % reportEvery === 0) {
-              onProgress?.({ checked, total: TOTAL_FORMATIONS });
-              await new Promise<void>((resolve) => setTimeout(resolve, 0));
-            }
-          }
-        }
+    if (match) {
+      if (match.stage < bestStage) {
+        bestStage = match.stage;
+        results = [
+          {
+            heroes,
+            zones,
+            relaxationDistance: match.distance,
+            relaxedMetric: match.metric,
+            relaxationStage: match.stage,
+          },
+        ];
+      } else if (match.stage === bestStage) {
+        results.push({
+          heroes,
+          zones,
+          relaxationDistance: match.distance,
+          relaxedMetric: match.metric,
+          relaxationStage: match.stage,
+        });
       }
     }
-  }
 
-  onProgress?.({ checked: TOTAL_FORMATIONS, total: TOTAL_FORMATIONS });
+    checked++;
+
+    if (checked % reportEvery === 0) {
+      onProgress?.({ checked, total });
+    }
+  };
+
+  const choose = (start: number, selected: Hero[]) => {
+    if (selected.length === neededOptional) {
+      evaluate(selected);
+      return;
+    }
+
+    const remaining = neededOptional - selected.length;
+
+    for (let index = start; index <= optional.length - remaining; index++) {
+      selected.push(optional[index]);
+      choose(index + 1, selected);
+      selected.pop();
+    }
+  };
+
+  choose(0, []);
+
+  onProgress?.({ checked: total, total });
 
   return results;
 }
