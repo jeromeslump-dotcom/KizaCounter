@@ -1,4 +1,5 @@
 import { HEROES, type Hero } from "../../data/heroes";
+import winningPatterns from "../../data/winning-patterns.json";
 
 export type GeneratorMetricKey = "atk" | "matk" | "def" | "mdef" | "hp";
 export type GeneratorTargets = Record<GeneratorMetricKey, number>;
@@ -10,6 +11,10 @@ export type GeneratorTeam = {
   relaxedMetric: GeneratorMetricKey | null;
   relaxationStage: number;
 };
+
+const TESTED_FORMATIONS = new Set(
+  winningPatterns.formations.all.map((formation) => formation.formation)
+);
 
 export type GeneratorProgress = {
   checked: number;
@@ -184,6 +189,7 @@ export async function generateTeams(
   targets: GeneratorTargets,
   availableHeroIds: Set<string> = new Set(HEROES.map((hero) => hero.id)),
   requiredHeroIds: Set<string> = new Set(),
+  neverTestedOnly = false,
   onProgress?: (progress: GeneratorProgress) => void
 ): Promise<GeneratorTeam[]> {
   const { required, optional } = getCandidateHeroes(
@@ -210,6 +216,13 @@ export async function generateTeams(
     const heroes = [...required, ...optionalSelection].sort((a, b) =>
       a.id.localeCompare(b.id)
     );
+    const formation = heroes.map((hero) => hero.id).join(",");
+
+    if (neverTestedOnly && TESTED_FORMATIONS.has(formation)) {
+      checked++;
+      return;
+    }
+
     const zones = getTeamZones(heroes);
     const match = getMatchRank(zones, targets);
 
