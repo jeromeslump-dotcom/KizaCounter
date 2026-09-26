@@ -42,22 +42,22 @@ export default function TeamLabTabs({ mode, onChange }: TeamLabTabsProps) {
       <button
         type="button"
         role="tab"
-        aria-selected={mode === "generator"}
-        onClick={() => onChange("generator")}
-        className={mode === "generator" ? "ui-button-success" : "ui-button"}
-      >
-        Étape 4 — Générateur de team
-      </button>
-      <button
-        type="button"
-        role="tab"
         aria-selected={mode === "customization"}
         onClick={() => onChange("customization")}
         className={
           mode === "customization" ? "ui-button-success" : "ui-button"
         }
       >
-        Étape 5 — Personnalisation
+        Étape 4 — Personnalisation
+      </button>
+      <button
+        type="button"
+        role="tab"
+        aria-selected={mode === "generator"}
+        onClick={() => onChange("generator")}
+        className={mode === "generator" ? "ui-button-success" : "ui-button"}
+      >
+        Étape 5 — Générateur de team
       </button>
     </div>
   );
