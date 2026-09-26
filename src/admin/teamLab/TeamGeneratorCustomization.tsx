@@ -116,7 +116,12 @@ export default function TeamGeneratorCustomization({
             </p>
 
             <div className="mt-3 flex flex-wrap items-center gap-2">
-              <span className="ui-card rounded-lg border px-3 py-1.5 text-xs font-bold">
+              <span
+                className={[
+                  "ui-card rounded-lg border px-3 py-1.5 text-xs font-bold",
+                  "border-[var(--ui-theme-primary)]",
+                ].join(" ")}
+              >
                 <span className="ui-text-primary">{enabledHeroIds.size}</span>
                 <span className="ui-text-muted">
                   {" "}
@@ -124,7 +129,12 @@ export default function TeamGeneratorCustomization({
                 </span>
               </span>
 
-              <span className="ui-card rounded-lg border px-3 py-1.5 text-xs font-bold">
+              <span
+                className={[
+                  "ui-card rounded-lg border px-3 py-1.5 text-xs font-bold",
+                  "border-[var(--ui-theme-primary)]",
+                ].join(" ")}
+              >
                 <span className="ui-text-primary">{requiredHeroIds.size}</span>
                 <span className="ui-text-muted">
                   {" "}
@@ -190,7 +200,7 @@ export default function TeamGeneratorCustomization({
                         ? "ui-card hover:scale-[1.02]"
                         : "ui-card cursor-not-allowed opacity-35",
                       required
-                        ? "ring-2 ring-[var(--ui-theme-primary)]"
+                        ? "border-[var(--ui-theme-primary)] ring-2 ring-[var(--ui-theme-primary)]"
                         : "",
                     ].join(" ")}
                   >
@@ -231,9 +241,6 @@ export default function TeamGeneratorCustomization({
                         </span>
                       </div>
 
-                      <div className="ui-text-soft mt-2 truncate text-center text-[10px] font-semibold sm:text-xs">
-                        {available ? "Disponible" : "Non disponible"}
-                      </div>
                     </div>
                   </button>
                 );
