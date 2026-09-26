@@ -44,10 +44,6 @@ export default function TeamGeneratorCustomization({
     onRequiredChange(next);
   };
 
-  const handleNeverTestedChange = (enabled: boolean) => {
-    onNeverTestedChange(enabled);
-  };
-
   return (
     <div className="space-y-5">
       <section className="ui-panel rounded-2xl border p-4 sm:p-5">
@@ -61,25 +57,25 @@ export default function TeamGeneratorCustomization({
             formations de 5 héros déjà présentes dans l&apos;historique.
           </p>
 
-          <div className="relative z-10 mt-3 flex flex-wrap gap-2">
+          <div className="relative z-20 mt-3 flex flex-wrap gap-2">
             <button
               type="button"
-              onClick={() => handleNeverTestedChange(true)}
+              aria-pressed={neverTestedOnly}
+              onClick={() => onNeverTestedChange(true)}
               className={
                 neverTestedOnly ? "ui-button-success" : "ui-button"
               }
-              style={{ pointerEvents: "auto" }}
             >
               Formation jamais testée : activé
             </button>
 
             <button
               type="button"
-              onClick={() => handleNeverTestedChange(false)}
+              aria-pressed={!neverTestedOnly}
+              onClick={() => onNeverTestedChange(false)}
               className={
                 !neverTestedOnly ? "ui-button-success" : "ui-button"
               }
-              style={{ pointerEvents: "auto" }}
             >
               Formation jamais testée : désactivé
             </button>
