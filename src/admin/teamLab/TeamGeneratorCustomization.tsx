@@ -1,5 +1,17 @@
 import { useMemo, useState } from "react";
 import { HEROES } from "../../data/heroes";
+import winningPatterns from "../../../data/winning-patterns.json";
+const HERO_PLAYED_COUNT = new Map<string, number>();
+
+for (const formation of winningPatterns.formations.all) {
+  for (const heroId of formation.heroes) {
+    HERO_PLAYED_COUNT.set(
+      heroId,
+      (HERO_PLAYED_COUNT.get(heroId) ?? 0) + formation.observations,
+    );
+  }
+}
+
 
 interface TeamGeneratorCustomizationProps {
   enabledHeroIds: Set<string>;
@@ -21,13 +33,22 @@ export default function TeamGeneratorCustomization({
   const filteredHeroes = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
 
-    if (!normalizedQuery) return HEROES;
+    const heroes = normalizedQuery
+      ? HEROES.filter(
+          (hero) =>
+            hero.name.toLowerCase().includes(normalizedQuery) ||
+            hero.alias.toLowerCase().includes(normalizedQuery),
+        )
+      : HEROES;
 
-    return HEROES.filter(
-      (hero) =>
-        hero.name.toLowerCase().includes(normalizedQuery) ||
-        hero.alias.toLowerCase().includes(normalizedQuery),
-    );
+    return [...heroes].sort((a, b) => {
+      const playedDifference =
+        (HERO_PLAYED_COUNT.get(b.id) ?? 0) -
+        (HERO_PLAYED_COUNT.get(a.id) ?? 0);
+
+      if (playedDifference !== 0) return playedDifference;
+      return HEROES.indexOf(a) - HEROES.indexOf(b);
+    });
   }, [query]);
 
   const toggleRequired = (heroId: string) => {
