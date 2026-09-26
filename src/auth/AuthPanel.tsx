@@ -1,18 +1,19 @@
 // src/auth/AuthPanel.tsx
 
-import { useState } from "react";
+import { lazy, Suspense, useState } from "react";
 import AdminPanel from "../admin/AdminPanel";
 import CombatHistory from "../admin/CombatHistory";
 import EncounteredTeams from "../admin/EncounteredTeams";
 import UserManagement from "../admin/UserManagement";
 import AnalysisHelp from "../admin/AnalysisHelp";
-import TeamLab from "../admin/teamLab/TeamLab";
 import type { Combat } from "../types";
 import { HEROES } from "../data/heroes";
 import { loadCombats } from "../storage/combatStorage";
 import { signIn, signOut } from "./auth";
 import useAuthSession from "./useAuthSession";
 import UserPanel from "./UserPanel";
+
+const TeamLab = lazy(() => import("../admin/teamLab/TeamLab"));
 
 interface AuthPanelProps {
   onManageHeroes: () => void;
@@ -236,12 +237,14 @@ export default function AuthPanel({
               onBack={backToAdminPanel}
             />
 
-            <TeamLab
-              open={showWinningPatternsLab}
-              onClose={closeAdminArea}
-              onBack={backToAdminPanel}
-              enabledHeroIds={enabledHeroIds}
-            />
+            <Suspense fallback={null}>
+              <TeamLab
+                open={showWinningPatternsLab}
+                onClose={closeAdminArea}
+                onBack={backToAdminPanel}
+                enabledHeroIds={enabledHeroIds}
+              />
+            </Suspense>
           </>
         )}
       </>
