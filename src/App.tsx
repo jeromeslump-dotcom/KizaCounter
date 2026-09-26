@@ -158,6 +158,7 @@ export default function App() {
                 onManageHeroes={() => setShowHeroManager(true)}
                 theme={theme}
                 onThemeChange={setTheme}
+                enabledHeroIds={enabledHeroIds}
               />
             </div>
           </div>
