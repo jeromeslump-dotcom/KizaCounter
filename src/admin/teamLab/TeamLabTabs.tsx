@@ -48,6 +48,17 @@ export default function TeamLabTabs({ mode, onChange }: TeamLabTabsProps) {
       >
         Étape 4 — Générateur de team
       </button>
+      <button
+        type="button"
+        role="tab"
+        aria-selected={mode === "customization"}
+        onClick={() => onChange("customization")}
+        className={
+          mode === "customization" ? "ui-button-success" : "ui-button"
+        }
+      >
+        Étape 5 — Personnalisation
+      </button>
     </div>
   );
 }
