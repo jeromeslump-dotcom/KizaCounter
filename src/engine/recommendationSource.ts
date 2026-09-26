@@ -80,18 +80,44 @@ function findBestEnabledExactHistoryTeam(
   excludedTeamKey?: string
 ): Hero[] | null {
   const targetKey = teamKey(enemyIds);
-  return findBestEnabledHistoricalTeam(
-    enemyIds,
-    candidateHeroes,
-    candidateHeroesById,
+  const enabledIds = new Set(candidateHeroes.map((hero) => hero.id));
+  const historicalCandidates = collectHistoricalCandidates(
     combats,
-    excludedTeamKey,
     (historicalEnemy) =>
       historicalEnemy.length === TEAM_SIZE &&
       teamKey(historicalEnemy) === targetKey
         ? 0
         : null
   );
+
+  const recommendationCandidates = [...historicalCandidates.values()].filter(
+    (candidate) => {
+      if (!candidate.heroIds.every((id) => enabledIds.has(id))) return false;
+      if (teamKey(candidate.heroIds) === excludedTeamKey) return false;
+      return true;
+    }
+  );
+
+  for (const candidate of orderHistoricalCandidates(
+    recommendationCandidates,
+    false,
+    true
+  )) {
+    const team = resolveTeamFromIds(candidate.heroIds, candidateHeroesById);
+    if (!team) continue;
+    if (!isUsableRecommendationTeam(team, combats, enemyIds)) continue;
+
+    const battles = candidate.wins + candidate.losses;
+    const winRate = battles > 0 ? (candidate.wins / battles) * 100 : 0;
+
+    if (battles >= 40 && winRate <= 50) {
+      continue;
+    }
+
+    return team;
+  }
+
+  return null;
 }
 
 function findBestEnabledSimilarHistoryTeam(
