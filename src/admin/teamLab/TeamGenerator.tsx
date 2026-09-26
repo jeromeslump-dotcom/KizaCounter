@@ -21,6 +21,7 @@ const DISPLAY_LIMIT = 24;
 interface TeamGeneratorProps {
   enabledHeroIds: Set<string>;
   requiredHeroIds: Set<string>;
+  neverTestedOnly: boolean;
 }
 
 function TeamCard({ team }: { team: GeneratorTeam }) {
@@ -63,6 +64,7 @@ function TeamCard({ team }: { team: GeneratorTeam }) {
 export default function TeamGenerator({
   enabledHeroIds,
   requiredHeroIds,
+  neverTestedOnly,
 }: TeamGeneratorProps) {
   const [targets, setTargets] = useState<GeneratorTargets>(INITIAL_TARGETS);
   const [results, setResults] = useState<GeneratorTeam[]>([]);
@@ -98,6 +100,7 @@ export default function TeamGenerator({
         targets,
         enabledHeroIds,
         requiredHeroIds,
+        neverTestedOnly,
         ({ checked, total }) => {
           setProgress(total === 0 ? 0 : Math.round((checked / total) * 100));
         }
