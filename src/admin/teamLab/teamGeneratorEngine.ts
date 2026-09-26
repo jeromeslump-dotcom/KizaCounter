@@ -164,7 +164,13 @@ function getCandidateHeroes(
   requiredHeroIds: Set<string>
 ): { required: Hero[]; optional: Hero[] } {
   const available = HEROES.filter((hero) => availableHeroIds.has(hero.id));
-  const required = available.filter((hero) => requiredHeroIds.has(hero.id));
+  const availableById = new Map(available.map((hero) => [hero.id, hero]));
+
+  // Preserve the order in which the user selected the required heroes.
+  const required = [...requiredHeroIds]
+    .map((heroId) => availableById.get(heroId))
+    .filter((hero): hero is Hero => Boolean(hero));
+
   const requiredIds = new Set(required.map((hero) => hero.id));
   const optional = available.filter((hero) => !requiredIds.has(hero.id));
 
