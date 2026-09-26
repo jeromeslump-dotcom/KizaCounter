@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import TeamLabTabs from "./TeamLabTabs";
 import TheoreticalChart from "./TheoreticalChart";
 import ZoneChart from "./ZoneChart";
 import TeamGenerator from "./TeamGenerator";
+import TeamGeneratorCustomization from "./TeamGeneratorCustomization";
 import {
   completeZones,
   METRICS,
@@ -15,10 +16,31 @@ interface TeamLabProps {
   open: boolean;
   onClose: () => void;
   onBack: () => void;
+  enabledHeroIds: Set<string>;
 }
 
-export default function TeamLab({ open, onClose, onBack }: TeamLabProps) {
+export default function TeamLab({
+  open,
+  onClose,
+  onBack,
+  enabledHeroIds,
+}: TeamLabProps) {
   const [mode, setMode] = useState<TeamLabMode>("combats");
+  const [requiredHeroIds, setRequiredHeroIds] = useState<Set<string>>(
+    () => new Set()
+  );
+
+  useEffect(() => {
+    setRequiredHeroIds((current) => {
+      const next = new Set(
+        [...current].filter((heroId) => enabledHeroIds.has(heroId))
+      );
+
+      if (next.size === current.size) return current;
+
+      return next;
+    });
+  }, [enabledHeroIds]);
 
   if (!open) return null;
 
@@ -29,7 +51,10 @@ export default function TeamLab({ open, onClose, onBack }: TeamLabProps) {
         ? "2"
         : mode === "theoretical"
           ? "3"
-          : "4";
+          : mode === "generator"
+            ? "4"
+            : "5";
+
   const description =
     mode === "combats"
       ? "Répartition réelle des combats enregistrés dans les 20 zones"
@@ -37,7 +62,9 @@ export default function TeamLab({ open, onClose, onBack }: TeamLabProps) {
         ? "Répartition réelle des formations enregistrées dans les 20 zones"
         : mode === "theoretical"
           ? "Distribution théorique des 5 461 512 formations possibles dans les 20 zones"
-          : "Génération d'équipes à partir de zones cibles et de relaxations progressives";
+          : mode === "generator"
+            ? "Génération d'équipes à partir de zones cibles et de relaxations progressives"
+            : "Personnalisation des héros utilisés par le générateur";
 
   return (
     <div
@@ -83,7 +110,16 @@ export default function TeamLab({ open, onClose, onBack }: TeamLabProps) {
 
         <div className="min-h-0 flex-1 overflow-y-auto p-4 sm:p-6">
           {mode === "generator" ? (
-            <TeamGenerator />
+            <TeamGenerator
+              enabledHeroIds={enabledHeroIds}
+              requiredHeroIds={requiredHeroIds}
+            />
+          ) : mode === "customization" ? (
+            <TeamGeneratorCustomization
+              enabledHeroIds={enabledHeroIds}
+              requiredHeroIds={requiredHeroIds}
+              onRequiredChange={setRequiredHeroIds}
+            />
           ) : mode === "theoretical" ? (
             <>
               <div className="mb-5 flex flex-wrap items-center gap-4 text-xs">
