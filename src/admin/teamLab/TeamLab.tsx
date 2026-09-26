@@ -51,7 +51,7 @@ export default function TeamLab({
         ? "2"
         : mode === "theoretical"
           ? "3"
-          : mode === "generator"
+          : mode === "customization"
             ? "4"
             : "5";
 
@@ -62,9 +62,9 @@ export default function TeamLab({
         ? "Répartition réelle des formations enregistrées dans les 20 zones"
         : mode === "theoretical"
           ? "Distribution théorique des 5 461 512 formations possibles dans les 20 zones"
-          : mode === "generator"
-            ? "Génération d'équipes à partir de zones cibles et de relaxations progressives"
-            : "Personnalisation des héros utilisés par le générateur";
+          : mode === "customization"
+            ? "Personnalisation des héros utilisés par le générateur"
+            : "Génération d'équipes à partir de zones cibles et de relaxations progressives";
 
   return (
     <div
