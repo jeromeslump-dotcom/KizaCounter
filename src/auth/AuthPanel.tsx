@@ -18,12 +18,14 @@ interface AuthPanelProps {
   onManageHeroes: () => void;
   theme: "agi" | "str" | "int";
   onThemeChange: (theme: "agi" | "str" | "int") => void;
+  enabledHeroIds: Set<string>;
 }
 
 export default function AuthPanel({
   onManageHeroes,
   theme,
   onThemeChange,
+  enabledHeroIds,
 }: AuthPanelProps) {
   const { session, profile, loading } = useAuthSession();
   const [showAdminPanel, setShowAdminPanel] = useState(false);
@@ -238,6 +240,7 @@ export default function AuthPanel({
               open={showWinningPatternsLab}
               onClose={closeAdminArea}
               onBack={backToAdminPanel}
+              enabledHeroIds={enabledHeroIds}
             />
           </>
         )}
@@ -286,7 +289,7 @@ export default function AuthPanel({
       <button
         type="submit"
         disabled={submitting}
-        className="ui-button-sm ui-button-sky disabled:opacity-50"
+        className="ui-button-sm ui-button-sky"
       >
         {submitting ? "..." : "OK"}
       </button>
