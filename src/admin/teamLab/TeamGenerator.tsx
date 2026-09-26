@@ -159,7 +159,7 @@ export default function TeamGenerator({
             type="button"
             onClick={handleGenerate}
             disabled={searching || candidateTotal === 0}
-            className="ui-button-success"
+            className="ui-button ui-button-success"
           >
             {searching ? "Recherche en cours…" : "Générer les teams"}
           </button>
