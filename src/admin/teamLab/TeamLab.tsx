@@ -29,6 +29,7 @@ export default function TeamLab({
   const [requiredHeroIds, setRequiredHeroIds] = useState<Set<string>>(
     () => new Set()
   );
+  const [neverTestedOnly, setNeverTestedOnly] = useState(false);
 
   useEffect(() => {
     setRequiredHeroIds((current) => {
@@ -113,11 +114,14 @@ export default function TeamLab({
             <TeamGenerator
               enabledHeroIds={enabledHeroIds}
               requiredHeroIds={requiredHeroIds}
+              neverTestedOnly={neverTestedOnly}
             />
           ) : mode === "customization" ? (
             <TeamGeneratorCustomization
               enabledHeroIds={enabledHeroIds}
               requiredHeroIds={requiredHeroIds}
+              neverTestedOnly={neverTestedOnly}
+              onNeverTestedChange={setNeverTestedOnly}
               onRequiredChange={setRequiredHeroIds}
             />
           ) : mode === "theoretical" ? (
