@@ -139,6 +139,12 @@
   color: white;
 }
 
+.ui-button.is-selected {
+  border-color: var(--ui-theme);
+  background-color: color-mix(in srgb, var(--ui-theme) 16%, var(--ui-bg));
+  color: white;
+}
+
 .ui-button {
   border-radius: 0.5rem;
   padding: 0.5rem 1rem;
