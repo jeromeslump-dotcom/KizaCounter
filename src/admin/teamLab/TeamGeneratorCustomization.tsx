@@ -117,10 +117,8 @@ export default function TeamGeneratorCustomization({
 
             <div className="mt-3 flex flex-wrap items-center gap-2">
               <span
-                className={[
-                  "ui-card rounded-lg border px-3 py-1.5 text-xs font-bold",
-                  "border-[var(--ui-theme)]",
-                ].join(" ")}
+                className="ui-card rounded-lg border px-3 py-1.5 text-xs font-bold"
+                style={{ borderColor: "var(--ui-theme)" }}
               >
                 <span className="ui-text-primary">{enabledHeroIds.size}</span>
                 <span className="ui-text-muted">
@@ -199,9 +197,7 @@ export default function TeamGeneratorCustomization({
                       available
                         ? "ui-card hover:scale-[1.02]"
                         : "ui-card cursor-not-allowed opacity-35",
-                      required
-                        ? "border-[var(--ui-theme)] ring-2 ring-[var(--ui-theme)]"
-                        : "",
+                      required ? "ring-2 ring-[var(--ui-theme)]" : "",
                     ].join(" ")}
                   >
                     <div className="relative p-2.5">
