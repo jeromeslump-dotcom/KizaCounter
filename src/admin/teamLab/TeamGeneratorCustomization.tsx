@@ -4,12 +4,16 @@ import { HEROES } from "../../data/heroes";
 interface TeamGeneratorCustomizationProps {
   enabledHeroIds: Set<string>;
   requiredHeroIds: Set<string>;
+  neverTestedOnly: boolean;
+  onNeverTestedChange: (enabled: boolean) => void;
   onRequiredChange: (heroIds: Set<string>) => void;
 }
 
 export default function TeamGeneratorCustomization({
   enabledHeroIds,
   requiredHeroIds,
+  neverTestedOnly,
+  onNeverTestedChange,
   onRequiredChange,
 }: TeamGeneratorCustomizationProps) {
   const [query, setQuery] = useState("");
@@ -43,6 +47,30 @@ export default function TeamGeneratorCustomization({
   return (
     <div className="space-y-5">
       <section className="ui-panel rounded-2xl border p-4 sm:p-5">
+        <div className="mb-5">
+          <h3 className="ui-text-primary text-base font-black">Formation jamais testée</h3>
+          <p className="ui-text-secondary mt-1 text-xs leading-relaxed">
+            Lorsque cette option est activée, le générateur exclut les formations de 5 héros déjà présentes dans l&apos;historique.
+          </p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => onNeverTestedChange(true)}
+              className={neverTestedOnly ? "ui-button-success" : "ui-button"}
+            >
+              Formation jamais testée : activé
+            </button>
+            <button
+              type="button"
+              onClick={() => onNeverTestedChange(false)}
+              className={!neverTestedOnly ? "ui-button-success" : "ui-button"}
+            >
+              Formation jamais testée : désactivé
+            </button>
+          </div>
+        </div>
+
+        <div className="border-t border-[var(--ui-border)] pt-5">
         <div className="mb-4">
           <h3 className="ui-text-primary text-base font-black">
             Héros disponibles
