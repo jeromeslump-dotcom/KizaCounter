@@ -9,11 +9,11 @@ import {
 } from "./teamGeneratorEngine";
 
 const INITIAL_TARGETS: GeneratorTargets = {
-  atk: 20,
+  atk: 8,
   matk: 8,
-  def: 12,
-  mdef: 15,
-  hp: 7,
+  def: 6,
+  mdef: 6,
+  hp: 6,
 };
 
 const DISPLAY_LIMIT = 24;
