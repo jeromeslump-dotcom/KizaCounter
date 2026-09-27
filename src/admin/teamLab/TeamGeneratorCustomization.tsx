@@ -203,7 +203,7 @@ export default function TeamGeneratorCustomization({
                     <div className="relative p-2.5">
                       <div
                         className={[
-                          "relative aspect-square overflow-hidden rounded-xl bg-[var(--ui-bg)]/20",
+                          "relative flex min-h-[150px] items-center justify-center overflow-hidden rounded-xl bg-[var(--ui-bg)]/20",
                           available
                             ? `hero-card-wallpaper-${hero.cls.toLowerCase()}`
                             : "",
@@ -214,16 +214,10 @@ export default function TeamGeneratorCustomization({
                           alt={hero.name}
                           loading="lazy"
                           className={[
-                            "absolute inset-0 h-full w-full object-cover",
+                            "h-auto max-h-[125px] w-full object-contain",
                             available ? "" : "grayscale",
                           ].join(" ")}
                         />
-
-                        <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-[var(--ui-bg)]/90 to-transparent" />
-
-                        <span className="absolute bottom-2 left-2 right-2 line-clamp-1 text-center text-xs font-bold ui-text-primary drop-shadow-lg">
-                          {hero.name}
-                        </span>
 
                         <span
                           className={[
@@ -237,6 +231,9 @@ export default function TeamGeneratorCustomization({
                         </span>
                       </div>
 
+                      <p className="ui-text-primary mt-2 truncate text-center text-xs font-bold">
+                        {hero.name}
+                      </p>
                     </div>
                   </button>
                 );
