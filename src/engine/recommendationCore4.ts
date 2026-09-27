@@ -110,13 +110,28 @@ export function findBestEnabledCore4HistoryTeam(
   }
 
   const settings = getEngineSettings();
+  const minCoreBattles = Math.max(
+    1,
+    settings.advanced.core4MinBattles
+  );
+  const minReplacementBattles = Math.max(
+    1,
+    settings.advanced.core4MinReplacementBattles
+  );
   const confidenceBattles = Math.max(
     1,
     settings.advanced.core4ConfidenceBattles
   );
 
   const rankedCores = [...coreCandidates.values()]
-    .filter((core) => core.wins > 0 && core.wins >= core.losses)
+    .filter((core) => {
+      const battles = core.wins + core.losses;
+      return (
+        core.wins > 0 &&
+        core.wins >= core.losses &&
+        battles >= minCoreBattles
+      );
+    })
     .map((core) => {
       const battles = core.wins + core.losses;
       return {
@@ -142,7 +157,14 @@ export function findBestEnabledCore4HistoryTeam(
 
   for (const rankedCore of rankedCores) {
     const replacements = [...rankedCore.core.replacements.entries()]
-      .filter(([, stats]) => stats.wins > 0 && stats.wins >= stats.losses)
+      .filter(([, stats]) => {
+        const battles = stats.wins + stats.losses;
+        return (
+          stats.wins > 0 &&
+          stats.wins >= stats.losses &&
+          battles >= minReplacementBattles
+        );
+      })
       .map(([heroId, stats]) => {
         const battles = stats.wins + stats.losses;
         return {
