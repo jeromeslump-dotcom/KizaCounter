@@ -112,6 +112,16 @@ export default function CounterGenerator({
 
   const enemyIds = useMemo(() => enemies.map((hero) => hero.id), [enemies]);
 
+  const enemyZones = useMemo(
+    () => (enemies.length === 5 ? getTeamZones(enemies) : null),
+    [enemies]
+  );
+
+  const exactReferences = useMemo(
+    () => (enemyZones ? findCounterReferences(combats, enemyZones) : []),
+    [combats, enemyZones]
+  );
+
   const toggleEnemy = (hero: Hero) => {
     setSearched(false);
     setResults([]);
