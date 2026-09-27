@@ -12,7 +12,6 @@ import {
   getGeneratorCandidateTotal,
   getRelaxationLabel,
   getTeamZones,
-  type GeneratorTargets,
   type GeneratorTeam,
 } from "./teamGeneratorEngine";
 
@@ -72,7 +71,6 @@ export default function CounterGenerator({
   const [searched, setSearched] = useState(false);
   const [results, setResults] = useState<GeneratorTeam[]>([]);
   const [reference, setReference] = useState<CounterReference | null>(null);
-  const [referencesFound, setReferencesFound] = useState<CounterReference[]>([]);
   const [progress, setProgress] = useState(0);
   const [neverTestedOnly, setNeverTestedOnly] = useState(true);
 
@@ -103,7 +101,6 @@ export default function CounterGenerator({
     const normalizedQuery = query.trim().toLowerCase();
 
     return HEROES.filter((hero) => {
-      if (!enabledHeroIds.has(hero.id)) return false;
       if (!normalizedQuery) return true;
 
       return (
@@ -119,7 +116,6 @@ export default function CounterGenerator({
     setSearched(false);
     setResults([]);
     setReference(null);
-    setReferencesFound([]);
 
     setEnemies((current) => {
       if (current.some((item) => item.id === hero.id)) {
@@ -131,8 +127,16 @@ export default function CounterGenerator({
     });
   };
 
+  const availableCounterHeroIds = useMemo(() => {
+    const ids = new Set(enabledHeroIds);
+    for (const enemyId of enemyIds) {
+      ids.delete(enemyId);
+    }
+    return ids;
+  }, [enabledHeroIds, enemyIds]);
+
   const candidateTotal = getGeneratorCandidateTotal(
-    enabledHeroIds,
+    availableCounterHeroIds,
     requiredHeroIds
   );
 
@@ -143,7 +147,6 @@ export default function CounterGenerator({
     setSearched(false);
     setResults([]);
     setReference(null);
-    setReferencesFound(exactReferences);
     setProgress(0);
 
     try {
@@ -153,7 +156,7 @@ export default function CounterGenerator({
 
         const generated = await generateTeams(
           currentReference.winningZones,
-          enabledHeroIds,
+          availableCounterHeroIds,
           requiredHeroIds,
           neverTestedOnly,
           ({ checked, total }) => {
