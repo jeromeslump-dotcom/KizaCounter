@@ -63,7 +63,11 @@ describe("historical recommendation sources", () => {
     const result = recommendTeamWithSource(
       target,
       heroes,
-      [combat(recommended, similarEnemy, true)]
+      [
+        combat(recommended, similarEnemy, true),
+        combat(recommended, similarEnemy, true),
+        combat(recommended, similarEnemy, true),
+      ]
     );
 
     expect(result.source).toBe("core4");

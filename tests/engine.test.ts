@@ -1,12 +1,10 @@
 import { describe, expect, it } from "vitest";
 import type { Combat, Hero } from "../src/types";
-import { evaluateEnemyClassHistory, evaluateExactTeamHistory } from "../src/engine/historicalScoring";
-import { recommendTeamWithSource } from "../src/engine/recommendationSource";
 import {
-  analyzeCore4Plus1,
-  core4ReplacementScore,
-  findBestCore4,
-} from "../src/engine/historicalCore4";
+  evaluateEnemyClassHistory,
+  evaluateExactTeamHistory,
+} from "../src/engine/historicalScoring";
+import { recommendTeamWithSource } from "../src/engine/recommendationSource";
 import { DEFAULT_ENGINE_SETTINGS } from "../src/engine/engineSettings";
 
 const enemy = ["enemy-a", "enemy-b", "enemy-c", "enemy-d", "enemy-e"];
@@ -162,8 +160,6 @@ describe("recommendation engine history", () => {
     };
 
     try {
-      // Isolate the class-history selector from the Core4 source so this test
-      // audits exactly the reliability rule for multiple historical teams.
       Object.assign(DEFAULT_ENGINE_SETTINGS.advanced, {
         core4MinBattles: 100,
       });
@@ -260,102 +256,6 @@ describe("recommendTeamWithSource priority", () => {
     );
   });
 
-  it("identifies the best complete Core4 plus fifth hero from the historical Core4 analyses", () => {
-    const coreATeam = [
-      "a",
-      "b",
-      "c",
-      "d",
-      "x",
-    ];
-
-    const coreBWinningTeam = [
-      "a",
-      "b",
-      "c",
-      "e",
-      "y",
-    ];
-
-    const coreBLosingTeam = [
-      "a",
-      "b",
-      "c",
-      "e",
-      "z",
-    ];
-
-    const combats: Combat[] = [
-      ...Array.from({ length: 8 }, () =>
-        combat(coreATeam, true)
-      ),
-      ...Array.from({ length: 12 }, () =>
-        combat(coreATeam, false)
-      ),
-      ...Array.from({ length: 6 }, () =>
-        combat(coreBWinningTeam, true)
-      ),
-      ...Array.from({ length: 14 }, () =>
-        combat(coreBLosingTeam, false)
-      ),
-    ];
-
-    const analyses = analyzeCore4Plus1(
-      enemy,
-      combats
-    );
-
-    expect(analyses.length).toBeGreaterThan(0);
-
-    const coreA = analyses.find((analysis) =>
-      analysis.coreIds.includes("d")
-    );
-
-    const coreB = analyses.find((analysis) =>
-      analysis.coreIds.includes("e")
-    );
-
-    expect(coreA).toBeDefined();
-    expect(coreB).toBeDefined();
-
-    const confidenceBattles =
-      DEFAULT_ENGINE_SETTINGS.advanced
-        .core4ConfidenceBattles;
-
-    const coreAConfidence =
-      coreA!.battles /
-      (coreA!.battles + confidenceBattles);
-
-    const coreBConfidence =
-      coreB!.battles /
-      (coreB!.battles + confidenceBattles);
-
-    const coreAScore =
-      coreA!.winRate * coreAConfidence;
-
-    const coreBScore =
-      coreB!.winRate * coreBConfidence;
-
-    const replacementB = coreB!.replacements.find(
-      (replacement) =>
-        replacement.heroId === "y"
-    );
-
-    expect(replacementB).toBeDefined();
-
-    expect(coreAScore).toBeGreaterThan(
-      coreBScore
-    );
-
-    const completeBScore =
-      coreBScore +
-      replacementB!.score * 0.3;
-
-    expect(completeBScore).toBeGreaterThan(
-      coreAScore
-    );
-  });
-
   it("uses enemy class history when no exact or Core4 history is available", () => {
     const targetEnemy = [
       "enemy-str-1",
@@ -419,174 +319,5 @@ describe("recommendTeamWithSource priority", () => {
     expect(result.team.map((hero) => hero.id).sort()).toEqual(
       [...historicalTeam].sort()
     );
-  });
-});
-
-describe("Core4 historical engine", () => {
-  it("uses the shared rational confidence curve", () => {
-    const settings = {
-      ...DEFAULT_ENGINE_SETTINGS,
-      advanced: {
-        ...DEFAULT_ENGINE_SETTINGS.advanced,
-        core4MinBattles: 1,
-        core4MinReplacementBattles: 1,
-        core4ConfidenceBattles: 4,
-      },
-    };
-
-    const analyses = analyzeCore4Plus1(
-      enemy,
-      [combat(teamA, true)],
-      settings
-    );
-
-    expect(analyses).toHaveLength(5);
-
-    expect(
-      analyses[0].replacements[0].confidence
-    ).toBeCloseTo(1 / 5, 10);
-  });
-
-  it("does not accept a Core4 below its minimum battle threshold", () => {
-    const analyses = analyzeCore4Plus1(
-      enemy,
-      [combat(teamA, true)]
-    );
-
-    expect(analyses).toHaveLength(0);
-  });
-
-  it("does not accept a replacement below its minimum battle threshold", () => {
-    const alternateTeam = [
-      "hero-a",
-      "hero-b",
-      "hero-c",
-      "hero-d",
-      "hero-f",
-    ];
-
-    const settings = {
-      ...DEFAULT_ENGINE_SETTINGS,
-      advanced: {
-        ...DEFAULT_ENGINE_SETTINGS.advanced,
-        core4MinBattles: 1,
-        core4MinReplacementBattles: 2,
-      },
-    };
-
-    const analyses = analyzeCore4Plus1(
-      enemy,
-      [
-        combat(teamA, true),
-        combat(alternateTeam, false),
-      ],
-      settings
-    );
-
-    expect(analyses).toHaveLength(9);
-
-    expect(
-      analyses.every(
-        (analysis) =>
-          analysis.replacements.length === 0
-      )
-    ).toBe(true);
-  });
-
-  it("calculates replacement score from delta and confidence", () => {
-    const settings = {
-      ...DEFAULT_ENGINE_SETTINGS,
-      advanced: {
-        ...DEFAULT_ENGINE_SETTINGS.advanced,
-        core4MinBattles: 1,
-        core4MinReplacementBattles: 1,
-        core4ConfidenceBattles: 4,
-      },
-    };
-
-    const analyses = analyzeCore4Plus1(
-      enemy,
-      [
-        combat(teamA, true),
-        combat(teamA, false),
-      ],
-      settings
-    );
-
-    const replacement =
-      analyses[0].replacements[0];
-
-    expect(replacement.delta).toBe(0);
-
-    expect(
-      replacement.confidence
-    ).toBeCloseTo(2 / 6, 10);
-
-    expect(
-      replacement.score
-    ).toBeCloseTo(
-      replacement.delta *
-        replacement.confidence,
-      10
-    );
-  });
-
-  it("finds the best Core4 using the same confidence curve", () => {
-    const settings = {
-      ...DEFAULT_ENGINE_SETTINGS,
-      advanced: {
-        ...DEFAULT_ENGINE_SETTINGS.advanced,
-        core4MinBattles: 1,
-        core4MinReplacementBattles: 1,
-        core4ConfidenceBattles: 4,
-      },
-    };
-
-    const result = findBestCore4(
-      enemy,
-      [
-        combat(teamA, true),
-        combat(teamA, false),
-      ],
-      settings
-    );
-
-    expect(result).toBeDefined();
-
-    const confidence =
-      result!.battles /
-      (result!.battles +
-        settings.advanced.core4ConfidenceBattles);
-
-    expect(confidence).toBeCloseTo(
-      2 / 6,
-      10
-    );
-  });
-
-  it("returns zero for an unavailable Core4 replacement", () => {
-    const settings = {
-      ...DEFAULT_ENGINE_SETTINGS,
-      advanced: {
-        ...DEFAULT_ENGINE_SETTINGS.advanced,
-        core4MinBattles: 1,
-        core4MinReplacementBattles: 2,
-      },
-    };
-
-    const result = core4ReplacementScore(
-      enemy,
-      [
-        "missing-a",
-        "missing-b",
-        "missing-c",
-        "missing-d",
-      ],
-      "missing-e",
-      [combat(teamA, true)],
-      settings
-    );
-
-    expect(result).toBe(0);
   });
 });
