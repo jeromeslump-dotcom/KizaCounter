@@ -4,6 +4,7 @@ import TheoreticalChart from "./TheoreticalChart";
 import ZoneChart from "./ZoneChart";
 import TeamGenerator from "./TeamGenerator";
 import TeamGeneratorCustomization from "./TeamGeneratorCustomization";
+import CounterGenerator from "./CounterGenerator";
 import {
   completeZones,
   METRICS,
@@ -54,7 +55,9 @@ export default function TeamLab({
           ? "3"
           : mode === "customization"
             ? "4"
-            : "5";
+            : mode === "generator"
+              ? "5"
+              : "6";
 
   const description =
     mode === "combats"
@@ -65,7 +68,9 @@ export default function TeamLab({
           ? "Distribution théorique des 5 461 512 formations possibles dans les 20 zones"
           : mode === "customization"
             ? "Personnalisation des héros utilisés par le générateur"
-            : "Génération d'équipes à partir de zones cibles et de relaxations progressives";
+            : mode === "generator"
+              ? "Génération d'équipes à partir de zones cibles et de relaxations progressives"
+              : "Recherche d'un contre à partir des combats réels et génération d'une formation jamais testée";
 
   return (
     <div
@@ -115,6 +120,11 @@ export default function TeamLab({
               enabledHeroIds={enabledHeroIds}
               requiredHeroIds={requiredHeroIds}
               neverTestedOnly={neverTestedOnly}
+            />
+          ) : mode === "counter" ? (
+            <CounterGenerator
+              enabledHeroIds={enabledHeroIds}
+              requiredHeroIds={requiredHeroIds}
             />
           ) : mode === "customization" ? (
             <TeamGeneratorCustomization
