@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { HEROES, type Hero } from "../../data/heroes";
 import type { Combat } from "../../types";
+import winningPatterns from "../../../data/winning-patterns.json";
 import { loadCombats } from "../../storage/combatStorage";
 import {
   findCounterReferences,
@@ -16,6 +17,17 @@ import {
 } from "./teamGeneratorEngine";
 
 const DISPLAY_LIMIT = 24;
+
+const HERO_PLAYED_COUNT = new Map<string, number>();
+
+for (const formation of winningPatterns.formations.all) {
+  for (const heroId of formation.heroes) {
+    HERO_PLAYED_COUNT.set(
+      heroId,
+      (HERO_PLAYED_COUNT.get(heroId) ?? 0) + formation.observations
+    );
+  }
+}
 
 interface CounterGeneratorProps {
   enabledHeroIds: Set<string>;
@@ -100,7 +112,7 @@ export default function CounterGenerator({
   const filteredHeroes = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
 
-    return HEROES.filter((hero) => {
+    const heroes = HEROES.filter((hero) => {
       if (!normalizedQuery) return true;
 
       return (
@@ -108,7 +120,16 @@ export default function CounterGenerator({
         hero.alias.toLowerCase().includes(normalizedQuery)
       );
     });
-  }, [query, enabledHeroIds]);
+
+    return [...heroes].sort((a, b) => {
+      const playedDifference =
+        (HERO_PLAYED_COUNT.get(b.id) ?? 0) -
+        (HERO_PLAYED_COUNT.get(a.id) ?? 0);
+
+      if (playedDifference !== 0) return playedDifference;
+      return HEROES.indexOf(a) - HEROES.indexOf(b);
+    });
+  }, [query]);
 
   const enemyIds = useMemo(() => enemies.map((hero) => hero.id), [enemies]);
 
@@ -253,17 +274,15 @@ export default function CounterGenerator({
                 ].join(" ")}
               >
                 <div className="relative p-2.5">
-                  <div className={`relative aspect-square overflow-hidden rounded-xl bg-[var(--ui-bg)]/20 hero-card-wallpaper-${hero.cls.toLowerCase()}`}>
+                  <div
+                    className={`relative flex min-h-[150px] items-center justify-center overflow-hidden rounded-xl bg-[var(--ui-bg)]/20 hero-card-wallpaper-${hero.cls.toLowerCase()}`}
+                  >
                     <img
                       src={hero.img}
                       alt={hero.name}
                       loading="lazy"
-                      className="absolute inset-0 h-full w-full object-cover"
+                      className="h-auto max-h-[125px] w-full object-contain"
                     />
-                    <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-[var(--ui-bg)]/90 to-transparent" />
-                    <span className="absolute bottom-2 left-2 right-2 line-clamp-1 text-center text-xs font-bold ui-text-primary drop-shadow-lg">
-                      {hero.name}
-                    </span>
                     <span
                       className={`absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-md ${
                         selected
@@ -274,6 +293,9 @@ export default function CounterGenerator({
                       {selected ? "✓" : "○"}
                     </span>
                   </div>
+                  <p className="ui-text-primary mt-2 truncate text-center text-xs font-bold">
+                    {hero.name}
+                  </p>
                 </div>
               </button>
             );
