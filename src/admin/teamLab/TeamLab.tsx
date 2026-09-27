@@ -140,7 +140,7 @@ export default function TeamLab({
                 <span className="flex items-center gap-2">
                   <span
                     className="h-3 w-3 rounded-full"
-                    style={{ background: "var(--ui-theme-primary)" }}
+                    style={{ background: "var(--ui-theme)" }}
                     aria-hidden="true"
                   />
                   Distribution théorique
