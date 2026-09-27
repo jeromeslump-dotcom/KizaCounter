@@ -57,6 +57,15 @@ export default function TeamLabTabs({ mode, onChange }: TeamLabTabsProps) {
       >
         Étape 5 — Générateur de team
       </button>
+      <button
+        type="button"
+        role="tab"
+        aria-selected={mode === "counter"}
+        onClick={() => onChange("counter")}
+        className={mode === "counter" ? "ui-button-success" : "ui-button"}
+      >
+        Étape 6 — Générateur de contre
+      </button>
     </div>
   );
 }
