@@ -11,6 +11,7 @@ import {
   generateTeams,
   getGeneratorCandidateTotal,
   getRelaxationLabel,
+  getTeamZones,
   type GeneratorTargets,
   type GeneratorTeam,
 } from "./teamGeneratorEngine";
@@ -113,67 +114,6 @@ export default function CounterGenerator({
   }, [query, enabledHeroIds]);
 
   const enemyIds = useMemo(() => enemies.map((hero) => hero.id), [enemies]);
-
-  const enemyZones = useMemo<GeneratorTargets | null>(() => {
-    if (enemies.length !== 5) return null;
-
-    const references = findCounterReferences(combats, {
-      atk: 1,
-      matk: 1,
-      def: 1,
-      mdef: 1,
-      hp: 1,
-    });
-
-    if (references.length === 0) return null;
-
-    return references[0].beatenZones;
-  }, [combats, enemies]);
-
-  const exactReferences = useMemo(() => {
-    if (enemies.length !== 5) return [];
-
-    const { getTeamZones } = requireTeamZones();
-    return findCounterReferences(combats, getTeamZones(enemies));
-  }, [combats, enemies]);
-
-  function requireTeamZones() {
-    return { getTeamZones: (heroes: Hero[]) => {
-      const totals = heroes.reduce(
-        (sum, hero) => ({
-          atk: sum.atk + hero.stats.atk,
-          matk: sum.matk + hero.stats.matk,
-          def: sum.def + hero.stats.def,
-          mdef: sum.mdef + hero.stats.mdef,
-          hp: sum.hp + hero.stats.hp,
-        }),
-        { atk: 0, matk: 0, def: 0, mdef: 0, hp: 0 }
-      );
-
-      const bounds = {
-        atk: [1417, 14178],
-        matk: [1287, 14004],
-        def: [409, 3885],
-        mdef: [714, 3534],
-        hp: [53401, 177892],
-      } as const;
-
-      const keys = ["atk", "matk", "def", "mdef", "hp"] as const;
-      return Object.fromEntries(
-        keys.map((key) => {
-          const width = Math.ceil((bounds[key][1] - bounds[key][0]) / 20);
-          const zone =
-            totals[key] >= bounds[key][1]
-              ? 20
-              : Math.max(
-                  1,
-                  Math.min(20, Math.floor((totals[key] - bounds[key][0]) / width) + 1)
-                );
-          return [key, zone];
-        })
-      ) as GeneratorTargets;
-    }};
-  }
 
   const toggleEnemy = (hero: Hero) => {
     setSearched(false);
