@@ -60,7 +60,7 @@ function getZone(
   );
 }
 
-function getTeamZones(heroes: Hero[]): GeneratorTargets {
+export function getTeamZones(heroes: Hero[]): GeneratorTargets {
   const totals = heroes.reduce(
     (sum, hero) => ({
       atk: sum.atk + hero.stats.atk,
