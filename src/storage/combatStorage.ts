@@ -78,19 +78,33 @@ function enrichCombat(
 // CHARGER LES COMBATS
 // ============================================================
 
-export async function loadCombats(): Promise<Combat[]> {
-  const { data, error } = await supabase
-    .from("combats")
-    .select(COMBAT_SELECT)
-    .eq("status", "active")
-    .order("created_at", { ascending: false });
+const COMBAT_PAGE_SIZE = 1000;
 
-  if (error) {
-    console.error("Erreur chargement combats :", error);
-    throw error;
+export async function loadCombats(): Promise<Combat[]> {
+  const combats: Combat[] = [];
+
+  for (let from = 0; ; from += COMBAT_PAGE_SIZE) {
+    const { data, error } = await supabase
+      .from("combats")
+      .select(COMBAT_SELECT)
+      .eq("status", "active")
+      .order("created_at", { ascending: false })
+      .range(from, from + COMBAT_PAGE_SIZE - 1);
+
+    if (error) {
+      console.error("Erreur chargement combats :", error);
+      throw error;
+    }
+
+    const page = (data ?? []) as Combat[];
+    combats.push(...page);
+
+    if (page.length < COMBAT_PAGE_SIZE) {
+      break;
+    }
   }
 
-  return (data ?? []) as Combat[];
+  return combats;
 }
 
 // ============================================================
