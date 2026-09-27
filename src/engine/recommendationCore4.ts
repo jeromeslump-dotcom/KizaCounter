@@ -110,10 +110,7 @@ export function findBestEnabledCore4HistoryTeam(
   }
 
   const settings = getEngineSettings();
-  const minCoreBattles = Math.max(
-    1,
-    settings.advanced.core4MinBattles
-  );
+  const minCoreBattles = Math.max(1, settings.advanced.core4MinBattles);
   const minReplacementBattles = Math.max(
     1,
     settings.advanced.core4MinReplacementBattles
@@ -127,9 +124,7 @@ export function findBestEnabledCore4HistoryTeam(
     .filter((core) => {
       const battles = core.wins + core.losses;
       return (
-        core.wins > 0 &&
-        core.wins >= core.losses &&
-        battles >= minCoreBattles
+        core.wins > 0 && core.wins >= core.losses && battles >= minCoreBattles
       );
     })
     .map((core) => {

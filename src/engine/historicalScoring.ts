@@ -5,11 +5,6 @@ import { getClassKey, teamKey, uniqueIds } from "./teamUtils";
 
 const TEAM_SIZE = 5;
 
-export interface HistoricalEnemyContext {
-  enemyKey: string;
-  combats: Combat[];
-}
-
 export interface HistoricalCandidate {
   heroIds: string[];
   wins: number;

@@ -62,7 +62,9 @@ function TeamCard({ team }: { team: GeneratorTeam }) {
       <div className="mt-3 grid grid-cols-5 gap-1 text-center text-[10px]">
         {(["atk", "matk", "def", "mdef", "hp"] as const).map((key) => (
           <div key={key} className="ui-panel-alt rounded-lg border px-1 py-1">
-            <div className="ui-text-muted">{key === "hp" ? "PV" : key.toUpperCase()}</div>
+            <div className="ui-text-muted">
+              {key === "hp" ? "PV" : key.toUpperCase()}
+            </div>
             <div className="ui-text-primary font-black">Z{team.zones[key]}</div>
           </div>
         ))}
@@ -95,7 +97,10 @@ export default function CounterGenerator({
         const history = await loadCombats();
         if (mounted) setCombats(history);
       } catch (error) {
-        console.error("Impossible de charger les combats pour le générateur de contre :", error);
+        console.error(
+          "Impossible de charger les combats pour le générateur de contre :",
+          error
+        );
         if (mounted) setCombats([]);
       } finally {
         if (mounted) setLoadingHistory(false);
@@ -123,8 +128,7 @@ export default function CounterGenerator({
 
     return [...heroes].sort((a, b) => {
       const playedDifference =
-        (HERO_PLAYED_COUNT.get(b.id) ?? 0) -
-        (HERO_PLAYED_COUNT.get(a.id) ?? 0);
+        (HERO_PLAYED_COUNT.get(b.id) ?? 0) - (HERO_PLAYED_COUNT.get(a.id) ?? 0);
 
       if (playedDifference !== 0) return playedDifference;
       return HEROES.indexOf(a) - HEROES.indexOf(b);
@@ -220,12 +224,15 @@ export default function CounterGenerator({
           </h3>
           <p className="ui-text-secondary mt-1 text-xs leading-relaxed">
             Sélectionnez les 5 héros ennemis. Le Lab calcule leurs 5 zones et
-            recherche les combats réels où cette formation de zones a été battue.
+            recherche les combats réels où cette formation de zones a été
+            battue.
           </p>
 
           <div className="mt-3 flex flex-wrap items-center gap-2">
             <span className="ui-card rounded-lg border px-3 py-1.5 text-xs font-bold">
-              <span className="ui-text-primary">{combats.length.toLocaleString("fr-FR")}</span>
+              <span className="ui-text-primary">
+                {combats.length.toLocaleString("fr-FR")}
+              </span>
               <span className="ui-text-muted"> combats analysés</span>
             </span>
             <span
@@ -310,8 +317,8 @@ export default function CounterGenerator({
               Recherche du contre
             </h3>
             <p className="ui-text-secondary mt-1 text-xs leading-relaxed">
-              La référence de contre est recherchée dans les combats réels.
-              Le générateur réutilise ensuite sa relaxation progressive pour
+              La référence de contre est recherchée dans les combats réels. Le
+              générateur réutilise ensuite sa relaxation progressive pour
               trouver une formation jamais testée.
             </p>
           </div>
@@ -321,7 +328,9 @@ export default function CounterGenerator({
               type="button"
               onClick={() => setNeverTestedOnly(true)}
               disabled={searching}
-              className={neverTestedOnly ? "ui-button is-selected" : "ui-button"}
+              className={
+                neverTestedOnly ? "ui-button is-selected" : "ui-button"
+              }
             >
               Formation jamais testée
             </button>
@@ -329,7 +338,9 @@ export default function CounterGenerator({
               type="button"
               onClick={() => setNeverTestedOnly(false)}
               disabled={searching}
-              className={!neverTestedOnly ? "ui-button is-selected" : "ui-button"}
+              className={
+                !neverTestedOnly ? "ui-button is-selected" : "ui-button"
+              }
             >
               Autoriser les formations testées
             </button>
@@ -442,7 +453,8 @@ export default function CounterGenerator({
                     {reference.combats > 1 ? "s" : ""}
                   </p>
                   <p className="ui-text-secondary mt-1 text-xs">
-                    Zones gagnantes : {formatZoneReference(reference.winningZones)}
+                    Zones gagnantes :{" "}
+                    {formatZoneReference(reference.winningZones)}
                   </p>
                   <p className="ui-text-secondary mt-1 text-xs">
                     Zones battues : {formatZoneReference(reference.beatenZones)}

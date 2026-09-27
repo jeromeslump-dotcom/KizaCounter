@@ -7,11 +7,10 @@ for (const formation of winningPatterns.formations.all) {
   for (const heroId of formation.heroes) {
     HERO_PLAYED_COUNT.set(
       heroId,
-      (HERO_PLAYED_COUNT.get(heroId) ?? 0) + formation.observations,
+      (HERO_PLAYED_COUNT.get(heroId) ?? 0) + formation.observations
     );
   }
 }
-
 
 interface TeamGeneratorCustomizationProps {
   enabledHeroIds: Set<string>;
@@ -37,14 +36,13 @@ export default function TeamGeneratorCustomization({
       ? HEROES.filter(
           (hero) =>
             hero.name.toLowerCase().includes(normalizedQuery) ||
-            hero.alias.toLowerCase().includes(normalizedQuery),
+            hero.alias.toLowerCase().includes(normalizedQuery)
         )
       : HEROES;
 
     return [...heroes].sort((a, b) => {
       const playedDifference =
-        (HERO_PLAYED_COUNT.get(b.id) ?? 0) -
-        (HERO_PLAYED_COUNT.get(a.id) ?? 0);
+        (HERO_PLAYED_COUNT.get(b.id) ?? 0) - (HERO_PLAYED_COUNT.get(a.id) ?? 0);
 
       if (playedDifference !== 0) return playedDifference;
       return HEROES.indexOf(a) - HEROES.indexOf(b);
@@ -110,8 +108,8 @@ export default function TeamGeneratorCustomization({
             </h3>
 
             <p className="ui-text-secondary mt-1 text-xs leading-relaxed">
-              Le générateur utilise automatiquement les héros activés dans
-              « Gérer les héros ». Les héros désactivés ne peuvent jamais être
+              Le générateur utilise automatiquement les héros activés dans «
+              Gérer les héros ». Les héros désactivés ne peuvent jamais être
               proposés.
             </p>
 

@@ -1,9 +1,6 @@
 import type { Combat } from "../../types";
 import { HEROES, type Hero } from "../../data/heroes";
-import {
-  getTeamZones,
-  type GeneratorTargets,
-} from "./teamGeneratorEngine";
+import { getTeamZones, type GeneratorTargets } from "./teamGeneratorEngine";
 
 export type CounterReference = {
   winningZones: GeneratorTargets;
@@ -20,7 +17,9 @@ function validTeam(heroIds: string[]): boolean {
 }
 
 export function buildCounterReferences(combats: Combat[]): CounterReference[] {
-  const heroesById = new Map<string, Hero>(HEROES.map((hero) => [hero.id, hero]));
+  const heroesById = new Map<string, Hero>(
+    HEROES.map((hero) => [hero.id, hero])
+  );
   const references = new Map<string, CounterReference>();
 
   for (const combat of combats) {
