@@ -172,7 +172,7 @@ export default function TheoreticalChart({
                 width={barWidth}
                 height={winHeight}
                 rx="2"
-                fill="#4ade80"
+                fill="var(--ui-success)"
                 opacity="0.9"
               >
                 <title>
@@ -191,7 +191,7 @@ export default function TheoreticalChart({
                 width={barWidth}
                 height={lossHeight}
                 rx="2"
-                fill="#ff5a62"
+                fill="var(--ui-danger)"
                 opacity="0.9"
               >
                 <title>
@@ -224,7 +224,7 @@ export default function TheoreticalChart({
         <path
           d={theoreticalPath}
           fill="none"
-          stroke="#3b82f6"
+          stroke="var(--ui-sky)"
           strokeWidth="4"
           strokeLinejoin="round"
           strokeLinecap="round"
@@ -237,8 +237,8 @@ export default function TheoreticalChart({
               cx={center}
               cy={y}
               r="5"
-              fill="#3b82f6"
-              stroke="#60a5fa"
+              fill="var(--ui-sky)"
+              stroke="var(--ui-sky)"
               strokeWidth="2"
             >
               <title>
@@ -353,7 +353,7 @@ export default function TheoreticalChart({
           textAnchor="middle"
           fontSize="11"
           fontWeight="700"
-          fill="#93c5fd"
+          fill="var(--ui-sky)"
           transform={"rotate(-90 15 " + (top + chartHeight / 2) + ")"}
         >
           Y → Formations théoriques
@@ -383,7 +383,7 @@ export default function TheoreticalChart({
           y={top + 10}
           textAnchor="start"
           fontSize="10"
-          fill="#93c5fd"
+          fill="var(--ui-sky)"
         >
           Max zone : {formatNumber(maxTheoretical)}
         </text>
@@ -407,7 +407,7 @@ export default function TheoreticalChart({
         <span className="ui-text-secondary">
           <span
             className="mr-2 inline-block h-[3px] w-7 align-middle rounded"
-            style={{ background: "#3b82f6" }}
+            style={{ background: "var(--ui-sky)" }}
           />
           Théorique —{" "}
           <strong className="ui-text-primary">
@@ -419,7 +419,7 @@ export default function TheoreticalChart({
         <span className="ui-text-secondary">
           <span
             className="mr-1 inline-block h-3 w-3 rounded-sm align-middle"
-            style={{ background: "#4ade80" }}
+            style={{ background: "var(--ui-success)" }}
           />
           WIN — formations observées
         </span>
@@ -427,7 +427,7 @@ export default function TheoreticalChart({
         <span className="ui-text-secondary">
           <span
             className="mr-1 inline-block h-3 w-3 rounded-sm align-middle"
-            style={{ background: "#ff5a62" }}
+            style={{ background: "var(--ui-danger)" }}
           />
           LOSS — formations observées
         </span>
