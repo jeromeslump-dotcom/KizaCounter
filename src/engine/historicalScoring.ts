@@ -144,10 +144,10 @@ export function orderHistoricalCandidates(
   );
 
   return [...candidates]
-    .filter(
-      (candidate) =>
-        candidate.wins > 0 &&
-        (allowLosingCandidates || candidate.wins >= candidate.losses)
+    .filter((candidate) =>
+      allowLosingCandidates
+        ? true
+        : candidate.wins > 0 && candidate.wins >= candidate.losses
     )
     .map((candidate) => ({
       candidate,
