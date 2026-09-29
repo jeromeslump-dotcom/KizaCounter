@@ -342,6 +342,6 @@ export function recommendationSourceLabel(
     case "core4":
       return RECOMMENDATION_SOURCE_LABELS.core4;
     case "fallback":
-      return RECOMMATION_SOURCE_LABELS.fallback;
+      return RECOMMENDATION_SOURCE_LABELS.fallback;
   }
 }
