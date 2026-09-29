@@ -1,7 +1,25 @@
 import type { Combat, Hero } from "../types";
+import { getEngineSettings } from "./engineSettings";
+import { evaluateTeamHistory } from "./historicalScoring";
 import { teamKey, uniqueIds } from "./teamUtils";
 
 const TEAM_SIZE = 5;
+
+export function isHistoricalTeamEligible(
+  teamIds: string[],
+  combats: Combat[]
+): boolean {
+  if (uniqueIds(teamIds).length !== TEAM_SIZE) return false;
+
+  const history = evaluateTeamHistory(teamIds, combats);
+  const { exactHistoryMinBattles, exactHistoryMinWinRate } =
+    getEngineSettings().advanced;
+
+  return (
+    history.battles >= exactHistoryMinBattles &&
+    history.winRate >= exactHistoryMinWinRate
+  );
+}
 
 /**
  * A team that has already been played but has never won must never be
