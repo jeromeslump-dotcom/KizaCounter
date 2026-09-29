@@ -25,6 +25,8 @@ interface AdvancedSettingRowProps {
   onChange: (value: number) => void;
 }
 
+type EngineSettingsTab = "team" | "history" | "core4";
+
 function formatNumber(value: number): string {
   return Number.isInteger(value) ? String(value) : value.toFixed(2);
 }
@@ -71,6 +73,48 @@ function AdvancedSettingRow({
   );
 }
 
+interface SettingsTabProps {
+  icon: string;
+  title: string;
+  description: string;
+  active: boolean;
+  onClick: () => void;
+}
+
+function SettingsTab({
+  icon,
+  title,
+  description,
+  active,
+  onClick,
+}: SettingsTabProps) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-selected={active}
+      className={`ui-card ${active ? "is-active" : ""} w-full rounded-xl p-4 text-left transition hover:scale-[1.01]`}
+    >
+      <span className="flex items-start gap-3">
+        <span
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border ui-divider text-lg"
+          aria-hidden="true"
+        >
+          {icon}
+        </span>
+        <span className="min-w-0">
+          <span className="ui-text-primary block text-sm font-black">
+            {title}
+          </span>
+          <span className="ui-text-secondary mt-1 block text-xs leading-relaxed">
+            {description}
+          </span>
+        </span>
+      </span>
+    </button>
+  );
+}
+
 export default function EngineSettings({
   open,
   onClose,
@@ -79,6 +123,7 @@ export default function EngineSettings({
   const [settings, setSettings] = useState<EngineSettings>(() =>
     getEngineSettings()
   );
+  const [activeTab, setActiveTab] = useState<EngineSettingsTab>("team");
 
   if (!open) return null;
 
@@ -148,108 +193,154 @@ export default function EngineSettings({
         </header>
 
         <div className="max-h-[68vh] overflow-y-auto p-4 sm:p-6">
-          <div className="ui-panel-alt rounded-2xl border px-4 sm:px-5">
-            <AdvancedSettingRow
-              icon="🛡️"
-              label="Combats pour confiance maximale"
-              value={advanced.historicalConfidenceBattles}
-              min={1}
-              max={20}
-              step={1}
-              unit="combats"
-              onChange={(value) =>
-                updateAdvanced("historicalConfidenceBattles", value)
-              }
-            />
+          <div className="flex flex-col gap-4 md:flex-row md:items-start">
+            <nav
+              className="flex w-full shrink-0 flex-col gap-2 md:w-56"
+              aria-label="Catégories des réglages du moteur"
+            >
+              <SettingsTab
+                icon="🎯"
+                title="Team historique"
+                description="Seuils d'éligibilité"
+                active={activeTab === "team"}
+                onClick={() => setActiveTab("team")}
+              />
+              <SettingsTab
+                icon="🛡️"
+                title="Historique"
+                description="Confiance et fiabilité"
+                active={activeTab === "history"}
+                onClick={() => setActiveTab("history")}
+              />
+              <SettingsTab
+                icon="🧩"
+                title="Core4"
+                description="Paramètres spécifiques"
+                active={activeTab === "core4"}
+                onClick={() => setActiveTab("core4")}
+              />
+            </nav>
 
-            <AdvancedSettingRow
-              icon="🛡️"
-              label="Base de fiabilité"
-              value={advanced.historicalReliabilityBase}
-              min={0}
-              max={1}
-              step={0.05}
-              unit="×"
-              onChange={(value) =>
-                updateAdvanced("historicalReliabilityBase", value)
-              }
-            />
+            <div className="ui-panel-alt min-w-0 flex-1 rounded-2xl border px-4 sm:px-5">
+              {activeTab === "team" && (
+                <>
+                  <AdvancedSettingRow
+                    icon="🎯"
+                    label="Combats minimum requis pour une team historique"
+                    value={advanced.exactHistoryMinBattles}
+                    min={1}
+                    max={100}
+                    step={1}
+                    unit="combats"
+                    onChange={(value) =>
+                      updateAdvanced("exactHistoryMinBattles", value)
+                    }
+                  />
 
-            <AdvancedSettingRow
-              icon="🛡️"
-              label="Poids de la confiance"
-              value={advanced.historicalReliabilityConfidenceWeight}
-              min={0}
-              max={1}
-              step={0.05}
-              unit="×"
-              onChange={(value) =>
-                updateAdvanced("historicalReliabilityConfidenceWeight", value)
-              }
-            />
+                  <AdvancedSettingRow
+                    icon="🎯"
+                    label="Taux de victoire minimum d’une team historique"
+                    value={advanced.exactHistoryMinWinRate}
+                    min={0}
+                    max={100}
+                    step={1}
+                    unit="%"
+                    onChange={(value) =>
+                      updateAdvanced("exactHistoryMinWinRate", value)
+                    }
+                  />
+                </>
+              )}
 
-            <AdvancedSettingRow
-              icon="🎯"
-              label="Combats minimum requis pour une team historique"
-              value={advanced.exactHistoryMinBattles}
-              min={1}
-              max={100}
-              step={1}
-              unit="combats"
-              onChange={(value) =>
-                updateAdvanced("exactHistoryMinBattles", value)
-              }
-            />
+              {activeTab === "history" && (
+                <>
+                  <AdvancedSettingRow
+                    icon="🛡️"
+                    label="Combats pour confiance maximale"
+                    value={advanced.historicalConfidenceBattles}
+                    min={1}
+                    max={20}
+                    step={1}
+                    unit="combats"
+                    onChange={(value) =>
+                      updateAdvanced("historicalConfidenceBattles", value)
+                    }
+                  />
 
-            <AdvancedSettingRow
-              icon="🎯"
-              label="Taux de victoire minimum d’une team historique"
-              value={advanced.exactHistoryMinWinRate}
-              min={0}
-              max={100}
-              step={1}
-              unit="%"
-              onChange={(value) =>
-                updateAdvanced("exactHistoryMinWinRate", value)
-              }
-            />
+                  <AdvancedSettingRow
+                    icon="🛡️"
+                    label="Base de fiabilité"
+                    value={advanced.historicalReliabilityBase}
+                    min={0}
+                    max={1}
+                    step={0.05}
+                    unit="×"
+                    onChange={(value) =>
+                      updateAdvanced("historicalReliabilityBase", value)
+                    }
+                  />
 
-            <AdvancedSettingRow
-              icon="🧩"
-              label="Combats minimum pour valider un Core4"
-              value={advanced.core4MinBattles}
-              min={1}
-              max={20}
-              step={1}
-              unit="combats"
-              onChange={(value) => updateAdvanced("core4MinBattles", value)}
-            />
+                  <AdvancedSettingRow
+                    icon="🛡️"
+                    label="Poids de la confiance"
+                    value={advanced.historicalReliabilityConfidenceWeight}
+                    min={0}
+                    max={1}
+                    step={0.05}
+                    unit="×"
+                    onChange={(value) =>
+                      updateAdvanced(
+                        "historicalReliabilityConfidenceWeight",
+                        value
+                      )
+                    }
+                  />
+                </>
+              )}
 
-            <AdvancedSettingRow
-              icon="🧩"
-              label="Combats minimum pour prendre en compte un remplaçant Core4"
-              value={advanced.core4MinReplacementBattles}
-              min={1}
-              max={20}
-              step={1}
-              unit="combats"
-              onChange={(value) =>
-                updateAdvanced("core4MinReplacementBattles", value)
-              }
-            />
+              {activeTab === "core4" && (
+                <>
+                  <AdvancedSettingRow
+                    icon="🧩"
+                    label="Combats minimum pour valider un Core4"
+                    value={advanced.core4MinBattles}
+                    min={1}
+                    max={20}
+                    step={1}
+                    unit="combats"
+                    onChange={(value) =>
+                      updateAdvanced("core4MinBattles", value)
+                    }
+                  />
 
-            <AdvancedSettingRow
-              icon="🧩"
-              label="Combats pour confiance maximale du Core4"
-              value={advanced.core4ConfidenceBattles}
-              min={1}
-              max={20}
-              step={1}
-              unit="combats"
-              onChange={(value) =>
-                updateAdvanced("core4ConfidenceBattles", value)
-              }
-            />
+                  <AdvancedSettingRow
+                    icon="🧩"
+                    label="Combats minimum pour prendre en compte un remplaçant Core4"
+                    value={advanced.core4MinReplacementBattles}
+                    min={1}
+                    max={20}
+                    step={1}
+                    unit="combats"
+                    onChange={(value) =>
+                      updateAdvanced("core4MinReplacementBattles", value)
+                    }
+                  />
+
+                  <AdvancedSettingRow
+                    icon="🧩"
+                    label="Combats pour confiance maximale du Core4"
+                    value={advanced.core4ConfidenceBattles}
+                    min={1}
+                    max={20}
+                    step={1}
+                    unit="combats"
+                    onChange={(value) =>
+                      updateAdvanced("core4ConfidenceBattles", value)
+                    }
+                  />
+                </>
+              )}
+            </div>
           </div>
 
           <div className="mt-5 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
