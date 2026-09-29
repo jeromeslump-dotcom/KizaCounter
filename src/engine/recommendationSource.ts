@@ -18,6 +18,7 @@ import {
   uniqueIds,
 } from "./teamUtils";
 import { RECOMMENDATION_SOURCE_LABELS } from "./recommendationLabels";
+import { getEngineSettings } from "./engineSettings";
 
 export type RecommendationSource =
   | "exact-history"
@@ -110,7 +111,13 @@ function findBestEnabledExactHistoryTeam(
     const battles = candidate.wins + candidate.losses;
     const winRate = battles > 0 ? (candidate.wins / battles) * 100 : 0;
 
-    if (battles >= 40 && winRate <= 50) {
+    const { exactHistoryMinBattles, exactHistoryMinWinRate } =
+      getEngineSettings().advanced;
+
+    if (
+      battles >= exactHistoryMinBattles &&
+      winRate <= exactHistoryMinWinRate
+    ) {
       continue;
     }
 
