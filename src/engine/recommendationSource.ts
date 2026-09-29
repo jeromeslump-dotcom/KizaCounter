@@ -9,7 +9,10 @@ import {
   findBestEnabledCore4HistoryTeam,
   type Core4HistoryStats,
 } from "./recommendationCore4";
-import { isUsableRecommendationTeam } from "./recommendationGuards";
+import {
+  isHistoricalTeamEligible,
+  isUsableRecommendationTeam,
+} from "./recommendationGuards";
 import {
   getClassKey,
   resolveTeamFromIds,
@@ -18,7 +21,6 @@ import {
   uniqueIds,
 } from "./teamUtils";
 import { RECOMMENDATION_SOURCE_LABELS } from "./recommendationLabels";
-import { getEngineSettings } from "./engineSettings";
 
 export type RecommendationSource =
   | "exact-history"
@@ -107,19 +109,7 @@ function findBestEnabledExactHistoryTeam(
     const team = resolveTeamFromIds(candidate.heroIds, candidateHeroesById);
     if (!team) continue;
     if (!isUsableRecommendationTeam(team, combats, enemyIds)) continue;
-
-    const battles = candidate.wins + candidate.losses;
-    const winRate = battles > 0 ? (candidate.wins / battles) * 100 : 0;
-
-    const { exactHistoryMinBattles, exactHistoryMinWinRate } =
-      getEngineSettings().advanced;
-
-    if (
-      battles < exactHistoryMinBattles ||
-      winRate < exactHistoryMinWinRate
-    ) {
-      continue;
-    }
+    if (!isHistoricalTeamEligible(candidate.heroIds, combats)) continue;
 
     return team;
   }
@@ -246,6 +236,10 @@ export function recommendTeamWithSource(
 
   if (
     defeatHistoryTeam &&
+    isHistoricalTeamEligible(
+      defeatHistoryTeam.map((hero) => hero.id),
+      combats
+    ) &&
     isUsableRecommendationTeam(defeatHistoryTeam, combats, enemyIds)
   )
     return { team: defeatHistoryTeam, source: "defeat-history" };
@@ -263,7 +257,13 @@ export function recommendTeamWithSource(
     }
   );
 
-  if (core4HistoryTeam)
+  if (
+    core4HistoryTeam &&
+    isHistoricalTeamEligible(
+      core4HistoryTeam.map((hero) => hero.id),
+      combats
+    )
+  )
     return {
       team: core4HistoryTeam,
       source: "core4",
@@ -342,6 +342,6 @@ export function recommendationSourceLabel(
     case "core4":
       return RECOMMENDATION_SOURCE_LABELS.core4;
     case "fallback":
-      return RECOMMENDATION_SOURCE_LABELS.fallback;
+      return RECOMMATION_SOURCE_LABELS.fallback;
   }
 }
