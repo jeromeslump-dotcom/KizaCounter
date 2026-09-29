@@ -115,7 +115,7 @@ function findBestEnabledExactHistoryTeam(
       getEngineSettings().advanced;
 
     if (
-      battles >= exactHistoryMinBattles &&
+      battles < exactHistoryMinBattles ||
       winRate < exactHistoryMinWinRate
     ) {
       continue;
