@@ -1,5 +1,6 @@
 import { HEROES, type Hero } from "../../data/heroes";
 import winningPatterns from "../../../data/winning-patterns.json";
+import { getZone } from "./theoreticalData";
 
 export type GeneratorMetricKey = "atk" | "matk" | "def" | "mdef" | "hp";
 export type GeneratorTargets = Record<GeneratorMetricKey, number>;
@@ -34,31 +35,7 @@ export const GENERATOR_METRICS: Array<{
 
 const SEARCH_ORDER: GeneratorMetricKey[] = ["atk", "matk", "def", "mdef", "hp"];
 
-const ZONE_COUNT = 20;
 
-const METRIC_BOUNDS: Record<GeneratorMetricKey, { min: number; max: number }> =
-  {
-    atk: { min: 1417, max: 14178 },
-    matk: { min: 1287, max: 14004 },
-    def: { min: 409, max: 3885 },
-    mdef: { min: 714, max: 3534 },
-    hp: { min: 53401, max: 177892 },
-  };
-
-function getZone(
-  value: number,
-  theoreticalMin: number,
-  theoreticalMax: number
-): number {
-  const zoneWidth = Math.ceil((theoreticalMax - theoreticalMin) / ZONE_COUNT);
-
-  if (value >= theoreticalMax) return ZONE_COUNT;
-
-  return Math.max(
-    1,
-    Math.min(ZONE_COUNT, Math.floor((value - theoreticalMin) / zoneWidth) + 1)
-  );
-}
 
 export function getTeamZones(heroes: Hero[]): GeneratorTargets {
   const totals = heroes.reduce(
@@ -73,11 +50,11 @@ export function getTeamZones(heroes: Hero[]): GeneratorTargets {
   );
 
   return {
-    atk: getZone(totals.atk, METRIC_BOUNDS.atk.min, METRIC_BOUNDS.atk.max),
-    matk: getZone(totals.matk, METRIC_BOUNDS.matk.min, METRIC_BOUNDS.matk.max),
-    def: getZone(totals.def, METRIC_BOUNDS.def.min, METRIC_BOUNDS.def.max),
-    mdef: getZone(totals.mdef, METRIC_BOUNDS.mdef.min, METRIC_BOUNDS.mdef.max),
-    hp: getZone(totals.hp, METRIC_BOUNDS.hp.min, METRIC_BOUNDS.hp.max),
+    atk: getZone(totals.atk, "atk"),
+    matk: getZone(totals.matk, "matk"),
+    def: getZone(totals.def, "def"),
+    mdef: getZone(totals.mdef, "mdef"),
+    hp: getZone(totals.hp, "hp"),
   };
 }
 
