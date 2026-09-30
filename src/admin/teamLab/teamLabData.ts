@@ -30,43 +30,11 @@ export type TheoreticalMetric = {
   total: number;
 };
 
-export const METRICS = [
-  {
-    key: "atk" as MetricKey,
-    label: "ATK",
-    xLabel: "ATK totale de l'équipe",
-    theoreticalMin: 1417,
-    theoreticalMax: 14178,
-  },
-  {
-    key: "matk" as MetricKey,
-    label: "MATK",
-    xLabel: "MATK totale de l'équipe",
-    theoreticalMin: 1287,
-    theoreticalMax: 14004,
-  },
-  {
-    key: "def" as MetricKey,
-    label: "DEF",
-    xLabel: "DEF totale de l'équipe",
-    theoreticalMin: 409,
-    theoreticalMax: 3885,
-  },
-  {
-    key: "mdef" as MetricKey,
-    label: "MDEF",
-    xLabel: "MDEF totale de l'équipe",
-    theoreticalMin: 714,
-    theoreticalMax: 3534,
-  },
-  {
-    key: "hp" as MetricKey,
-    label: "PV",
-    xLabel: "PV totaux de l'équipe",
-    theoreticalMin: 53401,
-    theoreticalMax: 177892,
-  },
-];
+export { METRICS } from "./theoreticalData";
+export {
+  getZoneBounds,
+  type MetricKey,
+} from "./theoreticalData";
 
 export const zoneSummary = winningPatterns.zoneSummary as Record<
   MetricKey,
@@ -103,17 +71,6 @@ export function completeZones(rows: ZoneRow[]): ZoneRow[] {
       }
     );
   });
-}
-
-export function getZoneBounds(
-  theoreticalMin: number,
-  theoreticalMax: number,
-  zone: number
-): { min: number; max: number } {
-  const zoneWidth = Math.ceil((theoreticalMax - theoreticalMin) / 20);
-  const min = theoreticalMin + (zone - 1) * zoneWidth;
-  const max = zone === 20 ? theoreticalMax : min + zoneWidth - 1;
-  return { min, max };
 }
 
 export function formatNumber(value: number): string {
