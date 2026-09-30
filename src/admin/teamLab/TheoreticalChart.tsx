@@ -1,17 +1,20 @@
 import {
   formatNumber,
   getZoneBounds,
+  type MetricKey,
   type TheoreticalMetric,
   type ZoneRow,
 } from "./teamLabData";
 
 interface TheoreticalChartProps {
+  metric: MetricKey;
   xLabel: string;
   theoretical: TheoreticalMetric;
   observedRows: ZoneRow[];
 }
 
 export default function TheoreticalChart({
+  metric,
   xLabel,
   theoretical,
   observedRows,
@@ -42,17 +45,9 @@ export default function TheoreticalChart({
   const barWidth = Math.max(5, slotWidth * 0.31);
   const gap = Math.max(2, slotWidth * 0.04);
 
-  const zone1 = getZoneBounds(
-    theoretical.theoreticalMin,
-    theoretical.theoreticalMax,
-    1
-  );
+  const zone1 = getZoneBounds(metric, 1);
 
-  const zone20 = getZoneBounds(
-    theoretical.theoreticalMin,
-    theoretical.theoreticalMax,
-    20
-  );
+  const zone20 = getZoneBounds(metric, 20);
 
   const middleValue =
     (theoretical.theoreticalMin + theoretical.theoreticalMax) / 2;
