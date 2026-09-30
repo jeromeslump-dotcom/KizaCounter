@@ -6,6 +6,7 @@ import {
 } from "./teamLabData";
 
 interface ZoneChartProps {
+  metric: MetricKey;
   xLabel: string;
   theoreticalMin: number;
   theoreticalMax: number;
@@ -14,6 +15,7 @@ interface ZoneChartProps {
 }
 
 export default function ZoneChart({
+  metric,
   xLabel,
   theoreticalMin,
   theoreticalMax,
@@ -38,8 +40,8 @@ export default function ZoneChart({
   const slotWidth = chartWidth / rows.length;
   const barWidth = Math.max(5, slotWidth * 0.31);
   const gap = Math.max(2, slotWidth * 0.04);
-  const zone1 = getZoneBounds(theoreticalMin, theoreticalMax, 1);
-  const zone20 = getZoneBounds(theoreticalMin, theoreticalMax, 20);
+  const zone1 = getZoneBounds(metric, 1);
+  const zone20 = getZoneBounds(metric, 20);
   const middleValue = (theoreticalMin + theoreticalMax) / 2;
 
   return (
