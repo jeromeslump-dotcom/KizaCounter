@@ -167,6 +167,7 @@ export default function TeamLab({
                     </div>
 
                     <TheoreticalChart
+                      metric={key}
                       xLabel={xLabel}
                       theoretical={theoreticalSummary[key]}
                       observedRows={completeZones(zoneSummary[key] ?? [])}
@@ -236,6 +237,7 @@ export default function TeamLab({
                       </div>
 
                       <ZoneChart
+                        metric={key}
                         xLabel={xLabel}
                         theoreticalMin={theoreticalMin}
                         theoreticalMax={theoreticalMax}
