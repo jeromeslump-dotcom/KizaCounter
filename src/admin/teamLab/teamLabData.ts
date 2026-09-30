@@ -9,6 +9,8 @@ export type ZoneRow = {
   lossFormations: number;
 };
 
+import type { MetricKey } from "./theoreticalData";
+
 export type TeamLabMode =
   | "combats"
   | "formations"
@@ -32,7 +34,6 @@ export type TheoreticalMetric = {
 export {
   METRICS,
   getZoneBounds,
-  type MetricKey,
 } from "./theoreticalData";
 
 export const zoneSummary = winningPatterns.zoneSummary as Record<
