@@ -1,6 +1,6 @@
 import { HEROES, type Hero } from "../../data/heroes";
 import winningPatterns from "../../../data/winning-patterns.json";
-import { getZone, METRICS, type MetricKey } from "./theoreticalData";
+import { getZone, METRICS, ZONE_COUNT, type MetricKey } from "./theoreticalData";
 
 export type GeneratorMetricKey = MetricKey;
 export type GeneratorTargets = Record<GeneratorMetricKey, number>;
