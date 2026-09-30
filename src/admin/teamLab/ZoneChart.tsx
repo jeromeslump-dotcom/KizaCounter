@@ -1,6 +1,7 @@
 import {
   formatNumber,
   getZoneBounds,
+  type MetricKey,
   type TeamLabMode,
   type ZoneRow,
 } from "./teamLabData";
