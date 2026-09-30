@@ -9,7 +9,6 @@ export type ZoneRow = {
   lossFormations: number;
 };
 
-export type MetricKey = "atk" | "matk" | "def" | "mdef" | "hp";
 export type TeamLabMode =
   | "combats"
   | "formations"
@@ -30,8 +29,8 @@ export type TheoreticalMetric = {
   total: number;
 };
 
-export { METRICS } from "./theoreticalData";
 export {
+  METRICS,
   getZoneBounds,
   type MetricKey,
 } from "./theoreticalData";
