@@ -9,7 +9,7 @@ export type ZoneRow = {
   lossFormations: number;
 };
 
-import type { MetricKey } from "./theoreticalData";
+export type { MetricKey } from "./theoreticalData";
 
 export type TeamLabMode =
   | "combats"
