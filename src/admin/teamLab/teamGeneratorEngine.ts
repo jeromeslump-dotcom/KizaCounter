@@ -1,6 +1,6 @@
 import { HEROES, type Hero } from "../../data/heroes";
 import winningPatterns from "../../../data/winning-patterns.json";
-import { getZone } from "./theoreticalData";
+import { getZone, METRICS } from "./theoreticalData";
 
 export type GeneratorMetricKey = "atk" | "matk" | "def" | "mdef" | "hp";
 export type GeneratorTargets = Record<GeneratorMetricKey, number>;
@@ -22,19 +22,12 @@ export type GeneratorProgress = {
   total: number;
 };
 
-export const GENERATOR_METRICS: Array<{
-  key: GeneratorMetricKey;
-  label: string;
-}> = [
-  { key: "atk", label: "ATK" },
-  { key: "matk", label: "MATK" },
-  { key: "def", label: "DEF" },
-  { key: "mdef", label: "MDEF" },
-  { key: "hp", label: "PV" },
-];
+export const GENERATOR_METRICS = METRICS.map(({ key, label }) => ({
+  key,
+  label,
+}));
 
 const SEARCH_ORDER: GeneratorMetricKey[] = ["atk", "matk", "def", "mdef", "hp"];
-
 
 
 export function getTeamZones(heroes: Hero[]): GeneratorTargets {
