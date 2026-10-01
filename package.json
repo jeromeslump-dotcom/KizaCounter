@@ -14,7 +14,8 @@
     "duplicates": "jscpd src && node scripts/check-redundancy.mjs",
     "analyze:winning": "node --experimental-strip-types scripts/analyze-winning-patterns.ts",
     "generate:theoretical": "node --experimental-strip-types scripts/generate-theoretical-formations.ts",
-    "analyze:relations": "node --experimental-strip-types scripts/analyze-stat-relations.ts"
+    "analyze:relations": "node --experimental-strip-types scripts/analyze-stat-relations.ts",
+    "analyze:relation-curves": "node --experimental-strip-types scripts/analyze-stat-relations-curves.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.57.4",
