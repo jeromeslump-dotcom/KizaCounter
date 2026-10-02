@@ -110,7 +110,11 @@ describe("inverse historical defeat engine", () => {
 
   it("integrates the inverse defeat history before class history", () => {
     const heroes = heroesFor(targetTeam, defeatingTeam, otherDefeatingTeam);
-    const combats = [combat(targetTeam, defeatingTeam, false)];
+    const combats = [
+      combat(targetTeam, defeatingTeam, false),
+      combat(targetTeam, defeatingTeam, false),
+      combat(targetTeam, defeatingTeam, false),
+    ];
 
     const result = recommendTeamWithSource(targetTeam, heroes, combats);
 
