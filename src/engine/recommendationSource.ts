@@ -67,6 +67,7 @@ function findBestEnabledHistoricalTeam(
     sortBySimilarity
   )) {
     const team = resolveTeamFromIds(candidate.heroIds, candidateHeroesById);
+    if (!isHistoricalTeamEligible(candidate.heroIds, combats)) continue;
     if (team && isUsableRecommendationTeam(team, combats, enemyIds)) {
       return team;
     }
@@ -196,6 +197,7 @@ function findBestEnabledGlobalWinTeam(
   for (const candidate of candidates) {
     const team = resolveTeamFromIds(candidate.heroIds, candidateHeroesById);
 
+    if (!isHistoricalTeamEligible(candidate.heroIds, combats)) continue;
     if (team && isUsableRecommendationTeam(team, combats, enemyIds)) {
       return team;
     }
