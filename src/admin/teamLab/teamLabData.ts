@@ -32,10 +32,7 @@ export type TheoreticalMetric = {
   total: number;
 };
 
-export {
-  METRICS,
-  getZoneBounds,
-} from "./theoreticalData";
+export { METRICS, getZoneBounds } from "./theoreticalData";
 
 export const zoneSummary = winningPatterns.zoneSummary as Record<
   MetricKey,

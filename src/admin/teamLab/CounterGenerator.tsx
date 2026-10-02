@@ -18,7 +18,6 @@ import {
 
 const DISPLAY_LIMIT = 24;
 
-
 interface CounterGeneratorProps {
   enabledHeroIds: Set<string>;
   requiredHeroIds: Set<string>;

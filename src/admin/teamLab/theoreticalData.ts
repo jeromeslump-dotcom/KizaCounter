@@ -14,10 +14,7 @@ type TheoreticalStat = {
   zones: TheoreticalZone[];
 };
 
-const METRIC_LABELS: Record<
-  MetricKey,
-  { label: string; xLabel: string }
-> = {
+const METRIC_LABELS: Record<MetricKey, { label: string; xLabel: string }> = {
   atk: {
     label: "ATK",
     xLabel: "ATK totale de l'équipe",
@@ -47,14 +44,14 @@ const theoreticalStats = theoreticalZones.stats as Record<
 
 export const ZONE_COUNT = theoreticalZones.zoneCount;
 
-export const METRICS = (
-  Object.keys(METRIC_LABELS) as MetricKey[]
-).map((key) => ({
-  key,
-  ...METRIC_LABELS[key],
-  theoreticalMin: theoreticalStats[key].theoreticalMin,
-  theoreticalMax: theoreticalStats[key].theoreticalMax,
-}));
+export const METRICS = (Object.keys(METRIC_LABELS) as MetricKey[]).map(
+  (key) => ({
+    key,
+    ...METRIC_LABELS[key],
+    theoreticalMin: theoreticalStats[key].theoreticalMin,
+    theoreticalMax: theoreticalStats[key].theoreticalMax,
+  })
+);
 
 export function getZoneBounds(
   metric: MetricKey,

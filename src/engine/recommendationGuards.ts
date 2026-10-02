@@ -10,10 +10,7 @@ function isHistoricalStatsEligible(battles: number, wins: number): boolean {
     getEngineSettings().advanced;
   const winRate = battles > 0 ? (wins / battles) * 100 : 0;
 
-  return (
-    battles >= exactHistoryMinBattles &&
-    winRate >= exactHistoryMinWinRate
-  );
+  return battles >= exactHistoryMinBattles && winRate >= exactHistoryMinWinRate;
 }
 
 export function isHistoricalTeamEligible(
