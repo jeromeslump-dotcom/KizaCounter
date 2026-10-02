@@ -238,10 +238,6 @@ export function recommendTeamWithSource(
 
   if (
     defeatHistoryTeam &&
-    isHistoricalTeamEligible(
-      defeatHistoryTeam.map((hero) => hero.id),
-      combats
-    ) &&
     isUsableRecommendationTeam(defeatHistoryTeam, combats, enemyIds)
   )
     return { team: defeatHistoryTeam, source: "defeat-history" };
