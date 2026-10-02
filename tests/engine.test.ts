@@ -238,6 +238,12 @@ describe("recommendation engine history", () => {
 });
 
 describe("recommendTeamWithSource priority", () => {
+  beforeEach(() => {
+    Object.assign(DEFAULT_ENGINE_SETTINGS.advanced, {
+      exactHistoryMinBattles: 3,
+      exactHistoryMinWinRate: 75,
+    });
+  });
   it("prefers an exact historical winning team before other recommendation sources", () => {
     const heroes = [
       ...teamA.map((id) => hero(id, "STR")),
