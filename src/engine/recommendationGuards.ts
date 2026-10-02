@@ -5,6 +5,17 @@ import { teamKey, uniqueIds } from "./teamUtils";
 
 const TEAM_SIZE = 5;
 
+function isHistoricalStatsEligible(battles: number, wins: number): boolean {
+  const { exactHistoryMinBattles, exactHistoryMinWinRate } =
+    getEngineSettings().advanced;
+  const winRate = battles > 0 ? (wins / battles) * 100 : 0;
+
+  return (
+    battles >= exactHistoryMinBattles &&
+    winRate >= exactHistoryMinWinRate
+  );
+}
+
 export function isHistoricalTeamEligible(
   teamIds: string[],
   combats: Combat[]
@@ -12,13 +23,14 @@ export function isHistoricalTeamEligible(
   if (uniqueIds(teamIds).length !== TEAM_SIZE) return false;
 
   const history = evaluateTeamHistory(teamIds, combats);
-  const { exactHistoryMinBattles, exactHistoryMinWinRate } =
-    getEngineSettings().advanced;
+  return isHistoricalStatsEligible(history.battles, history.wins);
+}
 
-  return (
-    history.battles >= exactHistoryMinBattles &&
-    history.winRate >= exactHistoryMinWinRate
-  );
+export function isHistoricalCounterEligible(
+  battles: number,
+  wins: number
+): boolean {
+  return isHistoricalStatsEligible(battles, wins);
 }
 
 /**
