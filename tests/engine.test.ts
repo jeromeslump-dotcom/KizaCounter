@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import type { Combat, Hero } from "../src/types";
 import {
   evaluateEnemyClassHistory,
