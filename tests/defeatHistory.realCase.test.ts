@@ -1,5 +1,6 @@
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import type { Combat, Hero } from "../src/types";
+import { DEFAULT_ENGINE_SETTINGS } from "../src/engine/engineSettings";
 import { findBestHistoricalDefeatTeam } from "../src/engine/defeatHistory";
 import {
   recommendTeamWithSource,
@@ -42,6 +43,12 @@ function combat(myHeroes: string[], enemyHeroes: string[], won: boolean): Combat
 }
 
 describe("real inverse defeat case", () => {
+  beforeEach(() => {
+    Object.assign(DEFAULT_ENGINE_SETTINGS.advanced, {
+      exactHistoryMinBattles: 3,
+      exactHistoryMinWinRate: 75,
+    });
+  });
   it("returns the exact team that defeated the recorded team", () => {
     const heroes = [...new Set([...targetTeam, ...defeatingTeam])].map(hero);
     const combats = [
