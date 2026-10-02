@@ -44,7 +44,11 @@ function combat(myHeroes: string[], enemyHeroes: string[], won: boolean): Combat
 describe("real inverse defeat case", () => {
   it("returns the exact team that defeated the recorded team", () => {
     const heroes = [...new Set([...targetTeam, ...defeatingTeam])].map(hero);
-    const combats = [combat(targetTeam, defeatingTeam, false)];
+    const combats = [
+      combat(targetTeam, defeatingTeam, false),
+      combat(targetTeam, defeatingTeam, false),
+      combat(targetTeam, defeatingTeam, false),
+    ];
 
     const team = findBestHistoricalDefeatTeam(targetTeam, combats, heroes);
 
@@ -55,7 +59,11 @@ describe("real inverse defeat case", () => {
 
   it("uses defeat history instead of class history for the real case", () => {
     const heroes = [...new Set([...targetTeam, ...defeatingTeam])].map(hero);
-    const combats = [combat(targetTeam, defeatingTeam, false)];
+    const combats = [
+      combat(targetTeam, defeatingTeam, false),
+      combat(targetTeam, defeatingTeam, false),
+      combat(targetTeam, defeatingTeam, false),
+    ];
 
     const result = recommendTeamWithSource(targetTeam, heroes, combats);
 
