@@ -33,6 +33,17 @@ function uniqueHeroes(...groups: Hero[][]): Hero[] {
   return [...new Map(groups.flat().map((hero) => [hero.id, hero])).values()];
 }
 
+function repeatedCombats(
+  count: number,
+  myHeroes: string[],
+  enemyHeroes: string[],
+  won: boolean
+): Combat[] {
+  return Array.from({ length: count }, () =>
+    combat(myHeroes, enemyHeroes, won)
+  );
+}
+
 describe("historical recommendation sources", () => {
   const target = ["enemy-1", "enemy-2", "enemy-3", "enemy-4", "enemy-5"];
   const recommended = ["hero-1", "hero-2", "hero-3", "hero-4", "hero-5"];
@@ -43,7 +54,7 @@ describe("historical recommendation sources", () => {
     const result = recommendTeamWithSource(
       target,
       heroes,
-      [combat(recommended, target, true)]
+      repeatedCombats(40, recommended, target, true)
     );
 
     expect(result.source).toBe("exact-history");
@@ -63,11 +74,7 @@ describe("historical recommendation sources", () => {
     const result = recommendTeamWithSource(
       target,
       heroes,
-      [
-        combat(recommended, similarEnemy, true),
-        combat(recommended, similarEnemy, true),
-        combat(recommended, similarEnemy, true),
-      ]
+      repeatedCombats(40, recommended, similarEnemy, true)
     );
 
     expect(result.source).toBe("core4");
@@ -94,7 +101,7 @@ describe("historical recommendation sources", () => {
     const result = recommendTeamWithSource(
       target,
       heroes,
-      [combat(recommended, classMatchedEnemy, true)]
+      repeatedCombats(40, recommended, classMatchedEnemy, true)
     );
 
     expect(result.source).toBe("class-history");
@@ -132,7 +139,7 @@ describe("historical recommendation sources", () => {
       heroes,
       [
         combat(target, recommended, false),
-        combat(alternative, classMatchedEnemy, true),
+        ...repeatedCombats(40, alternative, classMatchedEnemy, true),
       ],
       recommended
     );
@@ -140,6 +147,100 @@ describe("historical recommendation sources", () => {
     expect(result?.team.map((hero) => hero.id).sort()).toEqual(
       [...alternative].sort()
     );
+  });
+
+  it("rejects an under-threshold similar-history team", () => {
+    const similarEnemy = [
+      ...target.slice(0, 3),
+      "other-enemy-4",
+      "other-enemy-5",
+    ];
+    const candidate = [
+      "candidate-1",
+      "candidate-2",
+      "candidate-3",
+      "candidate-4",
+      "candidate-5",
+    ];
+    const heroes = uniqueHeroes(
+      heroesFor(target),
+      heroesFor(similarEnemy),
+      heroesFor(candidate)
+    );
+
+    const result = recommendTeamWithSource(
+      target,
+      heroes,
+      [
+        ...repeatedCombats(2, candidate, similarEnemy, true),
+        ...repeatedCombats(2, candidate, similarEnemy, false),
+      ]
+    );
+
+    expect(result.team).toEqual([]);
+  });
+
+  it("rejects an under-threshold class-history team", () => {
+    const classMatchedEnemy = [
+      "class-1",
+      "class-2",
+      "class-3",
+      "class-4",
+      "class-5",
+    ];
+    const classes: Hero["cls"][] = ["STR", "AGI", "INT", "STR", "AGI"];
+    const candidate = [
+      "candidate-1",
+      "candidate-2",
+      "candidate-3",
+      "candidate-4",
+      "candidate-5",
+    ];
+    const heroes = uniqueHeroes(
+      heroesFor(target, classes),
+      heroesFor(classMatchedEnemy, classes),
+      heroesFor(candidate)
+    );
+
+    const result = recommendTeamWithSource(
+      target,
+      heroes,
+      [
+        ...repeatedCombats(2, candidate, classMatchedEnemy, true),
+        ...repeatedCombats(2, candidate, classMatchedEnemy, false),
+      ]
+    );
+
+    expect(result.team).toEqual([]);
+  });
+
+  it("rejects an under-threshold fallback team", () => {
+    const candidate = [
+      "candidate-1",
+      "candidate-2",
+      "candidate-3",
+      "candidate-4",
+      "candidate-5",
+    ];
+    const otherEnemy = [
+      "other-1",
+      "other-2",
+      "other-3",
+      "other-4",
+      "other-5",
+    ];
+    const heroes = uniqueHeroes(heroesFor(target), heroesFor(candidate));
+
+    const result = recommendTeamWithSource(
+      target,
+      heroes,
+      [
+        ...repeatedCombats(2, candidate, otherEnemy, true),
+        ...repeatedCombats(2, candidate, otherEnemy, false),
+      ]
+    );
+
+    expect(result.team).toEqual([]);
   });
 
   it("never proposes a team with a recorded 0% win rate", () => {
