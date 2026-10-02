@@ -1,5 +1,6 @@
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it } from "vitest";
 import type { Combat, Hero } from "../src/types";
+import { DEFAULT_ENGINE_SETTINGS } from "../src/engine/engineSettings";
 import {
   findBestHistoricalDefeatTeam,
   findHistoricalDefeatCounters,
@@ -44,6 +45,12 @@ function heroesFor(...teams: string[][]): Hero[] {
 }
 
 describe("inverse historical defeat engine", () => {
+  beforeEach(() => {
+    Object.assign(DEFAULT_ENGINE_SETTINGS.advanced, {
+      exactHistoryMinBattles: 3,
+      exactHistoryMinWinRate: 75,
+    });
+  });
   it("finds the exact opponent team that defeated the current enemy team", () => {
     const combats = [combat(targetTeam, defeatingTeam, false)];
     const candidates = findHistoricalDefeatCounters(
