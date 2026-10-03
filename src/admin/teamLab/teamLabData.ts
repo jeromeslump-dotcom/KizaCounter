@@ -13,6 +13,7 @@ import type { MetricKey } from "./theoreticalData";
 export type { MetricKey } from "./theoreticalData";
 
 export type TeamLabMode =
+  | "enemySelection"
   | "combats"
   | "formations"
   | "theoretical"
