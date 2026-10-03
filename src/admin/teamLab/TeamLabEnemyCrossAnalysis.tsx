@@ -66,7 +66,11 @@ function HeroStrip({ ids, heroesById }: { ids: string[]; heroesById: Map<string,
         const hero = heroesById.get(id);
         return hero ? (
           <div key={id} className="flex w-16 flex-col items-center gap-1">
-            <img src={hero.img} alt={hero.name} className="h-11 w-11 rounded-lg border border-white/10 object-cover" />
+            <img
+              src={hero.img}
+              alt={hero.name}
+              className="h-11 w-11 rounded-lg border border-white/10 object-cover"
+            />
             <span className="ui-text-primary text-center text-[10px] font-semibold leading-tight">
               {hero.name}
             </span>
@@ -77,7 +81,9 @@ function HeroStrip({ ids, heroesById }: { ids: string[]; heroesById: Map<string,
   );
 }
 
-export default function TeamLabEnemyCrossAnalysis({ selectedEnemyIds }: TeamLabEnemyCrossAnalysisProps) {
+export default function TeamLabEnemyCrossAnalysis({
+  selectedEnemyIds,
+}: TeamLabEnemyCrossAnalysisProps) {
   const [combats, setCombats] = useState<Combat[]>([]);
   const heroesById = useMemo(() => new Map(HEROES.map((hero) => [hero.id, hero])), []);
 
@@ -140,10 +146,16 @@ export default function TeamLabEnemyCrossAnalysis({ selectedEnemyIds }: TeamLabE
 
   const sortedCandidates = [...candidates.values()]
     .sort((a, b) => {
+      const totalA = a.sourceWins + a.sourceLosses;
+      const totalB = b.sourceWins + b.sourceLosses;
+
+      if (totalB !== totalA) return totalB - totalA;
+
       const ratioA = ratio(a.sourceWins, a.sourceLosses);
       const ratioB = ratio(b.sourceWins, b.sourceLosses);
+
       if (ratioB !== ratioA) return ratioB - ratioA;
-      return b.sourceWins + b.sourceLosses - (a.sourceWins + a.sourceLosses);
+      return 0;
     })
     .slice(0, MAX_CANDIDATES);
 
@@ -173,7 +185,9 @@ export default function TeamLabEnemyCrossAnalysis({ selectedEnemyIds }: TeamLabE
         <>
           <div className="ui-panel-alt mb-5 rounded-lg border p-3">
             <div className="flex flex-wrap gap-x-5 gap-y-2 text-xs">
-              <span className="ui-text-primary font-bold">{sortedCandidates.length} proposition{sortedCandidates.length !== 1 ? "s" : ""}</span>
+              <span className="ui-text-primary font-bold">
+                {sortedCandidates.length} proposition{sortedCandidates.length !== 1 ? "s" : ""}
+              </span>
               <span className="ui-text-muted">Proximité : 3 héros communs sur 4</span>
               <span className="ui-text-muted">🆕 Jamais testée dans tout l'historique</span>
             </div>
@@ -183,16 +197,26 @@ export default function TeamLabEnemyCrossAnalysis({ selectedEnemyIds }: TeamLabE
               <article key={teamKey(candidate.teamIds)} className="ui-card rounded-xl border p-4">
                 <div className="mb-4 flex items-center justify-between gap-3">
                   <h4 className="ui-text-primary text-sm font-black">#{index + 1} — 🆕 JAMAIS TESTÉE</h4>
-                  <span className="rounded-full border border-[var(--ui-theme-primary)] px-2 py-1 text-[10px] font-black text-[var(--ui-theme-primary)]">3/4 communs</span>
+                  <span className="rounded-full border border-[var(--ui-theme-primary)] px-2 py-1 text-[10px] font-black text-[var(--ui-theme-primary)]">
+                    3/4 communs
+                  </span>
                 </div>
                 <div className="mb-4">
                   <p className="ui-text-muted mb-2 text-[10px] font-bold uppercase tracking-wide">Héros repris</p>
                   <div className="flex items-center gap-3">
-                    <img src={candidate.sourceHero.img} alt={candidate.sourceHero.name} className="h-12 w-12 rounded-lg border border-[var(--ui-theme-primary)] object-cover" />
+                    <img
+                      src={candidate.sourceHero.img}
+                      alt={candidate.sourceHero.name}
+                      className="h-12 w-12 rounded-lg border border-[var(--ui-theme-primary)] object-cover"
+                    />
                     <div>
                       <p className="ui-text-primary text-sm font-black">{candidate.sourceHero.name}</p>
                       <p className="ui-text-muted text-xs">
-                        {candidate.sourceWins} WIN · {candidate.sourceLosses} LOSS · W/L {candidate.sourceLosses === 0 ? "∞" : (candidate.sourceWins / candidate.sourceLosses).toFixed(2)} · {candidate.sourceWins + candidate.sourceLosses} combats
+                        {candidate.sourceWins} WIN · {candidate.sourceLosses} LOSS · W/L{" "}
+                        {candidate.sourceLosses === 0
+                          ? "∞"
+                          : (candidate.sourceWins / candidate.sourceLosses).toFixed(2)}{" "}
+                        · {candidate.sourceWins + candidate.sourceLosses} combats
                       </p>
                     </div>
                   </div>
