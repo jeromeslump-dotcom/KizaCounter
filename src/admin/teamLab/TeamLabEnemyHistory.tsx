@@ -264,22 +264,46 @@ export default function TeamLabEnemyHistory({
                       <p className="ui-text-muted mb-2 text-[10px] font-bold uppercase tracking-wide">
                         Ma team
                       </p>
-                      <p className="ui-text-primary text-sm leading-relaxed">
-                        {myNames.length > 0
-                          ? myNames.join(" · ")
-                          : "Héros inconnus"}
-                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {combat.my_heroes.map((heroId) => {
+                          const hero = heroesById.get(heroId);
+                          return hero ? (
+                            <div key={heroId} className="flex items-center gap-2" title={hero.name}>
+                              <img
+                                src={hero.img}
+                                alt={hero.name}
+                                className="h-12 w-12 rounded-lg border border-white/10 object-cover"
+                              />
+                              <span className="ui-text-primary text-xs font-semibold">
+                                {hero.name}
+                              </span>
+                            </div>
+                          ) : null;
+                        })}
+                      </div>
                     </div>
 
                     <div className="ui-panel-alt rounded-lg border p-3">
                       <p className="ui-text-muted mb-2 text-[10px] font-bold uppercase tracking-wide">
                         Ordre ennemi enregistré
                       </p>
-                      <p className="ui-text-primary text-sm leading-relaxed">
-                        {recordedEnemyNames.length > 0
-                          ? recordedEnemyNames.join(" → ")
-                          : "Héros inconnus"}
-                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {combat.enemy_heroes.map((heroId) => {
+                          const hero = heroesById.get(heroId);
+                          return hero ? (
+                            <div key={heroId} className="flex items-center gap-2" title={hero.name}>
+                              <img
+                                src={hero.img}
+                                alt={hero.name}
+                                className="h-12 w-12 rounded-lg border border-white/10 object-cover"
+                              />
+                              <span className="ui-text-primary text-xs font-semibold">
+                                {hero.name}
+                              </span>
+                            </div>
+                          ) : null;
+                        })}
+                      </div>
                     </div>
                   </div>
                 </article>
