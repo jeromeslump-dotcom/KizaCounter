@@ -421,6 +421,7 @@ export default function TeamLabEnemyHistory({
                               <th className="px-2 py-2">5e héros</th>
                               <th className="px-2 py-2 text-center">WIN</th>
                               <th className="px-2 py-2 text-center">LOSS</th>
+                              <th className="px-2 py-2 text-center">W/L</th>
                               <th className="px-2 py-2 text-center">Total</th>
                             </tr>
                           </thead>
