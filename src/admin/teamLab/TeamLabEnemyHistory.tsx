@@ -15,6 +15,8 @@ interface TeamLabEnemyHistoryProps {
   open: boolean;
   enabledHeroIds: Set<string>;
   step: "A" | "B" | "C";
+  selectedEnemyIds: string[];
+  onSelectedEnemyIdsChange: (ids: string[]) => void;
 }
 
 
@@ -34,9 +36,10 @@ export default function TeamLabEnemyHistory({
   open,
   enabledHeroIds,
   step,
+  selectedEnemyIds,
+  onSelectedEnemyIdsChange,
 }: TeamLabEnemyHistoryProps) {
   const [combats, setCombats] = useState<Combat[]>([]);
-  const [selectedEnemyIds, setSelectedEnemyIds] = useState<string[]>([]);
   const [activeClass, setActiveClass] = useState<HeroClassFilter>("ALL");
   const [query, setQuery] = useState("");
   const [sortBy, setSortBy] = useState<HeroSort>("played");
@@ -113,21 +116,17 @@ export default function TeamLabEnemyHistory({
   }, [combats, selectedEnemyIds]);
 
   const toggleEnemy = (hero: Hero) => {
-    setSelectedEnemyIds((current) => {
-      if (current.includes(hero.id)) {
-        return current.filter((id) => id !== hero.id);
-      }
-
-      if (current.length >= TEAM_SIZE) {
-        return current;
-      }
-
-      return [...current, hero.id];
-    });
+    onSelectedEnemyIdsChange(
+      selectedEnemyIds.includes(hero.id)
+        ? selectedEnemyIds.filter((id) => id !== hero.id)
+        : selectedEnemyIds.length >= TEAM_SIZE
+          ? selectedEnemyIds
+          : [...selectedEnemyIds, hero.id]
+    );
   };
 
   const clearEnemies = () => {
-    setSelectedEnemyIds([]);
+    onSelectedEnemyIdsChange([]);
   };
 
   return (
