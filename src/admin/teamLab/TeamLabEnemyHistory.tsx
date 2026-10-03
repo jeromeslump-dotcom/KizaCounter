@@ -257,7 +257,7 @@ export default function TeamLabEnemyHistory({
                         {combat.my_heroes.map((heroId) => {
                           const hero = heroesById.get(heroId);
                           return hero ? (
-                            <div key={heroId} className="flex items-center gap-2" title={hero.name}>
+                            <div key={heroId} className="flex w-16 flex-col items-center gap-1" title={hero.name}>
                               <img
                                 src={hero.img}
                                 alt={hero.name}
@@ -280,7 +280,7 @@ export default function TeamLabEnemyHistory({
                         {combat.enemy_heroes.map((heroId) => {
                           const hero = heroesById.get(heroId);
                           return hero ? (
-                            <div key={heroId} className="flex items-center gap-2" title={hero.name}>
+                            <div key={heroId} className="flex w-16 flex-col items-center gap-1" title={hero.name}>
                               <img
                                 src={hero.img}
                                 alt={hero.name}
@@ -425,41 +425,82 @@ export default function TeamLabEnemyHistory({
                             </tr>
                           </thead>
                           <tbody>
-                            {Array.from(variants.values())
-                              .sort(
-                                (a, b) =>
+                            {(() => {
+                              const sortedVariants = Array.from(
+                                variants.values()
+                              ).sort((a, b) => {
+                                const ratioA =
+                                  a.losses === 0 ? Infinity : a.wins / a.losses;
+                                const ratioB =
+                                  b.losses === 0 ? Infinity : b.wins / b.losses;
+
+                                if (ratioB !== ratioA) return ratioB - ratioA;
+                                return (
                                   b.wins +
                                   b.losses -
                                   (a.wins + a.losses)
-                              )
-                              .map((variant) => (
-                                <tr
-                                  key={variant.hero.id}
-                                  className="border-b border-white/5 last:border-0"
-                                >
-                                  <td className="px-2 py-2">
-                                    <div className="flex items-center gap-2">
-                                      <img
-                                        src={variant.hero.img}
-                                        alt={variant.hero.name}
-                                        className="h-9 w-9 rounded-md border border-white/10 object-cover"
-                                      />
-                                      <span className="ui-text-primary font-semibold">
-                                        {variant.hero.name}
-                                      </span>
-                                    </div>
-                                  </td>
-                                  <td className="px-2 py-2 text-center font-bold">
-                                    {variant.wins}
-                                  </td>
-                                  <td className="px-2 py-2 text-center font-bold">
-                                    {variant.losses}
-                                  </td>
-                                  <td className="px-2 py-2 text-center font-bold">
-                                    {variant.wins + variant.losses}
-                                  </td>
-                                </tr>
-                              ))}
+                                );
+                              });
+
+                              let lossBoundaryInserted = false;
+
+                              return sortedVariants.flatMap((variant) => {
+                                const isLossDominant =
+                                  variant.losses > variant.wins;
+                                const separator =
+                                  isLossDominant && !lossBoundaryInserted
+                                    ? [
+                                        <tr key="loss-boundary">
+                                          <td
+                                            colSpan={5}
+                                            className="border-y-2 border-[var(--ui-theme-primary)] px-2 py-2 text-center text-[10px] font-black uppercase tracking-wider text-[var(--ui-theme-primary)]"
+                                          >
+                                            Plus de LOSS que de WIN
+                                          </td>
+                                        </tr>,
+                                      ]
+                                    : [];
+
+                                if (isLossDominant) {
+                                  lossBoundaryInserted = true;
+                                }
+
+                                return [
+                                  ...separator,
+                                  <tr
+                                    key={variant.hero.id}
+                                    className="border-b border-white/5 last:border-0"
+                                  >
+                                    <td className="px-2 py-2">
+                                      <div className="flex items-center gap-2">
+                                        <img
+                                          src={variant.hero.img}
+                                          alt={variant.hero.name}
+                                          className="h-9 w-9 rounded-md border border-white/10 object-cover"
+                                        />
+                                        <span className="ui-text-primary font-semibold">
+                                          {variant.hero.name}
+                                        </span>
+                                      </div>
+                                    </td>
+                                    <td className="px-2 py-2 text-center font-bold">
+                                      {variant.wins}
+                                    </td>
+                                    <td className="px-2 py-2 text-center font-bold">
+                                      {variant.losses}
+                                    </td>
+                                    <td className="px-2 py-2 text-center font-bold">
+                                      {variant.losses === 0
+                                        ? "∞"
+                                        : (variant.wins / variant.losses).toFixed(2)}
+                                    </td>
+                                    <td className="px-2 py-2 text-center font-bold">
+                                      {variant.wins + variant.losses}
+                                    </td>
+                                  </tr>,
+                                ];
+                              });
+                            })()}
                           </tbody>
                         </table>
                       </div>
