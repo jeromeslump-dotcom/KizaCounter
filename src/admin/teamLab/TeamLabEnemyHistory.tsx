@@ -17,11 +17,6 @@ interface TeamLabEnemyHistoryProps {
   step: "A" | "B";
 }
 
-function heroNames(heroIds: string[], heroesById: Map<string, Hero>): string[] {
-  return heroIds
-    .map((heroId) => heroesById.get(heroId)?.name)
-    .filter((name): name is string => Boolean(name));
-}
 
 function formatCombatDate(createdAt?: string): string {
   if (!createdAt) return "Date inconnue";
@@ -138,7 +133,7 @@ export default function TeamLabEnemyHistory({
   return (
     <div className="mt-8 space-y-6">
       {step === "A" && (
-      <section className="ui-panel is-active rounded-xl border p-4 sm:p-5">
+        <section className="ui-panel is-active rounded-xl border p-4 sm:p-5">
         <div className="mb-4">
           <h3 className="ui-text-primary text-base font-black">
             Étape A — Sélection ennemis
@@ -173,11 +168,11 @@ export default function TeamLabEnemyHistory({
             onHeroClick={toggleEnemy}
           />
         </div>
-      </section>
+        </section>
       )}
 
       {step === "B" && (
-      <section className="ui-panel is-active rounded-xl border p-4 sm:p-5">
+        <section className="ui-panel is-active rounded-xl border p-4 sm:p-5">
         <div className="mb-4">
           <h3 className="ui-text-primary text-base font-black">
             Étape B — Combats historiques contre cette équipe
@@ -227,12 +222,6 @@ export default function TeamLabEnemyHistory({
             </div>
 
             {matchingCombats.map((combat, index) => {
-              const myNames = heroNames(combat.my_heroes, heroesById);
-              const recordedEnemyNames = heroNames(
-                combat.enemy_heroes,
-                heroesById
-              );
-
               return (
                 <article
                   key={combat.id ?? `${combat.created_at ?? "combat"}-${index}`}
@@ -311,7 +300,7 @@ export default function TeamLabEnemyHistory({
             })}
           </div>
         )}
-      </section>
+        </section>
       )}
     </div>
   );
