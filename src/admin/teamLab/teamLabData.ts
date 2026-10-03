@@ -16,6 +16,7 @@ export type TeamLabMode =
   | "enemySelection"
   | "enemyHistory"
   | "enemyCoreAnalysis"
+  | "enemyCrossAnalysis"
   | "combats"
   | "formations"
   | "theoretical"
