@@ -14,6 +14,7 @@ const TEAM_SIZE = 5;
 interface TeamLabEnemyHistoryProps {
   open: boolean;
   enabledHeroIds: Set<string>;
+  step: "A" | "B";
 }
 
 function heroNames(heroIds: string[], heroesById: Map<string, Hero>): string[] {
@@ -37,6 +38,7 @@ function formatCombatDate(createdAt?: string): string {
 export default function TeamLabEnemyHistory({
   open,
   enabledHeroIds,
+  step,
 }: TeamLabEnemyHistoryProps) {
   const [combats, setCombats] = useState<Combat[]>([]);
   const [selectedEnemyIds, setSelectedEnemyIds] = useState<string[]>([]);
@@ -135,6 +137,7 @@ export default function TeamLabEnemyHistory({
 
   return (
     <div className="mt-8 space-y-6">
+      {step === "A" && (
       <section className="ui-panel is-active rounded-xl border p-4 sm:p-5">
         <div className="mb-4">
           <h3 className="ui-text-primary text-base font-black">
@@ -171,7 +174,9 @@ export default function TeamLabEnemyHistory({
           />
         </div>
       </section>
+      )}
 
+      {step === "B" && (
       <section className="ui-panel is-active rounded-xl border p-4 sm:p-5">
         <div className="mb-4">
           <h3 className="ui-text-primary text-base font-black">
@@ -283,6 +288,7 @@ export default function TeamLabEnemyHistory({
           </div>
         )}
       </section>
+      )}
     </div>
   );
 }
