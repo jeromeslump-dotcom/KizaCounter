@@ -15,6 +15,7 @@ export type { MetricKey } from "./theoreticalData";
 export type TeamLabMode =
   | "enemySelection"
   | "enemyHistory"
+  | "enemyCoreAnalysis"
   | "combats"
   | "formations"
   | "theoretical"
