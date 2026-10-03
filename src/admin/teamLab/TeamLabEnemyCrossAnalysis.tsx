@@ -112,6 +112,8 @@ export default function TeamLabEnemyCrossAnalysis({
 
   for (const source of groups) {
     for (const variant of source.variants.values()) {
+      if (variant.wins <= variant.losses) continue;
+
       const sourceRatio = ratio(variant.wins, variant.losses);
 
       for (const target of groups) {
