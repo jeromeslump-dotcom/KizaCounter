@@ -48,32 +48,34 @@ export default function TeamLab({
   if (!open) return null;
 
   const stepLabel =
-    mode === "combats"
-      ? "1"
-      : mode === "formations"
-        ? "2"
-        : mode === "theoretical"
-          ? "3"
-          : mode === "customization"
-            ? "4"
-            : mode === "generator"
-              ? "5"
-              : "6";
+    mode === "enemySelection"
+      ? "A"
+      : mode === "combats"
+        ? "1"
+        : mode === "formations"
+          ? "2"
+          : mode === "theoretical"
+            ? "3"
+            : mode === "customization"
+              ? "4"
+              : mode === "generator"
+                ? "5"
+                : "6";
 
   const description =
     mode === "enemySelection"
       ? "Sélection d'une équipe ennemie et recherche de tous les combats historiques correspondants"
       : mode === "combats"
         ? "Répartition réelle des combats enregistrés dans les 20 zones"
-      : mode === "formations"
-        ? "Répartition réelle des formations enregistrées dans les 20 zones"
-        : mode === "theoretical"
-          ? "Distribution théorique des 5 461 512 formations possibles dans les 20 zones"
-          : mode === "customization"
-            ? "Personnalisation des héros utilisés par le générateur"
-            : mode === "generator"
-              ? "Génération d'équipes à partir de zones cibles et de relaxations progressives"
-              : "Recherche d'un contre à partir des combats réels et génération d'une formation jamais testée";
+        : mode === "formations"
+          ? "Répartition réelle des formations enregistrées dans les 20 zones"
+          : mode === "theoretical"
+            ? "Distribution théorique des 5 461 512 formations possibles dans les 20 zones"
+            : mode === "customization"
+              ? "Personnalisation des héros utilisés par le générateur"
+              : mode === "generator"
+                ? "Génération d'équipes à partir de zones cibles et de relaxations progressives"
+                : "Recherche d'un contre à partir des combats réels et génération d'une formation jamais testée";
 
   return (
     <div
