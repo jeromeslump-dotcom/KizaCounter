@@ -52,7 +52,9 @@ export default function TeamLab({
       ? "A"
       : mode === "enemyHistory"
         ? "B"
-        : mode === "combats"
+        : mode === "enemyCoreAnalysis"
+          ? "C"
+          : mode === "combats"
         ? "1"
         : mode === "formations"
           ? "2"
@@ -69,7 +71,9 @@ export default function TeamLab({
       ? "Sélection d'une équipe ennemie"
       : mode === "enemyHistory"
         ? "Historique de tous les combats contre l'équipe sélectionnée"
-        : mode === "combats"
+        : mode === "enemyCoreAnalysis"
+          ? "Classement des teams par 4 héros identiques + 5e héros"
+          : mode === "combats"
         ? "Répartition réelle des combats enregistrés dans les 20 zones"
         : mode === "formations"
           ? "Répartition réelle des formations enregistrées dans les 20 zones"
@@ -124,11 +128,17 @@ export default function TeamLab({
         </div>
 
         <div className="min-h-0 flex-1 overflow-y-auto p-4 sm:p-6">
-          {mode === "enemySelection" || mode === "enemyHistory" ? (
+          {mode === "enemySelection" || mode === "enemyHistory" || mode === "enemyCoreAnalysis" ? (
             <TeamLabEnemyHistory
               open={open}
               enabledHeroIds={enabledHeroIds}
-              step={mode === "enemySelection" ? "A" : "B"}
+              step={
+                mode === "enemySelection"
+                  ? "A"
+                  : mode === "enemyCoreAnalysis"
+                    ? "C"
+                    : "B"
+              }
             />
           ) : mode === "generator" ? (
             <TeamGenerator
