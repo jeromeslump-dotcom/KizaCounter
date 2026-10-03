@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 
 import { HEROES, type Hero } from "../../data/heroes";
-import { loadCombats } from "../../storage/combatStorage";
+import { addCombat, loadCombats } from "../../storage/combatStorage";
 import type { Combat } from "../../types";
 import { teamKey } from "../../engine/teamUtils";
 
@@ -85,6 +85,7 @@ export default function TeamLabEnemyCrossAnalysis({
   selectedEnemyIds,
 }: TeamLabEnemyCrossAnalysisProps) {
   const [combats, setCombats] = useState<Combat[]>([]);
+  const [savingTeamKey, setSavingTeamKey] = useState<string | null>(null);
   const heroesById = useMemo(() => new Map(HEROES.map((hero) => [hero.id, hero])), []);
 
   useEffect(() => {
@@ -143,6 +144,25 @@ export default function TeamLabEnemyCrossAnalysis({
           });
         }
       }
+    }
+  }
+
+  async function recordResult(candidate: Candidate, won: boolean) {
+    const candidateKey = teamKey(candidate.teamIds);
+    if (savingTeamKey === candidateKey) return;
+
+    setSavingTeamKey(candidateKey);
+    try {
+      const savedCombat = await addCombat({
+        enemy_heroes: selectedEnemyIds,
+        my_heroes: candidate.teamIds,
+        won,
+      });
+      setCombats((current) => [savedCombat, ...current]);
+    } catch (error) {
+      console.error("Erreur enregistrement résultat équipe proposée :", error);
+    } finally {
+      setSavingTeamKey(null);
     }
   }
 
@@ -231,9 +251,27 @@ export default function TeamLabEnemyCrossAnalysis({
                 <div className="mb-3 rounded-lg border border-[var(--ui-theme-primary)]/30 p-3">
                   <p className="ui-text-muted mb-2 text-[10px] font-bold uppercase tracking-wide">Nouvelle équipe proposée</p>
                   <HeroStrip ids={candidate.teamIds} heroesById={heroesById} />
+                  <div className="mt-4 grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      className="ui-button-success w-full"
+                      disabled={savingTeamKey === teamKey(candidate.teamIds)}
+                      onClick={() => void recordResult(candidate, true)}
+                    >
+                      {savingTeamKey === teamKey(candidate.teamIds) ? "Enregistrement..." : "✓ WIN"}
+                    </button>
+                    <button
+                      type="button"
+                      className="ui-button-danger w-full"
+                      disabled={savingTeamKey === teamKey(candidate.teamIds)}
+                      onClick={() => void recordResult(candidate, false)}
+                    >
+                      {savingTeamKey === teamKey(candidate.teamIds) ? "Enregistrement..." : "✗ LOSS"}
+                    </button>
+                  </div>
                 </div>
                 <p className="ui-text-muted text-[10px] leading-relaxed">
-                  Le résultat WIN/LOSS du héros est conservé uniquement comme preuve de son contexte d'origine. Aucun taux de victoire n'est estimé pour cette nouvelle équipe.
+                  Les boutons enregistrent directement le résultat contre l'équipe ennemie sélectionnée dans Supabase.
                 </p>
               </article>
             ))}
