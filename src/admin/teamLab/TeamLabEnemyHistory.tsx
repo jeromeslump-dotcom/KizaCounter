@@ -14,7 +14,7 @@ const TEAM_SIZE = 5;
 interface TeamLabEnemyHistoryProps {
   open: boolean;
   enabledHeroIds: Set<string>;
-  step: "A" | "B";
+  step: "A" | "B" | "C";
 }
 
 
@@ -263,7 +263,7 @@ export default function TeamLabEnemyHistory({
                                 alt={hero.name}
                                 className="h-12 w-12 rounded-lg border border-white/10 object-cover"
                               />
-                              <span className="ui-text-primary text-xs font-semibold">
+                              <span className="ui-text-primary text-center text-[11px] font-semibold leading-tight">
                                 {hero.name}
                               </span>
                             </div>
@@ -286,7 +286,7 @@ export default function TeamLabEnemyHistory({
                                 alt={hero.name}
                                 className="h-12 w-12 rounded-lg border border-white/10 object-cover"
                               />
-                              <span className="ui-text-primary text-xs font-semibold">
+                              <span className="ui-text-primary text-center text-[11px] font-semibold leading-tight">
                                 {hero.name}
                               </span>
                             </div>
@@ -300,6 +300,156 @@ export default function TeamLabEnemyHistory({
             })}
           </div>
         )}
+        </section>
+      )}
+
+
+      {step === "C" && (
+        <section className="ui-panel is-active rounded-xl border p-4 sm:p-5">
+          <div className="mb-4">
+            <h3 className="ui-text-primary text-base font-black">
+              Étape C — Classement par 4 héros identiques + 5e héros
+            </h3>
+            <p className="ui-text-secondary mt-1 text-xs leading-relaxed">
+              Les teams jouées dans les combats de l'étape B sont regroupées
+              par noyau de 4 héros communs. Le 5e héros est affiché comme
+              variante, avec le nombre de WIN et LOSS.
+            </p>
+          </div>
+
+          {selectedEnemyIds.length !== TEAM_SIZE ? (
+            <div className="ui-panel-empty rounded-lg border border-dashed p-6 text-center">
+              <p className="ui-text-muted text-sm">
+                Sélectionnez d'abord 5 héros ennemis dans l'étape A.
+              </p>
+            </div>
+          ) : matchingCombats.length === 0 ? (
+            <div className="ui-panel-empty rounded-lg border border-dashed p-6 text-center">
+              <p className="ui-text-muted text-sm">
+                Aucun combat à classer.
+              </p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
+              {Array.from({ length: TEAM_SIZE }, (_, removedIndex) => {
+                const coreIds = matchingCombats[0].my_heroes
+                  .filter((_, index) => index !== removedIndex)
+                  .sort();
+                const coreKey = coreIds.join("|");
+
+                const variants = new Map<
+                  string,
+                  { hero: Hero; wins: number; losses: number }
+                >();
+
+                for (const combat of matchingCombats) {
+                  const core = combat.my_heroes.filter(
+                    (heroId) => coreIds.includes(heroId)
+                  );
+                  if (core.length !== 4) continue;
+
+                  const fifthId = combat.my_heroes.find(
+                    (heroId) => !coreIds.includes(heroId)
+                  );
+                  const fifth = fifthId ? heroesById.get(fifthId) : undefined;
+                  if (!fifth) continue;
+
+                  const current = variants.get(fifth.id) ?? {
+                    hero: fifth,
+                    wins: 0,
+                    losses: 0,
+                  };
+
+                  if (combat.won) current.wins++;
+                  else current.losses++;
+
+                  variants.set(fifth.id, current);
+                }
+
+                return (
+                  <section
+                    key={coreKey}
+                    className="ui-card rounded-xl border p-4"
+                  >
+                    <h4 className="ui-text-primary mb-3 text-sm font-black">
+                      Noyau de 4 héros
+                    </h4>
+
+                    <div className="mb-4 flex flex-wrap gap-2">
+                      {coreIds.map((heroId) => {
+                        const hero = heroesById.get(heroId);
+                        return hero ? (
+                          <div
+                            key={heroId}
+                            className="flex w-16 flex-col items-center gap-1"
+                          >
+                            <img
+                              src={hero.img}
+                              alt={hero.name}
+                              className="h-12 w-12 rounded-lg border border-white/10 object-cover"
+                            />
+                            <span className="ui-text-primary text-center text-[10px] font-semibold leading-tight">
+                              {hero.name}
+                            </span>
+                          </div>
+                        ) : null;
+                      })}
+                    </div>
+
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-left text-xs">
+                        <thead>
+                          <tr className="ui-text-muted border-b border-white/10">
+                            <th className="px-2 py-2">5e héros</th>
+                            <th className="px-2 py-2 text-center">WIN</th>
+                            <th className="px-2 py-2 text-center">LOSS</th>
+                            <th className="px-2 py-2 text-center">Total</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {Array.from(variants.values())
+                            .sort(
+                              (a, b) =>
+                                b.wins +
+                                b.losses -
+                                (a.wins + a.losses)
+                            )
+                            .map((variant) => (
+                              <tr
+                                key={variant.hero.id}
+                                className="border-b border-white/5 last:border-0"
+                              >
+                                <td className="px-2 py-2">
+                                  <div className="flex items-center gap-2">
+                                    <img
+                                      src={variant.hero.img}
+                                      alt={variant.hero.name}
+                                      className="h-9 w-9 rounded-md border border-white/10 object-cover"
+                                    />
+                                    <span className="ui-text-primary font-semibold">
+                                      {variant.hero.name}
+                                    </span>
+                                  </div>
+                                </td>
+                                <td className="px-2 py-2 text-center font-bold">
+                                  {variant.wins}
+                                </td>
+                                <td className="px-2 py-2 text-center font-bold">
+                                  {variant.losses}
+                                </td>
+                                <td className="px-2 py-2 text-center font-bold">
+                                  {variant.wins + variant.losses}
+                                </td>
+                              </tr>
+                            ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </section>
+                );
+              })}
+            </div>
+          )}
         </section>
       )}
     </div>
