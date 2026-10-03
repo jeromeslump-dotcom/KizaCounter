@@ -94,6 +94,15 @@ export default function TeamLabTabs({ mode, onChange }: TeamLabTabsProps) {
         >
           Étape C — Classement 4 + 1
         </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={mode === "enemyCrossAnalysis"}
+          onClick={() => onChange("enemyCrossAnalysis")}
+          className={mode === "enemyCrossAnalysis" ? "ui-button-success" : "ui-button"}
+        >
+          Étape D — Équipes à tester
+        </button>
       </div>
     </div>
   );
