@@ -15,6 +15,15 @@ export default function TeamLabTabs({ mode, onChange }: TeamLabTabsProps) {
       <button
         type="button"
         role="tab"
+        aria-selected={mode === "enemySelection"}
+        onClick={() => onChange("enemySelection")}
+        className={mode === "enemySelection" ? "ui-button-success" : "ui-button"}
+      >
+        Étape A — Sélection ennemis
+      </button>
+      <button
+        type="button"
+        role="tab"
         aria-selected={mode === "combats"}
         onClick={() => onChange("combats")}
         className={mode === "combats" ? "ui-button-success" : "ui-button"}
