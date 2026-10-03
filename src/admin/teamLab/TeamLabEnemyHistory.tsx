@@ -465,7 +465,7 @@ export default function TeamLabEnemyHistory({
                       </div>
                     </section>
                   ));
-              })()}              })}
+              })()}
             </div>
           )}
         </section>
