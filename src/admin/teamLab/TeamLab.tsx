@@ -6,6 +6,7 @@ import TeamGenerator from "./TeamGenerator";
 import TeamGeneratorCustomization from "./TeamGeneratorCustomization";
 import CounterGenerator from "./CounterGenerator";
 import TeamLabEnemyHistory from "./TeamLabEnemyHistory";
+import TeamLabEnemyCrossAnalysis from "./TeamLabEnemyCrossAnalysis";
 import {
   completeZones,
   METRICS,
@@ -32,6 +33,7 @@ export default function TeamLab({
     () => new Set()
   );
   const [neverTestedOnly, setNeverTestedOnly] = useState(false);
+  const [selectedEnemyIds, setSelectedEnemyIds] = useState<string[]>([]);
 
   useEffect(() => {
     setRequiredHeroIds((current) => {
@@ -54,7 +56,9 @@ export default function TeamLab({
         ? "B"
         : mode === "enemyCoreAnalysis"
           ? "C"
-          : mode === "combats"
+          : mode === "enemyCrossAnalysis"
+            ? "D"
+            : mode === "combats"
         ? "1"
         : mode === "formations"
           ? "2"
@@ -73,7 +77,9 @@ export default function TeamLab({
         ? "Historique de tous les combats contre l'équipe sélectionnée"
         : mode === "enemyCoreAnalysis"
           ? "Classement des teams par 4 héros identiques + 5e héros"
-          : mode === "combats"
+          : mode === "enemyCrossAnalysis"
+            ? "Recherche d'équipes jamais testées en conservant le contexte d'un héros performant"
+            : mode === "combats"
         ? "Répartition réelle des combats enregistrés dans les 20 zones"
         : mode === "formations"
           ? "Répartition réelle des formations enregistrées dans les 20 zones"
@@ -132,6 +138,8 @@ export default function TeamLab({
             <TeamLabEnemyHistory
               open={open}
               enabledHeroIds={enabledHeroIds}
+              selectedEnemyIds={selectedEnemyIds}
+              onSelectedEnemyIdsChange={setSelectedEnemyIds}
               step={
                 mode === "enemySelection"
                   ? "A"
@@ -140,6 +148,8 @@ export default function TeamLab({
                     : "B"
               }
             />
+          ) : mode === "enemyCrossAnalysis" ? (
+            <TeamLabEnemyCrossAnalysis selectedEnemyIds={selectedEnemyIds} />
           ) : mode === "generator" ? (
             <TeamGenerator
               enabledHeroIds={enabledHeroIds}
