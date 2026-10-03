@@ -61,8 +61,10 @@ export default function TeamLab({
               : "6";
 
   const description =
-    mode === "combats"
-      ? "Répartition réelle des combats enregistrés dans les 20 zones"
+    mode === "enemySelection"
+      ? "Sélection d'une équipe ennemie et recherche de tous les combats historiques correspondants"
+      : mode === "combats"
+        ? "Répartition réelle des combats enregistrés dans les 20 zones"
       : mode === "formations"
         ? "Répartition réelle des formations enregistrées dans les 20 zones"
         : mode === "theoretical"
@@ -116,7 +118,12 @@ export default function TeamLab({
         </div>
 
         <div className="min-h-0 flex-1 overflow-y-auto p-4 sm:p-6">
-          {mode === "generator" ? (
+          {mode === "enemySelection" ? (
+            <TeamLabEnemyHistory
+              open={open}
+              enabledHeroIds={enabledHeroIds}
+            />
+          ) : mode === "generator" ? (
             <TeamGenerator
               enabledHeroIds={enabledHeroIds}
               requiredHeroIds={requiredHeroIds}
@@ -259,12 +266,6 @@ export default function TeamLab({
                 </p>
               </div>
 
-              {mode === "combats" && (
-                <TeamLabEnemyHistory
-                  open={open}
-                  enabledHeroIds={enabledHeroIds}
-                />
-              )}
             </>
           )}
         </div>
