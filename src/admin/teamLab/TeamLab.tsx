@@ -5,6 +5,7 @@ import ZoneChart from "./ZoneChart";
 import TeamGenerator from "./TeamGenerator";
 import TeamGeneratorCustomization from "./TeamGeneratorCustomization";
 import CounterGenerator from "./CounterGenerator";
+import TeamLabEnemyHistory from "./TeamLabEnemyHistory";
 import {
   completeZones,
   METRICS,
@@ -257,6 +258,13 @@ export default function TeamLab({
                   statistiques, sans score et sans classement.
                 </p>
               </div>
+
+              {mode === "combats" && (
+                <TeamLabEnemyHistory
+                  open={open}
+                  enabledHeroIds={enabledHeroIds}
+                />
+              )}
             </>
           )}
         </div>
