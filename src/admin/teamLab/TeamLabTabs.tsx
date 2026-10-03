@@ -15,15 +15,6 @@ export default function TeamLabTabs({ mode, onChange }: TeamLabTabsProps) {
       <button
         type="button"
         role="tab"
-        aria-selected={mode === "enemySelection"}
-        onClick={() => onChange("enemySelection")}
-        className={mode === "enemySelection" ? "ui-button-success" : "ui-button"}
-      >
-        Étape A — Sélection ennemis
-      </button>
-      <button
-        type="button"
-        role="tab"
         aria-selected={mode === "combats"}
         onClick={() => onChange("combats")}
         className={mode === "combats" ? "ui-button-success" : "ui-button"}
@@ -66,6 +57,26 @@ export default function TeamLabTabs({ mode, onChange }: TeamLabTabsProps) {
       >
         Étape 5 — Générateur de team
       </button>
+      <div className="flex basis-full flex-wrap gap-2 border-t border-white/10 pt-2">
+        <button
+          type="button"
+          role="tab"
+          aria-selected={mode === "enemySelection"}
+          onClick={() => onChange("enemySelection")}
+          className={mode === "enemySelection" ? "ui-button-success" : "ui-button"}
+        >
+          Étape A — Sélection ennemis
+        </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={mode === "enemyHistory"}
+          onClick={() => onChange("enemyHistory")}
+          className={mode === "enemyHistory" ? "ui-button-success" : "ui-button"}
+        >
+          Étape B — Historique contre l'équipe
+        </button>
+      </div>
       <button
         type="button"
         role="tab"
