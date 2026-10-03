@@ -85,6 +85,15 @@ export default function TeamLabTabs({ mode, onChange }: TeamLabTabsProps) {
         >
           Étape B — Historique contre l'équipe
         </button>
+        <button
+          type="button"
+          role="tab"
+          aria-selected={mode === "enemyCoreAnalysis"}
+          onClick={() => onChange("enemyCoreAnalysis")}
+          className={mode === "enemyCoreAnalysis" ? "ui-button-success" : "ui-button"}
+        >
+          Étape C — Classement 4 + 1
+        </button>
       </div>
     </div>
   );
