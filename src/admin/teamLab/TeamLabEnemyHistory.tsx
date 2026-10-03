@@ -331,41 +331,141 @@ export default function TeamLabEnemyHistory({
             </div>
           ) : (
             <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
-              {Array.from({ length: TEAM_SIZE }, (_, removedIndex) => {
-                const coreIds = matchingCombats[0].my_heroes
-                  .filter((_, index) => index !== removedIndex)
-                  .sort();
-                const coreKey = coreIds.join("|");
-
-                const variants = new Map<
+              {(() => {
+                const groups = new Map<
                   string,
-                  { hero: Hero; wins: number; losses: number }
+                  {
+                    coreIds: string[];
+                    variants: Map<
+                      string,
+                      { hero: Hero; wins: number; losses: number }
+                    >;
+                  }
                 >();
 
                 for (const combat of matchingCombats) {
-                  const core = combat.my_heroes.filter(
-                    (heroId) => coreIds.includes(heroId)
-                  );
-                  if (core.length !== 4) continue;
+                  for (let removedIndex = 0; removedIndex < TEAM_SIZE; removedIndex++) {
+                    const coreIds = combat.my_heroes
+                      .filter((_, index) => index !== removedIndex)
+                      .sort();
+                    const coreKey = coreIds.join("|");
+                    const fifthId = combat.my_heroes[removedIndex];
+                    const fifth = heroesById.get(fifthId);
+                    if (!fifth) continue;
 
-                  const fifthId = combat.my_heroes.find(
-                    (heroId) => !coreIds.includes(heroId)
-                  );
-                  const fifth = fifthId ? heroesById.get(fifthId) : undefined;
-                  if (!fifth) continue;
+                    const group = groups.get(coreKey) ?? {
+                      coreIds,
+                      variants: new Map(),
+                    };
 
-                  const current = variants.get(fifth.id) ?? {
-                    hero: fifth,
-                    wins: 0,
-                    losses: 0,
-                  };
+                    const variant = group.variants.get(fifth.id) ?? {
+                      hero: fifth,
+                      wins: 0,
+                      losses: 0,
+                    };
 
-                  if (combat.won) current.wins++;
-                  else current.losses++;
+                    if (combat.won) variant.wins++;
+                    else variant.losses++;
 
-                  variants.set(fifth.id, current);
+                    group.variants.set(fifth.id, variant);
+                    groups.set(coreKey, group);
+                  }
                 }
 
+                return Array.from(groups.values())
+                  .sort((a, b) => {
+                    const totalA = Array.from(a.variants.values()).reduce(
+                      (sum, variant) => sum + variant.wins + variant.losses,
+                      0
+                    );
+                    const totalB = Array.from(b.variants.values()).reduce(
+                      (sum, variant) => sum + variant.wins + variant.losses,
+                      0
+                    );
+                    return totalB - totalA;
+                  })
+                  .map(({ coreIds, variants }) => (
+                    <section
+                      key={coreIds.join("|")}
+                      className="ui-card rounded-xl border p-4"
+                    >
+                      <h4 className="ui-text-primary mb-3 text-sm font-black">
+                        Noyau de 4 héros
+                      </h4>
+
+                      <div className="mb-4 flex flex-wrap gap-2">
+                        {coreIds.map((heroId) => {
+                          const hero = heroesById.get(heroId);
+                          return hero ? (
+                            <div
+                              key={heroId}
+                              className="flex w-16 flex-col items-center gap-1"
+                            >
+                              <img
+                                src={hero.img}
+                                alt={hero.name}
+                                className="h-12 w-12 rounded-lg border border-white/10 object-cover"
+                              />
+                              <span className="ui-text-primary text-center text-[10px] font-semibold leading-tight">
+                                {hero.name}
+                              </span>
+                            </div>
+                          ) : null;
+                        })}
+                      </div>
+
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-left text-xs">
+                          <thead>
+                            <tr className="ui-text-muted border-b border-white/10">
+                              <th className="px-2 py-2">5e héros</th>
+                              <th className="px-2 py-2 text-center">WIN</th>
+                              <th className="px-2 py-2 text-center">LOSS</th>
+                              <th className="px-2 py-2 text-center">Total</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {Array.from(variants.values())
+                              .sort(
+                                (a, b) =>
+                                  b.wins +
+                                  b.losses -
+                                  (a.wins + a.losses)
+                              )
+                              .map((variant) => (
+                                <tr
+                                  key={variant.hero.id}
+                                  className="border-b border-white/5 last:border-0"
+                                >
+                                  <td className="px-2 py-2">
+                                    <div className="flex items-center gap-2">
+                                      <img
+                                        src={variant.hero.img}
+                                        alt={variant.hero.name}
+                                        className="h-9 w-9 rounded-md border border-white/10 object-cover"
+                                      />
+                                      <span className="ui-text-primary font-semibold">
+                                        {variant.hero.name}
+                                      </span>
+                                    </div>
+                                  </td>
+                                  <td className="px-2 py-2 text-center font-bold">
+                                    {variant.wins}
+                                  </td>
+                                  <td className="px-2 py-2 text-center font-bold">
+                                    {variant.losses}
+                                  </td>
+                                  <td className="px-2 py-2 text-center font-bold">
+                                    {variant.wins + variant.losses}
+                                  </td>
+                                </tr>
+                              ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </section>
+                  ));
+              })()}
                 return (
                   <section
                     key={coreKey}
