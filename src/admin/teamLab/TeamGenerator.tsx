@@ -77,21 +77,26 @@ export default function TeamGenerator({
 }: TeamGeneratorProps) {
   const [results, setResults] = useState<TargetGeneratorTeam[]>([]);
   const [searched, setSearched] = useState(false);
+  const [page, setPage] = useState(1);
 
   const candidateTotal = getTargetCandidateTotal(
     enabledHeroIds,
     requiredHeroIds
   );
-  const maxResults = getTargetMaxResults();
-  const needsMoreHeroes = candidateTotal > maxResults;
+  const pageSize = getTargetMaxResults();
+  const pageCount = Math.max(1, Math.ceil(results.length / pageSize));
+  const pageStart = (page - 1) * pageSize;
+  const visibleResults = results.slice(pageStart, pageStart + pageSize);
 
   useEffect(() => {
     setSearched(false);
     setResults([]);
+    setPage(1);
   }, [enabledHeroIds, requiredHeroIds]);
 
   const handleGenerate = async () => {
     setSearched(true);
+    setPage(1);
     setResults(await generateTargetTeams(enabledHeroIds, requiredHeroIds));
   };
 
@@ -147,12 +152,6 @@ export default function TeamGenerator({
             Sélectionnez au moins <strong>1 héros obligatoire</strong> à
             l&apos;étape précédente pour commencer la recherche.
           </p>
-        ) : needsMoreHeroes ? (
-          <p className="ui-warning mt-4 rounded-xl border p-3 text-xs">
-            Il reste {candidateTotal.toLocaleString("fr-FR")} formations.
-            <strong> Ajoutez un héros obligatoire supplémentaire</strong> pour
-            réduire le pool à {maxResults} formations ou moins.
-          </p>
         ) : candidateTotal === 0 ? (
           <p className="ui-error mt-4 rounded-xl border p-3 text-xs">
             Aucune formation testable ne correspond aux héros activés et aux
@@ -168,7 +167,9 @@ export default function TeamGenerator({
               Afficher les formations à tester
             </button>
             <span className="ui-text-muted text-xs">
-              {candidateTotal} résultat{candidateTotal > 1 ? "s" : ""} maximum
+              {candidateTotal.toLocaleString("fr-FR")} résultat
+              {candidateTotal > 1 ? "s" : ""} disponible
+              {candidateTotal > 1 ? "s" : ""}
             </span>
           </div>
         )}
@@ -200,13 +201,39 @@ export default function TeamGenerator({
               </div>
 
               <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
-                {results.slice(0, maxResults).map((team) => (
+                {visibleResults.map((team) => (
                   <TeamCard
                     key={team.heroes.map((hero) => hero.id).join(",")}
                     team={team}
                   />
                 ))}
               </div>
+
+              {pageCount > 1 && (
+                <div className="flex flex-wrap items-center justify-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setPage((current) => Math.max(1, current - 1))}
+                    disabled={page === 1}
+                    className="ui-button"
+                  >
+                    ← Précédent
+                  </button>
+                  <span className="ui-text-muted px-2 text-xs">
+                    Page {page} / {pageCount}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setPage((current) => Math.min(pageCount, current + 1))
+                    }
+                    disabled={page === pageCount}
+                    className="ui-button"
+                  >
+                    Suivant →
+                  </button>
+                </div>
+              )}
             </>
           )}
         </section>
