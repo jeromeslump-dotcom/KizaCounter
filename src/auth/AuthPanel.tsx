@@ -14,6 +14,9 @@ import useAuthSession from "./useAuthSession";
 import UserPanel from "./UserPanel";
 
 const TeamLab = lazy(() => import("../admin/teamLab/TeamLab"));
+const TeamByPosition = lazy(
+  () => import("../admin/teamByPosition/TeamByPosition")
+);
 const TeamCreator = lazy(() => import("../admin/teamCreator/TeamCreator"));
 
 interface AuthPanelProps {
@@ -37,6 +40,7 @@ export default function AuthPanel({
   const [showCombatHistory, setShowCombatHistory] = useState(false);
   const [showAnalysisHelp, setShowAnalysisHelp] = useState(false);
   const [showWinningPatternsLab, setShowWinningPatternsLab] = useState(false);
+  const [showTeamByPosition, setShowTeamByPosition] = useState(false);
   const [showTeamCreator, setShowTeamCreator] = useState(false);
   const [adminCombats, setAdminCombats] = useState<Combat[]>([]);
   const [showLogin, setShowLogin] = useState(false);
@@ -71,6 +75,7 @@ export default function AuthPanel({
     setShowCombatHistory(false);
     setShowAnalysisHelp(false);
     setShowWinningPatternsLab(false);
+    setShowTeamByPosition(false);
     setShowTeamCreator(false);
   }
 
@@ -80,6 +85,7 @@ export default function AuthPanel({
     setShowCombatHistory(false);
     setShowAnalysisHelp(false);
     setShowWinningPatternsLab(false);
+    setShowTeamByPosition(false);
     setShowTeamCreator(false);
     setShowAdminPanel(true);
   }
@@ -212,6 +218,20 @@ export default function AuthPanel({
                 setShowAdminPanel(false);
                 setShowWinningPatternsLab(true);
               }}
+              onTeamByPosition={async () => {
+                setShowAdminPanel(false);
+                setShowTeamByPosition(true);
+                try {
+                  const history = await loadCombats();
+                  setAdminCombats(history);
+                } catch (error) {
+                  console.error(
+                    "Impossible de charger les combats pour Team par position :",
+                    error
+                  );
+                  setAdminCombats([]);
+                }
+              }}
               onTeamCreator={() => {
                 setShowAdminPanel(false);
                 setShowTeamCreator(true);
@@ -246,6 +266,12 @@ export default function AuthPanel({
             />
 
             <Suspense fallback={null}>
+              <TeamByPosition
+                open={showTeamByPosition}
+                combats={adminCombats}
+                onClose={closeAdminArea}
+                onBack={backToAdminPanel}
+              />
               <TeamLab
                 open={showWinningPatternsLab}
                 onClose={closeAdminArea}
