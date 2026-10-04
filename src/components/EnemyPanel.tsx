@@ -1,5 +1,6 @@
 import type { Hero } from "../types";
 import HeroCard from "./HeroCard";
+import HeroPortrait from "./HeroPortrait";
 
 interface EnemyPanelProps {
   heroes: Hero[];
@@ -52,11 +53,10 @@ export default function EnemyPanel({
                 title={`Retirer ${hero.name}`}
               >
                 <div className="relative z-10 aspect-square w-full overflow-hidden">
-                  <img
-                    src={`/heroes_portrait/${hero.id}.png`}
-                    alt={hero.name}
-                    className="h-full w-full object-contain transition group-hover:brightness-75"
-                    loading="lazy"
+                  <HeroPortrait
+                    hero={hero}
+                    showName={false}
+                    imageClassName="h-full w-full transition group-hover:brightness-75"
                   />
                 </div>
 
