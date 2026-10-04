@@ -33,7 +33,6 @@ const TARGET_DATA = teamLabTargets as TargetData;
 const TARGET_FORMATIONS = TARGET_DATA.formations;
 const TARGET_VECTORS = new Set(TARGET_DATA.targetVectors);
 
-
 const TESTED_FORMATIONS = new Set(
   winningPatterns.formations.all.map((formation) => formation.formation)
 );
