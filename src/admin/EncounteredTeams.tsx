@@ -199,11 +199,10 @@ export default function EncounteredTeams({
                               >
                                 <div className="h-14 w-14 overflow-hidden rounded-lg border ui-divider sm:h-16 sm:w-16">
                                   {hero ? (
-                                    <img
-                                      src={hero.img}
-                                      alt={hero.name}
-                                      loading="lazy"
-                                      className="h-full w-full object-cover"
+                                    <HeroPortrait
+                                      hero={hero}
+                                      showName={false}
+                                      imageClassName="h-full w-full object-cover"
                                     />
                                   ) : (
                                     <div className="ui-text-soft flex h-full w-full items-center justify-center text-[9px]">
