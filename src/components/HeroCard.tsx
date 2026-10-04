@@ -4,6 +4,7 @@ import { memo } from "react";
 import type { Hero } from "../types";
 
 import SelectionOrderBadge from "./SelectionOrderBadge";
+import HeroFullBody from "./HeroFullBody";
 
 interface HeroCardProps {
   hero: Hero;
@@ -23,7 +24,6 @@ function HeroCard({
   onClick,
 }: HeroCardProps) {
   const { stats } = hero;
-  const rosterImage = `/heroes/${hero.id}.png`;
 
   return (
     <button
@@ -74,11 +74,10 @@ function HeroCard({
 
         <div className="flex flex-1 items-center px-2 pb-2 pt-2">
           <div className="flex w-[42%] shrink-0 items-center justify-center">
-            <img
-              src={rosterImage}
-              alt={hero.name}
-              className="h-auto max-h-[125px] w-full object-contain"
-              loading="lazy"
+            <HeroFullBody
+              hero={hero}
+              showName={false}
+              imageClassName="max-h-[125px]"
             />
           </div>
 
