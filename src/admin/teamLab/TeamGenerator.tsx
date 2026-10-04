@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import HeroPortrait from "../../components/HeroPortrait";
+import HeroTeamItem from "../../components/HeroTeamItem";
 import {
   generateTargetTeams,
   getTargetCandidateTotal,
@@ -29,16 +29,7 @@ function TeamCard({ team }: { team: TargetGeneratorTeam }) {
 
       <div className="grid grid-cols-5 gap-2">
         {team.heroes.map((hero) => (
-          <div key={hero.id} className="min-w-0 text-center">
-            <HeroPortrait
-              hero={hero}
-              showName={false}
-              imageClassName="mx-auto max-w-20 rounded-xl"
-            />
-            <p className="ui-text-primary mt-1 truncate text-[11px] font-bold">
-              {hero.name}
-            </p>
-          </div>
+          <HeroTeamItem key={hero.id} hero={hero} />
         ))}
       </div>
 
