@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import type { Combat, Hero } from "../types";
 import { HEROES } from "../data/heroes";
-import SharedHeroPortrait from "../components/HeroPortrait";
+import HeroListItem from "../components/HeroListItem";
 import { deleteCombat } from "../storage/combatStorage";
 import { loadTeamOrders, type TeamOrder } from "../storage/teamOrderStorage";
 import { teamKey } from "../engine/teamUtils";
@@ -205,18 +205,7 @@ export default function CombatHistory({
       );
     }
 
-    return (
-      <div
-        className="flex min-w-0 flex-col items-center gap-0.5 sm:gap-1"
-        title={hero.name}
-      >
-        <SharedHeroPortrait hero={hero} showName={false} imageClassName="h-7 w-7 shrink-0 rounded-md border ui-divider object-cover shadow-sm sm:h-[72px] sm:w-[72px] sm:rounded-lg" />
-
-        <span className="ui-text-secondary block w-full min-w-0 truncate text-center text-[8px] font-semibold leading-tight sm:max-w-[84px] sm:text-[10px]">
-          {hero.name}
-        </span>
-      </div>
-    );
+    return <HeroListItem hero={hero} size="history" />;
   }
 
   if (orderEditor) {
