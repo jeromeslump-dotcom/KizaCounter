@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import type { Hero } from "../types";
 import { getTeamOrder } from "../storage/teamOrderStorage";
+import HeroPortrait from "./HeroPortrait";
 
 interface CompactTeamProps {
   title: string;
@@ -10,7 +11,6 @@ interface CompactTeamProps {
   selectedIds?: string[];
   enemy?: boolean;
   onHeroClick?: (hero: Hero) => void;
-  compactPortrait?: boolean;
 }
 
 export default function CompactTeam({
@@ -20,7 +20,6 @@ export default function CompactTeam({
   selectedIds = [],
   enemy = false,
   onHeroClick,
-  compactPortrait = false,
 }: CompactTeamProps) {
   const [savedOrder, setSavedOrder] = useState<string[] | null>(null);
 
@@ -81,10 +80,6 @@ export default function CompactTeam({
           {orderedHeroes.map((hero, index) => {
             const isSelected = selectedIds.includes(hero.id);
 
-            const imageSrc = compactPortrait
-              ? `/heroes_portrait/${hero.id}.png`
-              : hero.img;
-
             return (
               <button
                 key={hero.id}
@@ -98,11 +93,10 @@ export default function CompactTeam({
                 ].join(" ")}
               >
                 <div className="relative aspect-square w-full overflow-hidden">
-                  <img
-                    src={imageSrc}
-                    alt={hero.name}
-                    className="h-full w-full object-contain"
-                    loading="lazy"
+                  <HeroPortrait
+                    hero={hero}
+                    showName={false}
+                    imageClassName="h-full w-full"
                   />
 
                   <span className="selection-order-badge absolute left-0 top-0 z-20 flex h-5 w-5 items-center justify-center rounded-full border text-[10px] font-black leading-none shadow sm:left-2 sm:top-2 sm:h-7 sm:w-7 sm:border-2 sm:text-sm">
