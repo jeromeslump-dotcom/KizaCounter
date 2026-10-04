@@ -145,7 +145,6 @@ export default function TeamCreatorEnemyHistory({
 
           <EnemyPanel
             heroes={selectedEnemies}
-            maxHeroes={TEAM_SIZE}
             onHeroClick={toggleEnemy}
             onClear={clearEnemies}
             compact
