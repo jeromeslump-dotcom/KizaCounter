@@ -8,6 +8,7 @@ interface HeroListItemProps {
   selected?: boolean;
   disabled?: boolean;
   className?: string;
+  layout?: "stacked" | "inline";
 }
 
 const SIZE_CLASSES = {
@@ -26,6 +27,7 @@ export default function HeroListItem({
   selected = false,
   disabled = false,
   className = "",
+  layout = "stacked",
 }: HeroListItemProps) {
   const content = (
     <>
@@ -34,7 +36,12 @@ export default function HeroListItem({
         showName={false}
         imageClassName={SIZE_CLASSES[size]}
       />
-      <span className="ui-text-primary min-w-0 truncate text-center text-[10px] font-bold sm:text-xs">
+      <span
+        className={[
+          "ui-text-primary min-w-0 truncate text-[10px] font-bold sm:text-xs",
+          layout === "stacked" ? "text-center" : "flex-1",
+        ].join(" ")}
+      >
         {hero.name}
       </span>
     </>
@@ -44,7 +51,9 @@ export default function HeroListItem({
     return (
       <div
         className={[
-          "flex min-w-0 flex-col items-center gap-1",
+          layout === "stacked"
+          ? "flex min-w-0 flex-col items-center gap-1"
+          : "flex min-w-0 items-center gap-3",
           selected ? "hero-card-selected rounded-lg p-1" : "",
           disabled ? "opacity-45" : "",
           className,
