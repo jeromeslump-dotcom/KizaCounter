@@ -14,6 +14,7 @@
     "duplicates": "jscpd src && node scripts/check-redundancy.mjs",
     "analyze:winning": "node --experimental-strip-types scripts/analyze-winning-patterns.ts",
     "generate:theoretical": "node --experimental-strip-types scripts/generate-theoretical-formations.ts",
+    "generate:team-lab": "node --experimental-strip-types scripts/generate-team-lab-targets.ts",
     "analyze:relations": "node --experimental-strip-types scripts/analyze-stat-relations.ts",
     "analyze:relation-curves": "node --experimental-strip-types scripts/analyze-stat-relations-curves.ts"
   },
