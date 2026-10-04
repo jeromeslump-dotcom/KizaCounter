@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import HeroPortrait from "../../components/HeroPortrait";
+import HeroListItem from "../../components/HeroListItem";
 
 import { HEROES, type Hero } from "../../data/heroes";
 import { addCombat, loadCombats } from "../../storage/combatStorage";
@@ -81,12 +81,7 @@ function HeroStrip({
       {ids.map((id) => {
         const hero = heroesById.get(id);
         return hero ? (
-          <div key={id} className="flex w-16 flex-col items-center gap-1">
-            <HeroPortrait hero={hero} showName={false} imageClassName="h-11 w-11 rounded-lg border border-white/10 object-cover" />
-            <span className="ui-text-primary text-center text-[10px] font-semibold leading-tight">
-              {hero.name}
-            </span>
-          </div>
+          <HeroListItem key={id} hero={hero} size="standard" />
         ) : null;
       })}
     </div>
@@ -272,10 +267,10 @@ export default function TeamCreatorEnemyCrossAnalysis({
                     Héros repris
                   </p>
                   <div className="flex items-center gap-3">
-                    <HeroPortrait
+                    <HeroListItem
                       hero={candidate.sourceHero}
-                      showName={false}
-                      imageClassName="h-12 w-12 rounded-lg border border-[var(--ui-theme-primary)] object-cover"
+                      size="standard"
+                      layout="inline"
                     />
                     <div>
                       <p className="ui-text-primary text-sm font-black">
