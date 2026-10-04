@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import HeroPortrait from "../../components/HeroPortrait";
+import HeroListItem from "../../components/HeroListItem";
 
 import EnemyPanel from "../../components/EnemyPanel";
 import HeroGrid from "../../components/HeroGrid";
@@ -263,10 +263,7 @@ export default function TeamCreatorEnemyHistory({
                                 className="flex w-16 flex-col items-center gap-1"
                                 title={hero.name}
                               >
-                                <HeroPortrait hero={hero} showName={false} imageClassName="h-12 w-12 rounded-lg border border-white/10 object-cover" />
-                                <span className="ui-text-primary text-center text-[11px] font-semibold leading-tight">
-                                  {hero.name}
-                                </span>
+                                <HeroListItem hero={hero} size="standard" />
                               </div>
                             ) : null;
                           })}
@@ -286,10 +283,7 @@ export default function TeamCreatorEnemyHistory({
                                 className="flex w-16 flex-col items-center gap-1"
                                 title={hero.name}
                               >
-                                <HeroPortrait hero={hero} showName={false} imageClassName="h-12 w-12 rounded-lg border border-white/10 object-cover" />
-                                <span className="ui-text-primary text-center text-[11px] font-semibold leading-tight">
-                                  {hero.name}
-                                </span>
+                                <HeroListItem hero={hero} size="standard" />
                               </div>
                             ) : null;
                           })}
@@ -403,10 +397,7 @@ export default function TeamCreatorEnemyHistory({
                               key={heroId}
                               className="flex w-16 flex-col items-center gap-1"
                             >
-                              <HeroPortrait hero={hero} showName={false} imageClassName="h-12 w-12 rounded-lg border border-white/10 object-cover" />
-                              <span className="ui-text-primary text-center text-[10px] font-semibold leading-tight">
-                                {hero.name}
-                              </span>
+                              <HeroListItem hero={hero} size="standard" />
                             </div>
                           ) : null;
                         })}
@@ -468,7 +459,7 @@ export default function TeamCreatorEnemyHistory({
                                   >
                                     <td className="px-2 py-2">
                                       <div className="flex items-center gap-2">
-                                        <HeroPortrait hero={variant.hero} showName={false} imageClassName="h-9 w-9 rounded-md border border-white/10 object-cover" />
+                                        <HeroListItem hero={variant.hero} size="compact" layout="inline" />
                                         <span className="ui-text-primary font-semibold">
                                           {variant.hero.name}
                                         </span>
