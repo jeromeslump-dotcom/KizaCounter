@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import type { Hero } from "../types";
 import { getTeamOrder } from "../storage/teamOrderStorage";
-import HeroPortrait from "./HeroPortrait";
+import HeroTeamItem from "./HeroTeamItem";
 
 interface CompactTeamProps {
   title: string;
@@ -81,33 +81,13 @@ export default function CompactTeam({
             const isSelected = selectedIds.includes(hero.id);
 
             return (
-              <button
+              <HeroTeamItem
                 key={hero.id}
-                type="button"
-                disabled={!onHeroClick}
-                onClick={() => onHeroClick?.(hero)}
-                className={[
-                  "ui-card ui-hover-theme group relative w-full max-w-[180px] justify-self-center min-w-0 overflow-hidden rounded-lg border transition",
-                  isSelected ? "hero-card-selected" : "",
-                  onHeroClick ? "cursor-pointer" : "cursor-default",
-                ].join(" ")}
-              >
-                <div className="relative aspect-square w-full overflow-hidden">
-                  <HeroPortrait
-                    hero={hero}
-                    showName={false}
-                    imageClassName="h-full w-full"
-                  />
-
-                  <span className="selection-order-badge absolute left-0 top-0 z-20 flex h-5 w-5 items-center justify-center rounded-full border text-[10px] font-black leading-none shadow sm:left-2 sm:top-2 sm:h-7 sm:w-7 sm:border-2 sm:text-sm">
-                    {index + 1}
-                  </span>
-                </div>
-
-                <div className="ui-divider ui-text-primary relative z-10 truncate border-t px-1 py-1.5 text-center text-[9px] font-bold leading-tight sm:px-2 sm:py-2 sm:text-xs">
-                  {hero.name}
-                </div>
-              </button>
+                hero={hero}
+                order={index + 1}
+                selected={isSelected}
+                onClick={onHeroClick}
+              />
             );
           })}
         </div>
