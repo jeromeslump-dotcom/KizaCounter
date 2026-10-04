@@ -1,5 +1,5 @@
 import type { Hero } from "../data/heroes";
-import HeroPortrait from "../components/HeroPortrait";
+import HeroListItem from "../components/HeroListItem";
 import CompactTeam from "../components/CompactTeam";
 
 export interface HeroEvaluationGroup {
@@ -135,14 +135,7 @@ export default function AnalysisHelpResults({
                         key={hero.id}
                         className="ui-panel rounded-lg border p-2 text-center"
                       >
-                        <HeroPortrait
-                          hero={hero}
-                          showName={false}
-                          imageClassName="mx-auto mb-1 h-12 w-12 rounded-lg object-cover"
-                        />
-                        <div className="ui-text-primary text-[10px] font-bold leading-tight sm:text-xs">
-                          {hero.name}
-                        </div>
+                        <HeroListItem hero={hero} size="standard" />
                       </div>
                     ))}
                   </div>
