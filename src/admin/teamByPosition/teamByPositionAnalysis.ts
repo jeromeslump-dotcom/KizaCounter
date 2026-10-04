@@ -1,0 +1,164 @@
+import type { Combat } from "../../types";
+
+export interface OrderedFormationStats {
+  heroIds: string[];
+  wins: number;
+  losses: number;
+  point: -1 | 0 | 1;
+}
+
+export interface PositionHeroRanking {
+  heroId: string;
+  score: number;
+  wins: number;
+  losses: number;
+  comparisons: number;
+}
+
+export interface TeamByPositionAnalysis {
+  formations: number;
+  comparisons: number;
+  rankings: PositionHeroRanking[][];
+}
+
+const FORMATION_SIZE = 5;
+
+function formationKey(heroIds: string[]): string {
+  return heroIds.join("|");
+}
+
+function getFormationPoint(wins: number, losses: number): -1 | 0 | 1 {
+  if (wins > losses) return 1;
+  if (wins < losses) return -1;
+  return 0;
+}
+
+export function aggregateOrderedFormations(
+  combats: Combat[]
+): Map<string, OrderedFormationStats> {
+  const formations = new Map<string, OrderedFormationStats>();
+
+  for (const combat of combats) {
+    if (combat.my_heroes.length !== FORMATION_SIZE) continue;
+
+    const key = formationKey(combat.my_heroes);
+    const current = formations.get(key);
+
+    if (current) {
+      if (combat.won) current.wins += 1;
+      else current.losses += 1;
+      current.point = getFormationPoint(current.wins, current.losses);
+      continue;
+    }
+
+    const wins = combat.won ? 1 : 0;
+    const losses = combat.won ? 0 : 1;
+
+    formations.set(key, {
+      heroIds: [...combat.my_heroes],
+      wins,
+      losses,
+      point: getFormationPoint(wins, losses),
+    });
+  }
+
+  return formations;
+}
+
+function contextKey(heroIds: string[], position: number): string {
+  return heroIds
+    .map((heroId, index) => (index === position ? "__TARGET__" : heroId))
+    .join("|");
+}
+
+export function analyzeTeamByPosition(
+  combats: Combat[]
+): TeamByPositionAnalysis {
+  const formations = aggregateOrderedFormations(combats);
+  const rankings: PositionHeroRanking[][] = Array.from(
+    { length: FORMATION_SIZE },
+    () => []
+  );
+
+  let comparisons = 0;
+
+  for (let position = 0; position < FORMATION_SIZE; position += 1) {
+    const contexts = new Map<string, OrderedFormationStats[]>();
+
+    for (const formation of formations.values()) {
+      const key = contextKey(formation.heroIds, position);
+      const group = contexts.get(key);
+
+      if (group) group.push(formation);
+      else contexts.set(key, [formation]);
+    }
+
+    const byHero = new Map<string, PositionHeroRanking>();
+
+    for (const group of contexts.values()) {
+      if (group.length < 2) continue;
+
+      for (let left = 0; left < group.length - 1; left += 1) {
+        for (let right = left + 1; right < group.length; right += 1) {
+          const a = group[left];
+          const b = group[right];
+
+          if (a.point === b.point) continue;
+
+          comparisons += 1;
+
+          const aHeroId = a.heroIds[position];
+          const bHeroId = b.heroIds[position];
+
+          const aRanking = byHero.get(aHeroId) ?? {
+            heroId: aHeroId,
+            score: 0,
+            wins: 0,
+            losses: 0,
+            comparisons: 0,
+          };
+
+          const bRanking = byHero.get(bHeroId) ?? {
+            heroId: bHeroId,
+            score: 0,
+            wins: 0,
+            losses: 0,
+            comparisons: 0,
+          };
+
+          if (a.point > b.point) {
+            aRanking.score += 1;
+            aRanking.wins += 1;
+            bRanking.score -= 1;
+            bRanking.losses += 1;
+          } else {
+            aRanking.score -= 1;
+            aRanking.losses += 1;
+            bRanking.score += 1;
+            bRanking.wins += 1;
+          }
+
+          aRanking.comparisons += 1;
+          bRanking.comparisons += 1;
+
+          byHero.set(aHeroId, aRanking);
+          byHero.set(bHeroId, bRanking);
+        }
+      }
+    }
+
+    rankings[position] = Array.from(byHero.values()).sort(
+      (a, b) =>
+        b.score - a.score ||
+        b.wins - a.wins ||
+        b.comparisons - a.comparisons ||
+        a.heroId.localeCompare(b.heroId)
+    );
+  }
+
+  return {
+    formations: formations.size,
+    comparisons,
+    rankings,
+  };
+}
