@@ -5,8 +5,6 @@
     historicalReliabilityConfidenceWeight: number;
     historicalTeamMinBattles: number;
     historicalTeamMinWinRate: number;
-    core4MinBattles: number;
-    core4MinReplacementBattles: number;
     core4ConfidenceBattles: number;
   };
 }
@@ -18,8 +16,6 @@ export const DEFAULT_ENGINE_SETTINGS: EngineSettings = {
     historicalReliabilityConfidenceWeight: 0.65,
     historicalTeamMinBattles: 40,
     historicalTeamMinWinRate: 50,
-    core4MinBattles: 2,
-    core4MinReplacementBattles: 3,
     core4ConfidenceBattles: 4,
   },
 };
