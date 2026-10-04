@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import {
-  generateTeams,
-  getGeneratorCandidateTotal,
+  generateTargetTeams,
+  getTargetCandidateTotal,
   getTargetFormationTotal,
-  getMaxResults,
-  type GeneratorTeam,
-} from "./teamGeneratorEngine";
+  getTargetMaxResults,
+  type TargetGeneratorTeam,
+} from "./teamLabTargetEngine";
 
 
 interface TeamGeneratorProps {
@@ -13,7 +13,7 @@ interface TeamGeneratorProps {
   requiredHeroIds: Set<string>;
 }
 
-function TeamCard({ team }: { team: GeneratorTeam }) {
+function TeamCard({ team }: { team: TargetGeneratorTeam }) {
   return (
     <article className="ui-card rounded-2xl border p-3">
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
@@ -76,14 +76,14 @@ export default function TeamGenerator({
   enabledHeroIds,
   requiredHeroIds,
 }: TeamGeneratorProps) {
-  const [results, setResults] = useState<GeneratorTeam[]>([]);
+  const [results, setResults] = useState<TargetGeneratorTeam[]>([]);
   const [searched, setSearched] = useState(false);
 
-  const candidateTotal = getGeneratorCandidateTotal(
+  const candidateTotal = getTargetCandidateTotal(
     enabledHeroIds,
     requiredHeroIds
   );
-  const maxResults = getMaxResults();
+  const maxResults = getTargetMaxResults();
   const needsMoreHeroes = candidateTotal > maxResults;
 
   useEffect(() => {
@@ -93,7 +93,7 @@ export default function TeamGenerator({
 
   const handleGenerate = async () => {
     setSearched(true);
-    setResults(await generateTeams(enabledHeroIds, requiredHeroIds));
+    setResults(await generateTargetTeams(enabledHeroIds, requiredHeroIds));
   };
 
   return (
