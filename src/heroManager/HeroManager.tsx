@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 
 import { HEROES } from "../data/heroes";
+import HeroPortrait from "../components/HeroPortrait";
 
 interface HeroManagerProps {
   open: boolean;
@@ -142,11 +143,10 @@ export default function HeroManager({
                           : ""
                       }`}
                     >
-                      <img
-                        src={hero.img}
-                        alt={hero.name}
-                        loading="lazy"
-                        className={[
+                      <HeroPortrait
+                        hero={hero}
+                        showName={false}
+                        imageClassName={[
                           "absolute inset-0 h-full w-full object-cover",
                           enabled ? "" : "grayscale",
                         ].join(" ")}
