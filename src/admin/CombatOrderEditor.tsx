@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import type { Hero } from "../types";
 import { saveTeamOrder } from "../storage/teamOrderStorage";
-import HeroPortrait from "../components/HeroPortrait";
+import HeroListItem from "../components/HeroListItem";
 
 interface CombatOrderEditorProps {
   heroes: Hero[];
@@ -92,14 +92,7 @@ export default function CombatOrderEditor({
 
             return (
               <div key={hero.id}>
-                <HeroPortrait
-                  hero={hero}
-                  showName={false}
-                  imageClassName="h-14 w-14 shrink-0 rounded-lg border ui-divider object-cover sm:h-20 sm:w-20 sm:rounded-xl"
-                />
-                <span className="ui-text-primary w-full min-w-0 truncate text-center text-[10px] font-bold sm:text-xs">
-                  {hero.name}
-                </span>
+                <HeroListItem hero={hero} size="large" />
                 <select
                   value={currentPosition}
                   onChange={(event) =>
