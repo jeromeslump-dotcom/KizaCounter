@@ -18,10 +18,10 @@ export default function TeamLabTabs({ mode, onChange }: TeamLabTabsProps) {
         Étape 3 — Théorique
       </button>
       <button type="button" role="tab" aria-selected={mode === "customization"} onClick={() => onChange("customization")} className={mode === "customization" ? "ui-button-success" : "ui-button"}>
-        Étape 4 — Personnalisation
+        Étape 4 — Héros obligatoires
       </button>
       <button type="button" role="tab" aria-selected={mode === "generator"} onClick={() => onChange("generator")} className={mode === "generator" ? "ui-button-success" : "ui-button"}>
-        Étape 5 — Générateur de team
+        Étape 5 — Équipes à tester
       </button>
       <button type="button" role="tab" aria-selected={mode === "counter"} onClick={() => onChange("counter")} className={mode === "counter" ? "ui-button-success" : "ui-button"}>
         Étape 6 — Générateur de contre
