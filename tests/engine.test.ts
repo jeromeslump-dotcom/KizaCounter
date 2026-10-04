@@ -161,10 +161,9 @@ describe("recommendation engine history", () => {
 
     try {
       Object.assign(DEFAULT_ENGINE_SETTINGS.advanced, {
-        exactHistoryMinBattles: 3,
-        exactHistoryMinWinRate: 75,
-        core4MinBattles: 100,
-      });
+        historicalTeamMinBattles: 3,
+        historicalTeamMinWinRate: 75,
+        });
 
       const result = recommendTeamWithSource(
         targetEnemy,
@@ -240,8 +239,8 @@ describe("recommendation engine history", () => {
 describe("recommendTeamWithSource priority", () => {
   beforeEach(() => {
     Object.assign(DEFAULT_ENGINE_SETTINGS.advanced, {
-      exactHistoryMinBattles: 3,
-      exactHistoryMinWinRate: 75,
+      historicalTeamMinBattles: 3,
+      historicalTeamMinWinRate: 75,
     });
   });
   it("prefers an exact historical winning team before other recommendation sources", () => {
