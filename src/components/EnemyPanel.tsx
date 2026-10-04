@@ -4,7 +4,6 @@ import HeroTeamItem from "./HeroTeamItem";
 
 interface EnemyPanelProps {
   heroes: Hero[];
-  maxHeroes?: number;
   onHeroClick?: (hero: Hero) => void;
   onClear?: () => void;
   compact?: boolean;
@@ -12,7 +11,6 @@ interface EnemyPanelProps {
 
 export default function EnemyPanel({
   heroes,
-  maxHeroes = 5,
   onHeroClick,
   onClear,
   compact = false,
@@ -21,7 +19,7 @@ export default function EnemyPanel({
     <section className="ui-panel is-active w-full rounded-xl border p-4">
       <div className="mb-4 flex items-center justify-between gap-3">
         <h2 className="ui-text-primary text-base font-bold">
-          Ennemis ({heroes.length}/{maxHeroes})
+          Ennemis ({heroes.length}/5)
         </h2>
 
         {onClear && heroes.length > 0 && (
@@ -39,7 +37,7 @@ export default function EnemyPanel({
         heroes.length === 0 ? (
           <div className="ui-panel-empty rounded-lg border border-dashed p-4 text-center">
             <p className="ui-text-muted text-sm">
-              Sélectionnez jusqu'à {maxHeroes} héros ennemis.
+              Sélectionnez exactement 5 héros ennemis.
             </p>
           </div>
         ) : (
