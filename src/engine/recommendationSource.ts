@@ -46,8 +46,7 @@ function findBestEnabledHistoricalTeam(
   combats: Combat[],
   excludedTeamKey: string | undefined,
   matchesHistoricalEnemy: (historicalEnemy: string[]) => number | null,
-  sortBySimilarity = false,
-  allowLosingCandidates = false
+  sortBySimilarity = false
 ): Hero[] | null {
   const enabledIds = new Set(candidateHeroes.map((hero) => hero.id));
   const historicalCandidates = collectHistoricalCandidates(
@@ -65,8 +64,7 @@ function findBestEnabledHistoricalTeam(
 
   for (const candidate of orderHistoricalCandidates(
     recommendationCandidates,
-    sortBySimilarity,
-    allowLosingCandidates
+    sortBySimilarity
   )) {
     const team = resolveTeamFromIds(candidate.heroIds, candidateHeroesById);
     if (!isHistoricalTeamEligible(candidate.heroIds, combats)) continue;
@@ -98,8 +96,7 @@ function findBestEnabledExactHistoryTeam(
       teamKey(historicalEnemy) === targetKey
         ? 0
         : null,
-    false,
-    true
+    false
   );
 }
 
