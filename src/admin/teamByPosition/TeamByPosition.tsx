@@ -168,8 +168,40 @@ export default function TeamByPosition({
         matchingOrderedCombats,
         analysis.rankings
       ).filter((candidate) => !recordedTeamKeys.has(teamKey(candidate.teamIds))),
-    [analysis.rankings, combats, matchingOrderedCombats, recordedTeamKeys]
+    [analysis.rankings, matchingOrderedCombats, recordedTeamKeys]
   );
+
+  const candidateGroups = useMemo(() => {
+    const groups = new Map<
+      string,
+      {
+        baseTeamIds: string[];
+        position: number;
+        lostHeroId: string;
+        candidates: typeof candidates;
+      }
+    >();
+
+    for (const candidate of candidates) {
+      const baseTeamIds = [...candidate.teamIds];
+      baseTeamIds[candidate.position] = candidate.lostHeroId;
+      const key = `${baseTeamIds.join("|")}::${candidate.position}`;
+      const group = groups.get(key);
+
+      if (group) {
+        group.candidates.push(candidate);
+      } else {
+        groups.set(key, {
+          baseTeamIds,
+          position: candidate.position,
+          lostHeroId: candidate.lostHeroId,
+          candidates: [candidate],
+        });
+      }
+    }
+
+    return [...groups.values()];
+  }, [candidates]);
 
   const toggleEnemy = (hero: Hero) => {
     setEnemyIds((current) => {
@@ -472,7 +504,7 @@ export default function TeamByPosition({
                     Aucun combat avec ordre connu contre cette équipe ennemie.
                   </p>
                 </div>
-              ) : candidates.length === 0 ? (
+              ) : candidateGroups.length === 0 ? (
                 <div className="ui-panel-empty rounded-xl border border-dashed p-6 text-center">
                   <p className="ui-text-muted text-sm">
                     Aucune nouvelle équipe mieux classée n'a été trouvée dans
