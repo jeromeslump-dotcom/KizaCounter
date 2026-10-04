@@ -56,7 +56,7 @@ export default function EnemyPanel({
       ) : heroes.length === 0 ? (
         <div className="ui-panel-empty rounded-lg border border-dashed p-6 text-center">
           <p className="ui-text-muted text-sm">
-            Sélectionnez jusqu'à {maxHeroes} héros ennemis.
+            Sélectionnez exactement 5 héros ennemis.
           </p>
         </div>
       ) : (
