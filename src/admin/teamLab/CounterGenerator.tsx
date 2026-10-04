@@ -254,7 +254,6 @@ export default function CounterGenerator({
                 hero={hero}
                 selected={selected}
                 enabled
-                layout="showcase"
                 status={selected ? "✓" : "○"}
                 onClick={toggleEnemy}
               />
