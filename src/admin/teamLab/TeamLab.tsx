@@ -66,7 +66,7 @@ export default function TeamLab({
         : mode === "theoretical"
           ? "Distribution théorique des 5 461 512 formations possibles dans les 20 zones"
           : mode === "customization"
-            ? "Personnalisation des héros utilisés par le générateur"
+            ? "Sélection cumulative des héros obligatoires pour réduire le pool expérimental"
             : mode === "generator"
               ? "Génération d'équipes à partir de zones cibles et de relaxations progressives"
               : "Recherche d'un contre à partir des combats réels et génération d'une formation jamais testée";
