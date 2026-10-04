@@ -7,7 +7,6 @@ import {
   type GeneratorTeam,
 } from "./teamGeneratorEngine";
 
-const DISPLAY_LIMIT = 24;
 
 interface TeamGeneratorProps {
   enabledHeroIds: Set<string>;
@@ -202,7 +201,7 @@ export default function TeamGenerator({
               </div>
 
               <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
-                {results.slice(0, DISPLAY_LIMIT).map((team) => (
+                {results.slice(0, maxResults).map((team) => (
                   <TeamCard
                     key={team.heroes.map((hero) => hero.id).join(",")}
                     team={team}
