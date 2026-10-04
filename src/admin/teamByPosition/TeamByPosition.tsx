@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { HEROES } from "../../data/heroes";
 import type { Combat } from "../../types";
-import { teamKey } from "../../engine/teamUtils";
 import { loadTeamOrders, type TeamOrder } from "../../storage/teamOrderStorage";
 import {
   analyzeTeamByPosition,
+  applyKnownTeamOrders,
   type PositionHeroRanking,
 } from "./teamByPositionAnalysis";
 
@@ -75,18 +75,8 @@ export default function TeamByPosition({
   }, [open]);
 
   const orderedCombats = useMemo(
-    () => {
-      if (teamOrdersLoading) return [];
-
-      return combats.flatMap((combat) => {
-        if (combat.my_heroes.length !== 5) return [];
-
-        const orderedHeroIds = teamOrders.get(teamKey(combat.my_heroes));
-        if (!orderedHeroIds || orderedHeroIds.length !== 5) return [];
-
-        return [{ ...combat, my_heroes: orderedHeroIds }];
-      });
-    },
+    () =>
+      teamOrdersLoading ? [] : applyKnownTeamOrders(combats, teamOrders),
     [combats, teamOrders, teamOrdersLoading]
   );
 
