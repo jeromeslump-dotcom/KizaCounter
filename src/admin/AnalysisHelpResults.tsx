@@ -135,10 +135,10 @@ export default function AnalysisHelpResults({
                         key={hero.id}
                         className="ui-panel rounded-lg border p-2 text-center"
                       >
-                        <img
-                          src={hero.img}
-                          alt={hero.name}
-                          className="mx-auto mb-1 h-12 w-12 rounded-lg object-cover"
+                        <HeroPortrait
+                          hero={hero}
+                          showName={false}
+                          imageClassName="mx-auto mb-1 h-12 w-12 rounded-lg object-cover"
                         />
                         <div className="ui-text-primary text-[10px] font-bold leading-tight sm:text-xs">
                           {hero.name}
