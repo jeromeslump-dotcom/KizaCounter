@@ -3,6 +3,11 @@ import type { Combat, HeroClassFilter, HeroSort } from "../types";
 import type { Hero } from "../data/heroes";
 import { calculateHeroUsage } from "../engine/historicalScoring";
 import { teamKey } from "../engine/teamUtils";
+import { loadTeamOrders, type TeamOrder } from "../storage/teamOrderStorage";
+import {
+  analyzeTeamByPosition,
+  applyKnownTeamOrders,
+} from "./teamByPosition/teamByPositionAnalysis";
 import AnalysisHelpEnemySelection from "./AnalysisHelpEnemySelection";
 import AnalysisHelpResults, {
   type HeroEvaluationGroup,
@@ -30,6 +35,42 @@ export default function AnalysisHelp({
   const [activeClass, setActiveClass] = useState<HeroClassFilter>("ALL");
   const [query, setQuery] = useState("");
   const [sortBy, setSortBy] = useState<HeroSort>("played");
+  const [teamOrders, setTeamOrders] = useState<Map<string, string[]>>(new Map());
+  const [teamOrdersLoading, setTeamOrdersLoading] = useState(true);
+
+  useEffect(() => {
+    if (!open) return;
+
+    let cancelled = false;
+    setTeamOrdersLoading(true);
+    setTeamOrders(new Map());
+
+    async function loadOrders() {
+      try {
+        const orders = await loadTeamOrders();
+        if (!cancelled) {
+          setTeamOrders(
+            new Map(
+              orders.map((order: TeamOrder) => [
+                order.team_key,
+                order.ordered_hero_ids,
+              ])
+            )
+          );
+        }
+      } catch (error) {
+        console.error("Impossible de charger les ordres connus :", error);
+        if (!cancelled) setTeamOrders(new Map());
+      } finally {
+        if (!cancelled) setTeamOrdersLoading(false);
+      }
+    }
+
+    void loadOrders();
+    return () => {
+      cancelled = true;
+    };
+  }, [open]);
 
   const heroUsage = useMemo(() => {
     const usage = calculateHeroUsage(combats, heroes);
@@ -54,6 +95,17 @@ export default function AnalysisHelp({
           )
         : [],
     [combats, enemyIds]
+  );
+
+  const knownOrderedCombats = useMemo(
+    () =>
+      teamOrdersLoading ? [] : applyKnownTeamOrders(combats, teamOrders),
+    [combats, teamOrders, teamOrdersLoading]
+  );
+
+  const positionAnalysis = useMemo(
+    () => analyzeTeamByPosition(knownOrderedCombats),
+    [knownOrderedCombats]
   );
 
   const combatGroups = useMemo<HeroEvaluationGroup[]>(() => {
@@ -172,6 +224,12 @@ export default function AnalysisHelp({
             enemyIds={enemyIds}
             matchingCombats={matchingCombats}
             combatGroups={combatGroups}
+            positionRankings={positionAnalysis.rankings}
+            knownOrderedMatchingCombats={knownOrderedCombats.filter(
+              (combat) =>
+                teamKey(enemyIds) === teamKey(combat.enemy_heroes ?? [])
+            )}
+            teamOrdersLoading={teamOrdersLoading}
             onEdit={() => setShowResults(false)}
           />
         )}
