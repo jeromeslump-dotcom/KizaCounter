@@ -1,6 +1,8 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { HEROES } from "../../data/heroes";
 import type { Combat } from "../../types";
+import { teamKey } from "../../engine/teamUtils";
+import { loadTeamOrders, type TeamOrder } from "../../storage/teamOrderStorage";
 import {
   analyzeTeamByPosition,
   type PositionHeroRanking,
@@ -28,10 +30,65 @@ export default function TeamByPosition({
   combats,
 }: TeamByPositionProps) {
   const [position, setPosition] = useState(0);
+  const [teamOrders, setTeamOrders] = useState<Map<string, string[]>>(new Map());
+  const [teamOrdersLoading, setTeamOrdersLoading] = useState(true);
+
+  useEffect(() => {
+    if (!open) return;
+
+    let cancelled = false;
+
+    setTeamOrdersLoading(true);
+
+    async function loadOrders() {
+      try {
+        const orders = await loadTeamOrders();
+
+        if (!cancelled) {
+          setTeamOrders(
+            new Map(
+              orders.map((order: TeamOrder) => [
+                order.team_key,
+                order.ordered_hero_ids,
+              ])
+            )
+          );
+        }
+      } catch (error) {
+        console.error(
+          "Impossible de charger les ordres connus pour Team par position :",
+          error
+        );
+
+        if (!cancelled) setTeamOrders(new Map());
+      } finally {
+        if (!cancelled) setTeamOrdersLoading(false);
+      }
+    }
+
+    void loadOrders();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [open]);
+
+  const orderedCombats = useMemo(
+    () =>
+      combats.flatMap((combat) => {
+        if (combat.my_heroes.length !== 5) return [];
+
+        const orderedHeroIds = teamOrders.get(teamKey(combat.my_heroes));
+        if (!orderedHeroIds || orderedHeroIds.length !== 5) return [];
+
+        return [{ ...combat, my_heroes: orderedHeroIds }];
+      }),
+    [combats, teamOrders]
+  );
 
   const analysis = useMemo(
-    () => analyzeTeamByPosition(combats),
-    [combats]
+    () => analyzeTeamByPosition(orderedCombats),
+    [orderedCombats]
   );
 
   if (!open) return null;
@@ -85,11 +142,16 @@ export default function TeamByPosition({
         <div className="min-h-0 flex-1 overflow-y-auto p-5 sm:p-6">
           <div className="mb-4 grid gap-3 sm:grid-cols-3">
             <div className="ui-card rounded-2xl border p-4">
+            {teamOrdersLoading ? (
+              <div className="ui-text-muted mb-4 rounded-xl border border-dashed p-4 text-center text-xs">
+                ⏳ Vérification des combats avec « ✓ Ordre connu »…
+              </div>
+            ) : null}
               <div className="ui-text-muted text-[10px] font-black uppercase tracking-wide">
                 Combats analysés
               </div>
               <div className="ui-text-primary mt-1 text-xl font-black">
-                {combats.length}
+                {orderedCombats.length}
               </div>
             </div>
             <div className="ui-card rounded-2xl border p-4">
@@ -137,7 +199,7 @@ export default function TeamByPosition({
                 </h3>
                 <p className="ui-text-secondary mt-1 text-xs">
                   Les quatre autres héros doivent être identiques et dans les
-                  mêmes positions.
+                  mêmes positions. Seuls les combats avec « ✓ Ordre connu » sont analysés.
                 </p>
               </div>
               <span className="ui-text-muted text-[10px]">
