@@ -37,7 +37,7 @@ const TESTED_FORMATIONS = new Set(
 );
 const HERO_BY_ID = new Map(HEROES.map((hero) => [hero.id, hero]));
 const METRICS: MetricKey[] = ["atk", "matk", "def", "mdef", "hp"];
-const MAX_RESULTS = 24;
+const PAGE_SIZE = 24;
 
 export function getTargetFormationTotal(): number {
   return TARGET_DATA.targetFormationCount;
@@ -131,7 +131,6 @@ export async function generateTargetTeams(
   });
 
   if (requiredHeroIds.size === 0 || formations.length === 0) return [];
-  if (formations.length > MAX_RESULTS) return [];
 
   return formations
     .map((formation) => {
@@ -166,5 +165,5 @@ export async function generateTargetTeams(
 }
 
 export function getTargetMaxResults(): number {
-  return MAX_RESULTS;
+  return PAGE_SIZE;
 }
