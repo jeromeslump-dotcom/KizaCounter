@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { Combat, HeroClassFilter, HeroSort } from "../types";
 import type { Hero } from "../data/heroes";
 import { calculateHeroUsage } from "../engine/historicalScoring";
