@@ -91,6 +91,75 @@ function formationTeamKey(heroIds: string[]): string {
   return [...new Set(heroIds)].sort().join("|");
 }
 
+export interface NeverTestedTeamCandidate {
+  teamIds: string[];
+  position: number;
+  lostHeroId: string;
+  candidateHeroId: string;
+  candidateRank: number;
+  candidateScore: number;
+}
+
+export function buildNeverTestedTeamCandidates(
+  matchingCombats: Combat[],
+  rankings: PositionHeroRanking[][],
+  allCombats: Combat[]
+): NeverTestedTeamCandidate[] {
+  const testedTeams = new Set(
+    allCombats
+      .filter((combat) => combat.my_heroes.length === FORMATION_SIZE)
+      .map((combat) => formationTeamKey(combat.my_heroes))
+  );
+  const candidates = new Map<string, NeverTestedTeamCandidate>();
+
+  for (const combat of matchingCombats) {
+    if (combat.won || combat.my_heroes.length !== FORMATION_SIZE) continue;
+
+    for (let position = 0; position < FORMATION_SIZE; position += 1) {
+      const lostHeroId = combat.my_heroes[position];
+      const lostRank = rankings[position].findIndex(
+        (ranking) => ranking.heroId === lostHeroId
+      );
+
+      if (lostRank <= 0) continue;
+
+      const teamIds = [...combat.my_heroes];
+
+      for (let candidateRank = 0; candidateRank < lostRank; candidateRank += 1) {
+        const ranking = rankings[position][candidateRank];
+        if (!ranking || teamIds.includes(ranking.heroId)) continue;
+
+        const proposedTeam = [...teamIds];
+        proposedTeam[position] = ranking.heroId;
+
+        if (new Set(proposedTeam).size !== FORMATION_SIZE) continue;
+
+        const candidateKey = formationTeamKey(proposedTeam);
+        if (testedTeams.has(candidateKey)) continue;
+
+        const orderedKey = proposedTeam.join("|");
+        if (!candidates.has(orderedKey)) {
+          candidates.set(orderedKey, {
+            teamIds: proposedTeam,
+            position,
+            lostHeroId,
+            candidateHeroId: ranking.heroId,
+            candidateRank: candidateRank + 1,
+            candidateScore: ranking.score,
+          });
+        }
+      }
+    }
+  }
+
+  return [...candidates.values()].sort(
+    (a, b) =>
+      a.candidateRank - b.candidateRank ||
+      b.candidateScore - a.candidateScore ||
+      a.position - b.position
+  );
+}
+
 export function analyzeTeamByPosition(
   combats: Combat[]
 ): TeamByPositionAnalysis {
