@@ -356,7 +356,6 @@ export default function CounterModal({
             heroes={enemies}
             selectedIds={enemies.map((hero) => hero.id)}
             enemy
-            compactPortrait
           />
 
           <div className="mt-4">
@@ -368,7 +367,6 @@ export default function CounterModal({
               heroes={team}
               selectedIds={teamIds}
               onHeroClick={onHeroClick}
-              compactPortrait
             />
           </div>
 
