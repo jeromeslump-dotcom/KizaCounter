@@ -6,11 +6,11 @@ import { teamKey, uniqueIds } from "./teamUtils";
 const TEAM_SIZE = 5;
 
 function isHistoricalStatsEligible(battles: number, wins: number): boolean {
-  const { exactHistoryMinBattles, exactHistoryMinWinRate } =
+  const { historicalTeamMinBattles, historicalTeamMinWinRate } =
     getEngineSettings().advanced;
   const winRate = battles > 0 ? (wins / battles) * 100 : 0;
 
-  return battles >= exactHistoryMinBattles && winRate >= exactHistoryMinWinRate;
+  return battles >= historicalTeamMinBattles && winRate >= historicalTeamMinWinRate;
 }
 
 export function isHistoricalTeamEligible(
