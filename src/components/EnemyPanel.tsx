@@ -1,6 +1,6 @@
 import type { Hero } from "../types";
 import HeroCard from "./HeroCard";
-import HeroPortrait from "./HeroPortrait";
+import HeroTeamItem from "./HeroTeamItem";
 
 interface EnemyPanelProps {
   heroes: Hero[];
@@ -45,29 +45,13 @@ export default function EnemyPanel({
         ) : (
           <div className="grid grid-cols-5 justify-center gap-2 sm:flex sm:justify-center sm:gap-3">
             {heroes.map((hero, index) => (
-              <button
+              <HeroTeamItem
                 key={hero.id}
-                type="button"
-                onClick={() => onHeroClick?.(hero)}
-                className="ui-card ui-hover-red group relative w-full max-w-[180px] min-w-0 justify-self-center overflow-hidden rounded-xl border transition"
+                hero={hero}
+                order={index + 1}
+                onClick={onHeroClick}
                 title={`Retirer ${hero.name}`}
-              >
-                <div className="relative z-10 aspect-square w-full overflow-hidden">
-                  <HeroPortrait
-                    hero={hero}
-                    showName={false}
-                    imageClassName="h-full w-full transition group-hover:brightness-75"
-                  />
-                </div>
-
-                <span className="selection-order-badge absolute left-1 top-1 z-20 flex h-5 w-5 items-center justify-center rounded-full border text-[10px] font-black leading-none shadow sm:left-2 sm:top-2 sm:h-7 sm:w-7 sm:border-2 sm:text-sm">
-                  {index + 1}
-                </span>
-
-                <div className="ui-divider ui-text-primary relative z-10 truncate border-t px-1.5 py-1.5 text-center text-[9px] font-bold leading-tight sm:text-xs">
-                  {hero.name}
-                </div>
-              </button>
+              />
             ))}
           </div>
         )
