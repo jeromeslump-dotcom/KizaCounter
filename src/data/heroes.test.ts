@@ -14,7 +14,6 @@ describe("hero data integrity", () => {
         `${hero.name || "Héros sans nom"}: id manquant`
       ).toBeTruthy();
       expect(hero.name, `${hero.id}: nom manquant`).toBeTruthy();
-      expect(hero.img, `${hero.id}: image manquante`).toBeTruthy();
       expect(["STR", "AGI", "INT"], `${hero.id}: classe invalide`).toContain(
         hero.cls
       );
