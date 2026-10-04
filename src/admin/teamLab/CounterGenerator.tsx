@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import HeroPortrait from "../../components/HeroPortrait";
 import HeroTeamItem from "../../components/HeroTeamItem";
+import HeroGridItem from "../../components/HeroGridItem";
 import { HEROES, type Hero } from "../../data/heroes";
 import type { Combat } from "../../types";
 import { loadCombats } from "../../storage/combatStorage";
@@ -249,42 +249,15 @@ export default function CounterGenerator({
             const selected = enemyIds.includes(hero.id);
 
             return (
-              <button
+              <HeroGridItem
                 key={hero.id}
-                type="button"
-                onClick={() => toggleEnemy(hero)}
-                disabled={searching || (!selected && enemies.length >= 5)}
-                className={[
-                  "relative overflow-hidden rounded-2xl border text-left transition-all",
-                  "ui-card hover:scale-[1.02]",
-                  selected ? "ring-2 ring-[var(--ui-theme)]" : "",
-                  !selected && enemies.length >= 5 ? "opacity-40" : "",
-                ].join(" ")}
-              >
-                <div className="relative p-2.5">
-                  <div
-                    className={`relative flex min-h-[150px] items-center justify-center overflow-hidden rounded-xl bg-[var(--ui-bg)]/20 hero-card-wallpaper-${hero.cls.toLowerCase()}`}
-                  >
-                    <HeroPortrait
-                      hero={hero}
-                      showName={false}
-                      imageClassName="h-auto max-h-[125px] w-full"
-                    />
-                    <span
-                      className={`absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-md ${
-                        selected
-                          ? "bg-[var(--ui-theme)] text-[var(--ui-bg)]"
-                          : "bg-[var(--ui-bg)]/75 text-[var(--ui-text-primary)]/50"
-                      }`}
-                    >
-                      {selected ? "✓" : "○"}
-                    </span>
-                  </div>
-                  <p className="ui-text-primary mt-2 truncate text-center text-xs font-bold">
-                    {hero.name}
-                  </p>
-                </div>
-              </button>
+                hero={hero}
+                selected={selected}
+                enabled
+                layout="showcase"
+                status={selected ? "✓" : "○"}
+                onClick={toggleEnemy}
+              />
             );
           })}
         </div>
