@@ -130,7 +130,10 @@ function buildTargetVectors(signals: Signal[]): Set<string> {
         const neighbor = [...vector];
         neighbor[index] += delta;
 
-        if (neighbor[index] >= 1 && neighbor[index] <= theoreticalZones.zoneCount) {
+        if (
+          neighbor[index] >= 1 &&
+          neighbor[index] <= theoreticalZones.zoneCount
+        ) {
           targetVectors.add(neighbor.join("-"));
         }
       }
@@ -240,11 +243,15 @@ if (theoreticalFormationCount !== 5_461_512) {
 }
 
 if (robustSignals.length !== 5) {
-  throw new Error(`Nombre de signaux robustes inattendu : ${robustSignals.length}`);
+  throw new Error(
+    `Nombre de signaux robustes inattendu : ${robustSignals.length}`
+  );
 }
 
 if (targetVectors.size !== 53) {
-  throw new Error(`Nombre de vecteurs cibles inattendu : ${targetVectors.size}`);
+  throw new Error(
+    `Nombre de vecteurs cibles inattendu : ${targetVectors.size}`
+  );
 }
 
 if (targetFormations.length !== 5240) {
