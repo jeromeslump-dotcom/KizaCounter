@@ -1,27 +1,16 @@
 import { useEffect, useState } from "react";
 import {
   generateTeams,
-  GENERATOR_METRICS,
   getGeneratorCandidateTotal,
-  getRelaxationLabel,
-  type GeneratorTargets,
+  getMaxResults,
   type GeneratorTeam,
 } from "./teamGeneratorEngine";
-
-const INITIAL_TARGETS: GeneratorTargets = {
-  atk: 8,
-  matk: 8,
-  def: 6,
-  mdef: 6,
-  hp: 6,
-};
 
 const DISPLAY_LIMIT = 24;
 
 interface TeamGeneratorProps {
   enabledHeroIds: Set<string>;
   requiredHeroIds: Set<string>;
-  neverTestedOnly: boolean;
 }
 
 function TeamCard({ team }: { team: GeneratorTeam }) {
@@ -29,7 +18,12 @@ function TeamCard({ team }: { team: GeneratorTeam }) {
     <article className="ui-card rounded-2xl border p-3">
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
         <span className="ui-text-primary text-sm font-black">
-          {getRelaxationLabel(team)}
+          {team.distance === 0
+            ? "Signal robuste exact"
+            : "Voisin direct du signal robuste"}
+        </span>
+        <span className="ui-text-muted text-[11px]">
+          {team.distance === 0 ? "distance 0" : "distance 1"}
         </span>
       </div>
 
@@ -50,12 +44,23 @@ function TeamCard({ team }: { team: GeneratorTeam }) {
       </div>
 
       <div className="mt-3 grid grid-cols-5 gap-1 text-center text-[10px]">
-        {GENERATOR_METRICS.map(({ key, label }) => (
+        {Object.entries(team.zones).map(([key, zone]) => (
           <div key={key} className="ui-panel-alt rounded-lg border px-1 py-1">
-            <div className="ui-text-muted">{label}</div>
-            <div className="ui-text-primary font-black">Z{team.zones[key]}</div>
+            <div className="ui-text-muted">{key.toUpperCase()}</div>
+            <div className="ui-text-primary font-black">Z{zone}</div>
           </div>
         ))}
+      </div>
+
+      <div className="ui-panel-alt mt-3 rounded-lg border p-2 text-[10px]">
+        <div className="ui-text-muted">Signal historique de référence</div>
+        <div className="ui-text-primary mt-0.5 font-black">
+          {team.signalVector}
+        </div>
+        <div className="ui-text-secondary mt-0.5">
+          {Math.round(team.signalWinRate * 100)} % historique · Wilson 95 %
+          inférieur : {(team.signalWilsonLowerBound * 100).toFixed(1)} %
+        </div>
       </div>
     </article>
   );
@@ -64,53 +69,25 @@ function TeamCard({ team }: { team: GeneratorTeam }) {
 export default function TeamGenerator({
   enabledHeroIds,
   requiredHeroIds,
-  neverTestedOnly,
 }: TeamGeneratorProps) {
-  const [targets, setTargets] = useState<GeneratorTargets>(INITIAL_TARGETS);
   const [results, setResults] = useState<GeneratorTeam[]>([]);
   const [searched, setSearched] = useState(false);
-  const [searching, setSearching] = useState(false);
-  const [progress, setProgress] = useState(0);
 
   const candidateTotal = getGeneratorCandidateTotal(
     enabledHeroIds,
     requiredHeroIds
   );
+  const maxResults = getMaxResults();
+  const needsMoreHeroes = candidateTotal > maxResults;
 
   useEffect(() => {
     setSearched(false);
     setResults([]);
-    setProgress(0);
   }, [enabledHeroIds, requiredHeroIds]);
 
-  const updateTarget = (key: keyof GeneratorTargets, value: number) => {
-    setTargets((current) => ({ ...current, [key]: value }));
-    setSearched(false);
-    setResults([]);
-  };
-
   const handleGenerate = async () => {
-    setSearching(true);
-    setSearched(false);
-    setResults([]);
-    setProgress(0);
-
-    try {
-      const generated = await generateTeams(
-        targets,
-        enabledHeroIds,
-        requiredHeroIds,
-        neverTestedOnly,
-        ({ checked, total }) => {
-          setProgress(total === 0 ? 0 : Math.round((checked / total) * 100));
-        }
-      );
-
-      setResults(generated);
-      setSearched(true);
-    } finally {
-      setSearching(false);
-    }
+    setSearched(true);
+    setResults(await generateTeams(enabledHeroIds, requiredHeroIds));
   };
 
   return (
@@ -118,86 +95,76 @@ export default function TeamGenerator({
       <section className="ui-panel rounded-2xl border p-4 sm:p-5">
         <div className="mb-4">
           <h3 className="ui-text-primary text-base font-black">
-            Zones recherchées
+            Équipes à tester
           </h3>
           <p className="ui-text-secondary mt-1 text-xs leading-relaxed">
-            Le générateur cherche d&apos;abord les 5 zones exactes, puis élargit
-            progressivement les tolérances dans l&apos;ordre ATK → MATK → DEF →
-            MDEF → PV. Il passe par exemple de 0 0 0 0 0 à 1 0 0 0 0, puis 1 1 0
-            0 0, jusqu&apos;à 1 1 1 1 1, avant de passer à 2 1 1 1 1.
+            Le Lab part des formations théoriques situées dans les zones
+            cibles issues des signaux historiques robustes. Une seule métrique
+            peut s&apos;écarter d&apos;une zone vers le voisin direct. Les
+            formations déjà testées sont toujours exclues.
           </p>
         </div>
 
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
-          {GENERATOR_METRICS.map(({ key, label }) => (
-            <label key={key} className="ui-card rounded-xl border p-3">
-              <span className="ui-text-secondary block text-xs font-bold">
-                {label}
-              </span>
-              <select
-                value={targets[key]}
-                onChange={(event) =>
-                  updateTarget(key, Number(event.target.value))
-                }
-                className="ui-input mt-2 w-full"
-                disabled={searching}
-              >
-                {Array.from({ length: 20 }, (_, index) => index + 1).map(
-                  (zone) => (
-                    <option key={zone} value={zone}>
-                      Z{zone}
-                    </option>
-                  )
-                )}
-              </select>
-            </label>
-          ))}
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <div className="ui-card rounded-xl border p-3">
+            <div className="ui-text-muted text-xs">Pool initial</div>
+            <div className="ui-text-primary mt-1 text-lg font-black">
+              5 240
+            </div>
+            <div className="ui-text-muted text-[11px]">
+              formations théoriques
+            </div>
+          </div>
+
+          <div className="ui-card rounded-xl border p-3">
+            <div className="ui-text-muted text-xs">Après historique</div>
+            <div className="ui-text-primary mt-1 text-lg font-black">
+              {candidateTotal.toLocaleString("fr-FR")}
+            </div>
+            <div className="ui-text-muted text-[11px]">
+              formations encore testables
+            </div>
+          </div>
+
+          <div className="ui-card rounded-xl border p-3">
+            <div className="ui-text-muted text-xs">Héros obligatoires</div>
+            <div className="ui-text-primary mt-1 text-lg font-black">
+              {requiredHeroIds.size} / 5
+            </div>
+            <div className="ui-text-muted text-[11px]">
+              sélection cumulative
+            </div>
+          </div>
         </div>
 
-        <div className="mt-4 flex flex-wrap items-center gap-3">
-          <button
-            type="button"
-            onClick={handleGenerate}
-            disabled={searching || candidateTotal === 0}
-            className="ui-button ui-button-success"
-          >
-            {searching ? "Recherche en cours…" : "Générer les teams"}
-          </button>
-
-          <span className="ui-text-muted text-xs">
-            {candidateTotal.toLocaleString("fr-FR")} formations candidates
-          </span>
-
-          <span className="ui-text-muted text-xs">
-            {requiredHeroIds.size} héros obligatoire
-            {requiredHeroIds.size > 1 ? "s" : ""}
-          </span>
-        </div>
-
-        {candidateTotal === 0 && (
-          <p className="ui-error mt-3 text-xs">
-            Impossible de former une équipe de 5 avec la configuration actuelle.
-            Vérifiez les héros disponibles et les héros obligatoires.
+        {requiredHeroIds.size === 0 ? (
+          <p className="ui-warning mt-4 rounded-xl border p-3 text-xs">
+            Sélectionnez au moins <strong>1 héros obligatoire</strong> à
+            l&apos;étape précédente pour commencer la recherche.
           </p>
-        )}
-
-        {searching && (
-          <div className="mt-4">
-            <div className="mb-1 flex justify-between text-[11px]">
-              <span className="ui-text-secondary">
-                Analyse des formations candidates
-              </span>
-              <span className="ui-text-muted">{progress}%</span>
-            </div>
-            <div className="h-2 overflow-hidden rounded-full bg-black/30">
-              <div
-                className="h-full rounded-full transition-[width]"
-                style={{
-                  width: `${progress}%`,
-                  background: "var(--ui-theme-primary)",
-                }}
-              />
-            </div>
+        ) : needsMoreHeroes ? (
+          <p className="ui-warning mt-4 rounded-xl border p-3 text-xs">
+            Il reste {candidateTotal.toLocaleString("fr-FR")} formations.
+            <strong> Ajoutez un héros obligatoire supplémentaire</strong> pour
+            réduire le pool à {maxResults} formations ou moins.
+          </p>
+        ) : candidateTotal === 0 ? (
+          <p className="ui-error mt-4 rounded-xl border p-3 text-xs">
+            Aucune formation testable ne correspond aux héros activés et aux
+            héros obligatoires sélectionnés.
+          </p>
+        ) : (
+          <div className="mt-4 flex flex-wrap items-center gap-3">
+            <button
+              type="button"
+              onClick={handleGenerate}
+              className="ui-button ui-button-success"
+            >
+              Afficher les formations à tester
+            </button>
+            <span className="ui-text-muted text-xs">
+              {candidateTotal} résultat{candidateTotal > 1 ? "s" : ""} maximum
+            </span>
           </div>
         )}
       </section>
@@ -207,12 +174,10 @@ export default function TeamGenerator({
           {results.length === 0 ? (
             <div className="ui-panel rounded-2xl border p-5">
               <p className="ui-text-primary text-sm font-black">
-                Aucune formation trouvée.
+                Aucune formation disponible.
               </p>
               <p className="ui-text-secondary mt-1 text-xs">
-                Même après avoir élargi progressivement les 5 caractéristiques
-                jusqu&apos;à ±19 zones, aucune formation candidate ne correspond
-                à cette progression.
+                Les formations historiques sont exclues systématiquement.
               </p>
             </div>
           ) : (
@@ -220,28 +185,23 @@ export default function TeamGenerator({
               <div className="ui-panel rounded-2xl border p-4">
                 <p className="ui-text-primary text-sm font-black">
                   {results.length.toLocaleString("fr-FR")} formation
-                  {results.length > 1 ? "s" : ""} trouvée
-                  {results.length > 1 ? "s" : ""}
+                  {results.length > 1 ? "s" : ""} à tester
                 </p>
                 <p className="ui-text-secondary mt-1 text-xs">
-                  Le niveau affiché est le premier niveau de relaxation qui
-                  produit un résultat. Les étapes suivantes ne sont pas
-                  recherchées.
+                  Les signaux robustes exacts sont prioritaires, puis leurs
+                  voisins directs. Aucun classement de performance future n&apos;est
+                  déduit pour ces équipes.
                 </p>
               </div>
 
               <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
-                {results.slice(0, DISPLAY_LIMIT).map((team, index) => (
-                  <TeamCard key={index} team={team} />
+                {results.slice(0, DISPLAY_LIMIT).map((team) => (
+                  <TeamCard
+                    key={team.heroes.map((hero) => hero.id).join(",")}
+                    team={team}
+                  />
                 ))}
               </div>
-
-              {results.length > DISPLAY_LIMIT && (
-                <p className="ui-text-muted text-center text-xs">
-                  Affichage des {DISPLAY_LIMIT} premières formations sur{" "}
-                  {results.length.toLocaleString("fr-FR")}.
-                </p>
-              )}
             </>
           )}
         </section>
