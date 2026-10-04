@@ -22,7 +22,7 @@ export default function HeroPortrait({
         alt={hero.name}
         loading={loading}
         className={[
-          "hero-render-image hero-render-image-portrait aspect-square w-full object-contain",
+          "hero-render-image hero-render-image-portrait block aspect-square w-full object-contain",
           imageClassName,
         ].join(" ")}
       />
