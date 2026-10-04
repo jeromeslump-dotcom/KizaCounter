@@ -166,8 +166,7 @@ export default function TeamByPosition({
     () =>
       buildNeverTestedTeamCandidates(
         matchingOrderedCombats,
-        analysis.rankings,
-        combats
+        analysis.rankings
       ).filter((candidate) => !recordedTeamKeys.has(teamKey(candidate.teamIds))),
     [analysis.rankings, combats, matchingOrderedCombats, recordedTeamKeys]
   );
