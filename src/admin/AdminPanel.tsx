@@ -12,6 +12,7 @@ interface AdminPanelProps {
   onCombatHistory: () => void;
   onAnalysisHelp: () => void;
   onWinningPatternsLab: () => void;
+  onTeamCreator: () => void;
   heroes?: Hero[];
   combats?: Combat[];
 }
@@ -60,6 +61,7 @@ export default function AdminPanel({
   onCombatHistory,
   onAnalysisHelp,
   onWinningPatternsLab,
+  onTeamCreator,
   heroes = [],
   combats = [],
 }: AdminPanelProps) {
@@ -158,6 +160,12 @@ export default function AdminPanel({
             title="Aide à l'analyse"
             description="Analyser les combats correspondant exactement à une équipe ennemie"
             onClick={onAnalysisHelp}
+          />
+          <AdminAction
+            icon="🧪"
+            title="Créateur d'équipes"
+            description="Créer et tester de nouvelles équipes à partir de l'historique des combats"
+            onClick={onTeamCreator}
           />
           <AdminAction
             icon="🧪"
