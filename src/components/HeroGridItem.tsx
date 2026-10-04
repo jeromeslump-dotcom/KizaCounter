@@ -47,7 +47,7 @@ export default function HeroGridItem({
             hero={hero}
             showName={false}
             imageClassName={[
-              "absolute inset-0 h-full w-full object-cover",
+              "absolute inset-0 h-full w-full object-contain",
               enabled ? "" : "grayscale",
             ].join(" ")}
           />
