@@ -26,29 +26,13 @@ type TargetData = {
     wilsonLowerBound: number;
   }>;
   formations: string[];
+  targetVectors: string[];
 };
 
 const TARGET_DATA = teamLabTargets as TargetData;
 const TARGET_FORMATIONS = TARGET_DATA.formations;
-const TARGET_VECTORS = new Set(
-  TARGET_DATA.robustSignals.flatMap((signal) => {
-    const vector = signal.vector.split("-").map(Number);
-    const vectors = [signal.vector];
+const TARGET_VECTORS = new Set(TARGET_DATA.targetVectors);
 
-    for (let index = 0; index < vector.length; index++) {
-      for (const delta of [-1, 1]) {
-        const neighbor = [...vector];
-        neighbor[index] += delta;
-
-        if (neighbor[index] >= 1 && neighbor[index] <= 20) {
-          vectors.push(neighbor.join("-"));
-        }
-      }
-    }
-
-    return vectors;
-  })
-);
 
 const TESTED_FORMATIONS = new Set(
   winningPatterns.formations.all.map((formation) => formation.formation)
