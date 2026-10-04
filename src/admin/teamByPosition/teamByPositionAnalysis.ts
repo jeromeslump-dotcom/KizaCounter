@@ -102,11 +102,10 @@ export interface NeverTestedTeamCandidate {
 
 export function buildNeverTestedTeamCandidates(
   matchingCombats: Combat[],
-  rankings: PositionHeroRanking[][],
-  allCombats: Combat[]
+  rankings: PositionHeroRanking[][]
 ): NeverTestedTeamCandidate[] {
   const testedTeams = new Set(
-    allCombats
+    matchingCombats
       .filter((combat) => combat.my_heroes.length === FORMATION_SIZE)
       .map((combat) => formationTeamKey(combat.my_heroes))
   );
