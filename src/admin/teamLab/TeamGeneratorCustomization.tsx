@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { HEROES } from "../../data/heroes";
+import HeroPortrait from "../../components/HeroPortrait";
 import winningPatterns from "../../../data/winning-patterns.json";
 
 const HERO_PLAYED_COUNT = new Map<string, number>();
@@ -152,12 +153,11 @@ export default function TeamGeneratorCustomization({
                           : "",
                       ].join(" ")}
                     >
-                      <img
-                        src={hero.img}
-                        alt={hero.name}
-                        loading="lazy"
-                        className={[
-                          "h-auto max-h-[125px] w-full object-contain",
+                      <HeroPortrait
+                        hero={hero}
+                        showName={false}
+                        imageClassName={[
+                          "h-auto max-h-[125px] w-full",
                           available ? "" : "grayscale",
                         ].join(" ")}
                       />
