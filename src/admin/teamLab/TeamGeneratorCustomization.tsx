@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { HEROES } from "../../data/heroes";
-import HeroPortrait from "../../components/HeroPortrait";
+import HeroGridItem from "../../components/HeroGridItem";
 import winningPatterns from "../../../data/winning-patterns.json";
 
 const HERO_PLAYED_COUNT = new Map<string, number>();
@@ -130,55 +130,14 @@ export default function TeamGeneratorCustomization({
               const required = requiredHeroIds.has(hero.id);
 
               return (
-                <button
+                <HeroGridItem
                   key={hero.id}
-                  type="button"
+                  hero={hero}
+                  enabled={available}
+                  selected={required}
+                  status={required ? "★" : available ? "○" : "✕"}
                   onClick={() => toggleRequired(hero.id)}
-                  disabled={!available}
-                  aria-pressed={required}
-                  className={[
-                    "relative overflow-hidden rounded-2xl border text-left transition-all",
-                    available
-                      ? "ui-card hover:scale-[1.02]"
-                      : "ui-card cursor-not-allowed opacity-35",
-                    required ? "ring-2 ring-[var(--ui-theme)]" : "",
-                  ].join(" ")}
-                >
-                  <div className="relative p-2.5">
-                    <div
-                      className={[
-                        "relative flex min-h-[150px] items-center justify-center overflow-hidden rounded-xl bg-[var(--ui-bg)]/20",
-                        available
-                          ? `hero-card-wallpaper-${hero.cls.toLowerCase()}`
-                          : "",
-                      ].join(" ")}
-                    >
-                      <HeroPortrait
-                        hero={hero}
-                        showName={false}
-                        imageClassName={[
-                          "h-auto max-h-[125px] w-full",
-                          available ? "" : "grayscale",
-                        ].join(" ")}
-                      />
-
-                      <span
-                        className={[
-                          "absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-md",
-                          required
-                            ? "bg-[var(--ui-theme)] text-[var(--ui-bg)]"
-                            : "bg-[var(--ui-bg)]/75 text-[var(--ui-text-primary)]/50",
-                        ].join(" ")}
-                      >
-                        {required ? "★" : available ? "○" : "✕"}
-                      </span>
-                    </div>
-
-                    <p className="ui-text-primary mt-2 truncate text-center text-xs font-bold">
-                      {hero.name}
-                    </p>
-                  </div>
-                </button>
+                />
               );
             })}
           </div>
