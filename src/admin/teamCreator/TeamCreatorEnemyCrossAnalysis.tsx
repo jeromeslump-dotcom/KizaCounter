@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import HeroPortrait from "../../components/HeroPortrait";
 
 import { HEROES, type Hero } from "../../data/heroes";
 import { addCombat, loadCombats } from "../../storage/combatStorage";
@@ -81,11 +82,7 @@ function HeroStrip({
         const hero = heroesById.get(id);
         return hero ? (
           <div key={id} className="flex w-16 flex-col items-center gap-1">
-            <img
-              src={hero.img}
-              alt={hero.name}
-              className="h-11 w-11 rounded-lg border border-white/10 object-cover"
-            />
+            <HeroPortrait hero={hero} showName={false} imageClassName="h-11 w-11 rounded-lg border border-white/10 object-cover" />
             <span className="ui-text-primary text-center text-[10px] font-semibold leading-tight">
               {hero.name}
             </span>
