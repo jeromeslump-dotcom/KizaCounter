@@ -12,10 +12,8 @@ interface HeroListItemProps {
 }
 
 const SIZE_CLASSES = {
-  compact:
-    "h-9 w-9 rounded-md border border-white/10 object-cover",
-  standard:
-    "h-12 w-12 rounded-lg border ui-divider object-cover sm:h-16 sm:w-16",
+  compact: "h-9 w-9 rounded-md border border-white/10 object-cover",
+  standard: "h-12 w-12 rounded-lg border ui-divider object-cover sm:h-16 sm:w-16",
   large:
     "h-14 w-14 rounded-lg border ui-divider object-cover sm:h-20 sm:w-20 sm:rounded-xl",
   history:
@@ -49,21 +47,17 @@ export default function HeroListItem({
     </>
   );
 
+  const classes = [
+    layout === "stacked"
+      ? "flex min-w-0 flex-col items-center gap-1"
+      : "flex min-w-0 items-center gap-3",
+    selected ? "hero-card-selected rounded-lg p-1" : "",
+    disabled ? "opacity-45" : "",
+    className,
+  ].join(" ");
+
   if (!onClick) {
-    return (
-      <div
-        className={[
-          layout === "stacked"
-          ? "flex min-w-0 flex-col items-center gap-1"
-          : "flex min-w-0 items-center gap-3",
-          selected ? "hero-card-selected rounded-lg p-1" : "",
-          disabled ? "opacity-45" : "",
-          className,
-        ].join(" ")}
-      >
-        {content}
-      </div>
-    );
+    return <div className={classes}>{content}</div>;
   }
 
   return (
@@ -71,12 +65,7 @@ export default function HeroListItem({
       type="button"
       disabled={disabled}
       onClick={() => onClick(hero)}
-      className={[
-        "flex min-w-0 flex-col items-center gap-1",
-        selected ? "hero-card-selected rounded-lg p-1" : "",
-        disabled ? "opacity-45" : "",
-        className,
-      ].join(" ")}
+      className={classes}
     >
       {content}
     </button>
