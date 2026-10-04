@@ -13,11 +13,11 @@ interface HeroListItemProps {
 
 const SIZE_CLASSES = {
   compact: "h-9 w-9 rounded-md border border-white/10 object-contain",
-  standard: "h-12 w-12 rounded-lg border ui-divider object-cover sm:h-16 sm:w-16",
+  standard: "h-12 w-12 rounded-lg border ui-divider object-contain sm:h-16 sm:w-16",
   large:
-    "h-14 w-14 rounded-lg border ui-divider object-cover sm:h-20 sm:w-20 sm:rounded-xl",
+    "h-14 w-14 rounded-lg border ui-divider object-contain sm:h-20 sm:w-20 sm:rounded-xl",
   history:
-    "h-7 w-7 shrink-0 rounded-md border ui-divider object-cover shadow-sm sm:h-[72px] sm:w-[72px] sm:rounded-lg",
+    "h-7 w-7 shrink-0 rounded-md border ui-divider object-contain shadow-sm sm:h-[72px] sm:w-[72px] sm:rounded-lg",
 } as const;
 
 export default function HeroListItem({
