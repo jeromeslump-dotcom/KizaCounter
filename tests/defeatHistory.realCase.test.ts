@@ -45,8 +45,8 @@ function combat(myHeroes: string[], enemyHeroes: string[], won: boolean): Combat
 describe("real inverse defeat case", () => {
   beforeEach(() => {
     Object.assign(DEFAULT_ENGINE_SETTINGS.advanced, {
-      exactHistoryMinBattles: 3,
-      exactHistoryMinWinRate: 75,
+      historicalTeamMinBattles: 3,
+      historicalTeamMinWinRate: 75,
     });
   });
   it("returns the exact team that defeated the recorded team", () => {
