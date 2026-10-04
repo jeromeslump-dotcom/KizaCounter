@@ -164,7 +164,6 @@ function findBestEnabledGlobalWinTeam(
 
   const candidates = [...collectHistoricalCandidates(combats).values()]
     .filter((candidate) => {
-      if (candidate.wins <= 0) return false;
       if (!candidate.heroIds.every((id) => enabledIds.has(id))) return false;
       if (teamKey(candidate.heroIds) === excludedTeamKey) return false;
       return true;
