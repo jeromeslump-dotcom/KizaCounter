@@ -75,16 +75,19 @@ export default function TeamByPosition({
   }, [open]);
 
   const orderedCombats = useMemo(
-    () =>
-      combats.flatMap((combat) => {
+    () => {
+      if (teamOrdersLoading) return [];
+
+      return combats.flatMap((combat) => {
         if (combat.my_heroes.length !== 5) return [];
 
         const orderedHeroIds = teamOrders.get(teamKey(combat.my_heroes));
         if (!orderedHeroIds || orderedHeroIds.length !== 5) return [];
 
         return [{ ...combat, my_heroes: orderedHeroIds }];
-      }),
-    [combats, teamOrders]
+      });
+    },
+    [combats, teamOrders, teamOrdersLoading]
   );
 
   const analysis = useMemo(
@@ -143,11 +146,6 @@ export default function TeamByPosition({
         <div className="min-h-0 flex-1 overflow-y-auto p-5 sm:p-6">
           <div className="mb-4 grid gap-3 sm:grid-cols-3">
             <div className="ui-card rounded-2xl border p-4">
-            {teamOrdersLoading ? (
-              <div className="ui-text-muted mb-4 rounded-xl border border-dashed p-4 text-center text-xs">
-                ⏳ Vérification des combats avec « ✓ Ordre connu »…
-              </div>
-            ) : null}
               <div className="ui-text-muted text-[10px] font-black uppercase tracking-wide">
                 Combats analysés
               </div>
@@ -172,6 +170,12 @@ export default function TeamByPosition({
               </div>
             </div>
           </div>
+
+          {teamOrdersLoading ? (
+            <div className="ui-text-muted mb-4 rounded-xl border border-dashed p-4 text-center text-xs">
+              ⏳ Vérification des combats avec « ✓ Ordre connu »…
+            </div>
+          ) : null}
 
           <div className="ui-card mb-4 rounded-2xl border p-2">
             <div className="grid grid-cols-5 gap-1">
