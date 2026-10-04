@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 
 import { HEROES } from "../data/heroes";
-import HeroPortrait from "../components/HeroPortrait";
+import HeroGridItem from "../components/HeroGridItem";
 
 interface HeroManagerProps {
   open: boolean;
@@ -126,55 +126,14 @@ export default function HeroManager({
               const enabled = enabledHeroIds.has(hero.id);
 
               return (
-                <button
+                <HeroGridItem
                   key={hero.id}
-                  type="button"
+                  hero={hero}
+                  enabled={enabled}
+                  showAlias
+                  status={enabled ? "✓" : "✕"}
                   onClick={() => onToggleHero(hero.id)}
-                  className={[
-                    "ui-card relative overflow-hidden rounded-2xl border text-left transition-all hover:scale-[1.02]",
-                    enabled ? "" : "opacity-45",
-                  ].join(" ")}
-                >
-                  <div className="relative p-2.5">
-                    <div
-                      className={`relative aspect-square overflow-hidden rounded-xl bg-[var(--ui-bg)]/20 ${
-                        enabled
-                          ? `hero-card-wallpaper-${hero.cls.toLowerCase()}`
-                          : ""
-                      }`}
-                    >
-                      <HeroPortrait
-                        hero={hero}
-                        showName={false}
-                        imageClassName={[
-                          "absolute inset-0 h-full w-full object-cover",
-                          enabled ? "" : "grayscale",
-                        ].join(" ")}
-                      />
-
-                      <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-[var(--ui-bg)]/90 to-transparent" />
-
-                      <span className="absolute bottom-2 left-2 right-2 line-clamp-1 text-center text-xs font-bold ui-text-primary drop-shadow-lg">
-                        {hero.name}
-                      </span>
-
-                      <span
-                        className={[
-                          "absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-md",
-                          enabled
-                            ? "bg-[var(--ui-success)] text-[var(--ui-bg)]"
-                            : "bg-[var(--ui-bg)]/75 text-[var(--ui-text-primary)]/40",
-                        ].join(" ")}
-                      >
-                        {enabled ? "✓" : "✕"}
-                      </span>
-                    </div>
-
-                    <div className="ui-text-soft mt-2 truncate text-center text-[10px] font-semibold sm:text-xs">
-                      {hero.alias}
-                    </div>
-                  </div>
-                </button>
+                />
               );
             })}
           </div>
