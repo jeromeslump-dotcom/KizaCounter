@@ -1,4 +1,5 @@
 import type { Hero } from "../data/heroes";
+import HeroPortrait from "../components/HeroPortrait";
 import CompactTeam from "../components/CompactTeam";
 
 export interface HeroEvaluationGroup {
@@ -59,8 +60,7 @@ export default function AnalysisHelpResults({
           heroes={selectedEnemies}
           selectedIds={enemyIds}
           enemy
-          compactPortrait
-        />
+/>
       </div>
 
       <div className="ui-panel-alt mt-5 rounded-2xl border p-4 sm:p-5">
