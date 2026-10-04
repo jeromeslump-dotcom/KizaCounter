@@ -39,8 +39,7 @@ export default function TeamGeneratorCustomization({
 
     return [...heroes].sort((a, b) => {
       const playedDifference =
-        (HERO_PLAYED_COUNT.get(b.id) ?? 0) -
-        (HERO_PLAYED_COUNT.get(a.id) ?? 0);
+        (HERO_PLAYED_COUNT.get(b.id) ?? 0) - (HERO_PLAYED_COUNT.get(a.id) ?? 0);
 
       if (playedDifference !== 0) return playedDifference;
       return HEROES.indexOf(a) - HEROES.indexOf(b);

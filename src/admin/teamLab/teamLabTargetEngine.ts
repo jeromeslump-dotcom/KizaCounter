@@ -88,7 +88,10 @@ function getVector(zones: TargetGeneratorTargets): string {
 }
 
 function getSignalForVector(vector: string) {
-  let bestSignal: { signal: TargetData["robustSignals"][number]; distance: number } | null = null;
+  let bestSignal: {
+    signal: TargetData["robustSignals"][number];
+    distance: number;
+  } | null = null;
 
   for (const signal of TARGET_DATA.robustSignals) {
     const signalZones = signal.vector.split("-").map(Number);

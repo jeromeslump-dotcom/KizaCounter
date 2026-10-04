@@ -7,7 +7,6 @@ import {
   type TargetGeneratorTeam,
 } from "./teamLabTargetEngine";
 
-
 interface TeamGeneratorProps {
   enabledHeroIds: Set<string>;
   requiredHeroIds: Set<string>;
@@ -104,10 +103,10 @@ export default function TeamGenerator({
             Équipes à tester
           </h3>
           <p className="ui-text-secondary mt-1 text-xs leading-relaxed">
-            Le Lab part des formations théoriques situées dans les zones
-            cibles issues des signaux historiques robustes. Une seule métrique
-            peut s&apos;écarter d&apos;une zone vers le voisin direct. Les
-            formations déjà testées sont toujours exclues.
+            Le Lab part des formations théoriques situées dans les zones cibles
+            issues des signaux historiques robustes. Une seule métrique peut
+            s&apos;écarter d&apos;une zone vers le voisin direct. Les formations
+            déjà testées sont toujours exclues.
           </p>
         </div>
 
@@ -195,8 +194,8 @@ export default function TeamGenerator({
                 </p>
                 <p className="ui-text-secondary mt-1 text-xs">
                   Les signaux robustes exacts sont prioritaires, puis leurs
-                  voisins directs. Aucun classement de performance future n&apos;est
-                  déduit pour ces équipes.
+                  voisins directs. Aucun classement de performance future
+                  n&apos;est déduit pour ces équipes.
                 </p>
               </div>
 

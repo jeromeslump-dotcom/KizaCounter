@@ -19,7 +19,6 @@ interface TeamCreatorEnemyHistoryProps {
   onSelectedEnemyIdsChange: (ids: string[]) => void;
 }
 
-
 function formatCombatDate(createdAt?: string): string {
   if (!createdAt) return "Date inconnue";
 
@@ -133,175 +132,184 @@ export default function TeamCreatorEnemyHistory({
     <div className="mt-8 space-y-6">
       {step === "A" && (
         <section className="ui-panel is-active rounded-xl border p-4 sm:p-5">
-        <div className="mb-4">
-          <h3 className="ui-text-primary text-base font-black">
-            Étape A — Sélection ennemis
-          </h3>
-          <p className="ui-text-secondary mt-1 text-xs leading-relaxed">
-            Sélectionnez une équipe ennemie de 5 héros. La présentation et les
-            filtres sont les mêmes que dans l'écran principal.
-          </p>
-        </div>
+          <div className="mb-4">
+            <h3 className="ui-text-primary text-base font-black">
+              Étape A — Sélection ennemis
+            </h3>
+            <p className="ui-text-secondary mt-1 text-xs leading-relaxed">
+              Sélectionnez une équipe ennemie de 5 héros. La présentation et les
+              filtres sont les mêmes que dans l'écran principal.
+            </p>
+          </div>
 
-        <EnemyPanel
-          heroes={selectedEnemies}
-          maxHeroes={TEAM_SIZE}
-          onHeroClick={toggleEnemy}
-          onClear={clearEnemies}
-          compact
-        />
-
-        <div className="mt-4">
-          <HeroGrid
-            heroes={HEROES}
-            enabledHeroIds={enabledHeroIds}
-            enabledOnly={false}
-            activeClass={activeClass}
-            query={query}
-            sortBy={sortBy}
-            usage={heroUsage}
-            selectedIds={selectedEnemyIds}
-            onQueryChange={setQuery}
-            onClassChange={setActiveClass}
-            onSortChange={setSortBy}
+          <EnemyPanel
+            heroes={selectedEnemies}
+            maxHeroes={TEAM_SIZE}
             onHeroClick={toggleEnemy}
+            onClear={clearEnemies}
+            compact
           />
-        </div>
+
+          <div className="mt-4">
+            <HeroGrid
+              heroes={HEROES}
+              enabledHeroIds={enabledHeroIds}
+              enabledOnly={false}
+              activeClass={activeClass}
+              query={query}
+              sortBy={sortBy}
+              usage={heroUsage}
+              selectedIds={selectedEnemyIds}
+              onQueryChange={setQuery}
+              onClassChange={setActiveClass}
+              onSortChange={setSortBy}
+              onHeroClick={toggleEnemy}
+            />
+          </div>
         </section>
       )}
 
       {step === "B" && (
         <section className="ui-panel is-active rounded-xl border p-4 sm:p-5">
-        <div className="mb-4">
-          <h3 className="ui-text-primary text-base font-black">
-            Étape B — Combats historiques contre cette équipe
-          </h3>
-          <p className="ui-text-secondary mt-1 text-xs leading-relaxed">
-            Les 5 héros sont comparés sans tenir compte de leur ordre. Les
-            combats affichent ensuite l'ordre réellement enregistré.
-          </p>
-        </div>
+          <div className="mb-4">
+            <h3 className="ui-text-primary text-base font-black">
+              Étape B — Combats historiques contre cette équipe
+            </h3>
+            <p className="ui-text-secondary mt-1 text-xs leading-relaxed">
+              Les 5 héros sont comparés sans tenir compte de leur ordre. Les
+              combats affichent ensuite l'ordre réellement enregistré.
+            </p>
+          </div>
 
-        {loading ? (
-          <div className="ui-panel-empty rounded-lg border border-dashed p-6 text-center">
-            <p className="ui-text-muted text-sm">
-              Chargement de l'historique des combats…
-            </p>
-          </div>
-        ) : error ? (
-          <div className="ui-panel-empty rounded-lg border border-dashed p-6 text-center">
-            <p className="ui-text-secondary text-sm">{error}</p>
-          </div>
-        ) : selectedEnemyIds.length !== TEAM_SIZE ? (
-          <div className="ui-panel-empty rounded-lg border border-dashed p-6 text-center">
-            <p className="ui-text-muted text-sm">
-              Sélectionnez exactement 5 héros pour afficher les combats
-              correspondants.
-            </p>
-          </div>
-        ) : matchingCombats.length === 0 ? (
-          <div className="ui-panel-empty rounded-lg border border-dashed p-6 text-center">
-            <p className="ui-text-muted text-sm">
-              Aucun combat enregistré contre cette équipe.
-            </p>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            <div className="ui-panel-alt rounded-lg border p-3">
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <span className="ui-text-primary text-sm font-bold">
-                  {matchingCombats.length} combat
-                  {matchingCombats.length !== 1 ? "s" : ""} trouvé
-                  {matchingCombats.length !== 1 ? "s" : ""}
-                </span>
-                <span className="ui-text-muted text-xs">
-                  Équipe normalisée : {teamKey(selectedEnemyIds)}
-                </span>
-              </div>
+          {loading ? (
+            <div className="ui-panel-empty rounded-lg border border-dashed p-6 text-center">
+              <p className="ui-text-muted text-sm">
+                Chargement de l'historique des combats…
+              </p>
             </div>
+          ) : error ? (
+            <div className="ui-panel-empty rounded-lg border border-dashed p-6 text-center">
+              <p className="ui-text-secondary text-sm">{error}</p>
+            </div>
+          ) : selectedEnemyIds.length !== TEAM_SIZE ? (
+            <div className="ui-panel-empty rounded-lg border border-dashed p-6 text-center">
+              <p className="ui-text-muted text-sm">
+                Sélectionnez exactement 5 héros pour afficher les combats
+                correspondants.
+              </p>
+            </div>
+          ) : matchingCombats.length === 0 ? (
+            <div className="ui-panel-empty rounded-lg border border-dashed p-6 text-center">
+              <p className="ui-text-muted text-sm">
+                Aucun combat enregistré contre cette équipe.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <div className="ui-panel-alt rounded-lg border p-3">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <span className="ui-text-primary text-sm font-bold">
+                    {matchingCombats.length} combat
+                    {matchingCombats.length !== 1 ? "s" : ""} trouvé
+                    {matchingCombats.length !== 1 ? "s" : ""}
+                  </span>
+                  <span className="ui-text-muted text-xs">
+                    Équipe normalisée : {teamKey(selectedEnemyIds)}
+                  </span>
+                </div>
+              </div>
 
-            {matchingCombats.map((combat, index) => {
-              return (
-                <article
-                  key={combat.id ?? `${combat.created_at ?? "combat"}-${index}`}
-                  className="ui-card rounded-xl border p-4"
-                >
-                  <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-                    <div className="flex items-center gap-2">
-                      <span
-                        className={`rounded-full border px-2.5 py-1 text-[11px] font-black ${
-                          combat.won
-                            ? "text-[var(--ui-success)]"
-                            : "text-[var(--ui-theme-secondary)]"
-                        }`}
-                      >
-                        {combat.won ? "WIN" : "LOSS"}
-                      </span>
+              {matchingCombats.map((combat, index) => {
+                return (
+                  <article
+                    key={
+                      combat.id ?? `${combat.created_at ?? "combat"}-${index}`
+                    }
+                    className="ui-card rounded-xl border p-4"
+                  >
+                    <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+                      <div className="flex items-center gap-2">
+                        <span
+                          className={`rounded-full border px-2.5 py-1 text-[11px] font-black ${
+                            combat.won
+                              ? "text-[var(--ui-success)]"
+                              : "text-[var(--ui-theme-secondary)]"
+                          }`}
+                        >
+                          {combat.won ? "WIN" : "LOSS"}
+                        </span>
+                        <span className="ui-text-muted text-xs">
+                          Combat #{index + 1}
+                        </span>
+                      </div>
+
                       <span className="ui-text-muted text-xs">
-                        Combat #{index + 1}
+                        {formatCombatDate(combat.created_at)}
                       </span>
                     </div>
 
-                    <span className="ui-text-muted text-xs">
-                      {formatCombatDate(combat.created_at)}
-                    </span>
-                  </div>
+                    <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+                      <div className="ui-panel-alt rounded-lg border p-3">
+                        <p className="ui-text-muted mb-2 text-[10px] font-bold uppercase tracking-wide">
+                          Ma team
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                          {combat.my_heroes.map((heroId) => {
+                            const hero = heroesById.get(heroId);
+                            return hero ? (
+                              <div
+                                key={heroId}
+                                className="flex w-16 flex-col items-center gap-1"
+                                title={hero.name}
+                              >
+                                <img
+                                  src={hero.img}
+                                  alt={hero.name}
+                                  className="h-12 w-12 rounded-lg border border-white/10 object-cover"
+                                />
+                                <span className="ui-text-primary text-center text-[11px] font-semibold leading-tight">
+                                  {hero.name}
+                                </span>
+                              </div>
+                            ) : null;
+                          })}
+                        </div>
+                      </div>
 
-                  <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
-                    <div className="ui-panel-alt rounded-lg border p-3">
-                      <p className="ui-text-muted mb-2 text-[10px] font-bold uppercase tracking-wide">
-                        Ma team
-                      </p>
-                      <div className="flex flex-wrap gap-2">
-                        {combat.my_heroes.map((heroId) => {
-                          const hero = heroesById.get(heroId);
-                          return hero ? (
-                            <div key={heroId} className="flex w-16 flex-col items-center gap-1" title={hero.name}>
-                              <img
-                                src={hero.img}
-                                alt={hero.name}
-                                className="h-12 w-12 rounded-lg border border-white/10 object-cover"
-                              />
-                              <span className="ui-text-primary text-center text-[11px] font-semibold leading-tight">
-                                {hero.name}
-                              </span>
-                            </div>
-                          ) : null;
-                        })}
+                      <div className="ui-panel-alt rounded-lg border p-3">
+                        <p className="ui-text-muted mb-2 text-[10px] font-bold uppercase tracking-wide">
+                          Ordre ennemi enregistré
+                        </p>
+                        <div className="flex flex-wrap gap-2">
+                          {combat.enemy_heroes.map((heroId) => {
+                            const hero = heroesById.get(heroId);
+                            return hero ? (
+                              <div
+                                key={heroId}
+                                className="flex w-16 flex-col items-center gap-1"
+                                title={hero.name}
+                              >
+                                <img
+                                  src={hero.img}
+                                  alt={hero.name}
+                                  className="h-12 w-12 rounded-lg border border-white/10 object-cover"
+                                />
+                                <span className="ui-text-primary text-center text-[11px] font-semibold leading-tight">
+                                  {hero.name}
+                                </span>
+                              </div>
+                            ) : null;
+                          })}
+                        </div>
                       </div>
                     </div>
-
-                    <div className="ui-panel-alt rounded-lg border p-3">
-                      <p className="ui-text-muted mb-2 text-[10px] font-bold uppercase tracking-wide">
-                        Ordre ennemi enregistré
-                      </p>
-                      <div className="flex flex-wrap gap-2">
-                        {combat.enemy_heroes.map((heroId) => {
-                          const hero = heroesById.get(heroId);
-                          return hero ? (
-                            <div key={heroId} className="flex w-16 flex-col items-center gap-1" title={hero.name}>
-                              <img
-                                src={hero.img}
-                                alt={hero.name}
-                                className="h-12 w-12 rounded-lg border border-white/10 object-cover"
-                              />
-                              <span className="ui-text-primary text-center text-[11px] font-semibold leading-tight">
-                                {hero.name}
-                              </span>
-                            </div>
-                          ) : null;
-                        })}
-                      </div>
-                    </div>
-                  </div>
-                </article>
-              );
-            })}
-          </div>
-        )}
+                  </article>
+                );
+              })}
+            </div>
+          )}
         </section>
       )}
-
 
       {step === "C" && (
         <section className="ui-panel is-active rounded-xl border p-4 sm:p-5">
@@ -310,9 +318,9 @@ export default function TeamCreatorEnemyHistory({
               Étape C — Classement par 4 héros identiques + 5e héros
             </h3>
             <p className="ui-text-secondary mt-1 text-xs leading-relaxed">
-              Les teams jouées dans les combats de l'étape B sont regroupées
-              par noyau de 4 héros communs. Le 5e héros est affiché comme
-              variante, avec le nombre de WIN et LOSS.
+              Les teams jouées dans les combats de l'étape B sont regroupées par
+              noyau de 4 héros communs. Le 5e héros est affiché comme variante,
+              avec le nombre de WIN et LOSS.
             </p>
           </div>
 
@@ -324,9 +332,7 @@ export default function TeamCreatorEnemyHistory({
             </div>
           ) : matchingCombats.length === 0 ? (
             <div className="ui-panel-empty rounded-lg border border-dashed p-6 text-center">
-              <p className="ui-text-muted text-sm">
-                Aucun combat à classer.
-              </p>
+              <p className="ui-text-muted text-sm">Aucun combat à classer.</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
@@ -343,7 +349,11 @@ export default function TeamCreatorEnemyHistory({
                 >();
 
                 for (const combat of matchingCombats) {
-                  for (let removedIndex = 0; removedIndex < TEAM_SIZE; removedIndex++) {
+                  for (
+                    let removedIndex = 0;
+                    removedIndex < TEAM_SIZE;
+                    removedIndex++
+                  ) {
                     const coreIds = combat.my_heroes
                       .filter((_, index) => index !== removedIndex)
                       .sort();
@@ -435,11 +445,7 @@ export default function TeamCreatorEnemyHistory({
                                   b.losses === 0 ? Infinity : b.wins / b.losses;
 
                                 if (ratioB !== ratioA) return ratioB - ratioA;
-                                return (
-                                  b.wins +
-                                  b.losses -
-                                  (a.wins + a.losses)
-                                );
+                                return b.wins + b.losses - (a.wins + a.losses);
                               });
 
                               let lossBoundaryInserted = false;
@@ -492,7 +498,9 @@ export default function TeamCreatorEnemyHistory({
                                     <td className="px-2 py-2 text-center font-bold">
                                       {variant.losses === 0
                                         ? "∞"
-                                        : (variant.wins / variant.losses).toFixed(2)}
+                                        : (
+                                            variant.wins / variant.losses
+                                          ).toFixed(2)}
                                     </td>
                                     <td className="px-2 py-2 text-center font-bold">
                                       {variant.wins + variant.losses}
