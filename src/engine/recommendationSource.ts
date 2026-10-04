@@ -46,7 +46,8 @@ function findBestEnabledHistoricalTeam(
   combats: Combat[],
   excludedTeamKey: string | undefined,
   matchesHistoricalEnemy: (historicalEnemy: string[]) => number | null,
-  sortBySimilarity = false
+  sortBySimilarity = false,
+  allowLosingCandidates = false
 ): Hero[] | null {
   const enabledIds = new Set(candidateHeroes.map((hero) => hero.id));
   const historicalCandidates = collectHistoricalCandidates(
@@ -64,7 +65,8 @@ function findBestEnabledHistoricalTeam(
 
   for (const candidate of orderHistoricalCandidates(
     recommendationCandidates,
-    sortBySimilarity
+    sortBySimilarity,
+    allowLosingCandidates
   )) {
     const team = resolveTeamFromIds(candidate.heroIds, candidateHeroesById);
     if (!isHistoricalTeamEligible(candidate.heroIds, combats)) continue;
@@ -84,38 +86,21 @@ function findBestEnabledExactHistoryTeam(
   excludedTeamKey?: string
 ): Hero[] | null {
   const targetKey = teamKey(enemyIds);
-  const enabledIds = new Set(candidateHeroes.map((hero) => hero.id));
-  const historicalCandidates = collectHistoricalCandidates(
+
+  return findBestEnabledHistoricalTeam(
+    enemyIds,
+    candidateHeroes,
+    candidateHeroesById,
     combats,
+    excludedTeamKey,
     (historicalEnemy) =>
       historicalEnemy.length === TEAM_SIZE &&
       teamKey(historicalEnemy) === targetKey
         ? 0
-        : null
-  );
-
-  const recommendationCandidates = [...historicalCandidates.values()].filter(
-    (candidate) => {
-      if (!candidate.heroIds.every((id) => enabledIds.has(id))) return false;
-      if (teamKey(candidate.heroIds) === excludedTeamKey) return false;
-      return true;
-    }
-  );
-
-  for (const candidate of orderHistoricalCandidates(
-    recommendationCandidates,
+        : null,
     false,
     true
-  )) {
-    const team = resolveTeamFromIds(candidate.heroIds, candidateHeroesById);
-    if (!team) continue;
-    if (!isUsableRecommendationTeam(team, combats, enemyIds)) continue;
-    if (!isHistoricalTeamEligible(candidate.heroIds, combats)) continue;
-
-    return team;
-  }
-
-  return null;
+  );
 }
 
 function findBestEnabledSimilarHistoryTeam(
