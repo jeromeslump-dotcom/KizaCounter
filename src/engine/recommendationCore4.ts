@@ -20,7 +20,6 @@ export interface Core4HistoryStats {
 /**
  * Recommendation-specific Core4 history.
  *
- * Recommendation-specific Core4 history.
  * It uses the recommendation-layer rules (4 shared enemy heroes, enabled
  * candidates, excluded team, and recommendation usability checks). The final
  * 5-hero team is subject to the same historical-team eligibility thresholds as
