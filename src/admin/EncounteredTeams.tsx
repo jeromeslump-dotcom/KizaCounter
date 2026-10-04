@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import HeroPortrait from "../components/HeroPortrait";
 
 import { HEROES } from "../data/heroes";
 import type { Combat, Hero } from "../types";
