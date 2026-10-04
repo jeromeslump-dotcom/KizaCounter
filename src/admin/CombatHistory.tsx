@@ -158,6 +158,9 @@ export default function CombatHistory({
   const getTeamHeroes = (ids: string[]) =>
     ids.map(getHero).filter((hero): hero is Hero => Boolean(hero));
 
+  const getDisplayedOrder = (ids: string[]) =>
+    teamOrders.get(teamKey(ids)) ?? ids;
+
   const openOrderEditor = (teamIds: string[], title: string) =>
     setOrderEditor({ teamIds: [...teamIds], title });
 
@@ -391,7 +394,7 @@ export default function CombatHistory({
                         </div>
 
                         <div className="grid grid-cols-5 gap-1 sm:gap-2">
-                          {combat.enemy_heroes.map((id, i) => (
+                          {getDisplayedOrder(combat.enemy_heroes).map((id, i) => (
                             <HeroPortrait key={`${id}-${i}`} heroId={id} />
                           ))}
                         </div>
@@ -411,7 +414,7 @@ export default function CombatHistory({
                         </div>
 
                         <div className="grid grid-cols-5 gap-1 sm:gap-2">
-                          {combat.my_heroes.map((id, i) => (
+                          {getDisplayedOrder(combat.my_heroes).map((id, i) => (
                             <HeroPortrait key={`${id}-${i}`} heroId={id} />
                           ))}
                         </div>
