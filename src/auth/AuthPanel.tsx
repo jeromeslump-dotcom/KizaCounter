@@ -14,6 +14,7 @@ import useAuthSession from "./useAuthSession";
 import UserPanel from "./UserPanel";
 
 const TeamLab = lazy(() => import("../admin/teamLab/TeamLab"));
+const TeamCreator = lazy(() => import("../admin/teamCreator/TeamCreator"));
 
 interface AuthPanelProps {
   onManageHeroes: () => void;
@@ -36,6 +37,7 @@ export default function AuthPanel({
   const [showCombatHistory, setShowCombatHistory] = useState(false);
   const [showAnalysisHelp, setShowAnalysisHelp] = useState(false);
   const [showWinningPatternsLab, setShowWinningPatternsLab] = useState(false);
+  const [showTeamCreator, setShowTeamCreator] = useState(false);
   const [adminCombats, setAdminCombats] = useState<Combat[]>([]);
   const [showLogin, setShowLogin] = useState(false);
   const [email, setEmail] = useState("");
@@ -69,6 +71,7 @@ export default function AuthPanel({
     setShowCombatHistory(false);
     setShowAnalysisHelp(false);
     setShowWinningPatternsLab(false);
+    setShowTeamCreator(false);
   }
 
   function backToAdminPanel() {
@@ -77,6 +80,7 @@ export default function AuthPanel({
     setShowCombatHistory(false);
     setShowAnalysisHelp(false);
     setShowWinningPatternsLab(false);
+    setShowTeamCreator(false);
     setShowAdminPanel(true);
   }
 
@@ -208,6 +212,10 @@ export default function AuthPanel({
                 setShowAdminPanel(false);
                 setShowWinningPatternsLab(true);
               }}
+              onTeamCreator={() => {
+                setShowAdminPanel(false);
+                setShowTeamCreator(true);
+              }}
             />
 
             <UserManagement
@@ -240,6 +248,12 @@ export default function AuthPanel({
             <Suspense fallback={null}>
               <TeamLab
                 open={showWinningPatternsLab}
+                onClose={closeAdminArea}
+                onBack={backToAdminPanel}
+                enabledHeroIds={enabledHeroIds}
+              />
+              <TeamCreator
+                open={showTeamCreator}
                 onClose={closeAdminArea}
                 onBack={backToAdminPanel}
                 enabledHeroIds={enabledHeroIds}
