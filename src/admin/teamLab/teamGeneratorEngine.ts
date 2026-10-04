@@ -55,10 +55,6 @@ const TESTED_FORMATIONS = new Set(
 );
 
 const HERO_BY_ID = new Map(HEROES.map((hero) => [hero.id, hero]));
-const SIGNAL_BY_VECTOR = new Map(
-  TARGET_DATA.robustSignals.map((signal) => [signal.vector, signal])
-);
-
 export type GeneratorProgress = {
   checked: number;
   total: number;
@@ -148,6 +144,10 @@ function getCandidateFormations(
 
     return [...requiredHeroIds].every((heroId) => heroIds.includes(heroId));
   });
+}
+
+export function getTargetFormationTotal(): number {
+  return teamLabTargets.targetFormationCount;
 }
 
 export function getGeneratorCandidateTotal(
