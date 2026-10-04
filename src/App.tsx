@@ -167,7 +167,6 @@ export default function App() {
         <div className="mb-6">
           <EnemyPanel
             heroes={enemies}
-            maxHeroes={TEAM_SIZE}
             onHeroClick={toggleEnemy}
             onClear={clearEnemies}
             compact
