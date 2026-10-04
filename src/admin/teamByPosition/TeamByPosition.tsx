@@ -39,6 +39,7 @@ export default function TeamByPosition({
     let cancelled = false;
 
     setTeamOrdersLoading(true);
+    setTeamOrders(new Map());
 
     async function loadOrders() {
       try {
