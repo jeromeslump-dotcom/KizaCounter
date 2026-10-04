@@ -135,7 +135,6 @@ export default function TeamGeneratorCustomization({
                   hero={hero}
                   enabled={available}
                   selected={required}
-                  layout="showcase"
                   status={required ? "★" : available ? "○" : "✕"}
                   onClick={() => toggleRequired(hero.id)}
                 />
