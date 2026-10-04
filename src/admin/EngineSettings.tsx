@@ -302,32 +302,6 @@ export default function EngineSettings({
                 <>
                   <AdvancedSettingRow
                     icon="🧩"
-                    label="Combats minimum pour valider un Core4"
-                    value={advanced.core4MinBattles}
-                    min={1}
-                    max={20}
-                    step={1}
-                    unit="combats"
-                    onChange={(value) =>
-                      updateAdvanced("core4MinBattles", value)
-                    }
-                  />
-
-                  <AdvancedSettingRow
-                    icon="🧩"
-                    label="Combats minimum pour prendre en compte un remplaçant Core4"
-                    value={advanced.core4MinReplacementBattles}
-                    min={1}
-                    max={20}
-                    step={1}
-                    unit="combats"
-                    onChange={(value) =>
-                      updateAdvanced("core4MinReplacementBattles", value)
-                    }
-                  />
-
-                  <AdvancedSettingRow
-                    icon="🧩"
                     label="Combats pour confiance maximale du Core4"
                     value={advanced.core4ConfidenceBattles}
                     min={1}
