@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import {
   generateTeams,
   getGeneratorCandidateTotal,
+  getTargetFormationTotal,
   getMaxResults,
   type GeneratorTeam,
 } from "./teamGeneratorEngine";
@@ -44,9 +45,15 @@ function TeamCard({ team }: { team: GeneratorTeam }) {
       </div>
 
       <div className="mt-3 grid grid-cols-5 gap-1 text-center text-[10px]">
-        {Object.entries(team.zones).map(([key, zone]) => (
+        {[
+          ["ATK", team.zones.atk],
+          ["MATK", team.zones.matk],
+          ["DEF", team.zones.def],
+          ["MDEF", team.zones.mdef],
+          ["PV", team.zones.hp],
+        ].map(([key, zone]) => (
           <div key={key} className="ui-panel-alt rounded-lg border px-1 py-1">
-            <div className="ui-text-muted">{key.toUpperCase()}</div>
+            <div className="ui-text-muted">{key}</div>
             <div className="ui-text-primary font-black">Z{zone}</div>
           </div>
         ))}
@@ -109,7 +116,7 @@ export default function TeamGenerator({
           <div className="ui-card rounded-xl border p-3">
             <div className="ui-text-muted text-xs">Pool initial</div>
             <div className="ui-text-primary mt-1 text-lg font-black">
-              5 240
+              {getTargetFormationTotal().toLocaleString("fr-FR")}
             </div>
             <div className="ui-text-muted text-[11px]">
               formations théoriques
