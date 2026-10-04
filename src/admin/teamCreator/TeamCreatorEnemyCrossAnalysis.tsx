@@ -272,10 +272,10 @@ export default function TeamCreatorEnemyCrossAnalysis({
                     Héros repris
                   </p>
                   <div className="flex items-center gap-3">
-                    <img
-                      src={candidate.sourceHero.img}
-                      alt={candidate.sourceHero.name}
-                      className="h-12 w-12 rounded-lg border border-[var(--ui-theme-primary)] object-cover"
+                    <HeroPortrait
+                      hero={candidate.sourceHero}
+                      showName={false}
+                      imageClassName="h-12 w-12 rounded-lg border border-[var(--ui-theme-primary)] object-cover"
                     />
                     <div>
                       <p className="ui-text-primary text-sm font-black">
