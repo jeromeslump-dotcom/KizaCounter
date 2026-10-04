@@ -227,26 +227,26 @@ export default function EngineSettings({
                   <AdvancedSettingRow
                     icon="🎯"
                     label="Combats minimum requis pour une team historique"
-                    value={advanced.exactHistoryMinBattles}
+                    value={advanced.historicalTeamMinBattles}
                     min={1}
                     max={100}
                     step={1}
                     unit="combats"
                     onChange={(value) =>
-                      updateAdvanced("exactHistoryMinBattles", value)
+                      updateAdvanced("historicalTeamMinBattles", value)
                     }
                   />
 
                   <AdvancedSettingRow
                     icon="🎯"
                     label="Taux de victoire minimum d’une team historique"
-                    value={advanced.exactHistoryMinWinRate}
+                    value={advanced.historicalTeamMinWinRate}
                     min={0}
                     max={100}
                     step={1}
                     unit="%"
                     onChange={(value) =>
-                      updateAdvanced("exactHistoryMinWinRate", value)
+                      updateAdvanced("historicalTeamMinWinRate", value)
                     }
                   />
                 </>
