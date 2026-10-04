@@ -459,10 +459,11 @@ export default function TeamCreatorEnemyHistory({
                                   >
                                     <td className="px-2 py-2">
                                       <div className="flex items-center gap-2">
-                                        <HeroListItem hero={variant.hero} size="compact" layout="inline" />
-                                        <span className="ui-text-primary font-semibold">
-                                          {variant.hero.name}
-                                        </span>
+                                        <HeroListItem
+                                          hero={variant.hero}
+                                          size="compact"
+                                          layout="inline"
+                                        />
                                       </div>
                                     </td>
                                     <td className="px-2 py-2 text-center font-bold">
