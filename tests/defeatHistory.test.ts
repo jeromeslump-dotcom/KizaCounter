@@ -47,8 +47,8 @@ function heroesFor(...teams: string[][]): Hero[] {
 describe("inverse historical defeat engine", () => {
   beforeEach(() => {
     Object.assign(DEFAULT_ENGINE_SETTINGS.advanced, {
-      exactHistoryMinBattles: 3,
-      exactHistoryMinWinRate: 75,
+      historicalTeamMinBattles: 3,
+      historicalTeamMinWinRate: 75,
     });
   });
   it("finds the exact opponent team that defeated the current enemy team", () => {
