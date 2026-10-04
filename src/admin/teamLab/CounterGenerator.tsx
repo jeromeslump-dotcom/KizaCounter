@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import HeroPortrait from "../../components/HeroPortrait";
 import { HEROES, type Hero } from "../../data/heroes";
 import type { Combat } from "../../types";
 import { loadCombats } from "../../storage/combatStorage";
@@ -35,11 +36,10 @@ function TeamCard({ team }: { team: GeneratorTeam }) {
       <div className="grid grid-cols-5 gap-2">
         {team.heroes.map((hero) => (
           <div key={hero.id} className="min-w-0 text-center">
-            <img
-              src={hero.img}
-              alt={hero.name}
-              title={hero.name}
-              className="mx-auto aspect-square w-full max-w-20 rounded-xl object-cover"
+            <HeroPortrait
+              hero={hero}
+              showName={false}
+              imageClassName="mx-auto max-w-20 rounded-xl"
             />
             <p className="ui-text-primary mt-1 truncate text-[11px] font-bold">
               {hero.name}
@@ -273,11 +273,10 @@ export default function CounterGenerator({
                   <div
                     className={`relative flex min-h-[150px] items-center justify-center overflow-hidden rounded-xl bg-[var(--ui-bg)]/20 hero-card-wallpaper-${hero.cls.toLowerCase()}`}
                   >
-                    <img
-                      src={hero.img}
-                      alt={hero.name}
-                      loading="lazy"
-                      className="h-auto max-h-[125px] w-full object-contain"
+                    <HeroPortrait
+                      hero={hero}
+                      showName={false}
+                      imageClassName="h-auto max-h-[125px] w-full"
                     />
                     <span
                       className={`absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-md ${
