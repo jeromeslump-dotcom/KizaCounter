@@ -20,10 +20,11 @@ export interface Core4HistoryStats {
 /**
  * Recommendation-specific Core4 history.
  *
- * This is intentionally kept separate from historicalCore4.ts: it uses the
- * recommendation-layer rules (4 shared enemy heroes, enabled candidates,
- * excluded team, and recommendation usability checks) and therefore must not
- * be replaced by the generic Core4 analysis.
+ * Recommendation-specific Core4 history.
+ * It uses the recommendation-layer rules (4 shared enemy heroes, enabled
+ * candidates, excluded team, and recommendation usability checks). The final
+ * 5-hero team is subject to the same historical-team eligibility thresholds as
+ * every other historical recommendation source.
  */
 export function findBestEnabledCore4HistoryTeam(
   enemyIds: string[],
@@ -113,11 +114,6 @@ export function findBestEnabledCore4HistoryTeam(
   }
 
   const settings = getEngineSettings();
-  const minCoreBattles = Math.max(1, settings.advanced.core4MinBattles);
-  const minReplacementBattles = Math.max(
-    1,
-    settings.advanced.core4MinReplacementBattles
-  );
   const confidenceBattles = Math.max(
     1,
     settings.advanced.core4ConfidenceBattles
@@ -126,9 +122,7 @@ export function findBestEnabledCore4HistoryTeam(
   const rankedCores = [...coreCandidates.values()]
     .filter((core) => {
       const battles = core.wins + core.losses;
-      return (
-        core.wins > 0 && core.wins >= core.losses && battles >= minCoreBattles
-      );
+      return battles > 0;
     })
     .map((core) => {
       const battles = core.wins + core.losses;
@@ -157,11 +151,7 @@ export function findBestEnabledCore4HistoryTeam(
     const replacements = [...rankedCore.core.replacements.entries()]
       .filter(([, stats]) => {
         const battles = stats.wins + stats.losses;
-        return (
-          stats.wins > 0 &&
-          stats.wins >= stats.losses &&
-          battles >= minReplacementBattles
-        );
+        return battles > 0;
       })
       .map(([heroId, stats]) => {
         const battles = stats.wins + stats.losses;
