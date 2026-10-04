@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import HeroPortrait from "../components/HeroPortrait";
+import HeroListItem from "../components/HeroListItem";
 
 import { HEROES } from "../data/heroes";
 import type { Combat, Hero } from "../types";
@@ -199,11 +199,7 @@ export default function EncounteredTeams({
                               >
                                 <div className="h-14 w-14 overflow-hidden rounded-lg border ui-divider sm:h-16 sm:w-16">
                                   {hero ? (
-                                    <HeroPortrait
-                                      hero={hero}
-                                      showName={false}
-                                      imageClassName="h-full w-full object-cover"
-                                    />
+                                    <HeroListItem hero={hero} size="standard" />
                                   ) : (
                                     <div className="ui-text-soft flex h-full w-full items-center justify-center text-[9px]">
                                       ?
