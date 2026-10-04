@@ -3,7 +3,7 @@ import HeroPortrait from "./HeroPortrait";
 
 interface HeroListItemProps {
   hero: Hero;
-  size?: "compact" | "standard" | "large";
+  size?: "compact" | "standard" | "large" | "history";
   onClick?: (hero: Hero) => void;
   selected?: boolean;
   disabled?: boolean;
@@ -18,6 +18,8 @@ const SIZE_CLASSES = {
     "h-12 w-12 rounded-lg border ui-divider object-cover sm:h-16 sm:w-16",
   large:
     "h-14 w-14 rounded-lg border ui-divider object-cover sm:h-20 sm:w-20 sm:rounded-xl",
+  history:
+    "h-7 w-7 shrink-0 rounded-md border ui-divider object-cover shadow-sm sm:h-[72px] sm:w-[72px] sm:rounded-lg",
 } as const;
 
 export default function HeroListItem({
