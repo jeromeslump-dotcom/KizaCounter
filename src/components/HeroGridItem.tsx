@@ -10,6 +10,7 @@ interface HeroGridItemProps {
   showAlias?: boolean;
   status?: ReactNode;
   onClick?: (hero: Hero) => void;
+  layout?: "square" | "showcase";
 }
 
 export default function HeroGridItem({
@@ -20,6 +21,7 @@ export default function HeroGridItem({
   showAlias = false,
   status,
   onClick,
+  layout = "square",
 }: HeroGridItemProps) {
   const interactive = Boolean(onClick) && !disabled;
 
@@ -38,19 +40,25 @@ export default function HeroGridItem({
     >
       <div className="relative p-2.5">
         <div
-          className={[
-            "relative aspect-square overflow-hidden rounded-xl bg-[var(--ui-bg)]/20",
-            enabled ? `hero-card-wallpaper-${hero.cls.toLowerCase()}` : "",
-          ].join(" ")}
-        >
-          <HeroPortrait
-            hero={hero}
-            showName={false}
-            imageClassName={[
-              "absolute inset-0 h-full w-full object-cover",
-              enabled ? "" : "grayscale",
+          <div
+            className={[
+              "relative overflow-hidden rounded-xl bg-[var(--ui-bg)]/20",
+              layout === "showcase"
+                ? "flex min-h-[150px] items-center justify-center"
+                : "aspect-square",
+              enabled ? `hero-card-wallpaper-${hero.cls.toLowerCase()}` : "",
             ].join(" ")}
-          />
+          >
+            <HeroPortrait
+              hero={hero}
+              showName={false}
+              imageClassName={[
+                layout === "showcase"
+                  ? "h-auto max-h-[125px] w-full object-contain"
+                  : "absolute inset-0 h-full w-full object-cover",
+                enabled ? "" : "grayscale",
+              ].join(" ")}
+            />
 
           <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-[var(--ui-bg)]/90 to-transparent" />
 
