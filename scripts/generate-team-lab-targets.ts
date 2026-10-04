@@ -277,6 +277,7 @@ const output = {
   },
   robustSignals,
   targetVectorCount: targetVectors.size,
+  targetVectors: [...targetVectors].sort((a, b) => a.localeCompare(b, undefined, { numeric: true })),
   theoreticalFormationCount,
   targetFormationCount: targetFormations.length,
   formations: targetFormations,
