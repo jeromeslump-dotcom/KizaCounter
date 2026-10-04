@@ -71,6 +71,26 @@ function contextKey(heroIds: string[], position: number): string {
     .join("|");
 }
 
+
+
+export function applyKnownTeamOrders(
+  combats: Combat[],
+  teamOrders: Map<string, string[]>
+): Combat[] {
+  return combats.flatMap((combat) => {
+    if (combat.my_heroes.length !== FORMATION_SIZE) return [];
+
+    const orderedHeroIds = teamOrders.get(formationTeamKey(combat.my_heroes));
+    if (!orderedHeroIds || orderedHeroIds.length !== FORMATION_SIZE) return [];
+
+    return [{ ...combat, my_heroes: [...orderedHeroIds] }];
+  });
+}
+
+function formationTeamKey(heroIds: string[]): string {
+  return [...new Set(heroIds)].sort().join("|");
+}
+
 export function analyzeTeamByPosition(
   combats: Combat[]
 ): TeamByPositionAnalysis {
