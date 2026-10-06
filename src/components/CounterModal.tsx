@@ -39,6 +39,8 @@ interface CounterModalProps {
   onClassChange: (value: HeroClassFilter) => void;
   onSortChange: (value: HeroSort) => void;
   onSave: (combat: Combat) => Promise<void>;
+  onOpenTeamByPosition: (enemyIds: string[]) => void;
+  onOpenTeamCreator: (enemyIds: string[]) => void;
 }
 
 function formatCount(
@@ -179,6 +181,8 @@ export default function CounterModal({
   onClassChange,
   onSortChange,
   onSave,
+  onOpenTeamByPosition,
+  onOpenTeamCreator,
 }: CounterModalProps) {
   const {
     enemyIds,
@@ -357,6 +361,30 @@ export default function CounterModal({
             selectedIds={enemies.map((hero) => hero.id)}
             enemy
           />
+
+          {canViewDetailedHistory && (
+            <div className="ui-panel-alt mt-4 rounded-xl border p-3">
+              <div className="mb-2 text-[10px] font-black uppercase tracking-wide ui-text-muted">
+                🔗 Outils d'analyse admin
+              </div>
+              <div className="grid gap-2 sm:grid-cols-2">
+                <button
+                  type="button"
+                  className="ui-button-sm ui-button-primary w-full"
+                  onClick={() => onOpenTeamByPosition(enemyIds)}
+                >
+                  🧪 Team par position
+                </button>
+                <button
+                  type="button"
+                  className="ui-button-sm w-full"
+                  onClick={() => onOpenTeamCreator(enemyIds)}
+                >
+                  🧪 Créateur d'équipes — Étape D
+                </button>
+              </div>
+            </div>
+          )}
 
           <div className="mt-4">
             <CompactTeam
