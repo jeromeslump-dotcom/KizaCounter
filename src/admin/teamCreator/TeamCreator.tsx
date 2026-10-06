@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import TeamCreatorTabs from "./TeamCreatorTabs";
 import TeamCreatorEnemyHistory from "./TeamCreatorEnemyHistory";
 import TeamCreatorEnemyCrossAnalysis from "./TeamCreatorEnemyCrossAnalysis";
@@ -14,6 +14,8 @@ interface TeamCreatorProps {
   onClose: () => void;
   onBack: () => void;
   enabledHeroIds: Set<string>;
+  initialEnemyIds?: string[];
+  initialMode?: TeamCreatorMode;
 }
 
 export default function TeamCreator({
@@ -21,9 +23,19 @@ export default function TeamCreator({
   onClose,
   onBack,
   enabledHeroIds,
+  initialEnemyIds = [],
+  initialMode = "enemySelection",
 }: TeamCreatorProps) {
   const [mode, setMode] = useState<TeamCreatorMode>("enemySelection");
   const [selectedEnemyIds, setSelectedEnemyIds] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (!open) return;
+    setSelectedEnemyIds(
+      initialEnemyIds.length === 5 ? [...initialEnemyIds] : []
+    );
+    setMode(initialEnemyIds.length === 5 ? initialMode : "enemySelection");
+  }, [initialEnemyIds, initialMode, open]);
 
   if (!open) return null;
 
