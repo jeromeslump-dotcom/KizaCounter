@@ -217,6 +217,16 @@ export default function App() {
         onClassChange={setActiveClass}
         onSortChange={setSortBy}
         onSave={handleSaveCombat}
+        onOpenTeamByPosition={(ids) =>
+          document.dispatchEvent(
+            new CustomEvent("admin:team-by-position", { detail: ids })
+          )
+        }
+        onOpenTeamCreator={(ids) =>
+          document.dispatchEvent(
+            new CustomEvent("admin:team-creator-d", { detail: ids })
+          )
+        }
       />
     </main>
   );
