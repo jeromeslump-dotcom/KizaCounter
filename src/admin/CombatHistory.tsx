@@ -304,19 +304,27 @@ export default function CombatHistory({
                 <button
                   type="button"
                   onClick={() => setShowOnlyOrderToEdit((active) => !active)}
-                  disabled={teamOrdersLoading || !combatsWithOrderToEdit.length}
-                  className="ui-button-sm disabled:cursor-not-allowed disabled:opacity-40"
+                  disabled={!teamOrdersLoading && !combatsWithOrderToEdit.length}
                   aria-pressed={showOnlyOrderToEdit}
                   title={
-                    combatsWithOrderToEdit.length
-                      ? "Afficher uniquement les combats dont au moins un ordre doit être édité"
-                      : "Aucun combat avec un ordre à éditer"
+                    teamOrdersLoading
+                      ? "Vérification des ordres..."
+                      : combatsWithOrderToEdit.length
+                        ? "Afficher uniquement les combats dont au moins un ordre doit être édité"
+                        : "Aucun combat avec un ordre à éditer"
                   }
+                  className="inline-flex items-center rounded-lg border px-3 py-1.5 text-xs font-black transition disabled:cursor-not-allowed disabled:opacity-40"
+                  style={{
+                    borderColor: "rgb(from var(--ui-theme) r g b / 0.7)",
+                    backgroundColor: showOnlyOrderToEdit
+                      ? "var(--ui-theme)"
+                      : "rgb(from var(--ui-theme) r g b / 0.12)",
+                    color: showOnlyOrderToEdit ? "#fff" : "var(--ui-text-primary)",
+                  }}
                 >
-                  ✏️ Éditer l'ordre
-                  {combatsWithOrderToEdit.length > 0
-                    ? ` (${combatsWithOrderToEdit.length})`
-                    : ""}
+                  {teamOrdersLoading
+                    ? "⏳ Vérification..."
+                    : `✏️ Éditer l'ordre${combatsWithOrderToEdit.length ? ` (${combatsWithOrderToEdit.length})` : ""}`}
                 </button>
               </div>
             </div>
