@@ -473,11 +473,11 @@ export default function TeamByPosition({
                   Étape 3 — Équipes jamais testées
                 </h3>
                 <p className="ui-text-secondary mt-1 max-w-4xl text-xs leading-relaxed">
-                  À partir des défaites historiques avec ordre connu contre
-                  l'équipe ennemie sélectionnée, on remplace un héros par un
-                  héros mieux classé dans la même position. Seules les équipes
-                  absentes de l'historique contre cette composition ennemie
-                  sont proposées.
+                  À partir des équipes historiques avec ordre connu contre
+                  l'équipe ennemie sélectionnée, gagnantes ou perdantes, on
+                  remplace un héros par un héros mieux classé dans la même
+                  position. Seules les équipes absentes de l'historique contre
+                  cette composition ennemie sont proposées.
                 </p>
               </div>
 
@@ -531,10 +531,19 @@ export default function TeamByPosition({
                           </span>
                         </div>
 
-                        <div className="ui-danger mb-4 rounded-lg border p-3 text-xs">
-                          ❌ Défaite avec{" "}
-                          <strong>{heroName(candidate.lostHeroId)}</strong> en
+                        <div
+                          className={
+                            candidate.baseWon
+                              ? "ui-success mb-4 rounded-lg border p-3 text-xs"
+                              : "ui-danger mb-4 rounded-lg border p-3 text-xs"
+                          }
+                        >
+                          {candidate.baseWon ? "✅ Victoire" : "❌ Défaite"} avec{" "}
+                          <strong>{heroName(candidate.baseHeroId)}</strong> en
                           position {candidate.position + 1}
+                          <span className="ui-text-muted">
+                            {" "}· variante potentiellement meilleure
+                          </span>
                         </div>
 
                         <div className="ui-panel-alt mb-4 rounded-lg border p-3">
