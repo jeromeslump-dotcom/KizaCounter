@@ -42,10 +42,26 @@ export default function CombatHistory({
   const [deletedIds, setDeletedIds] = useState<Set<string>>(new Set());
   const [orderEditor, setOrderEditor] = useState<OrderEditorState | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [showOnlyOrderToEdit, setShowOnlyOrderToEdit] = useState(false);
 
   const visibleCombats = useMemo(
     () => combats.filter((combat) => !combat.id || !deletedIds.has(combat.id)),
     [combats, deletedIds]
+  );
+
+  const combatsWithOrderToEdit = useMemo(
+    () =>
+      visibleCombats.filter(
+        (combat) =>
+          !teamOrders.has(teamKey(combat.enemy_heroes)) ||
+          !teamOrders.has(teamKey(combat.my_heroes))
+      ),
+    [visibleCombats, teamOrders]
+  );
+
+  const displayedCombats = useMemo(
+    () => (showOnlyOrderToEdit ? combatsWithOrderToEdit : visibleCombats),
+    [showOnlyOrderToEdit, combatsWithOrderToEdit, visibleCombats]
   );
 
   const userIds = useMemo(
@@ -62,17 +78,21 @@ export default function CombatHistory({
 
   const totalPages = Math.max(
     1,
-    Math.ceil(visibleCombats.length / COMBATS_PER_PAGE)
+    Math.ceil(displayedCombats.length / COMBATS_PER_PAGE)
   );
 
   const paginatedCombats = useMemo(
     () =>
-      visibleCombats.slice(
+      displayedCombats.slice(
         (currentPage - 1) * COMBATS_PER_PAGE,
         currentPage * COMBATS_PER_PAGE
       ),
-    [visibleCombats, currentPage]
+    [displayedCombats, currentPage]
   );
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [showOnlyOrderToEdit]);
 
   useEffect(() => {
     setCurrentPage((page) => Math.min(page, totalPages));
@@ -85,6 +105,7 @@ export default function CombatHistory({
 
     setTeamOrdersLoading(true);
     setTeamOrders(new Map());
+    setShowOnlyOrderToEdit(false);
 
     async function loadOrders() {
       try {
@@ -268,15 +289,35 @@ export default function CombatHistory({
                 Historique commun des combats enregistrés.
               </p>
 
-              <div
-                className="mt-3 inline-flex items-center rounded-lg border px-3 py-1.5"
-                style={{
-                  borderColor: "rgb(from var(--ui-theme) r g b / 0.7)",
-                }}
-              >
-                <span className="text-xs font-bold text-white">
-                  {totalCombats} combats · {victories} victoires
-                </span>
+              <div className="mt-3 flex flex-wrap items-center gap-2">
+                <div
+                  className="inline-flex items-center rounded-lg border px-3 py-1.5"
+                  style={{
+                    borderColor: "rgb(from var(--ui-theme) r g b / 0.7)",
+                  }}
+                >
+                  <span className="text-xs font-bold text-white">
+                    {totalCombats} combats · {victories} victoires
+                  </span>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setShowOnlyOrderToEdit((active) => !active)}
+                  disabled={teamOrdersLoading || !combatsWithOrderToEdit.length}
+                  className="ui-button-sm disabled:cursor-not-allowed disabled:opacity-40"
+                  aria-pressed={showOnlyOrderToEdit}
+                  title={
+                    combatsWithOrderToEdit.length
+                      ? "Afficher uniquement les combats dont au moins un ordre doit être édité"
+                      : "Aucun combat avec un ordre à éditer"
+                  }
+                >
+                  ✏️ Éditer l'ordre
+                  {combatsWithOrderToEdit.length > 0
+                    ? ` (${combatsWithOrderToEdit.length})`
+                    : ""}
+                </button>
               </div>
             </div>
 
@@ -292,9 +333,11 @@ export default function CombatHistory({
         </header>
 
         <div className="min-h-0 overflow-y-auto p-4 sm:p-6">
-          {!visibleCombats.length ? (
+          {!displayedCombats.length ? (
             <p className="ui-text-soft py-12 text-center text-sm">
-              Aucun combat enregistré.
+              {showOnlyOrderToEdit
+                ? "Tous les combats ont déjà un ordre connu."
+                : "Aucun combat enregistré."}
             </p>
           ) : (
             <div className="space-y-3">
