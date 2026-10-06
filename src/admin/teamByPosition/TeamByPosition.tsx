@@ -184,7 +184,7 @@ export default function TeamByPosition({
 
     for (const candidate of candidates) {
       const baseTeamIds = [...candidate.teamIds];
-      baseTeamIds[candidate.position] = candidate.lostHeroId;
+      baseTeamIds[candidate.position] = candidate.baseHeroId;
       const key = `${baseTeamIds.join("|")}::${candidate.position}`;
       const group = groups.get(key);
 
@@ -194,7 +194,7 @@ export default function TeamByPosition({
         groups.set(key, {
           baseTeamIds,
           position: candidate.position,
-          lostHeroId: candidate.lostHeroId,
+          lostHeroId: candidate.baseHeroId,
           candidates: [candidate],
         });
       }
