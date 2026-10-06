@@ -94,7 +94,8 @@ function formationTeamKey(heroIds: string[]): string {
 export interface NeverTestedTeamCandidate {
   teamIds: string[];
   position: number;
-  lostHeroId: string;
+  baseHeroId: string;
+  baseWon: boolean;
   candidateHeroId: string;
   candidateRank: number;
   candidateScore: number;
@@ -112,19 +113,19 @@ export function buildNeverTestedTeamCandidates(
   const candidates = new Map<string, NeverTestedTeamCandidate>();
 
   for (const combat of matchingCombats) {
-    if (combat.won || combat.my_heroes.length !== FORMATION_SIZE) continue;
+    if (combat.my_heroes.length !== FORMATION_SIZE) continue;
 
     for (let position = 0; position < FORMATION_SIZE; position += 1) {
-      const lostHeroId = combat.my_heroes[position];
-      const lostRank = rankings[position].findIndex(
-        (ranking) => ranking.heroId === lostHeroId
+      const baseHeroId = combat.my_heroes[position];
+      const baseRank = rankings[position].findIndex(
+        (ranking) => ranking.heroId === baseHeroId
       );
 
-      if (lostRank <= 0) continue;
+      if (baseRank <= 0) continue;
 
       const teamIds = [...combat.my_heroes];
 
-      for (let candidateRank = 0; candidateRank < lostRank; candidateRank += 1) {
+      for (let candidateRank = 0; candidateRank < baseRank; candidateRank += 1) {
         const ranking = rankings[position][candidateRank];
         if (!ranking || teamIds.includes(ranking.heroId)) continue;
 
@@ -141,7 +142,8 @@ export function buildNeverTestedTeamCandidates(
           candidates.set(orderedKey, {
             teamIds: proposedTeam,
             position,
-            lostHeroId,
+            baseHeroId,
+            baseWon: combat.won,
             candidateHeroId: ranking.heroId,
             candidateRank: candidateRank + 1,
             candidateScore: ranking.score,
