@@ -1,6 +1,6 @@
 // src/auth/AuthPanel.tsx
 
-import { lazy, Suspense, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import AdminPanel from "../admin/AdminPanel";
 import CombatHistory from "../admin/CombatHistory";
 import EncounteredTeams from "../admin/EncounteredTeams";
@@ -42,7 +42,48 @@ export default function AuthPanel({
   const [showWinningPatternsLab, setShowWinningPatternsLab] = useState(false);
   const [showTeamByPosition, setShowTeamByPosition] = useState(false);
   const [showTeamCreator, setShowTeamCreator] = useState(false);
+  const [teamByPositionInitialEnemyIds, setTeamByPositionInitialEnemyIds] =
+    useState<string[]>([]);
+  const [teamCreatorInitialEnemyIds, setTeamCreatorInitialEnemyIds] =
+    useState<string[]>([]);
   const [adminCombats, setAdminCombats] = useState<Combat[]>([]);
+
+  useEffect(() => {
+    const openTeamByPosition = (event: Event) => {
+      const ids = (event as CustomEvent<string[]>).detail;
+      if (!Array.isArray(ids) || ids.length !== 5) return;
+      setShowAdminPanel(false);
+      setShowTeamCreator(false);
+      setShowTeamByPosition(true);
+      setTeamByPositionInitialEnemyIds(ids);
+      void loadCombats()
+        .then(setAdminCombats)
+        .catch((error) => {
+          console.error(
+            "Impossible de charger les combats pour Team par position :",
+            error
+          );
+          setAdminCombats([]);
+        });
+    };
+
+    const openTeamCreatorD = (event: Event) => {
+      const ids = (event as CustomEvent<string[]>).detail;
+      if (!Array.isArray(ids) || ids.length !== 5) return;
+      setShowAdminPanel(false);
+      setShowTeamByPosition(false);
+      setShowTeamCreator(true);
+      setTeamCreatorInitialEnemyIds(ids);
+    };
+
+    document.addEventListener("admin:team-by-position", openTeamByPosition);
+    document.addEventListener("admin:team-creator-d", openTeamCreatorD);
+
+    return () => {
+      document.removeEventListener("admin:team-by-position", openTeamByPosition);
+      document.removeEventListener("admin:team-creator-d", openTeamCreatorD);
+    };
+  }, []);
   const [showLogin, setShowLogin] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -268,6 +309,7 @@ export default function AuthPanel({
             <Suspense fallback={null}>
               <TeamByPosition
                 open={showTeamByPosition}
+                initialEnemyIds={teamByPositionInitialEnemyIds}
                 combats={adminCombats}
                 onClose={closeAdminArea}
                 onBack={backToAdminPanel}
@@ -280,6 +322,8 @@ export default function AuthPanel({
               />
               <TeamCreator
                 open={showTeamCreator}
+                initialEnemyIds={teamCreatorInitialEnemyIds}
+                initialMode="enemyCrossAnalysis"
                 onClose={closeAdminArea}
                 onBack={backToAdminPanel}
                 enabledHeroIds={enabledHeroIds}
