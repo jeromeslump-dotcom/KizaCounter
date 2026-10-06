@@ -19,6 +19,7 @@ interface TeamByPositionProps {
   onClose: () => void;
   onBack: () => void;
   combats: Combat[];
+  initialEnemyIds?: string[];
 }
 
 const POSITION_LABELS = [
@@ -61,6 +62,7 @@ export default function TeamByPosition({
   onClose,
   onBack,
   combats,
+  initialEnemyIds = [],
 }: TeamByPositionProps) {
   const [step, setStep] = useState(1);
   const [position, setPosition] = useState(0);
@@ -80,8 +82,11 @@ export default function TeamByPosition({
 
     let cancelled = false;
 
-    setStep(1);
-    setEnemyIds([]);
+    const initialEnemies =
+      initialEnemyIds.length === 5 ? [...initialEnemyIds] : [];
+
+    setStep(initialEnemies.length === 5 ? 3 : 1);
+    setEnemyIds(initialEnemies);
     setActiveClass("ALL");
     setQuery("");
     setSortBy("played");
@@ -120,7 +125,7 @@ export default function TeamByPosition({
     return () => {
       cancelled = true;
     };
-  }, [open]);
+  }, [initialEnemyIds, open]);
 
   const orderedCombats = useMemo(
     () =>
