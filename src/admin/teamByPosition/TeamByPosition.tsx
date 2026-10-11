@@ -167,13 +167,28 @@ export default function TeamByPosition({
     [enemyIds, orderedCombats]
   );
 
+  // Présentation uniquement : la génération des équipes candidates reste inchangée.
   const candidates = useMemo(
     () =>
       buildNeverTestedTeamCandidates(
         matchingOrderedCombats,
         analysis.rankings
-      ).filter((candidate) => !recordedTeamKeys.has(teamKey(candidate.teamIds))),
-    [analysis.rankings, matchingOrderedCombats, recordedTeamKeys]
+      )
+        .filter((candidate) => !recordedTeamKeys.has(teamKey(candidate.teamIds)))
+        .map((candidate) => ({
+          ...candidate,
+          sharedEnemyHeroCount: candidate.teamIds.filter((id) =>
+            enemyIds.includes(id)
+          ).length,
+        }))
+        .sort(
+          (a, b) =>
+            b.sharedEnemyHeroCount - a.sharedEnemyHeroCount ||
+            a.candidateRank - b.candidateRank ||
+            b.candidateScore - a.candidateScore ||
+            a.position - b.position
+        ),
+    [analysis.rankings, enemyIds, matchingOrderedCombats, recordedTeamKeys]
   );
 
   const candidateGroups = useMemo(() => {
@@ -531,9 +546,14 @@ export default function TeamByPosition({
                           <h4 className="ui-text-primary text-sm font-black">
                             #{index + 1} — 🆕 JAMAIS TESTÉE
                           </h4>
-                          <span className="rounded-full border border-[var(--ui-theme-primary)] px-2 py-1 text-[10px] font-black text-[var(--ui-theme-primary)]">
-                            Position {candidate.position + 1}
-                          </span>
+                          <div className="flex flex-wrap items-center justify-end gap-2">
+                            <span className="rounded-full border border-[var(--ui-theme-primary)] px-2 py-1 text-[10px] font-black text-[var(--ui-theme-primary)]">
+                              🔥 {candidate.sharedEnemyHeroCount}/5 héros communs
+                            </span>
+                            <span className="rounded-full border border-[var(--ui-theme-primary)] px-2 py-1 text-[10px] font-black text-[var(--ui-theme-primary)]">
+                              Position {candidate.position + 1}
+                            </span>
+                          </div>
                         </div>
 
                         <div
