@@ -38,9 +38,9 @@ export function isHistoricalCounterEligible(
 }
 
 /**
- * A team that has already been played but has never won must never be
- * proposed again, regardless of which recommendation source selected it.
- * An unseen team is still allowed: 0 battles is not a 0% historical record.
+ * Reject a team with no wins only when its source-appropriate history has
+ * reached the configured minimum sample size. Formation-based sources count
+ * distinct enemy formations, just like their eligibility check.
  */
 export function isHistoricallyWinlessTeam(
   team: Hero[],
@@ -48,21 +48,16 @@ export function isHistoricallyWinlessTeam(
 ): boolean {
   if (team.length !== TEAM_SIZE) return false;
 
-  const key = teamKey(team.map((hero) => hero.id));
+  const history = evaluateTeamHistory(
+    team.map((hero) => hero.id),
+    combats
+  );
   const { historicalTeamMinBattles } = getEngineSettings().advanced;
-  let battles = 0;
-  let wins = 0;
 
-  for (const combat of combats) {
-    if (teamKey(uniqueIds(combat.my_heroes ?? [])) !== key) continue;
-    battles++;
-    if (combat.won) wins++;
-  }
-
-  // Do not permanently reject a team on a tiny sample: the configured minimum
-  // sample size controls when a low win rate becomes meaningful.
   return (
-    battles >= historicalTeamMinBattles && battles > 0 && wins === 0
+    history.battles >= historicalTeamMinBattles &&
+    history.battles > 0 &&
+    history.wins === 0
   );
 }
 
