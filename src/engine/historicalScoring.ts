@@ -38,6 +38,35 @@ export function calculateWinRate(wins: number, total: number): number {
   return total <= 0 ? 0 : (wins / total) * 100;
 }
 
+export interface DistinctFormationResult {
+  wins: number;
+  losses: number;
+  battles: number;
+  winRate: number;
+}
+
+/** Counts each unordered five-hero enemy formation once, using its majority result. */
+export function summarizeDistinctFormationResults(
+  results: Array<{ formationKey: string; won: boolean }>
+): DistinctFormationResult {
+  const byFormation = new Map<string, { wins: number; losses: number }>();
+  for (const result of results) {
+    const stats = byFormation.get(result.formationKey) ?? { wins: 0, losses: 0 };
+    if (result.won) stats.wins++;
+    else stats.losses++;
+    byFormation.set(result.formationKey, stats);
+  }
+
+  let wins = 0;
+  let losses = 0;
+  for (const stats of byFormation.values()) {
+    if (stats.wins >= stats.losses) wins++;
+    else losses++;
+  }
+  const battles = wins + losses;
+  return { wins, losses, battles, winRate: calculateWinRate(wins, battles) };
+}
+
 export function evaluateExactTeamHistory(
   teamIds: string[],
   enemyIds: string[],
@@ -48,15 +77,14 @@ export function evaluateExactTeamHistory(
     return { wins: 0, losses: 0, battles: 0, winRate: 0 };
   const enemyKey = teamKey(enemyIds);
   const teamKeyValue = teamKey(normalizedTeam);
-  let wins = 0,
-    losses = 0;
-  for (const combat of combats) {
-    if (teamKey(combat.enemy_heroes ?? []) !== enemyKey) continue;
-    if (teamKey(combat.my_heroes ?? []) !== teamKeyValue) continue;
-    combat.won ? wins++ : losses++;
-  }
-  const battles = wins + losses;
-  return { wins, losses, battles, winRate: calculateWinRate(wins, battles) };
+  const results = combats
+    .filter((combat) =>
+      teamKey(combat.enemy_heroes ?? []) === enemyKey &&
+      teamKey(combat.my_heroes ?? []) === teamKeyValue &&
+      uniqueIds(combat.enemy_heroes ?? []).length === TEAM_SIZE
+    )
+    .map((combat) => ({ formationKey: teamKey(combat.enemy_heroes), won: combat.won }));
+  return summarizeDistinctFormationResults(results);
 }
 
 export function calculateHeroUsage(
@@ -89,16 +117,14 @@ export function evaluateTeamHistory(teamIds: string[], combats: Combat[]) {
   if (team.length !== TEAM_SIZE)
     return { wins: 0, losses: 0, battles: 0, winRate: 0 };
   const teamKeyValue = teamKey(team);
-  let wins = 0,
-    losses = 0;
-  for (const combat of combats) {
-    const historicalTeam = combat.my_heroes ?? [];
-    if (uniqueIds(historicalTeam).length !== TEAM_SIZE) continue;
-    if (teamKey(historicalTeam) !== teamKeyValue) continue;
-    combat.won ? wins++ : losses++;
-  }
-  const battles = wins + losses;
-  return { wins, losses, battles, winRate: calculateWinRate(wins, battles) };
+  const results = combats
+    .filter((combat) =>
+      uniqueIds(combat.my_heroes ?? []).length === TEAM_SIZE &&
+      teamKey(combat.my_heroes ?? []) === teamKeyValue &&
+      uniqueIds(combat.enemy_heroes ?? []).length === TEAM_SIZE
+    )
+    .map((combat) => ({ formationKey: teamKey(combat.enemy_heroes), won: combat.won }));
+  return summarizeDistinctFormationResults(results);
 }
 
 export function collectHistoricalCandidates(
@@ -188,8 +214,7 @@ export function evaluateEnemyClassHistory(
     };
   const teamKeyValue = teamKey(team);
   const classKeyCache = new Map<string, string | null>();
-  let wins = 0,
-    losses = 0;
+  const results: Array<{ formationKey: string; won: boolean }> = [];
   for (const combat of combats) {
     if (teamKey(combat.my_heroes ?? []) !== teamKeyValue) continue;
     const historicalEnemy = uniqueIds(combat.enemy_heroes ?? []);
@@ -201,14 +226,7 @@ export function evaluateEnemyClassHistory(
       classKeyCache.set(historicalEnemyKey, historicalClassKey);
     }
     if (historicalClassKey !== targetClassKey) continue;
-    combat.won ? wins++ : losses++;
+    results.push({ formationKey: historicalEnemyKey, won: combat.won });
   }
-  const battles = wins + losses;
-  return {
-    wins,
-    losses,
-    battles,
-    winRate: calculateWinRate(wins, battles),
-    classKey: targetClassKey,
-  };
+  return { ...summarizeDistinctFormationResults(results), classKey: targetClassKey };
 }
