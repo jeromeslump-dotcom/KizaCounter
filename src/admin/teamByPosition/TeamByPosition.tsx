@@ -175,12 +175,26 @@ export default function TeamByPosition({
         analysis.rankings
       )
         .filter((candidate) => !recordedTeamKeys.has(teamKey(candidate.teamIds)))
-        .map((candidate) => ({
-          ...candidate,
-          sharedEnemyHeroCount: candidate.teamIds.filter((id) =>
-            enemyIds.includes(id)
-          ).length,
-        }))
+        .map((candidate) => {
+          const enemyFormationsWon = new Set(
+            orderedCombats
+              .filter(
+                (combat) =>
+                  combat.won &&
+                  teamKey(combat.my_heroes) === teamKey(candidate.teamIds) &&
+                  combat.enemy_heroes.length === 5
+              )
+              .map((combat) => teamKey(combat.enemy_heroes))
+          ).size;
+
+          return {
+            ...candidate,
+            sharedEnemyHeroCount: candidate.teamIds.filter((id) =>
+              enemyIds.includes(id)
+            ).length,
+            enemyFormationsWon,
+          };
+        })
         .sort(
           (a, b) =>
             b.sharedEnemyHeroCount - a.sharedEnemyHeroCount ||
@@ -544,7 +558,7 @@ export default function TeamByPosition({
                       >
                         <div className="mb-4 flex items-center justify-between gap-3">
                           <h4 className="ui-text-primary text-sm font-black">
-                            #{index + 1} — 🆕 JAMAIS TESTÉE
+                            #{index + 1} — 🏆 {candidate.enemyFormationsWon} formation{candidate.enemyFormationsWon !== 1 ? "s" : ""} battue{candidate.enemyFormationsWon !== 1 ? "s" : ""}
                           </h4>
                           <div className="flex flex-wrap items-center justify-end gap-2">
                             <span className="rounded-full border border-[var(--ui-theme-primary)] px-2 py-1 text-[10px] font-black text-[var(--ui-theme-primary)]">
