@@ -69,7 +69,6 @@ function getRecommendationDisplay({
   core4History: Core4HistoryStats | null;
   defeatHistory: {
     counterWinRate: number;
-    distinctBattles: number;
     battles: number;
   } | null;
   exactHistory: {
@@ -111,7 +110,7 @@ function getRecommendationDisplay({
       historyLabel = (
         <span className="font-normal">
           {Math.round(defeatHistory.counterWinRate * 100)} % ·{" "}
-          {formatCount(defeatHistory.distinctBattles, "formation")}
+          {formatCount(defeatHistory.battles, "combat")}
         </span>
       );
     }
@@ -122,7 +121,7 @@ function getRecommendationDisplay({
       historyLabel = (
         <span className="font-normal">
           {Math.round(exactHistory.winRate)} % ·{" "}
-          {formatCount(exactHistory.battles, "formation")}
+          {formatCount(exactHistory.battles, "combat")}
         </span>
       );
     }
@@ -227,7 +226,7 @@ export default function CounterModal({
           <strong>Historique exact</strong>{" "}
           <span className="font-normal">
             · {Math.round(currentTeamHistory.winRate)} % ·{" "}
-            {formatCount(currentTeamHistory.battles, "formation")}
+            {formatCount(currentTeamHistory.battles, "combat")}
           </span>
         </>
       ) : (
