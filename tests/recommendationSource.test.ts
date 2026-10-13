@@ -256,7 +256,7 @@ describe("historical recommendation sources", () => {
     expect(result.team).toEqual([]);
   });
 
-  it("rejects a team that lost to this exact enemy even when it won elsewhere", () => {
+  it("rejects a team after enough losses to this exact enemy even when it won elsewhere", () => {
     const badTeam = ["bad-1", "bad-2", "bad-3", "bad-4", "bad-5"];
     const similarEnemy = [...target.slice(0, 4), "other-enemy"];
     const heroes = uniqueHeroes(
@@ -270,7 +270,7 @@ describe("historical recommendation sources", () => {
       heroes,
       [
         combat(badTeam, similarEnemy, true),
-        combat(badTeam, target, false),
+        ...Array.from({ length: 40 }, () => combat(badTeam, target, false)),
       ]
     );
 
@@ -306,7 +306,9 @@ describe("historical recommendation sources", () => {
       heroes,
       [
         combat(primary, target, true),
-        combat(badAlternative, target, false),
+        ...Array.from({ length: 40 }, () =>
+          combat(badAlternative, target, false)
+        ),
       ],
       primary
     );
