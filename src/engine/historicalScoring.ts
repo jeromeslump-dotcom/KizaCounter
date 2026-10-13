@@ -77,14 +77,15 @@ export function evaluateExactTeamHistory(
     return { wins: 0, losses: 0, battles: 0, winRate: 0 };
   const enemyKey = teamKey(enemyIds);
   const teamKeyValue = teamKey(normalizedTeam);
-  const results = combats
-    .filter((combat) =>
-      teamKey(combat.enemy_heroes ?? []) === enemyKey &&
-      teamKey(combat.my_heroes ?? []) === teamKeyValue &&
-      uniqueIds(combat.enemy_heroes ?? []).length === TEAM_SIZE
-    )
-    .map((combat) => ({ formationKey: teamKey(combat.enemy_heroes), won: combat.won }));
-  return summarizeDistinctFormationResults(results);
+  const matchingCombats = combats.filter((combat) =>
+    teamKey(combat.enemy_heroes ?? []) === enemyKey &&
+    teamKey(combat.my_heroes ?? []) === teamKeyValue &&
+    uniqueIds(combat.enemy_heroes ?? []).length === TEAM_SIZE
+  );
+  const wins = matchingCombats.filter((combat) => combat.won).length;
+  const battles = matchingCombats.length;
+  const losses = battles - wins;
+  return { wins, losses, battles, winRate: calculateWinRate(wins, battles) };
 }
 
 export function calculateHeroUsage(
