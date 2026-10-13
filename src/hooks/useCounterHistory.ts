@@ -6,6 +6,7 @@ import {
   evaluateEnemyClassHistory,
   evaluateExactTeamHistory,
   evaluateTeamHistory,
+  summarizeDistinctFormationResults,
 } from "../engine/historicalScoring";
 import { findHistoricalDefeatCounters } from "../engine/defeatHistory";
 import { getEngineSettings } from "../engine/engineSettings";
@@ -30,8 +31,7 @@ function evaluateSimilarTeamHistory(
     return EMPTY_HISTORY;
   }
 
-  let wins = 0;
-  let losses = 0;
+  const results: Array<{ formationKey: string; won: boolean }> = [];
 
   for (const combat of combats) {
     if (teamKey(combat.my_heroes ?? []) !== teamKeyValue) continue;
@@ -47,21 +47,10 @@ function evaluateSimilarTeamHistory(
 
     if (sharedHeroes !== SIMILAR_HISTORY_SHARED_HEROES) continue;
 
-    if (combat.won) {
-      wins++;
-    } else {
-      losses++;
-    }
+    results.push({ formationKey: teamKey(historicalEnemy), won: combat.won });
   }
 
-  const battles = wins + losses;
-
-  return {
-    wins,
-    losses,
-    battles,
-    winRate: battles > 0 ? (wins / battles) * 100 : 0,
-  };
+  return summarizeDistinctFormationResults(results);
 }
 
 interface UseCounterHistoryProps {
