@@ -10,6 +10,7 @@ import {
   type Core4HistoryStats,
 } from "./recommendationCore4";
 import {
+  isHistoricalCounterEligible,
   isHistoricalTeamEligible,
   isUsableRecommendationTeam,
 } from "./recommendationGuards";
@@ -46,7 +47,8 @@ function findBestEnabledHistoricalTeam(
   combats: Combat[],
   excludedTeamKey: string | undefined,
   matchesHistoricalEnemy: (historicalEnemy: string[]) => number | null,
-  sortBySimilarity = false
+  sortBySimilarity = false,
+  useRawStatsForEligibility = false
 ): Hero[] | null {
   const enabledIds = new Set(candidateHeroes.map((hero) => hero.id));
   const historicalCandidates = collectHistoricalCandidates(
@@ -67,7 +69,13 @@ function findBestEnabledHistoricalTeam(
     sortBySimilarity
   )) {
     const team = resolveTeamFromIds(candidate.heroIds, candidateHeroesById);
-    if (!isHistoricalTeamEligible(candidate.heroIds, combats)) continue;
+    const eligible = useRawStatsForEligibility
+      ? isHistoricalCounterEligible(
+          candidate.wins + candidate.losses,
+          candidate.wins
+        )
+      : isHistoricalTeamEligible(candidate.heroIds, combats);
+    if (!eligible) continue;
     if (team && isUsableRecommendationTeam(team, combats, enemyIds)) {
       return team;
     }
@@ -96,7 +104,8 @@ function findBestEnabledExactHistoryTeam(
       teamKey(historicalEnemy) === targetKey
         ? 0
         : null,
-    false
+    false,
+    true
   );
 }
 
