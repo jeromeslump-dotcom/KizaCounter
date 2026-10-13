@@ -133,12 +133,10 @@ export function findBestHistoricalDefeatTeam(
   );
 
   for (const candidate of candidates) {
-    // Defeat-history is an exact matchup source: use raw battles and wins both
-    // for the targeted matchup and for the configured minimum eligibility.
-    if (
-      candidate.wins < candidate.losses ||
-      !isHistoricalCounterEligible(candidate.battles, candidate.wins)
-    ) {
+    // Defeat-history is an exact matchup source: use raw battles and wins.
+    // The configured minimum sample size decides when a low win rate can
+    // disqualify this candidate; do not apply a separate 50% cutoff here.
+    if (!isHistoricalCounterEligible(candidate.battles, candidate.wins)) {
       continue;
     }
 
