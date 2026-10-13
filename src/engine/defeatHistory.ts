@@ -1,7 +1,7 @@
 import type { Combat, Hero } from "../types";
 import { getEngineSettings } from "./engineSettings";
 import { resolveTeamFromIds, teamKey, uniqueIds } from "./teamUtils";
-import { isHistoricalTeamEligible } from "./recommendationGuards";
+import { isHistoricalCounterEligible } from "./recommendationGuards";
 
 const TEAM_SIZE = 5;
 
@@ -11,7 +11,6 @@ export interface DefeatHistoryCandidate {
   wins: number;
   battles: number;
   counterWinRate: number;
-  distinctBattles: number;
   confidence: number;
   score: number;
 }
@@ -76,7 +75,6 @@ export function findHistoricalDefeatCounters(
       wins: 0,
       battles: 0,
       counterWinRate: 0,
-      distinctBattles: 0,
       confidence: 0,
       score: 0,
     };
@@ -93,9 +91,8 @@ export function findHistoricalDefeatCounters(
 
   const ordered = [...candidates.values()]
     .map((candidate) => {
-      const distinctResult = candidate.wins >= candidate.losses;
-      candidate.distinctBattles = 1;
-      candidate.counterWinRate = distinctResult ? 1 : 0;
+      candidate.counterWinRate =
+        candidate.battles > 0 ? candidate.wins / candidate.battles : 0;
       candidate.confidence = confidenceForBattles(
         candidate.battles,
         confidenceBattles
@@ -136,13 +133,11 @@ export function findBestHistoricalDefeatTeam(
   );
 
   for (const candidate of candidates) {
-    // Keep the candidate's matchup record separate from its overall historical
-    // eligibility: it must have beaten this enemy by majority, and its minimum
-    // historical win rate is evaluated using distinct enemy formations, just
-    // like every other historical recommendation source.
+    // Defeat-history is an exact matchup source: use raw battles and wins both
+    // for the targeted matchup and for the configured minimum eligibility.
     if (
       candidate.wins < candidate.losses ||
-      !isHistoricalTeamEligible(candidate.heroIds, combats)
+      !isHistoricalCounterEligible(candidate.battles, candidate.wins)
     ) {
       continue;
     }
