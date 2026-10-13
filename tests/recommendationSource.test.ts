@@ -243,14 +243,14 @@ describe("historical recommendation sources", () => {
     expect(result.team).toEqual([]);
   });
 
-  it("never proposes a team with a recorded 0% win rate", () => {
+  it("rejects a 0% team once its history reaches the minimum sample size", () => {
     const badTeam = ["bad-1", "bad-2", "bad-3", "bad-4", "bad-5"];
     const heroes = uniqueHeroes(heroesFor(target), heroesFor(badTeam));
 
     const result = recommendTeamWithSource(
       target,
       heroes,
-      [combat(badTeam, target, false)]
+      Array.from({ length: 40 }, () => combat(badTeam, target, false))
     );
 
     expect(result.team).toEqual([]);
