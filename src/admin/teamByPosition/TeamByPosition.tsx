@@ -197,6 +197,7 @@ export default function TeamByPosition({
         })
         .sort(
           (a, b) =>
+            b.enemyFormationsWon - a.enemyFormationsWon ||
             b.sharedEnemyHeroCount - a.sharedEnemyHeroCount ||
             a.candidateRank - b.candidateRank ||
             b.candidateScore - a.candidateScore ||
