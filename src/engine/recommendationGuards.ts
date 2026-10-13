@@ -10,8 +10,13 @@ function isHistoricalStatsEligible(battles: number, wins: number): boolean {
     getEngineSettings().advanced;
   const winRate = battles > 0 ? (wins / battles) * 100 : 0;
 
+  // Below the minimum sample size, the history is inconclusive:
+  // keep the historical team regardless of its observed win rate.
+  // Once the sample reaches the threshold, enforce the configured win rate.
   return (
-    battles >= historicalTeamMinBattles && winRate >= historicalTeamMinWinRate
+    battles > 0 &&
+    (battles < historicalTeamMinBattles ||
+      winRate >= historicalTeamMinWinRate)
   );
 }
 
