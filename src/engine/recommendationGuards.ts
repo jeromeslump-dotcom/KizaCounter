@@ -49,6 +49,7 @@ export function isHistoricallyWinlessTeam(
   if (team.length !== TEAM_SIZE) return false;
 
   const key = teamKey(team.map((hero) => hero.id));
+  const { historicalTeamMinBattles } = getEngineSettings().advanced;
   let battles = 0;
   let wins = 0;
 
@@ -58,12 +59,16 @@ export function isHistoricallyWinlessTeam(
     if (combat.won) wins++;
   }
 
-  return battles > 0 && wins === 0;
+  // Do not permanently reject a team on a tiny sample: the configured minimum
+  // sample size controls when a low win rate becomes meaningful.
+  return (
+    battles >= historicalTeamMinBattles && battles > 0 && wins === 0
+  );
 }
 
 /**
  * A team that has already faced this exact enemy team and never beaten it
- * must not be recommended against that enemy, even if it has wins elsewhere.
+ * must not be recommended against that enemy once enough battles exist.
  */
 export function isHistoricallyWinlessAgainstEnemy(
   team: Hero[],
@@ -76,6 +81,7 @@ export function isHistoricallyWinlessAgainstEnemy(
 
   const teamKeyValue = teamKey(team.map((hero) => hero.id));
   const enemyKeyValue = teamKey(uniqueIds(enemyIds));
+  const { historicalTeamMinBattles } = getEngineSettings().advanced;
   let battles = 0;
   let wins = 0;
 
@@ -88,7 +94,9 @@ export function isHistoricallyWinlessAgainstEnemy(
     if (combat.won) wins++;
   }
 
-  return battles > 0 && wins === 0;
+  return (
+    battles >= historicalTeamMinBattles && battles > 0 && wins === 0
+  );
 }
 
 export function isUsableRecommendationTeam(
