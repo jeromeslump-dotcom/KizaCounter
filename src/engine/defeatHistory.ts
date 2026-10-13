@@ -1,7 +1,7 @@
 import type { Combat, Hero } from "../types";
 import { getEngineSettings } from "./engineSettings";
 import { resolveTeamFromIds, teamKey, uniqueIds } from "./teamUtils";
-import { isHistoricalCounterEligible } from "./recommendationGuards";
+import { isHistoricalTeamEligible } from "./recommendationGuards";
 
 const TEAM_SIZE = 5;
 
@@ -136,7 +136,14 @@ export function findBestHistoricalDefeatTeam(
   );
 
   for (const candidate of candidates) {
-    if (!isHistoricalCounterEligible(candidate.battles, candidate.wins)) {
+    // Keep the candidate's matchup record separate from its overall historical
+    // eligibility: it must have beaten this enemy by majority, and its minimum
+    // historical win rate is evaluated using distinct enemy formations, just
+    // like every other historical recommendation source.
+    if (
+      candidate.wins < candidate.losses ||
+      !isHistoricalTeamEligible(candidate.heroIds, combats)
+    ) {
       continue;
     }
 
