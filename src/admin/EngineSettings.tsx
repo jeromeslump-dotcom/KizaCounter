@@ -226,7 +226,7 @@ export default function EngineSettings({
                 <>
                   <AdvancedSettingRow
                     icon="🎯"
-                    label="Combats requis pour rendre une team historique éligible"
+                    label="Combats avant de pouvoir rejeter une team historique"
                     value={advanced.historicalTeamMinBattles}
                     min={1}
                     max={100}
@@ -239,7 +239,7 @@ export default function EngineSettings({
 
                   <AdvancedSettingRow
                     icon="🎯"
-                    label="Taux de victoire minimum (en dessous, la team est rejetée)"
+                    label="Taux de victoire minimum pour conserver une team historique"
                     value={advanced.historicalTeamMinWinRate}
                     min={0}
                     max={100}
