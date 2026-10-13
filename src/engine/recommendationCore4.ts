@@ -1,6 +1,9 @@
 import type { Combat, Hero } from "../types";
 import { getEngineSettings } from "./engineSettings";
-import { calculateHistoricalReliability } from "./historicalScoring";
+import {
+  calculateHistoricalReliability,
+  summarizeDistinctFormationResults,
+} from "./historicalScoring";
 import {
   isHistoricalTeamEligible,
   isUsableRecommendationTeam,
@@ -45,6 +48,7 @@ export function findBestEnabledCore4HistoryTeam(
       wins: number;
       losses: number;
       replacements: Map<string, { wins: number; losses: number }>;
+      formationResults: Map<string, { wins: number; losses: number }>;
     }
   >();
   const coreVariantsByTeamKey = new Map<
@@ -94,10 +98,20 @@ export function findBestEnabledCore4HistoryTeam(
         wins: 0,
         losses: 0,
         replacements: new Map<string, { wins: number; losses: number }>(),
+        formationResults: new Map<string, { wins: number; losses: number }>(),
       };
 
       if (combat.won) accumulator.wins++;
       else accumulator.losses++;
+
+      const formationKey = teamKey(historicalEnemy);
+      const formationStats = accumulator.formationResults.get(formationKey) ?? {
+        wins: 0,
+        losses: 0,
+      };
+      if (combat.won) formationStats.wins++;
+      else formationStats.losses++;
+      accumulator.formationResults.set(formationKey, formationStats);
 
       const replacementStats = accumulator.replacements.get(
         variant.replacement
@@ -185,13 +199,13 @@ export function findBestEnabledCore4HistoryTeam(
       if (!isHistoricalTeamEligible(teamIds, combats)) continue;
       if (!isUsableRecommendationTeam(team, combats, enemyIds)) continue;
 
-      const battles = rankedCore.core.wins + rankedCore.core.losses;
-      onSelectedCore?.({
-        wins: rankedCore.core.wins,
-        losses: rankedCore.core.losses,
-        battles,
-        winRate: battles > 0 ? (rankedCore.core.wins / battles) * 100 : 0,
-      });
+      const distinctStats = summarizeDistinctFormationResults(
+        [...rankedCore.core.formationResults.entries()].map(([formationKey, stats]) => ({
+          formationKey,
+          won: stats.wins >= stats.losses,
+        }))
+      );
+      onSelectedCore?.(distinctStats);
       return team;
     }
   }
