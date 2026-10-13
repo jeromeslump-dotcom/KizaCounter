@@ -69,6 +69,7 @@ function getRecommendationDisplay({
   core4History: Core4HistoryStats | null;
   defeatHistory: {
     counterWinRate: number;
+    distinctBattles: number;
     battles: number;
   } | null;
   exactHistory: {
@@ -99,7 +100,7 @@ function getRecommendationDisplay({
       historyLabel = (
         <span className="font-normal">
           {Math.round(core4History.winRate)} % ·{" "}
-          {formatCount(core4History.battles, "combat")}
+          {formatCount(core4History.battles, "formation")}
         </span>
       );
     }
@@ -110,7 +111,7 @@ function getRecommendationDisplay({
       historyLabel = (
         <span className="font-normal">
           {Math.round(defeatHistory.counterWinRate * 100)} % ·{" "}
-          {formatCount(defeatHistory.battles, "combat")}
+          {formatCount(defeatHistory.distinctBattles, "formation")}
         </span>
       );
     }
@@ -121,7 +122,7 @@ function getRecommendationDisplay({
       historyLabel = (
         <span className="font-normal">
           {Math.round(exactHistory.winRate)} % ·{" "}
-          {formatCount(exactHistory.battles, "combat")}
+          {formatCount(exactHistory.battles, "formation")}
         </span>
       );
     }
@@ -132,7 +133,7 @@ function getRecommendationDisplay({
       historyLabel = (
         <span className="font-normal">
           {Math.round(classHistory.winRate)} % ·{" "}
-          {formatCount(classHistory.battles, "combat")}
+          {formatCount(classHistory.battles, "formation")}
         </span>
       );
     }
@@ -143,7 +144,7 @@ function getRecommendationDisplay({
       historyLabel = (
         <span className="font-normal">
           {Math.round(similarHistory.winRate)} % ·{" "}
-          {formatCount(similarHistory.battles, "combat")}
+          {formatCount(similarHistory.battles, "formation")}
         </span>
       );
     }
@@ -226,7 +227,7 @@ export default function CounterModal({
           <strong>Historique exact</strong>{" "}
           <span className="font-normal">
             · {Math.round(currentTeamHistory.winRate)} % ·{" "}
-            {formatCount(currentTeamHistory.battles, "combat")}
+            {formatCount(currentTeamHistory.battles, "formation")}
           </span>
         </>
       ) : (
@@ -239,7 +240,7 @@ export default function CounterModal({
             <strong>Nouvelle rencontre · Équipe déjà victorieuse</strong>{" "}
             <span className="font-normal">
               · {Math.round(currentTeamGeneralHistory.winRate)} % ·{" "}
-              {formatCount(currentTeamGeneralHistory.battles, "combat")}
+              {formatCount(currentTeamGeneralHistory.battles, "formation")}
             </span>
           </span>
 
