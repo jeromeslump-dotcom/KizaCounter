@@ -52,12 +52,9 @@ export function isHistoricallyWinlessTeam(
     team.map((hero) => hero.id),
     combats
   );
-  const { historicalTeamMinBattles } = getEngineSettings().advanced;
-
   return (
-    history.battles >= historicalTeamMinBattles &&
     history.battles > 0 &&
-    history.wins === 0
+    !isHistoricalStatsEligible(history.battles, history.wins)
   );
 }
 
@@ -76,7 +73,6 @@ export function isHistoricallyWinlessAgainstEnemy(
 
   const teamKeyValue = teamKey(team.map((hero) => hero.id));
   const enemyKeyValue = teamKey(uniqueIds(enemyIds));
-  const { historicalTeamMinBattles } = getEngineSettings().advanced;
   let battles = 0;
   let wins = 0;
 
@@ -89,9 +85,7 @@ export function isHistoricallyWinlessAgainstEnemy(
     if (combat.won) wins++;
   }
 
-  return (
-    battles >= historicalTeamMinBattles && battles > 0 && wins === 0
-  );
+  return battles > 0 && !isHistoricalStatsEligible(battles, wins);
 }
 
 export function isUsableRecommendationTeam(
