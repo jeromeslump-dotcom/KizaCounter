@@ -71,8 +71,6 @@ function contextKey(heroIds: string[], position: number): string {
     .join("|");
 }
 
-
-
 export function applyKnownTeamOrders(
   combats: Combat[],
   teamOrders: Map<string, string[]>
@@ -134,12 +132,14 @@ export function buildNeverTestedTeamCandidates(
 
         if (new Set(proposedTeam).size !== FORMATION_SIZE) continue;
 
+        // Une formation est identifiée sans tenir compte de l'ordre des héros.
+        // Cela évite de proposer deux fois la même équipe lorsqu'elle est
+        // générée depuis deux formations sources ordonnées différemment.
         const candidateKey = formationTeamKey(proposedTeam);
         if (testedTeams.has(candidateKey)) continue;
 
-        const orderedKey = proposedTeam.join("|");
-        if (!candidates.has(orderedKey)) {
-          candidates.set(orderedKey, {
+        if (!candidates.has(candidateKey)) {
+          candidates.set(candidateKey, {
             teamIds: proposedTeam,
             position,
             baseHeroId,
