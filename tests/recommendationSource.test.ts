@@ -1,5 +1,6 @@
 
 import { describe, expect, it } from "vitest";
+import { DEFAULT_ENGINE_SETTINGS } from "../src/engine/engineSettings";
 
 import {
   findHistoricalAlternativeRecommendation,
@@ -147,6 +148,49 @@ describe("historical recommendation sources", () => {
     expect(result?.team.map((hero) => hero.id).sort()).toEqual(
       [...alternative].sort()
     );
+  });
+
+  it("keeps a 1/1 exact-match win despite losses against unrelated enemy formations", () => {
+    const previousMinBattles = DEFAULT_ENGINE_SETTINGS.advanced.historicalTeamMinBattles;
+    const previousMinWinRate = DEFAULT_ENGINE_SETTINGS.advanced.historicalTeamMinWinRate;
+    Object.assign(DEFAULT_ENGINE_SETTINGS.advanced, {
+      historicalTeamMinBattles: 3,
+      historicalTeamMinWinRate: 75,
+    });
+
+    try {
+      const unrelatedEnemyA = [
+        "unrelated-a1",
+        "unrelated-a2",
+        "unrelated-a3",
+        "unrelated-a4",
+        "unrelated-a5",
+      ];
+      const unrelatedEnemyB = [
+        "unrelated-b1",
+        "unrelated-b2",
+        "unrelated-b3",
+        "unrelated-b4",
+        "unrelated-b5",
+      ];
+      const heroes = uniqueHeroes(heroesFor(target), heroesFor(recommended));
+
+      const result = recommendTeamWithSource(target, heroes, [
+        combat(recommended, target, true),
+        combat(recommended, unrelatedEnemyA, false),
+        combat(recommended, unrelatedEnemyB, false),
+      ]);
+
+      expect(result.source).toBe("exact-history");
+      expect(result.team.map((hero) => hero.id).sort()).toEqual(
+        [...recommended].sort()
+      );
+    } finally {
+      Object.assign(DEFAULT_ENGINE_SETTINGS.advanced, {
+        historicalTeamMinBattles: previousMinBattles,
+        historicalTeamMinWinRate: previousMinWinRate,
+      });
+    }
   });
 
   it("rejects an under-threshold similar-history team", () => {
