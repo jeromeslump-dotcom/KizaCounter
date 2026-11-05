@@ -361,4 +361,76 @@ describe("historical recommendation sources", () => {
       [...badAlternative].sort()
     );
   });
+
+  it("finds a second exact-history team when all alternatives are below the minimum sample size", () => {
+    const previousMinBattles =
+      DEFAULT_ENGINE_SETTINGS.advanced.historicalTeamMinBattles;
+    const previousMinWinRate =
+      DEFAULT_ENGINE_SETTINGS.advanced.historicalTeamMinWinRate;
+
+    Object.assign(DEFAULT_ENGINE_SETTINGS.advanced, {
+      historicalTeamMinBattles: 3,
+      historicalTeamMinWinRate: 75,
+    });
+
+    try {
+      const primary = [
+        "primary-1",
+        "primary-2",
+        "primary-3",
+        "primary-4",
+        "primary-5",
+      ];
+      const oneWinOneLoss = [
+        "mixed-1",
+        "mixed-2",
+        "mixed-3",
+        "mixed-4",
+        "mixed-5",
+      ];
+      const oneLossA = ["loss-a1", "loss-a2", "loss-a3", "loss-a4", "loss-a5"];
+      const oneLossB = ["loss-b1", "loss-b2", "loss-b3", "loss-b4", "loss-b5"];
+      const oneLossC = ["loss-c1", "loss-c2", "loss-c3", "loss-c4", "loss-c5"];
+      const heroes = uniqueHeroes(
+        heroesFor(target),
+        heroesFor(primary),
+        heroesFor(oneWinOneLoss),
+        heroesFor(oneLossA),
+        heroesFor(oneLossB),
+        heroesFor(oneLossC)
+      );
+
+      const result = findHistoricalAlternativeRecommendation(
+        target,
+        heroes,
+        heroes,
+        [
+          ...repeatedCombats(5, primary, target, true),
+          combat(oneWinOneLoss, target, true),
+          combat(oneWinOneLoss, target, false),
+          combat(oneLossA, target, false),
+          combat(oneLossB, target, false),
+          combat(oneLossC, target, false),
+        ],
+        primary
+      );
+
+      expect(result).not.toBeNull();
+      expect(result?.team.map((hero) => hero.id).sort()).not.toEqual(
+        [...primary].sort()
+      );
+      const alternativeKeys = [oneWinOneLoss, oneLossA, oneLossB, oneLossC].map(
+        (team) => team.slice().sort().join("|")
+      );
+      expect(alternativeKeys).toContain(
+        result?.team.map((hero) => hero.id).sort().join("|")
+      );
+    } finally {
+      Object.assign(DEFAULT_ENGINE_SETTINGS.advanced, {
+        historicalTeamMinBattles: previousMinBattles,
+        historicalTeamMinWinRate: previousMinWinRate,
+      });
+    }
+  });
+
 });
