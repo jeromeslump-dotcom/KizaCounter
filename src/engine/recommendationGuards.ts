@@ -15,8 +15,7 @@ function isHistoricalStatsEligible(battles: number, wins: number): boolean {
   // Once the sample reaches the threshold, enforce the configured win rate.
   return (
     battles > 0 &&
-    (battles < historicalTeamMinBattles ||
-      winRate >= historicalTeamMinWinRate)
+    (battles < historicalTeamMinBattles || winRate >= historicalTeamMinWinRate)
   );
 }
 

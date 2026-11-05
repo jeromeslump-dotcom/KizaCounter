@@ -16,7 +16,11 @@ export default function HeroFullBody({
   loading = "lazy",
 }: HeroFullBodyProps) {
   return (
-    <div className={["hero-render hero-render-full-body min-w-0", className].join(" ")}>
+    <div
+      className={["hero-render hero-render-full-body min-w-0", className].join(
+        " "
+      )}
+    >
       <img
         src={`/heroes/${hero.id}.png`}
         alt={hero.name}

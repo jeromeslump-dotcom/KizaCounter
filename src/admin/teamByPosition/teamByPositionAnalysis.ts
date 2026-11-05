@@ -123,7 +123,11 @@ export function buildNeverTestedTeamCandidates(
 
       const teamIds = [...combat.my_heroes];
 
-      for (let candidateRank = 0; candidateRank < baseRank; candidateRank += 1) {
+      for (
+        let candidateRank = 0;
+        candidateRank < baseRank;
+        candidateRank += 1
+      ) {
         const ranking = rankings[position][candidateRank];
         if (!ranking || teamIds.includes(ranking.heroId)) continue;
 

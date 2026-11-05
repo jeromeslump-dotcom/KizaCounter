@@ -48,7 +48,7 @@ export default function AnalysisHelpEnemySelection({
           heroes={selectedEnemies}
           selectedIds={enemyIds}
           enemy
-/>
+        />
       </div>
       <div className="mt-4">
         <HeroGrid

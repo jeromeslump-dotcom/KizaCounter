@@ -200,10 +200,12 @@ export function findBestEnabledCore4HistoryTeam(
       if (!isUsableRecommendationTeam(team, combats, enemyIds)) continue;
 
       const distinctStats = summarizeDistinctFormationResults(
-        [...rankedCore.core.formationResults.entries()].map(([formationKey, stats]) => ({
-          formationKey,
-          won: stats.wins >= stats.losses,
-        }))
+        [...rankedCore.core.formationResults.entries()].map(
+          ([formationKey, stats]) => ({
+            formationKey,
+            won: stats.wins >= stats.losses,
+          })
+        )
       );
       onSelectedCore?.(distinctStats);
       return team;

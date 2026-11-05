@@ -44,8 +44,9 @@ export default function AuthPanel({
   const [showTeamCreator, setShowTeamCreator] = useState(false);
   const [teamByPositionInitialEnemyIds, setTeamByPositionInitialEnemyIds] =
     useState<string[]>([]);
-  const [teamCreatorInitialEnemyIds, setTeamCreatorInitialEnemyIds] =
-    useState<string[]>([]);
+  const [teamCreatorInitialEnemyIds, setTeamCreatorInitialEnemyIds] = useState<
+    string[]
+  >([]);
   const [adminCombats, setAdminCombats] = useState<Combat[]>([]);
 
   useEffect(() => {
@@ -80,7 +81,10 @@ export default function AuthPanel({
     document.addEventListener("admin:team-creator-d", openTeamCreatorD);
 
     return () => {
-      document.removeEventListener("admin:team-by-position", openTeamByPosition);
+      document.removeEventListener(
+        "admin:team-by-position",
+        openTeamByPosition
+      );
       document.removeEventListener("admin:team-creator-d", openTeamCreatorD);
     };
   }, []);

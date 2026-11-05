@@ -66,7 +66,9 @@ export default function TeamByPosition({
 }: TeamByPositionProps) {
   const [step, setStep] = useState(1);
   const [position, setPosition] = useState(0);
-  const [teamOrders, setTeamOrders] = useState<Map<string, string[]>>(new Map());
+  const [teamOrders, setTeamOrders] = useState<Map<string, string[]>>(
+    new Map()
+  );
   const [teamOrdersLoading, setTeamOrdersLoading] = useState(true);
   const [enemyIds, setEnemyIds] = useState<string[]>([]);
   const [activeClass, setActiveClass] = useState<HeroClassFilter>("ALL");
@@ -128,8 +130,7 @@ export default function TeamByPosition({
   }, [initialEnemyIds, open]);
 
   const orderedCombats = useMemo(
-    () =>
-      teamOrdersLoading ? [] : applyKnownTeamOrders(combats, teamOrders),
+    () => (teamOrdersLoading ? [] : applyKnownTeamOrders(combats, teamOrders)),
     [combats, teamOrders, teamOrdersLoading]
   );
 
@@ -170,11 +171,10 @@ export default function TeamByPosition({
   // Présentation uniquement : la génération des équipes candidates reste inchangée.
   const candidates = useMemo(
     () =>
-      buildNeverTestedTeamCandidates(
-        matchingOrderedCombats,
-        analysis.rankings
-      )
-        .filter((candidate) => !recordedTeamKeys.has(teamKey(candidate.teamIds)))
+      buildNeverTestedTeamCandidates(matchingOrderedCombats, analysis.rankings)
+        .filter(
+          (candidate) => !recordedTeamKeys.has(teamKey(candidate.teamIds))
+        )
         .map((candidate) => {
           const enemyFormationsWon = new Set(
             orderedCombats
@@ -450,8 +450,8 @@ export default function TeamByPosition({
                             {ranking.comparisons} comparaison
                             {ranking.comparisons > 1 ? "s" : ""} ·{" "}
                             {ranking.wins} victoire
-                            {ranking.wins > 1 ? "s" : ""} ·{" "}
-                            {ranking.losses} défaite
+                            {ranking.wins > 1 ? "s" : ""} · {ranking.losses}{" "}
+                            défaite
                             {ranking.losses > 1 ? "s" : ""}
                           </div>
                         </div>
@@ -559,11 +559,16 @@ export default function TeamByPosition({
                       >
                         <div className="mb-4 flex items-center justify-between gap-3">
                           <h4 className="ui-text-primary text-sm font-black">
-                            #{index + 1} — 🏆 {candidate.enemyFormationsWon} formation{candidate.enemyFormationsWon !== 1 ? "s" : ""} battue{candidate.enemyFormationsWon !== 1 ? "s" : ""}
+                            #{index + 1} — 🏆 {candidate.enemyFormationsWon}{" "}
+                            formation
+                            {candidate.enemyFormationsWon !== 1 ? "s" : ""}{" "}
+                            battue
+                            {candidate.enemyFormationsWon !== 1 ? "s" : ""}
                           </h4>
                           <div className="flex flex-wrap items-center justify-end gap-2">
                             <span className="rounded-full border border-[var(--ui-theme-primary)] px-2 py-1 text-[10px] font-black text-[var(--ui-theme-primary)]">
-                              🔥 {candidate.sharedEnemyHeroCount}/5 héros communs
+                              🔥 {candidate.sharedEnemyHeroCount}/5 héros
+                              communs
                             </span>
                             <span className="rounded-full border border-[var(--ui-theme-primary)] px-2 py-1 text-[10px] font-black text-[var(--ui-theme-primary)]">
                               Position {candidate.position + 1}
@@ -578,11 +583,12 @@ export default function TeamByPosition({
                               : "ui-danger mb-4 rounded-lg border p-3 text-xs"
                           }
                         >
-                          {candidate.baseWon ? "✅ Victoire" : "❌ Défaite"} avec{" "}
-                          <strong>{heroName(candidate.baseHeroId)}</strong> en
-                          position {candidate.position + 1}
+                          {candidate.baseWon ? "✅ Victoire" : "❌ Défaite"}{" "}
+                          avec <strong>{heroName(candidate.baseHeroId)}</strong>{" "}
+                          en position {candidate.position + 1}
                           <span className="ui-text-muted">
-                            {" "}· variante potentiellement meilleure
+                            {" "}
+                            · variante potentiellement meilleure
                           </span>
                         </div>
 

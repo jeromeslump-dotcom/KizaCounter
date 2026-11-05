@@ -60,7 +60,7 @@ export default function AnalysisHelpResults({
           heroes={selectedEnemies}
           selectedIds={enemyIds}
           enemy
-/>
+        />
       </div>
 
       <div className="ui-panel-alt mt-5 rounded-2xl border p-4 sm:p-5">

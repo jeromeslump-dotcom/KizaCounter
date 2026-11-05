@@ -51,7 +51,10 @@ export function summarizeDistinctFormationResults(
 ): DistinctFormationResult {
   const byFormation = new Map<string, { wins: number; losses: number }>();
   for (const result of results) {
-    const stats = byFormation.get(result.formationKey) ?? { wins: 0, losses: 0 };
+    const stats = byFormation.get(result.formationKey) ?? {
+      wins: 0,
+      losses: 0,
+    };
     if (result.won) stats.wins++;
     else stats.losses++;
     byFormation.set(result.formationKey, stats);
@@ -77,10 +80,11 @@ export function evaluateExactTeamHistory(
     return { wins: 0, losses: 0, battles: 0, winRate: 0 };
   const enemyKey = teamKey(enemyIds);
   const teamKeyValue = teamKey(normalizedTeam);
-  const matchingCombats = combats.filter((combat) =>
-    teamKey(combat.enemy_heroes ?? []) === enemyKey &&
-    teamKey(combat.my_heroes ?? []) === teamKeyValue &&
-    uniqueIds(combat.enemy_heroes ?? []).length === TEAM_SIZE
+  const matchingCombats = combats.filter(
+    (combat) =>
+      teamKey(combat.enemy_heroes ?? []) === enemyKey &&
+      teamKey(combat.my_heroes ?? []) === teamKeyValue &&
+      uniqueIds(combat.enemy_heroes ?? []).length === TEAM_SIZE
   );
   const wins = matchingCombats.filter((combat) => combat.won).length;
   const battles = matchingCombats.length;
@@ -119,12 +123,16 @@ export function evaluateTeamHistory(teamIds: string[], combats: Combat[]) {
     return { wins: 0, losses: 0, battles: 0, winRate: 0 };
   const teamKeyValue = teamKey(team);
   const results = combats
-    .filter((combat) =>
-      uniqueIds(combat.my_heroes ?? []).length === TEAM_SIZE &&
-      teamKey(combat.my_heroes ?? []) === teamKeyValue &&
-      uniqueIds(combat.enemy_heroes ?? []).length === TEAM_SIZE
+    .filter(
+      (combat) =>
+        uniqueIds(combat.my_heroes ?? []).length === TEAM_SIZE &&
+        teamKey(combat.my_heroes ?? []) === teamKeyValue &&
+        uniqueIds(combat.enemy_heroes ?? []).length === TEAM_SIZE
     )
-    .map((combat) => ({ formationKey: teamKey(combat.enemy_heroes), won: combat.won }));
+    .map((combat) => ({
+      formationKey: teamKey(combat.enemy_heroes),
+      won: combat.won,
+    }));
   return summarizeDistinctFormationResults(results);
 }
 
@@ -229,5 +237,8 @@ export function evaluateEnemyClassHistory(
     if (historicalClassKey !== targetClassKey) continue;
     results.push({ formationKey: historicalEnemyKey, won: combat.won });
   }
-  return { ...summarizeDistinctFormationResults(results), classKey: targetClassKey };
+  return {
+    ...summarizeDistinctFormationResults(results),
+    classKey: targetClassKey,
+  };
 }

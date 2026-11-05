@@ -16,7 +16,11 @@ export default function HeroPortrait({
   loading = "lazy",
 }: HeroPortraitProps) {
   return (
-    <div className={["hero-render hero-render-portrait min-w-0", className].join(" ")}>
+    <div
+      className={["hero-render hero-render-portrait min-w-0", className].join(
+        " "
+      )}
+    >
       <img
         src={`/heroes_portrait/${hero.id}.png`}
         alt={hero.name}

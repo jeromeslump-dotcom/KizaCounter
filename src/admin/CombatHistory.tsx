@@ -304,7 +304,9 @@ export default function CombatHistory({
                 <button
                   type="button"
                   onClick={() => setShowOnlyOrderToEdit((active) => !active)}
-                  disabled={!teamOrdersLoading && !combatsWithOrderToEdit.length}
+                  disabled={
+                    !teamOrdersLoading && !combatsWithOrderToEdit.length
+                  }
                   aria-pressed={showOnlyOrderToEdit}
                   title={
                     teamOrdersLoading
@@ -319,7 +321,9 @@ export default function CombatHistory({
                     backgroundColor: showOnlyOrderToEdit
                       ? "var(--ui-theme)"
                       : "rgb(from var(--ui-theme) r g b / 0.12)",
-                    color: showOnlyOrderToEdit ? "#fff" : "var(--ui-text-primary)",
+                    color: showOnlyOrderToEdit
+                      ? "#fff"
+                      : "var(--ui-text-primary)",
                   }}
                 >
                   {teamOrdersLoading
@@ -445,9 +449,11 @@ export default function CombatHistory({
                         </div>
 
                         <div className="grid grid-cols-5 gap-1 sm:gap-2">
-                          {getDisplayedOrder(combat.enemy_heroes).map((id, i) => (
-                            <HeroPortrait key={`${id}-${i}`} heroId={id} />
-                          ))}
+                          {getDisplayedOrder(combat.enemy_heroes).map(
+                            (id, i) => (
+                              <HeroPortrait key={`${id}-${i}`} heroId={id} />
+                            )
+                          )}
                         </div>
                       </div>
 
