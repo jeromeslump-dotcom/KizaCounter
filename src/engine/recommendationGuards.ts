@@ -93,9 +93,12 @@ export function isUsableRecommendationTeam(
   combats: Combat[],
   enemyIds: string[]
 ): boolean {
+  // Historical eligibility is evaluated by the recommendation source
+  // (exact matchup, defeat history, or its corresponding formation scope).
+  // Do not apply a second all-opponents check here: unrelated defeats must
+  // not veto a team that is still eligible against the selected enemy team.
   return (
     team.length === TEAM_SIZE &&
-    !isHistoricallyWinlessTeam(team, combats) &&
     !isHistoricallyWinlessAgainstEnemy(team, enemyIds, combats)
   );
 }
