@@ -193,7 +193,7 @@ describe("historical recommendation sources", () => {
     }
   });
 
-  it("rejects an under-threshold similar-history team", () => {
+  it("keeps similar-history teams with fewer than three combats against one exact enemy formation", () => {
     const similarEnemy = [
       ...target.slice(0, 3),
       "other-enemy-4",
@@ -216,15 +216,17 @@ describe("historical recommendation sources", () => {
       target,
       heroes,
       [
-        ...repeatedCombats(2, candidate, similarEnemy, true),
-        ...repeatedCombats(2, candidate, similarEnemy, false),
+        combat(candidate, similarEnemy, true),
+        combat(candidate, similarEnemy, false),
       ]
     );
 
-    expect(result.team).toEqual([]);
+    expect(result.team.map((hero) => hero.id).sort()).toEqual(
+      [...candidate].sort()
+    );
   });
 
-  it("rejects an under-threshold class-history team", () => {
+  it("keeps class-history teams with fewer than three combats against one exact enemy formation", () => {
     const classMatchedEnemy = [
       "class-1",
       "class-2",
@@ -250,15 +252,17 @@ describe("historical recommendation sources", () => {
       target,
       heroes,
       [
-        ...repeatedCombats(2, candidate, classMatchedEnemy, true),
-        ...repeatedCombats(2, candidate, classMatchedEnemy, false),
+        combat(candidate, classMatchedEnemy, true),
+        combat(candidate, classMatchedEnemy, false),
       ]
     );
 
-    expect(result.team).toEqual([]);
+    expect(result.team.map((hero) => hero.id).sort()).toEqual(
+      [...candidate].sort()
+    );
   });
 
-  it("rejects an under-threshold fallback team", () => {
+  it("keeps fallback teams with fewer than three combats against one exact enemy formation", () => {
     const candidate = [
       "candidate-1",
       "candidate-2",
@@ -279,12 +283,14 @@ describe("historical recommendation sources", () => {
       target,
       heroes,
       [
-        ...repeatedCombats(2, candidate, otherEnemy, true),
-        ...repeatedCombats(2, candidate, otherEnemy, false),
+        combat(candidate, otherEnemy, true),
+        combat(candidate, otherEnemy, false),
       ]
     );
 
-    expect(result.team).toEqual([]);
+    expect(result.team.map((hero) => hero.id).sort()).toEqual(
+      [...candidate].sort()
+    );
   });
 
   it("rejects a 0% team once its history reaches the minimum sample size", () => {
