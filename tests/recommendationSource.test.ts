@@ -193,7 +193,7 @@ describe("historical recommendation sources", () => {
     }
   });
 
-  it("rejects an under-threshold similar-history team", () => {
+  it("keeps similar-history teams with fewer than three combats against one exact enemy formation", () => {
     const similarEnemy = [
       ...target.slice(0, 3),
       "other-enemy-4",
@@ -216,15 +216,17 @@ describe("historical recommendation sources", () => {
       target,
       heroes,
       [
-        ...repeatedCombats(2, candidate, similarEnemy, true),
-        ...repeatedCombats(2, candidate, similarEnemy, false),
+        combat(candidate, similarEnemy, true),
+        combat(candidate, similarEnemy, false),
       ]
     );
 
-    expect(result.team).toEqual([]);
+    expect(result.team.map((hero) => hero.id).sort()).toEqual(
+      [...candidate].sort()
+    );
   });
 
-  it("rejects an under-threshold class-history team", () => {
+  it("keeps class-history teams with fewer than three combats against one exact enemy formation", () => {
     const classMatchedEnemy = [
       "class-1",
       "class-2",
@@ -250,15 +252,17 @@ describe("historical recommendation sources", () => {
       target,
       heroes,
       [
-        ...repeatedCombats(2, candidate, classMatchedEnemy, true),
-        ...repeatedCombats(2, candidate, classMatchedEnemy, false),
+        combat(candidate, classMatchedEnemy, true),
+        combat(candidate, classMatchedEnemy, false),
       ]
     );
 
-    expect(result.team).toEqual([]);
+    expect(result.team.map((hero) => hero.id).sort()).toEqual(
+      [...candidate].sort()
+    );
   });
 
-  it("rejects an under-threshold fallback team", () => {
+  it("keeps fallback teams with fewer than three combats against one exact enemy formation", () => {
     const candidate = [
       "candidate-1",
       "candidate-2",
@@ -279,12 +283,14 @@ describe("historical recommendation sources", () => {
       target,
       heroes,
       [
-        ...repeatedCombats(2, candidate, otherEnemy, true),
-        ...repeatedCombats(2, candidate, otherEnemy, false),
+        combat(candidate, otherEnemy, true),
+        combat(candidate, otherEnemy, false),
       ]
     );
 
-    expect(result.team).toEqual([]);
+    expect(result.team.map((hero) => hero.id).sort()).toEqual(
+      [...candidate].sort()
+    );
   });
 
   it("rejects a 0% team once its history reaches the minimum sample size", () => {
@@ -361,4 +367,76 @@ describe("historical recommendation sources", () => {
       [...badAlternative].sort()
     );
   });
+
+  it("finds a second exact-history team when all alternatives are below the minimum sample size", () => {
+    const previousMinBattles =
+      DEFAULT_ENGINE_SETTINGS.advanced.historicalTeamMinBattles;
+    const previousMinWinRate =
+      DEFAULT_ENGINE_SETTINGS.advanced.historicalTeamMinWinRate;
+
+    Object.assign(DEFAULT_ENGINE_SETTINGS.advanced, {
+      historicalTeamMinBattles: 3,
+      historicalTeamMinWinRate: 75,
+    });
+
+    try {
+      const primary = [
+        "primary-1",
+        "primary-2",
+        "primary-3",
+        "primary-4",
+        "primary-5",
+      ];
+      const oneWinOneLoss = [
+        "mixed-1",
+        "mixed-2",
+        "mixed-3",
+        "mixed-4",
+        "mixed-5",
+      ];
+      const oneLossA = ["loss-a1", "loss-a2", "loss-a3", "loss-a4", "loss-a5"];
+      const oneLossB = ["loss-b1", "loss-b2", "loss-b3", "loss-b4", "loss-b5"];
+      const oneLossC = ["loss-c1", "loss-c2", "loss-c3", "loss-c4", "loss-c5"];
+      const heroes = uniqueHeroes(
+        heroesFor(target),
+        heroesFor(primary),
+        heroesFor(oneWinOneLoss),
+        heroesFor(oneLossA),
+        heroesFor(oneLossB),
+        heroesFor(oneLossC)
+      );
+
+      const result = findHistoricalAlternativeRecommendation(
+        target,
+        heroes,
+        heroes,
+        [
+          ...repeatedCombats(5, primary, target, true),
+          combat(oneWinOneLoss, target, true),
+          combat(oneWinOneLoss, target, false),
+          combat(oneLossA, target, false),
+          combat(oneLossB, target, false),
+          combat(oneLossC, target, false),
+        ],
+        primary
+      );
+
+      expect(result).not.toBeNull();
+      expect(result?.team.map((hero) => hero.id).sort()).not.toEqual(
+        [...primary].sort()
+      );
+      const alternativeKeys = [oneWinOneLoss, oneLossA, oneLossB, oneLossC].map(
+        (team) => team.slice().sort().join("|")
+      );
+      expect(alternativeKeys).toContain(
+        result?.team.map((hero) => hero.id).sort().join("|")
+      );
+    } finally {
+      Object.assign(DEFAULT_ENGINE_SETTINGS.advanced, {
+        historicalTeamMinBattles: previousMinBattles,
+        historicalTeamMinWinRate: previousMinWinRate,
+      });
+    }
+  });
+
 });
