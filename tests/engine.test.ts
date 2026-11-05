@@ -133,25 +133,33 @@ describe("recommendation engine history", () => {
       "INT",
     ];
 
+    const historicalEnemyFormations = Array.from(
+      { length: 15 },
+      (_, formationIndex) =>
+        historicalEnemy.map(
+          (_, heroIndex) => `history-${formationIndex}-${heroIndex}`
+        )
+    );
+
     const heroes = [
       ...targetEnemy.map((id, index) =>
         hero(id, targetClasses[index])
       ),
-      ...historicalEnemy.map((id, index) =>
-        hero(id, targetClasses[index])
+      ...historicalEnemyFormations.flatMap((formation) =>
+        formation.map((id, index) => hero(id, targetClasses[index]))
       ),
       ...teamA.map((id) => hero(id, "STR")),
       ...teamB.map((id) => hero(id, "AGI")),
     ];
 
     const combats: Combat[] = [
-      combat(teamA, true, historicalEnemy),
-      combat(teamA, true, historicalEnemy),
-      ...Array.from({ length: 13 }, () =>
-        combat(teamB, true, historicalEnemy)
+      combat(teamA, true, historicalEnemyFormations[0]),
+      combat(teamA, true, historicalEnemyFormations[1]),
+      ...historicalEnemyFormations.slice(0, 13).map((formation) =>
+        combat(teamB, true, formation)
       ),
-      ...Array.from({ length: 2 }, () =>
-        combat(teamB, false, historicalEnemy)
+      ...historicalEnemyFormations.slice(13).map((formation) =>
+        combat(teamB, false, formation)
       ),
     ];
 
