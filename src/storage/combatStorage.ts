@@ -4,6 +4,7 @@ import { supabase } from "./supabase";
 import {
   COMBAT_FULL_SYNC_INTERVAL_MS,
   getCombatCacheSnapshot,
+  getCombatPageCursor,
   isFullCombatSyncDue,
   removeCachedCombat,
   replaceCombatCache,
@@ -130,13 +131,6 @@ function getNewestCursor(
 interface FullCombatSnapshot {
   combats: Combat[];
   cursorCreatedAt: string;
-}
-
-export function getCombatPageCursor(page: Combat[]): CombatCursor | null {
-  const last = page[page.length - 1];
-  return last?.created_at && last.id
-    ? { created_at: last.created_at, id: last.id }
-    : null;
 }
 
 function cursorFilter(cursor: CombatCursor, direction: "older" | "newer"): string {
