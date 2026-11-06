@@ -83,10 +83,7 @@ export default function App() {
     async function refreshHistory(force = false) {
       const now = Date.now();
 
-      if (
-        syncing ||
-        (!force && now - lastSyncAttemptAt < 60 * 1000)
-      ) {
+      if (syncing || (!force && now - lastSyncAttemptAt < 60 * 1000)) {
         return;
       }
 
