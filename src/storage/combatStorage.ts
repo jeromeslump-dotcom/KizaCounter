@@ -1,6 +1,14 @@
 import { HEROES } from "../data/heroes";
 import type { Combat } from "../types";
 import { supabase } from "./supabase";
+import {
+  getCombatCacheSnapshot,
+  removeCachedCombat,
+  replaceCombatCache,
+  sortCombats,
+  upsertCachedCombats,
+  type CombatSyncMetadata,
+} from "./combatCache";
 
 const COMBAT_SELECT = `
   id, user_id, enemy_heroes, my_heroes, won, created_at, status,
@@ -75,12 +83,60 @@ function enrichCombat(
 }
 
 // ============================================================
-// CHARGER LES COMBATS
+// CHARGEMENT ET SYNCHRONISATION DE L'HISTORIQUE
 // ============================================================
 
 const COMBAT_PAGE_SIZE = 1000;
+export const COMBAT_FULL_SYNC_INTERVAL_MS = 24 * 60 * 60 * 1000;
 
-export async function loadCombats(): Promise<Combat[]> {
+interface CombatCursor {
+  created_at: string;
+  id: string;
+}
+
+export function isFullCombatSyncDue(
+  lastFullSyncAt: string | null | undefined,
+  now = Date.now()
+): boolean {
+  if (!lastFullSyncAt) return true;
+
+  const lastSyncTime = Date.parse(lastFullSyncAt);
+  return (
+    !Number.isFinite(lastSyncTime) ||
+    now < lastSyncTime ||
+    now - lastSyncTime >= COMBAT_FULL_SYNC_INTERVAL_MS
+  );
+}
+
+function isAfterCursor(combat: Combat, cursor: CombatCursor): boolean {
+  const createdAt = combat.created_at ?? "";
+  return (
+    createdAt > cursor.created_at ||
+    (createdAt === cursor.created_at && (combat.id ?? "") > cursor.id)
+  );
+}
+
+function getNewestCursor(
+  combats: Combat[],
+  fallback: CombatCursor
+): CombatCursor {
+  let newest = fallback;
+
+  for (const combat of combats) {
+    if (!combat.created_at || !combat.id) continue;
+
+    if (
+      combat.created_at > newest.created_at ||
+      (combat.created_at === newest.created_at && combat.id > newest.id)
+    ) {
+      newest = { created_at: combat.created_at, id: combat.id };
+    }
+  }
+
+  return newest;
+}
+
+async function fetchActiveCombats(): Promise<Combat[]> {
   const combats: Combat[] = [];
 
   for (let from = 0; ; from += COMBAT_PAGE_SIZE) {
@@ -89,22 +145,141 @@ export async function loadCombats(): Promise<Combat[]> {
       .select(COMBAT_SELECT)
       .eq("status", "active")
       .order("created_at", { ascending: false })
+      .order("id", { ascending: false })
       .range(from, from + COMBAT_PAGE_SIZE - 1);
 
     if (error) {
-      console.error("Erreur chargement combats :", error);
+      console.error("Erreur chargement complet des combats :", error);
       throw error;
     }
 
     const page = (data ?? []) as Combat[];
     combats.push(...page);
 
-    if (page.length < COMBAT_PAGE_SIZE) {
-      break;
-    }
+    if (page.length < COMBAT_PAGE_SIZE) break;
   }
 
-  return combats;
+  return sortCombats(combats);
+}
+
+/** Téléchargement complet, utilisé à la première synchronisation et chaque jour. */
+export async function loadCombats(): Promise<Combat[]> {
+  return fetchActiveCombats();
+}
+
+async function fetchCombatsAfter(cursor: CombatCursor): Promise<Combat[]> {
+  const combats: Combat[] = [];
+
+  for (let from = 0; ; from += COMBAT_PAGE_SIZE) {
+    const { data, error } = await supabase
+      .from("combats")
+      .select(COMBAT_SELECT)
+      .eq("status", "active")
+      .gte("created_at", cursor.created_at)
+      .order("created_at", { ascending: true })
+      .order("id", { ascending: true })
+      .range(from, from + COMBAT_PAGE_SIZE - 1);
+
+    if (error) {
+      console.error("Erreur synchronisation des nouveaux combats :", error);
+      throw error;
+    }
+
+    const page = (data ?? []) as Combat[];
+    combats.push(...page);
+
+    if (page.length < COMBAT_PAGE_SIZE) break;
+  }
+
+  return sortCombats(combats.filter((combat) => isAfterCursor(combat, cursor)));
+}
+
+/**
+ * Renvoie l'historique complet depuis IndexedDB, puis ne récupère que les
+ * nouveaux combats. Une réconciliation complète quotidienne récupère aussi
+ * les suppressions et modifications invisibles via les règles RLS.
+ */
+export async function syncCombats(): Promise<Combat[]> {
+  let snapshot;
+
+  try {
+    snapshot = await getCombatCacheSnapshot();
+  } catch (error) {
+    console.warn(
+      "Cache IndexedDB indisponible, chargement complet de secours :",
+      error
+    );
+    return loadCombats();
+  }
+
+  const now = new Date().toISOString();
+
+  if (!snapshot || isFullCombatSyncDue(snapshot.metadata.lastFullSyncAt)) {
+    const combats = await loadCombats();
+    const cursor = getNewestCursor(combats, {
+      created_at: now,
+      id: "",
+    });
+    const metadata: CombatSyncMetadata = {
+      key: "sync",
+      lastFullSyncAt: now,
+      lastIncrementalSyncAt: now,
+      cursorCreatedAt: cursor.created_at,
+      cursorId: cursor.id,
+    };
+
+    try {
+      await replaceCombatCache(combats, metadata);
+    } catch (error) {
+      console.warn("Impossible d'enregistrer le cache des combats :", error);
+    }
+
+    return combats;
+  }
+
+  const cursor: CombatCursor = {
+    created_at: snapshot.metadata.cursorCreatedAt,
+    id: snapshot.metadata.cursorId,
+  };
+
+  const newCombats = await fetchCombatsAfter(cursor);
+  const mergedById = new Map(
+    snapshot.combats
+      .filter((combat): combat is Combat & { id: string } => Boolean(combat.id))
+      .map((combat) => [combat.id, combat])
+  );
+
+  for (const combat of newCombats) {
+    if (combat.id) mergedById.set(combat.id, combat);
+  }
+
+  const mergedCombats = sortCombats([...mergedById.values()]);
+  const newestCursor = getNewestCursor(mergedCombats, cursor);
+  const metadata: CombatSyncMetadata = {
+    ...snapshot.metadata,
+    lastIncrementalSyncAt: now,
+    cursorCreatedAt: newestCursor.created_at,
+    cursorId: newestCursor.id,
+  };
+
+  try {
+    await upsertCachedCombats(newCombats);
+    // Les métadonnées sont enregistrées avec une transaction dédiée.
+    const currentCombats = await getCombatCacheSnapshot();
+    if (currentCombats) {
+      const updatedCombats = sortCombats([
+        ...currentCombats.combats.filter(
+          (combat) => !newCombats.some((newCombat) => newCombat.id === combat.id)
+        ),
+        ...newCombats,
+      ]);
+      await replaceCombatCache(updatedCombats, metadata);
+    }
+  } catch (error) {
+    console.warn("Impossible de mettre à jour le cache des combats :", error);
+  }
+
+  return mergedCombats;
 }
 
 // ============================================================
@@ -143,7 +318,15 @@ export async function addCombat(
     throw error;
   }
 
-  return data as Combat;
+  const savedCombat = data as Combat;
+
+  try {
+    await upsertCachedCombats([savedCombat]);
+  } catch (cacheError) {
+    console.warn("Impossible d'ajouter le combat au cache local :", cacheError);
+  }
+
+  return savedCombat;
 }
 
 // ============================================================
@@ -156,5 +339,11 @@ export async function deleteCombat(combatId: string): Promise<void> {
   if (error) {
     console.error("Erreur suppression combat :", error);
     throw error;
+  }
+
+  try {
+    await removeCachedCombat(combatId);
+  } catch (cacheError) {
+    console.warn("Impossible de retirer le combat du cache local :", cacheError);
   }
 }
