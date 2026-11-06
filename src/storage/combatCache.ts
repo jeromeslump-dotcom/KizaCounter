@@ -129,19 +129,29 @@ export async function replaceCombatCache(
   await completed;
 }
 
-export async function upsertCachedCombats(combats: Combat[]): Promise<void> {
+export async function upsertCachedCombats(
+  combats: Combat[],
+  metadata?: CombatSyncMetadata
+): Promise<void> {
   const identifiedCombats = combats.filter(
     (combat): combat is Combat & { id: string } => Boolean(combat.id)
   );
-  if (!identifiedCombats.length) return;
+  if (!identifiedCombats.length && !metadata) return;
 
+  const stores = metadata
+    ? [COMBATS_STORE, METADATA_STORE]
+    : [COMBATS_STORE];
   const database = await openDatabase();
-  const transaction = database.transaction(COMBATS_STORE, "readwrite");
+  const transaction = database.transaction(stores, "readwrite");
   const completed = transactionResult(transaction);
   const store = transaction.objectStore(COMBATS_STORE);
 
   for (const combat of identifiedCombats) {
     store.put(combat);
+  }
+
+  if (metadata) {
+    transaction.objectStore(METADATA_STORE).put(metadata);
   }
 
   await completed;
