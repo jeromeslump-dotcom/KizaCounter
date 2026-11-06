@@ -132,20 +132,37 @@ interface FullCombatSnapshot {
   cursorCreatedAt: string;
 }
 
+function getPageCursor(page: Combat[]): CombatCursor | null {
+  const last = page[page.length - 1];
+  return last?.created_at && last.id
+    ? { created_at: last.created_at, id: last.id }
+    : null;
+}
+
+function cursorFilter(cursor: CombatCursor, direction: "older" | "newer"): string {
+  const operator = direction === "older" ? "lt" : "gt";
+  return `created_at.${operator}.${cursor.created_at},and(created_at.eq.${cursor.created_at},id.${operator}.${cursor.id})`;
+}
+
 async function fetchActiveCombatSnapshot(): Promise<FullCombatSnapshot> {
   const combats: Combat[] = [];
-  // Si l'historique est vide, repartir de l'époque permet de détecter
-  // les premiers combats sans dépendre de l'horloge du navigateur.
   let cursorCreatedAt = "1970-01-01T00:00:00.000Z";
+  let pageCursor: CombatCursor | null = null;
 
-  for (let from = 0; ; from += COMBAT_PAGE_SIZE) {
-    const { data, error } = await supabase
+  while (true) {
+    let query = supabase
       .from("combats")
       .select(COMBAT_SELECT)
-      .eq("status", "active")
+      .eq("status", "active");
+
+    if (pageCursor) {
+      query = query.or(cursorFilter(pageCursor, "older"));
+    }
+
+    const { data, error } = await query
       .order("created_at", { ascending: false })
       .order("id", { ascending: false })
-      .range(from, from + COMBAT_PAGE_SIZE - 1);
+      .range(0, COMBAT_PAGE_SIZE - 1);
 
     if (error) {
       console.error("Erreur chargement complet des combats :", error);
@@ -154,23 +171,26 @@ async function fetchActiveCombatSnapshot(): Promise<FullCombatSnapshot> {
 
     const page = (data ?? []) as Combat[];
 
-    if (from === 0 && page[0]?.created_at) {
-      // Curseur serveur pris au début du téléchargement : les combats créés
-      // pendant les pages suivantes seront repris par la synchronisation.
+    if (!pageCursor && page[0]?.created_at) {
+      // Borne haute figée au début : les insertions plus récentes ne décalent
+      // pas les pages et seront récupérées par la synchronisation suivante.
       cursorCreatedAt = page[0].created_at;
     }
 
     combats.push(...page);
-
     if (page.length < COMBAT_PAGE_SIZE) break;
+
+    const nextCursor = getPageCursor(page);
+    if (!nextCursor || (pageCursor &&
+      nextCursor.created_at === pageCursor.created_at &&
+      nextCursor.id === pageCursor.id)) {
+      throw new Error("Pagination complète des combats bloquée.");
+    }
+    pageCursor = nextCursor;
   }
 
-  return {
-    combats: sortCombats(combats),
-    cursorCreatedAt,
-  };
+  return { combats: sortCombats(combats), cursorCreatedAt };
 }
-
 async function fetchActiveCombats(): Promise<Combat[]> {
   const snapshot = await fetchActiveCombatSnapshot();
   return snapshot.combats;
@@ -183,16 +203,26 @@ export async function loadCombats(): Promise<Combat[]> {
 
 async function fetchCombatsAfter(cursor: CombatCursor): Promise<Combat[]> {
   const combats: Combat[] = [];
+  let pageCursor: CombatCursor | null = null;
 
-  for (let from = 0; ; from += COMBAT_PAGE_SIZE) {
-    const { data, error } = await supabase
+  while (true) {
+    let query = supabase
       .from("combats")
       .select(COMBAT_SELECT)
-      .eq("status", "active")
-      .gte("created_at", cursor.created_at)
+      .eq("status", "active");
+
+    if (pageCursor) {
+      query = query.or(cursorFilter(pageCursor, "newer"));
+    } else if (cursor.id) {
+      query = query.or(cursorFilter(cursor, "newer"));
+    } else {
+      query = query.gte("created_at", cursor.created_at);
+    }
+
+    const { data, error } = await query
       .order("created_at", { ascending: true })
       .order("id", { ascending: true })
-      .range(from, from + COMBAT_PAGE_SIZE - 1);
+      .range(0, COMBAT_PAGE_SIZE - 1);
 
     if (error) {
       console.error("Erreur synchronisation des nouveaux combats :", error);
@@ -201,8 +231,15 @@ async function fetchCombatsAfter(cursor: CombatCursor): Promise<Combat[]> {
 
     const page = (data ?? []) as Combat[];
     combats.push(...page);
-
     if (page.length < COMBAT_PAGE_SIZE) break;
+
+    const nextCursor = getPageCursor(page);
+    if (!nextCursor || (pageCursor &&
+      nextCursor.created_at === pageCursor.created_at &&
+      nextCursor.id === pageCursor.id)) {
+      throw new Error("Pagination incrémentale des combats bloquée.");
+    }
+    pageCursor = nextCursor;
   }
 
   return sortCombats(combats.filter((combat) => isAfterCursor(combat, cursor)));
