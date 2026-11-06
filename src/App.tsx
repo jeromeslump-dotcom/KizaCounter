@@ -71,7 +71,7 @@ export default function App() {
   }, [theme]);
 
   useEffect(() => {
-    if (!session) {
+    if (!session || !profile?.active) {
       setCombats([]);
       return;
     }
@@ -142,7 +142,7 @@ export default function App() {
       );
       window.removeEventListener("focus", handleWindowFocus);
     };
-  }, [session]);
+  }, [session, profile?.active]);
 
   const heroUsage = useMemo(() => {
     const usage = calculateHeroUsage(combats, HEROES);
