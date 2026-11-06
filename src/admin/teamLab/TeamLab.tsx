@@ -1,17 +1,12 @@
-import { useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import TeamLabTabs from "./TeamLabTabs";
-import TheoreticalChart from "./TheoreticalChart";
-import ZoneChart from "./ZoneChart";
-import TeamGenerator from "./TeamGenerator";
-import TeamGeneratorCustomization from "./TeamGeneratorCustomization";
-import CounterGenerator from "./CounterGenerator";
-import {
-  completeZones,
-  METRICS,
-  theoreticalSummary,
-  type TeamLabMode,
-  zoneSummary,
-} from "./teamLabData";
+import type { TeamLabMode } from "./teamLabData";
+
+const TeamLabZonesView = lazy(() => import("./TeamLabZonesView"));
+const TeamLabTheoreticalView = lazy(() => import("./TeamLabTheoreticalView"));
+const TeamGenerator = lazy(() => import("./TeamGenerator"));
+const TeamGeneratorCustomization = lazy(() => import("./TeamGeneratorCustomization"));
+const CounterGenerator = lazy(() => import("./CounterGenerator"));
 
 interface TeamLabProps {
   open: boolean;
@@ -27,49 +22,31 @@ export default function TeamLab({
   enabledHeroIds,
 }: TeamLabProps) {
   const [mode, setMode] = useState<TeamLabMode>("combats");
-  const [requiredHeroIds, setRequiredHeroIds] = useState<Set<string>>(
-    () => new Set()
-  );
+  const [requiredHeroIds, setRequiredHeroIds] = useState<Set<string>>(() => new Set());
 
   useEffect(() => {
     setRequiredHeroIds((current) => {
-      const next = new Set(
-        [...current].filter((heroId) => enabledHeroIds.has(heroId))
-      );
-
-      if (next.size === current.size) return current;
-
-      return next;
+      const next = new Set([...current].filter((heroId) => enabledHeroIds.has(heroId)));
+      return next.size === current.size ? current : next;
     });
   }, [enabledHeroIds]);
 
   if (!open) return null;
 
   const stepLabel =
-    mode === "combats"
-      ? "1"
-      : mode === "formations"
-        ? "2"
-        : mode === "theoretical"
-          ? "3"
-          : mode === "customization"
-            ? "4"
-            : mode === "generator"
-              ? "5"
-              : "6";
+    mode === "combats" ? "1" :
+    mode === "formations" ? "2" :
+    mode === "theoretical" ? "3" :
+    mode === "customization" ? "4" :
+    mode === "generator" ? "5" : "6";
 
   const description =
-    mode === "combats"
-      ? "Répartition réelle des combats enregistrés dans les 20 zones"
-      : mode === "formations"
-        ? "Répartition réelle des formations enregistrées dans les 20 zones"
-        : mode === "theoretical"
-          ? "Distribution théorique des 5 461 512 formations possibles dans les 20 zones"
-          : mode === "customization"
-            ? "Sélection cumulative des héros obligatoires pour réduire le pool expérimental"
-            : mode === "generator"
-              ? "Génération d'équipes à partir de zones cibles et de relaxations progressives"
-              : "Recherche d'un contre à partir des combats réels et génération d'une formation jamais testée";
+    mode === "combats" ? "Répartition réelle des combats enregistrés dans les 20 zones" :
+    mode === "formations" ? "Répartition réelle des formations enregistrées dans les 20 zones" :
+    mode === "theoretical" ? "Distribution théorique des 5 461 512 formations possibles dans les 20 zones" :
+    mode === "customization" ? "Sélection cumulative des héros obligatoires pour réduire le pool expérimental" :
+    mode === "generator" ? "Génération d'équipes à partir de zones cibles et de relaxations progressives" :
+    "Recherche d'un contre à partir des combats réels et génération d'une formation jamais testée";
 
   return (
     <div
@@ -87,25 +64,12 @@ export default function TeamLab({
         <header className="ui-modal-header shrink-0 p-5 sm:p-6">
           <div className="ui-modal-header-inner">
             <div>
-              <h2
-                id="team-lab-title"
-                className="ui-text-primary text-xl font-black"
-              >
+              <h2 id="team-lab-title" className="ui-text-primary text-xl font-black">
                 🧪 Team Lab — Étape {stepLabel}
               </h2>
-              <p className="ui-text-secondary mt-1 text-xs sm:text-sm">
-                {description}
-              </p>
+              <p className="ui-text-secondary mt-1 text-xs sm:text-sm">{description}</p>
             </div>
-
-            <button
-              type="button"
-              onClick={onClose}
-              className="ui-button-icon"
-              aria-label="Fermer"
-            >
-              ✕
-            </button>
+            <button type="button" onClick={onClose} className="ui-button-icon" aria-label="Fermer">✕</button>
           </div>
         </header>
 
@@ -114,146 +78,28 @@ export default function TeamLab({
         </div>
 
         <div className="min-h-0 flex-1 overflow-y-auto p-4 sm:p-6">
-          {mode === "generator" ? (
-            <TeamGenerator
-              enabledHeroIds={enabledHeroIds}
-              requiredHeroIds={requiredHeroIds}
-            />
-          ) : mode === "counter" ? (
-            <CounterGenerator
-              enabledHeroIds={enabledHeroIds}
-              requiredHeroIds={requiredHeroIds}
-            />
-          ) : mode === "customization" ? (
-            <TeamGeneratorCustomization
-              enabledHeroIds={enabledHeroIds}
-              requiredHeroIds={requiredHeroIds}
-              onRequiredChange={setRequiredHeroIds}
-            />
-          ) : mode === "theoretical" ? (
-            <>
-              <div className="mb-5 flex flex-wrap items-center gap-4 text-xs">
-                <span className="flex items-center gap-2">
-                  <span
-                    className="h-3 w-3 rounded-full"
-                    style={{ background: "var(--ui-theme)" }}
-                    aria-hidden="true"
-                  />
-                  Distribution théorique
-                </span>
-                <span className="ui-text-muted">
-                  5 461 512 formations possibles
-                </span>
-                <span className="ui-text-muted">
-                  Source : theoretical-formations.json
-                </span>
-              </div>
-              <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
-                {METRICS.map(({ key, label, xLabel }) => (
-                  <section key={key} className="ui-card rounded-2xl border p-4">
-                    <div className="mb-2 flex items-center justify-between gap-3">
-                      <h3 className="ui-text-primary text-sm font-black">
-                        {label} — Z1 à Z20
-                      </h3>
-                      <span className="ui-text-muted text-[11px]">
-                        X → {xLabel}
-                      </span>
-                    </div>
-                    <TheoreticalChart
-                      metric={key}
-                      xLabel={xLabel}
-                      theoretical={theoreticalSummary[key]}
-                      observedRows={completeZones(zoneSummary[key] ?? [])}
-                    />
-                  </section>
-                ))}
-              </div>
-              <div className="ui-panel-alt mt-5 rounded-xl border p-4">
-                <p className="ui-text-secondary text-xs leading-relaxed">
-                  La courbe représente la distribution des 5 461 512 formations
-                  théoriquement possibles. Pour rester lisible avec les données
-                  historiques, son échelle verticale est normalisée sur le
-                  maximum observé entre WIN et LOSS dans les 20 zones. Les
-                  valeurs théoriques réelles restent disponibles au survol de
-                  chaque point.
-                </p>
-              </div>
-            </>
-          ) : (
-            <>
-              <div className="mb-5 flex flex-wrap items-center gap-4 text-xs">
-                <span className="flex items-center gap-2">
-                  <span
-                    className="h-3 w-3 rounded-sm"
-                    style={{ background: "var(--ui-success)" }}
-                    aria-hidden="true"
-                  />
-                  WIN
-                </span>
-                <span className="flex items-center gap-2">
-                  <span
-                    className="h-3 w-3 rounded-sm"
-                    style={{ background: "var(--ui-theme-secondary)" }}
-                    aria-hidden="true"
-                  />
-                  LOSS
-                </span>
-                <span className="ui-text-muted">
-                  WIN / LOSS ={" "}
-                  {mode === "combats"
-                    ? "combats enregistrés"
-                    : "formations enregistrées"}
-                </span>
-                <span className="ui-text-muted">
-                  Source : winning-patterns.json
-                </span>
-              </div>
-              <div className="grid grid-cols-1 gap-5 xl:grid-cols-2">
-                {METRICS.map(
-                  ({ key, label, xLabel, theoreticalMin, theoreticalMax }) => (
-                    <section
-                      key={key}
-                      className="ui-card rounded-2xl border p-4"
-                    >
-                      <div className="mb-2 flex items-center justify-between gap-3">
-                        <h3 className="ui-text-primary text-sm font-black">
-                          {label} — Z1 à Z20
-                        </h3>
-                        <span className="ui-text-muted text-[11px]">
-                          X → {xLabel}
-                        </span>
-                      </div>
-                      <ZoneChart
-                        metric={key}
-                        xLabel={xLabel}
-                        theoreticalMin={theoreticalMin}
-                        theoreticalMax={theoreticalMax}
-                        rows={completeZones(zoneSummary[key] ?? [])}
-                        mode={mode}
-                      />
-                    </section>
-                  )
-                )}
-              </div>
-              <div className="ui-panel-alt mt-5 rounded-xl border p-4">
-                <p className="ui-text-secondary text-xs leading-relaxed">
-                  Cette étape est descriptive uniquement. Les graphiques
-                  montrent les {mode === "combats" ? "combats" : "formations"}{" "}
-                  enregistrés dans chaque zone, sans comparaison entre
-                  statistiques, sans score et sans classement.
-                </p>
-              </div>
-            </>
-          )}
+          <Suspense fallback={<div className="ui-text-muted py-12 text-center text-sm">Chargement de cette étape…</div>}>
+            {mode === "generator" ? (
+              <TeamGenerator enabledHeroIds={enabledHeroIds} requiredHeroIds={requiredHeroIds} />
+            ) : mode === "counter" ? (
+              <CounterGenerator enabledHeroIds={enabledHeroIds} requiredHeroIds={requiredHeroIds} />
+            ) : mode === "customization" ? (
+              <TeamGeneratorCustomization
+                enabledHeroIds={enabledHeroIds}
+                requiredHeroIds={requiredHeroIds}
+                onRequiredChange={setRequiredHeroIds}
+              />
+            ) : mode === "theoretical" ? (
+              <TeamLabTheoreticalView />
+            ) : (
+              <TeamLabZonesView mode={mode} />
+            )}
+          </Suspense>
         </div>
 
         <footer className="ui-modal-footer flex shrink-0 justify-between gap-2 px-4 py-3 sm:px-5 sm:py-4">
-          <button type="button" onClick={onBack} className="ui-button">
-            ← Retour
-          </button>
-          <button type="button" onClick={onClose} className="ui-button">
-            Fermer
-          </button>
+          <button type="button" onClick={onBack} className="ui-button">← Retour</button>
+          <button type="button" onClick={onClose} className="ui-button">Fermer</button>
         </footer>
       </section>
     </div>
