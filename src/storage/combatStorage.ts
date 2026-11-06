@@ -99,10 +99,12 @@ interface CombatCursor {
 }
 
 function isAfterCursor(combat: Combat, cursor: CombatCursor): boolean {
-  const createdAt = combat.created_at ?? "";
-  return (
-    createdAt >= cursor.created_at
-  );
+  const createdAt = Date.parse(combat.created_at ?? "");
+  const cursorTime = Date.parse(cursor.created_at);
+
+  // La comparaison en millisecondes tolère les formats ISO équivalents
+  // (Z / +00:00) et peut relire quelques combats identiques sans en manquer.
+  return Number.isFinite(createdAt) && createdAt >= cursorTime;
 }
 
 function getNewestCursor(
