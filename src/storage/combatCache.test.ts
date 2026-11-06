@@ -5,7 +5,7 @@ import {
   sortCombats,
 } from "./combatCache";
 import type { Combat } from "../types";
-import { getCombatPageCursor } from "./combatStorage";
+import { getCombatPageCursor } from "./combatCache";
 
 function makeCombat(id: string, created_at: string): Combat {
   return {
