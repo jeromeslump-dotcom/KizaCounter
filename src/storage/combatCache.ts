@@ -93,7 +93,7 @@ export function sortCombats(combats: Combat[]): Combat[] {
   return [...combats].sort((a, b) => {
     const aDate = a.created_at ?? "";
     const bDate = b.created_at ?? "";
-    if (aDate !== bDate) return aDate > bDate ? 1 : -1;
+    if (aDate !== bDate) return aDate > bDate ? -1 : 1;
 
     const aId = a.id ?? "";
     const bId = b.id ?? "";
