@@ -5,6 +5,22 @@ const DATABASE_VERSION = 1;
 const COMBATS_STORE = "combats";
 const METADATA_STORE = "metadata";
 
+export const COMBAT_FULL_SYNC_INTERVAL_MS = 24 * 60 * 60 * 1000;
+
+export function isFullCombatSyncDue(
+  lastFullSyncAt: string | null | undefined,
+  now = Date.now()
+): boolean {
+  if (!lastFullSyncAt) return true;
+
+  const lastSyncTime = Date.parse(lastFullSyncAt);
+  return (
+    !Number.isFinite(lastSyncTime) ||
+    now < lastSyncTime ||
+    now - lastSyncTime >= COMBAT_FULL_SYNC_INTERVAL_MS
+  );
+}
+
 export interface CombatSyncMetadata {
   key: "sync";
   lastFullSyncAt: string;
@@ -75,8 +91,13 @@ function transactionResult(transaction: IDBTransaction): Promise<void> {
 
 export function sortCombats(combats: Combat[]): Combat[] {
   return [...combats].sort((a, b) => {
-    const dateOrder = (b.created_at ?? "").localeCompare(a.created_at ?? "");
-    return dateOrder || (b.id ?? "").localeCompare(a.id ?? "");
+    const aDate = a.created_at ?? "";
+    const bDate = b.created_at ?? "";
+    if (aDate !== bDate) return aDate > bDate ? 1 : -1;
+
+    const aId = a.id ?? "";
+    const bId = b.id ?? "";
+    return aId === bId ? 0 : aId > bId ? -1 : 1;
   });
 }
 
