@@ -5,6 +5,7 @@ import {
   sortCombats,
 } from "./combatCache";
 import type { Combat } from "../types";
+import { getCombatPageCursor } from "./combatStorage";
 
 function makeCombat(id: string, created_at: string): Combat {
   return {
@@ -44,6 +45,21 @@ describe("combat history cache helpers", () => {
         Date.parse("2026-11-06T12:00:00.000Z")
       )
     ).toBe(true);
+  });
+
+  it("builds the next keyset cursor from the final row, including timestamp ties", () => {
+    const page = [
+      makeCombat("a", "2026-11-06T10:00:00.000Z"),
+      makeCombat("b", "2026-11-06T10:00:00.000Z"),
+      makeCombat("c", "2026-11-06T10:00:00.000Z"),
+    ];
+
+    expect(getCombatPageCursor(page)).toEqual({
+      created_at: "2026-11-06T10:00:00.000Z",
+      id: "c",
+    });
+    expect(getCombatPageCursor([])).toBeNull();
+    expect(getCombatPageCursor([{ ...page[0], id: undefined }])).toBeNull();
   });
 
   it("sorts combats by newest date, then newest id", () => {
