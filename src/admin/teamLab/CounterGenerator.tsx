@@ -9,7 +9,7 @@ import {
   formatZoneReference,
   type CounterReference,
 } from "./counterGeneratorEngine";
-import { heroPlayedCount } from "./teamLabData";
+import { heroPlayedCount } from "./winningPatternsData";
 import {
   generateTeams,
   getGeneratorCandidateTotal,
