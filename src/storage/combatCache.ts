@@ -21,6 +21,18 @@ export function isFullCombatSyncDue(
   );
 }
 
+export interface CombatPageCursor {
+  created_at: string;
+  id: string;
+}
+
+export function getCombatPageCursor(page: Combat[]): CombatPageCursor | null {
+  const last = page[page.length - 1];
+  return last?.created_at && last.id
+    ? { created_at: last.created_at, id: last.id }
+    : null;
+}
+
 export interface CombatSyncMetadata {
   key: "sync";
   lastFullSyncAt: string;
