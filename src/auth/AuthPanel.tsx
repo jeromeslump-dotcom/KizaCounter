@@ -318,12 +318,14 @@ export default function AuthPanel({
                 onClose={closeAdminArea}
                 onBack={backToAdminPanel}
               />
-              <TeamLab
-                open={showWinningPatternsLab}
-                onClose={closeAdminArea}
-                onBack={backToAdminPanel}
-                enabledHeroIds={enabledHeroIds}
-              />
+              {showWinningPatternsLab && (
+                <TeamLab
+                  open
+                  onClose={closeAdminArea}
+                  onBack={backToAdminPanel}
+                  enabledHeroIds={enabledHeroIds}
+                />
+              )}
               <TeamCreator
                 open={showTeamCreator}
                 initialEnemyIds={teamCreatorInitialEnemyIds}
