@@ -132,7 +132,7 @@ interface FullCombatSnapshot {
   cursorCreatedAt: string;
 }
 
-function getPageCursor(page: Combat[]): CombatCursor | null {
+export function getCombatPageCursor(page: Combat[]): CombatCursor | null {
   const last = page[page.length - 1];
   return last?.created_at && last.id
     ? { created_at: last.created_at, id: last.id }
@@ -180,7 +180,7 @@ async function fetchActiveCombatSnapshot(): Promise<FullCombatSnapshot> {
     combats.push(...page);
     if (page.length < COMBAT_PAGE_SIZE) break;
 
-    const nextCursor = getPageCursor(page);
+    const nextCursor = getCombatPageCursor(page);
     if (!nextCursor || (pageCursor &&
       nextCursor.created_at === pageCursor.created_at &&
       nextCursor.id === pageCursor.id)) {
@@ -233,7 +233,7 @@ async function fetchCombatsAfter(cursor: CombatCursor): Promise<Combat[]> {
     combats.push(...page);
     if (page.length < COMBAT_PAGE_SIZE) break;
 
-    const nextCursor = getPageCursor(page);
+    const nextCursor = getCombatPageCursor(page);
     if (!nextCursor || (pageCursor &&
       nextCursor.created_at === pageCursor.created_at &&
       nextCursor.id === pageCursor.id)) {
