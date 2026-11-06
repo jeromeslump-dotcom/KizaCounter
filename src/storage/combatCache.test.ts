@@ -26,7 +26,10 @@ describe("combat history cache helpers", () => {
     const lastSyncTime = Date.parse(lastSync);
 
     expect(
-      isFullCombatSyncDue(lastSync, lastSyncTime + COMBAT_FULL_SYNC_INTERVAL_MS - 1)
+      isFullCombatSyncDue(
+        lastSync,
+        lastSyncTime + COMBAT_FULL_SYNC_INTERVAL_MS - 1
+      )
     ).toBe(false);
     expect(
       isFullCombatSyncDue(lastSync, lastSyncTime + COMBAT_FULL_SYNC_INTERVAL_MS)
@@ -36,7 +39,10 @@ describe("combat history cache helpers", () => {
   it("retries a full sync when the saved date is invalid or in the future", () => {
     expect(isFullCombatSyncDue("not-a-date", 1_000_000)).toBe(true);
     expect(
-      isFullCombatSyncDue("2026-11-07T12:00:00.000Z", Date.parse("2026-11-06T12:00:00.000Z"))
+      isFullCombatSyncDue(
+        "2026-11-07T12:00:00.000Z",
+        Date.parse("2026-11-06T12:00:00.000Z")
+      )
     ).toBe(true);
   });
 
