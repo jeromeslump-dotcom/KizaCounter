@@ -8,7 +8,12 @@ import CounterModal from "./components/CounterModal";
 import AuthPanel from "./auth/AuthPanel";
 import useAuthSession from "./auth/useAuthSession";
 import useCombatSelection from "./hooks/useCombatSelection";
-import { addCombat, loadCombats } from "./storage/combatStorage";
+import {
+  addCombat,
+  COMBAT_FULL_SYNC_INTERVAL_MS,
+  syncCombats,
+} from "./storage/combatStorage";
+import { getCombatCacheSnapshot } from "./storage/combatCache";
 import HeroManager from "./heroManager/HeroManager";
 import useHeroManager from "./heroManager/useHeroManager";
 import { calculateHeroUsage } from "./engine/historicalScoring";
@@ -72,23 +77,70 @@ export default function App() {
     }
 
     let mounted = true;
+    let syncing = false;
+    let lastSyncAttemptAt = 0;
 
-    async function loadHistory() {
+    async function refreshHistory(force = false) {
+      const now = Date.now();
+
+      if (
+        syncing ||
+        (!force && now - lastSyncAttemptAt < 60 * 1000)
+      ) {
+        return;
+      }
+
+      syncing = true;
+      lastSyncAttemptAt = now;
+
       try {
-        const history = await loadCombats();
+        const cached = await getCombatCacheSnapshot();
+        if (mounted && cached) {
+          setCombats(cached.combats);
+        }
+      } catch (error) {
+        console.warn("Lecture du cache local impossible :", error);
+      }
+
+      try {
+        const history = await syncCombats();
         if (mounted) setCombats(history);
       } catch (error) {
         console.error(
-          "Impossible de charger l'historique des combats :",
+          "Impossible de synchroniser l'historique des combats :",
           error
         );
+      } finally {
+        syncing = false;
       }
     }
 
-    void loadHistory();
+    void refreshHistory(true);
+
+    const fullSyncInterval = window.setInterval(
+      () => void refreshHistory(true),
+      COMBAT_FULL_SYNC_INTERVAL_MS
+    );
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        void refreshHistory();
+      }
+    };
+
+    const handleWindowFocus = () => void refreshHistory();
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    window.addEventListener("focus", handleWindowFocus);
 
     return () => {
       mounted = false;
+      window.clearInterval(fullSyncInterval);
+      document.removeEventListener(
+        "visibilitychange",
+        handleVisibilityChange
+      );
+      window.removeEventListener("focus", handleWindowFocus);
     };
   }, [session]);
 
