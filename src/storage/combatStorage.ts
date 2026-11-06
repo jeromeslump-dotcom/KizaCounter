@@ -263,18 +263,7 @@ export async function syncCombats(): Promise<Combat[]> {
   };
 
   try {
-    await upsertCachedCombats(newCombats);
-    // Les métadonnées sont enregistrées avec une transaction dédiée.
-    const currentCombats = await getCombatCacheSnapshot();
-    if (currentCombats) {
-      const updatedCombats = sortCombats([
-        ...currentCombats.combats.filter(
-          (combat) => !newCombats.some((newCombat) => newCombat.id === combat.id)
-        ),
-        ...newCombats,
-      ]);
-      await replaceCombatCache(updatedCombats, metadata);
-    }
+    await upsertCachedCombats(newCombats, metadata);
   } catch (error) {
     console.warn("Impossible de mettre à jour le cache des combats :", error);
   }
