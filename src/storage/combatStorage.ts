@@ -204,10 +204,12 @@ export async function syncCombats(): Promise<Combat[]> {
 
   if (!snapshot || isFullCombatSyncDue(snapshot.metadata.lastFullSyncAt)) {
     const combats = await loadCombats();
-    const cursor = getNewestCursor(combats, {
+    // Le curseur démarre au début de la synchronisation : les combats créés
+    // pendant le téléchargement complet seront ainsi repris par l'incrémental.
+    const cursor: CombatCursor = {
       created_at: now,
       id: "",
-    });
+    };
     const metadata: CombatSyncMetadata = {
       key: "sync",
       lastFullSyncAt: now,
