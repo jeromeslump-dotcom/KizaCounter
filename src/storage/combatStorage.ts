@@ -9,6 +9,7 @@ import {
   replaceCombatCache,
   sortCombats,
   upsertCachedCombats,
+  type CombatCacheSnapshot,
   type CombatSyncMetadata,
 } from "./combatCache";
 
@@ -188,7 +189,7 @@ async function fetchCombatsAfter(cursor: CombatCursor): Promise<Combat[]> {
  * les suppressions et modifications invisibles via les règles RLS.
  */
 export async function syncCombats(): Promise<Combat[]> {
-  let snapshot;
+  let snapshot: CombatCacheSnapshot | null;
 
   try {
     snapshot = await getCombatCacheSnapshot();
@@ -233,11 +234,11 @@ export async function syncCombats(): Promise<Combat[]> {
   };
 
   const newCombats = await fetchCombatsAfter(cursor);
-  const mergedById = new Map(
-    snapshot.combats
-      .filter((combat): combat is Combat & { id: string } => Boolean(combat.id))
-      .map((combat) => [combat.id, combat])
-  );
+  const mergedById = new Map<string, Combat>();
+
+  for (const combat of snapshot.combats) {
+    if (combat.id) mergedById.set(combat.id, combat);
+  }
 
   for (const combat of newCombats) {
     if (combat.id) mergedById.set(combat.id, combat);
