@@ -2,13 +2,17 @@ import { HEROES } from "../data/heroes";
 import type { Combat } from "../types";
 import { supabase } from "./supabase";
 import {
+  COMBAT_FULL_SYNC_INTERVAL_MS,
   getCombatCacheSnapshot,
+  isFullCombatSyncDue,
   removeCachedCombat,
   replaceCombatCache,
   sortCombats,
   upsertCachedCombats,
   type CombatSyncMetadata,
 } from "./combatCache";
+
+export { COMBAT_FULL_SYNC_INTERVAL_MS } from "./combatCache";
 
 const COMBAT_SELECT = `
   id, user_id, enemy_heroes, my_heroes, won, created_at, status,
@@ -87,32 +91,16 @@ function enrichCombat(
 // ============================================================
 
 const COMBAT_PAGE_SIZE = 1000;
-export const COMBAT_FULL_SYNC_INTERVAL_MS = 24 * 60 * 60 * 1000;
 
 interface CombatCursor {
   created_at: string;
   id: string;
 }
 
-export function isFullCombatSyncDue(
-  lastFullSyncAt: string | null | undefined,
-  now = Date.now()
-): boolean {
-  if (!lastFullSyncAt) return true;
-
-  const lastSyncTime = Date.parse(lastFullSyncAt);
-  return (
-    !Number.isFinite(lastSyncTime) ||
-    now < lastSyncTime ||
-    now - lastSyncTime >= COMBAT_FULL_SYNC_INTERVAL_MS
-  );
-}
-
 function isAfterCursor(combat: Combat, cursor: CombatCursor): boolean {
   const createdAt = combat.created_at ?? "";
   return (
-    createdAt > cursor.created_at ||
-    (createdAt === cursor.created_at && (combat.id ?? "") > cursor.id)
+    createdAt >= cursor.created_at
   );
 }
 
