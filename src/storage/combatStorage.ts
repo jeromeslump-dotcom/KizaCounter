@@ -127,8 +127,16 @@ function getNewestCursor(
   return newest;
 }
 
-async function fetchActiveCombats(): Promise<Combat[]> {
+interface FullCombatSnapshot {
+  combats: Combat[];
+  cursorCreatedAt: string;
+}
+
+async function fetchActiveCombatSnapshot(): Promise<FullCombatSnapshot> {
   const combats: Combat[] = [];
+  // Si l'historique est vide, repartir de l'époque permet de détecter
+  // les premiers combats sans dépendre de l'horloge du navigateur.
+  let cursorCreatedAt = "1970-01-01T00:00:00.000Z";
 
   for (let from = 0; ; from += COMBAT_PAGE_SIZE) {
     const { data, error } = await supabase
@@ -145,12 +153,27 @@ async function fetchActiveCombats(): Promise<Combat[]> {
     }
 
     const page = (data ?? []) as Combat[];
+
+    if (from === 0 && page[0]?.created_at) {
+      // Curseur serveur pris au début du téléchargement : les combats créés
+      // pendant les pages suivantes seront repris par la synchronisation.
+      cursorCreatedAt = page[0].created_at;
+    }
+
     combats.push(...page);
 
     if (page.length < COMBAT_PAGE_SIZE) break;
   }
 
-  return sortCombats(combats);
+  return {
+    combats: sortCombats(combats),
+    cursorCreatedAt,
+  };
+}
+
+async function fetchActiveCombats(): Promise<Combat[]> {
+  const snapshot = await fetchActiveCombatSnapshot();
+  return snapshot.combats;
 }
 
 /** Téléchargement complet, utilisé à la première synchronisation et chaque jour. */
@@ -206,11 +229,10 @@ export async function syncCombats(): Promise<Combat[]> {
   const now = new Date().toISOString();
 
   if (!snapshot || isFullCombatSyncDue(snapshot.metadata.lastFullSyncAt)) {
-    const combats = await loadCombats();
-    // Le curseur démarre au début de la synchronisation : les combats créés
-    // pendant le téléchargement complet seront ainsi repris par l'incrémental.
+    const fullSnapshot = await fetchActiveCombatSnapshot();
+    const combats = fullSnapshot.combats;
     const cursor: CombatCursor = {
-      created_at: now,
+      created_at: fullSnapshot.cursorCreatedAt,
       id: "",
     };
     const metadata: CombatSyncMetadata = {
