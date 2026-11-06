@@ -1,5 +1,5 @@
-import winningPatterns from "../../../data/winning-patterns.json";
-import theoreticalFormations from "../../../data/theoretical-formations.json";
+import type { MetricKey } from "./theoreticalData";
+export type { MetricKey } from "./theoreticalData";
 
 export type ZoneRow = {
   zone: number;
@@ -8,9 +8,6 @@ export type ZoneRow = {
   winFormations: number;
   lossFormations: number;
 };
-
-import type { MetricKey } from "./theoreticalData";
-export type { MetricKey } from "./theoreticalData";
 
 export type TeamLabMode =
   | "combats"
@@ -33,27 +30,6 @@ export type TheoreticalMetric = {
 };
 
 export { METRICS, getZoneBounds } from "./theoreticalData";
-
-export const zoneSummary = winningPatterns.zoneSummary as Record<
-  MetricKey,
-  ZoneRow[]
->;
-
-export const heroPlayedCount = new Map<string, number>();
-
-for (const formation of winningPatterns.formations.all) {
-  for (const heroId of formation.heroes) {
-    heroPlayedCount.set(
-      heroId,
-      (heroPlayedCount.get(heroId) ?? 0) + formation.observations
-    );
-  }
-}
-
-export const theoreticalSummary = theoreticalFormations.metrics as Record<
-  MetricKey,
-  TheoreticalMetric
->;
 
 export function completeZones(rows: ZoneRow[]): ZoneRow[] {
   const byZone = new Map(rows.map((row) => [row.zone, row]));
