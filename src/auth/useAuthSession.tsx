@@ -39,10 +39,12 @@ export function AuthSessionProvider({ children }: { children: ReactNode }) {
       if (!mounted) return;
 
       const requestId = ++profileRequest;
+      hasActiveSession = Boolean(currentSession);
 
       if (currentSession) {
         ensureSessionWindow();
         if (getSessionTimeRemainingMs() <= 0) {
+          hasActiveSession = false;
           try {
             await signOut();
           } catch (error) {
@@ -59,8 +61,6 @@ export function AuthSessionProvider({ children }: { children: ReactNode }) {
 
       setSession(currentSession);
       setProfile(null);
-
-      hasActiveSession = Boolean(currentSession);
 
       if (!currentSession) {
         setLoading(false);
