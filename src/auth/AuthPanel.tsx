@@ -2,6 +2,7 @@
 
 import { lazy, Suspense, useEffect, useState } from "react";
 import AdminPanel from "../admin/AdminPanel";
+import EngineSettings from "../admin/EngineSettings";
 import CombatHistory from "../admin/CombatHistory";
 import EncounteredTeams from "../admin/EncounteredTeams";
 import UserManagement from "../admin/UserManagement";
@@ -35,6 +36,7 @@ export default function AuthPanel({
   const { session, profile, loading } = useAuthSession();
   const [showAdminPanel, setShowAdminPanel] = useState(false);
   const [showUserPanel, setShowUserPanel] = useState(false);
+  const [showUserEngineSettings, setShowUserEngineSettings] = useState(false);
   const [showUserManagement, setShowUserManagement] = useState(false);
   const [showEncounteredTeams, setShowEncounteredTeams] = useState(false);
   const [showCombatHistory, setShowCombatHistory] = useState(false);
@@ -267,6 +269,10 @@ export default function AuthPanel({
             setShowUserPanel(false);
             onManageHeroes();
           }}
+          onOpenEngineSettings={() => {
+            setShowUserPanel(false);
+            setShowUserEngineSettings(true);
+          }}
           theme={theme}
           onThemeChange={onThemeChange}
           userName={getUserName()}
@@ -279,10 +285,24 @@ export default function AuthPanel({
           submitting={submitting}
         />
 
+        {showUserEngineSettings && session.user.id && (
+          <EngineSettings
+            open
+            mode="user"
+            userId={session.user.id}
+            onClose={() => setShowUserEngineSettings(false)}
+            onBack={() => {
+              setShowUserEngineSettings(false);
+              setShowUserPanel(true);
+            }}
+          />
+        )}
+
         {isAdmin && (
           <>
             <AdminPanel
               open={showAdminPanel}
+              userId={session.user.id}
               onClose={closeAdminArea}
               onUserManagement={() => {
                 setShowAdminPanel(false);
