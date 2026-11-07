@@ -48,6 +48,9 @@ export default function AuthPanel({
     string[]
   >([]);
   const [adminCombats, setAdminCombats] = useState<Combat[]>([]);
+  const [combatHistoryUserId, setCombatHistoryUserId] = useState<string | null>(
+    null
+  );
 
   useEffect(() => {
     const openTeamByPosition = (event: Event) => {
@@ -152,6 +155,7 @@ export default function AuthPanel({
   }
 
   async function openCombatHistory() {
+    setCombatHistoryUserId(null);
     setShowAdminPanel(false);
     setShowUserManagement(false);
     setShowEncounteredTeams(false);
@@ -165,6 +169,37 @@ export default function AuthPanel({
       setAdminCombats([]);
     }
   }
+
+  useEffect(() => {
+    const openHistoryForUser = (event: Event) => {
+      const userId = (event as CustomEvent<string>).detail;
+      if (!userId) return;
+
+      setCombatHistoryUserId(userId);
+      setShowAdminPanel(false);
+      setShowUserManagement(false);
+      setShowEncounteredTeams(false);
+      setShowAnalysisHelp(false);
+      setShowCombatHistory(true);
+
+      void loadCombats()
+        .then(setAdminCombats)
+        .catch((error) => {
+          console.error(
+            "Impossible de charger l'historique des combats :",
+            error
+          );
+          setAdminCombats([]);
+        });
+    };
+
+    document.addEventListener("admin:combat-history-user", openHistoryForUser);
+    return () =>
+      document.removeEventListener(
+        "admin:combat-history-user",
+        openHistoryForUser
+      );
+  }, []);
 
   async function openAnalysisHelp() {
     setShowAdminPanel(false);
@@ -298,6 +333,7 @@ export default function AuthPanel({
             <CombatHistory
               open={showCombatHistory}
               combats={adminCombats}
+              initialUserId={combatHistoryUserId}
               onClose={closeAdminArea}
               onBack={backToAdminPanel}
             />
