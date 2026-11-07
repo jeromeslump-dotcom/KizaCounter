@@ -188,7 +188,7 @@ export default function AdminPanel({
           <AdminAction
             icon="⚙️"
             title="Réglages du moteur"
-            description="Configurer les paramètres du moteur de recommandation"
+            description="Définir les valeurs par défaut partagées avec tous les utilisateurs"
             onClick={() => setShowEngineSettings(true)}
           />
         </div>
