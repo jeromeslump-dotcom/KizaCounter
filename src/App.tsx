@@ -41,9 +41,23 @@ export default function App() {
       return;
     }
 
-    void refreshUserEngineSettings(session.user.id).catch((error) => {
-      console.error("Impossible de charger les réglages personnels du moteur :", error);
-    });
+    const refreshSettings = () => {
+      void refreshUserEngineSettings(session.user.id).catch((error) => {
+        console.error("Impossible de charger les réglages personnels du moteur :", error);
+      });
+    };
+
+    refreshSettings();
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") refreshSettings();
+    };
+    window.addEventListener("focus", refreshSettings);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      window.removeEventListener("focus", refreshSettings);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
   }, [session?.user.id, profile?.active]);
 
   const {
