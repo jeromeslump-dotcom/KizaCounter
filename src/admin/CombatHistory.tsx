@@ -78,12 +78,13 @@ export default function CombatHistory({
     () =>
       Array.from(
         new Set(
-          visibleCombats
+          combats
+            .filter((combat) => !combat.id || !deletedIds.has(combat.id))
             .map((combat) => combat.user_id)
             .filter((id): id is string => Boolean(id))
         )
       ),
-    [visibleCombats]
+    [combats, deletedIds]
   );
 
   const totalPages = Math.max(
