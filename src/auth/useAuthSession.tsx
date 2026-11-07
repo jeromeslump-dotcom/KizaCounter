@@ -9,7 +9,13 @@ import {
 } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { getCurrentUserProfile, type UserProfile } from "../admin/adminAccess";
-import { getSession, onAuthStateChange } from "./auth";
+import {
+  ensureSessionWindow,
+  getSession,
+  getSessionTimeRemainingMs,
+  onAuthStateChange,
+  signOut,
+} from "./auth";
 
 interface AuthSessionState {
   session: Session | null;
@@ -32,6 +38,24 @@ export function AuthSessionProvider({ children }: { children: ReactNode }) {
       if (!mounted) return;
 
       const requestId = ++profileRequest;
+
+      if (currentSession) {
+        ensureSessionWindow();
+        if (getSessionTimeRemainingMs() <= 0) {
+          try {
+            await signOut();
+          } catch (error) {
+            console.error("Déconnexion après expiration impossible :", error);
+          }
+          if (mounted && requestId === profileRequest) {
+            setSession(null);
+            setProfile(null);
+            setLoading(false);
+          }
+          return;
+        }
+      }
+
       setSession(currentSession);
       setProfile(null);
 
@@ -77,9 +101,18 @@ export function AuthSessionProvider({ children }: { children: ReactNode }) {
       void applySession(currentSession);
     });
 
+    const expirationTimer = window.setInterval(() => {
+      if (getSessionTimeRemainingMs() <= 0) {
+        void signOut().catch((error) => {
+          console.error("Déconnexion automatique après 24 h impossible :", error);
+        });
+      }
+    }, 30_000);
+
     return () => {
       mounted = false;
       subscription.unsubscribe();
+      window.clearInterval(expirationTimer);
     };
   }, []);
 
