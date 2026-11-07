@@ -157,6 +157,8 @@ export async function saveSharedEngineSettings(
   });
 
   if (error) throw error;
+  // Keep the other advanced controls local to the administrator's browser.
+  saveEngineSettings(settings);
   await refreshUserEngineSettings(adminUserId);
 }
 
