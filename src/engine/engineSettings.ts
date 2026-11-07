@@ -16,8 +16,8 @@ export const DEFAULT_ENGINE_SETTINGS: EngineSettings = {
     historicalConfidenceBattles: 4,
     historicalReliabilityBase: 0.35,
     historicalReliabilityConfidenceWeight: 0.65,
-    historicalTeamMinBattles: 40,
-    historicalTeamMinWinRate: 50,
+    historicalTeamMinBattles: 3,
+    historicalTeamMinWinRate: 75,
     core4ConfidenceBattles: 4,
   },
 };
