@@ -4,6 +4,7 @@ interface UserPanelProps {
   open: boolean;
   onClose: () => void;
   onManageHeroes: () => void;
+  onOpenEngineSettings: () => void;
   onThemeChange: (theme: "agi" | "str" | "int") => void;
   theme: "agi" | "str" | "int";
   onOpenAdminPanel?: () => void;
@@ -55,6 +56,7 @@ export default function UserPanel({
   open,
   onClose,
   onManageHeroes,
+  onOpenEngineSettings,
   onThemeChange,
   theme,
   onOpenAdminPanel,
@@ -117,6 +119,13 @@ export default function UserPanel({
             title="Gérer les héros"
             description="Gérer les héros disponibles dans l'application"
             onClick={onManageHeroes}
+          />
+
+          <UserAction
+            icon="⚙️"
+            title="Réglages du moteur"
+            description="Personnaliser les seuils des recommandations"
+            onClick={onOpenEngineSettings}
           />
 
           <div className="ui-card is-active rounded-xl p-4">
