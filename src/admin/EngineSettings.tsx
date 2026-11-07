@@ -226,7 +226,7 @@ export default function EngineSettings({
                 <>
                   <AdvancedSettingRow
                     icon="🎯"
-                    label="Combats avant de pouvoir rejeter une team historique"
+                    label="Nombre de combats avant d’appliquer le taux de victoire"
                     value={advanced.historicalTeamMinBattles}
                     min={1}
                     max={100}
@@ -239,7 +239,7 @@ export default function EngineSettings({
 
                   <AdvancedSettingRow
                     icon="🎯"
-                    label="Taux de victoire minimum pour conserver une team historique"
+                    label="Taux de victoire minimum des recommandations"
                     value={advanced.historicalTeamMinWinRate}
                     min={0}
                     max={100}
