@@ -6,6 +6,7 @@ import type { Hero } from "../data/heroes";
 
 interface AdminPanelProps {
   open: boolean;
+  userId: string;
   onClose: () => void;
   onUserManagement: () => void;
   onEncounteredTeams: () => void;
@@ -56,6 +57,7 @@ function AdminAction({ icon, title, description, onClick }: AdminActionProps) {
 
 export default function AdminPanel({
   open,
+  userId,
   onClose,
   onUserManagement,
   onEncounteredTeams,
@@ -83,6 +85,8 @@ export default function AdminPanel({
     return (
       <EngineSettings
         open
+        mode="admin"
+        userId={userId}
         onClose={onClose}
         onBack={() => setShowEngineSettings(false)}
       />
