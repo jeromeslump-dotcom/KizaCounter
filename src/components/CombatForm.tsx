@@ -42,14 +42,12 @@ export default function CombatForm({
         won,
       });
     } catch (saveError) {
-      console.error("Impossible d'enregistrer le résultat du combat :", saveError);
-      setError(
-        saveError instanceof Error
-          ? saveError.message
-          : "Impossible d'enregistrer le résultat du combat."
-      );
+      // Le combat est terminé côté utilisateur : on ferme la sélection même
+      // si l'enregistrement n'est pas autorisé ou échoue.
+      console.warn("Résultat du combat non enregistré :", saveError);
     } finally {
       setSaving(false);
+      onClose?.();
     }
   }
 
