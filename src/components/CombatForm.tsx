@@ -85,16 +85,6 @@ export default function CombatForm({
         </p>
       )}
 
-      {onClose && (
-        <button
-          type="button"
-          disabled={saving}
-          onClick={onClose}
-          className="ui-button mt-2 w-full disabled:opacity-50"
-        >
-          Annuler
-        </button>
-      )}
 
       {saving && (
         <p className="ui-text-muted mt-2 text-center text-[10px]">
