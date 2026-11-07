@@ -13,6 +13,7 @@ interface CombatHistoryProps {
   combats: Combat[];
   onClose: () => void;
   onBack: () => void;
+  initialUserId?: string | null;
 }
 
 interface Profile {
@@ -32,6 +33,7 @@ export default function CombatHistory({
   combats,
   onClose,
   onBack,
+  initialUserId = null,
 }: CombatHistoryProps) {
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [teamOrders, setTeamOrders] = useState<Map<string, string[]>>(
@@ -43,10 +45,18 @@ export default function CombatHistory({
   const [orderEditor, setOrderEditor] = useState<OrderEditorState | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [showOnlyOrderToEdit, setShowOnlyOrderToEdit] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(
+    initialUserId
+  );
 
   const visibleCombats = useMemo(
-    () => combats.filter((combat) => !combat.id || !deletedIds.has(combat.id)),
-    [combats, deletedIds]
+    () =>
+      combats.filter(
+        (combat) =>
+          (!combat.id || !deletedIds.has(combat.id)) &&
+          (!selectedUserId || combat.user_id === selectedUserId)
+      ),
+    [combats, deletedIds, selectedUserId]
   );
 
   const combatsWithOrderToEdit = useMemo(
@@ -92,7 +102,11 @@ export default function CombatHistory({
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [showOnlyOrderToEdit]);
+  }, [showOnlyOrderToEdit, selectedUserId]);
+
+  useEffect(() => {
+    if (open) setSelectedUserId(initialUserId);
+  }, [open, initialUserId]);
 
   useEffect(() => {
     setCurrentPage((page) => Math.min(page, totalPages));
@@ -300,6 +314,27 @@ export default function CombatHistory({
                     {totalCombats} combats · {victories} victoires
                   </span>
                 </div>
+
+                <label className="inline-flex items-center gap-2 rounded-lg border px-3 py-1.5 text-xs font-bold"
+                  style={{ borderColor: "rgb(from var(--ui-theme) r g b / 0.7)" }}>
+                  <span aria-hidden="true">👤</span>
+                  <span className="sr-only">Filtrer par utilisateur</span>
+                  <select
+                    value={selectedUserId ?? ""}
+                    onChange={(event) =>
+                      setSelectedUserId(event.target.value || null)
+                    }
+                    className="max-w-[190px] bg-transparent text-xs font-bold outline-none"
+                    aria-label="Filtrer l'historique par utilisateur"
+                  >
+                    <option value="">Tous les utilisateurs</option>
+                    {userIds.map((userId) => (
+                      <option key={userId} value={userId}>
+                        {getUserName(userId)}
+                      </option>
+                    ))}
+                  </select>
+                </label>
 
                 <button
                   type="button"
