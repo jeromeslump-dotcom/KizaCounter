@@ -45,6 +45,54 @@ function supabaseUrl(): string {
   return import.meta.env.VITE_SUPABASE_URL as string;
 }
 
+
+// ============================================================
+// DURÉE MAXIMALE DE SESSION (24 H)
+// ============================================================
+
+const SESSION_MAX_AGE_MS = 24 * 60 * 60 * 1000;
+const SESSION_STARTED_AT_KEY = "kiza-session-started-at";
+
+export function startSessionWindow(): void {
+  try {
+    window.localStorage.setItem(SESSION_STARTED_AT_KEY, String(Date.now()));
+  } catch (error) {
+    console.warn("Impossible d'enregistrer le début de session :", error);
+  }
+}
+
+export function ensureSessionWindow(): void {
+  try {
+    // Une session déjà ouverte lors du déploiement démarre sa période
+    // de 24 h au premier chargement de cette version.
+    if (!window.localStorage.getItem(SESSION_STARTED_AT_KEY)) {
+      startSessionWindow();
+    }
+  } catch (error) {
+    console.warn("Impossible de vérifier la durée de session :", error);
+  }
+}
+
+export function clearSessionWindow(): void {
+  try {
+    window.localStorage.removeItem(SESSION_STARTED_AT_KEY);
+  } catch (error) {
+    console.warn("Impossible d'effacer le début de session :", error);
+  }
+}
+
+export function getSessionTimeRemainingMs(): number {
+  try {
+    const startedAt = Number(
+      window.localStorage.getItem(SESSION_STARTED_AT_KEY)
+    );
+    if (!Number.isFinite(startedAt) || startedAt <= 0) return 0;
+    return Math.max(0, SESSION_MAX_AGE_MS - (Date.now() - startedAt));
+  } catch {
+    return 0;
+  }
+}
+
 // ============================================================
 // SESSION
 // ============================================================
@@ -94,6 +142,7 @@ export async function signIn(
     );
   }
 
+  startSessionWindow();
   return data.session;
 }
 
@@ -102,6 +151,7 @@ export async function signIn(
 // ============================================================
 
 export async function signOut(): Promise<void> {
+  clearSessionWindow();
   const { error } = await supabase.auth.signOut({ scope: "local" });
 
   if (error) {
@@ -115,9 +165,14 @@ export async function signOut(): Promise<void> {
 // ÉCOUTER LES CHANGEMENTS DE SESSION
 // ============================================================
 
-export function onAuthStateChange(callback: (session: Session | null) => void) {
+export function onAuthStateChange(
+  callback: (session: Session | null, event: string) => void
+) {
   return supabase.auth.onAuthStateChange((event, session) => {
-    callback(session);
+    if (event === "SIGNED_IN") startSessionWindow();
+    if (event === "INITIAL_SESSION" && session) ensureSessionWindow();
+    if (event === "SIGNED_OUT") clearSessionWindow();
+    callback(session, event);
 
     if (event === "SIGNED_OUT") {
       console.info("Session Supabase locale terminée.");
