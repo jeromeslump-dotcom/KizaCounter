@@ -1,10 +1,13 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import {
   DEFAULT_ENGINE_SETTINGS,
   getEngineSettings,
-  resetEngineSettings,
-  saveEngineSettings,
+  loadSharedEngineSettings,
+  loadUserEngineSettings,
+  resetUserEngineSettings,
+  saveSharedEngineSettings,
+  saveUserEngineSettings,
   type EngineSettings,
 } from "../engine/engineSettings";
 
@@ -12,6 +15,8 @@ interface EngineSettingsProps {
   open: boolean;
   onClose: () => void;
   onBack: () => void;
+  mode?: "admin" | "user";
+  userId: string;
 }
 
 interface AdvancedSettingRowProps {
@@ -119,11 +124,42 @@ export default function EngineSettings({
   open,
   onClose,
   onBack,
+  mode = "admin",
+  userId,
 }: EngineSettingsProps) {
-  const [settings, setSettings] = useState<EngineSettings>(() =>
-    getEngineSettings()
-  );
+  const [settings, setSettings] = useState<EngineSettings>(() => getEngineSettings());
   const [activeTab, setActiveTab] = useState<EngineSettingsTab>("team");
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [hasPersonalOverrides, setHasPersonalOverrides] = useState(false);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    let active = true;
+    setLoading(true);
+    setError("");
+    const load = async () => {
+      try {
+        if (mode === "admin") {
+          const shared = await loadSharedEngineSettings();
+          if (active) setSettings(shared);
+        } else {
+          const result = await loadUserEngineSettings(userId);
+          if (active) {
+            setSettings(result.settings);
+            setHasPersonalOverrides(result.hasPersonalOverrides);
+          }
+        }
+      } catch (loadError) {
+        console.error("Impossible de charger les réglages du moteur :", loadError);
+        if (active) setError("Impossible de charger les réglages depuis le serveur.");
+      } finally {
+        if (active) setLoading(false);
+      }
+    };
+    void load();
+    return () => { active = false; };
+  }, [mode, userId]);
 
   if (!open) return null;
 
@@ -144,13 +180,50 @@ export default function EngineSettings({
     }));
   }
 
-  function handleSave() {
-    saveEngineSettings(settings);
+  async function handleSave() {
+    setSaving(true);
+    setError("");
+    try {
+      if (mode === "admin") {
+        await saveSharedEngineSettings(settings, userId);
+      } else {
+        await saveUserEngineSettings(settings, userId);
+        setHasPersonalOverrides(true);
+      }
+    } catch (saveError) {
+      console.error("Impossible d'enregistrer les réglages du moteur :", saveError);
+      setError("L'enregistrement a échoué. Vérifie ta connexion puis réessaie.");
+    } finally {
+      setSaving(false);
+    }
   }
 
-  function handleReset() {
-    resetEngineSettings();
-    setSettings(DEFAULT_ENGINE_SETTINGS);
+  async function handleReset() {
+    setSaving(true);
+    setError("");
+    try {
+      if (mode === "admin") {
+        const defaults = {
+          ...getEngineSettings(),
+          advanced: {
+            ...getEngineSettings().advanced,
+            historicalTeamMinBattles: DEFAULT_ENGINE_SETTINGS.advanced.historicalTeamMinBattles,
+            historicalTeamMinWinRate: DEFAULT_ENGINE_SETTINGS.advanced.historicalTeamMinWinRate,
+          },
+        };
+        await saveSharedEngineSettings(defaults, userId);
+        setSettings(await loadSharedEngineSettings());
+      } else {
+        const defaults = await resetUserEngineSettings(userId);
+        setSettings(defaults);
+        setHasPersonalOverrides(false);
+      }
+    } catch (resetError) {
+      console.error("Impossible de réinitialiser les réglages du moteur :", resetError);
+      setError("La réinitialisation a échoué. Vérifie ta connexion puis réessaie.");
+    } finally {
+      setSaving(false);
+    }
   }
 
   const advanced = settings.advanced;
@@ -178,7 +251,7 @@ export default function EngineSettings({
                 ⚙️ Réglages du moteur
               </h2>
               <p className="ui-text-secondary mt-1 text-xs sm:text-sm">
-                Paramètres techniques réellement utilisés par le moteur
+                {mode === "admin" ? "Valeurs par défaut appliquées à tous les utilisateurs" : "Réglages personnels utilisés par le moteur"}
               </p>
             </div>
             <button
@@ -193,9 +266,19 @@ export default function EngineSettings({
         </header>
 
         <div className="max-h-[68vh] overflow-y-auto p-4 sm:p-6">
+          {mode === "user" && (
+            <p className="ui-text-secondary mb-4 text-xs leading-relaxed">
+              {hasPersonalOverrides
+                ? "Tes réglages personnels remplacent les valeurs par défaut de l’administrateur."
+                : "Tu utilises actuellement les valeurs par défaut définies par l’administrateur. Tu peux les personnaliser ici."}
+            </p>
+          )}
+          {loading ? (
+            <p className="ui-text-secondary py-8 text-center text-sm">Chargement des réglages…</p>
+          ) : (
           <div className="flex flex-col gap-4 md:flex-row md:items-start">
             <nav
-              className="flex w-full shrink-0 flex-col gap-2 md:w-56"
+              className={`flex w-full shrink-0 flex-col gap-2 md:w-56 ${mode === "user" ? "hidden" : ""}`}
               aria-label="Catégories des réglages du moteur"
             >
               <SettingsTab
@@ -316,20 +399,26 @@ export default function EngineSettings({
               )}
             </div>
           </div>
+          )}
+
+          {error && <p className="ui-error mt-3 text-xs">{error}</p>}
 
           <div className="mt-5 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
             <button type="button" onClick={onBack} className="ui-button">
-              ← Retour au Admin Panel
+              {mode === "admin" ? "← Retour au Admin Panel" : "← Retour aux paramètres du compte"}
             </button>
-            <button type="button" onClick={handleReset} className="ui-button">
-              Réinitialiser
-            </button>
+            {(mode === "admin" || hasPersonalOverrides) && (
+              <button type="button" onClick={handleReset} disabled={loading || saving} className="ui-button">
+                {mode === "admin" ? "Valeurs par défaut" : "Réinitialiser"}
+              </button>
+            )}
             <button
               type="button"
               onClick={handleSave}
-              className="ui-button ui-button-success"
+              disabled={loading || saving}
+              className="ui-button ui-button-success disabled:opacity-50"
             >
-              Enregistrer
+              {saving ? "Enregistrement…" : "Enregistrer"}
             </button>
           </div>
         </div>
