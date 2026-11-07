@@ -503,7 +503,12 @@ hover:!text-[var(--ui-theme-soft)]"
           )}
 
           <div className="mt-4">
-            <CombatForm enemies={enemies} myHeroes={team} onSave={onSave} />
+            <CombatForm
+              enemies={enemies}
+              myHeroes={team}
+              onSave={onSave}
+              onClose={onClose}
+            />
           </div>
 
           <div className="mt-5">
