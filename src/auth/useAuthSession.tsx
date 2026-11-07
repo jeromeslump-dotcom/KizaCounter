@@ -33,6 +33,7 @@ export function AuthSessionProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let mounted = true;
     let profileRequest = 0;
+    let hasActiveSession = false;
 
     async function applySession(currentSession: Session | null) {
       if (!mounted) return;
@@ -58,6 +59,8 @@ export function AuthSessionProvider({ children }: { children: ReactNode }) {
 
       setSession(currentSession);
       setProfile(null);
+
+      hasActiveSession = Boolean(currentSession);
 
       if (!currentSession) {
         setLoading(false);
@@ -102,7 +105,7 @@ export function AuthSessionProvider({ children }: { children: ReactNode }) {
     });
 
     const expirationTimer = window.setInterval(() => {
-      if (getSessionTimeRemainingMs() <= 0) {
+      if (hasActiveSession && getSessionTimeRemainingMs() <= 0) {
         void signOut().catch((error) => {
           console.error("Déconnexion automatique après 24 h impossible :", error);
         });
