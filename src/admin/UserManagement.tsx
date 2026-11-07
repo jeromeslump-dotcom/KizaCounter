@@ -184,7 +184,21 @@ export default function UserManagement({
                           {user.combat_count > 0 && (
                             <>
                               <span className="mx-1.5">•</span>
-                              Combats enregistrés : {user.combat_count}
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  document.dispatchEvent(
+                                    new CustomEvent("admin:combat-history-user", {
+                                      detail: user.id,
+                                    })
+                                  )
+                                }
+                                className="font-bold underline decoration-dotted underline-offset-2 transition hover:opacity-80"
+                                style={{ color: "var(--ui-theme)" }}
+                                title={`Voir les combats enregistrés par ${user.display_name}`}
+                              >
+                                Combats enregistrés : {user.combat_count}
+                              </button>
                             </>
                           )}
                         </div>
