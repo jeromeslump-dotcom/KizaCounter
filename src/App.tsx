@@ -17,6 +17,7 @@ import { getCombatCacheSnapshot } from "./storage/combatCache";
 import HeroManager from "./heroManager/HeroManager";
 import useHeroManager from "./heroManager/useHeroManager";
 import { calculateHeroUsage } from "./engine/historicalScoring";
+import { refreshUserEngineSettings, resetEngineSettings } from "./engine/engineSettings";
 
 const TEAM_SIZE = 5;
 const BUILD_VERSION = __BUILD_VERSION__;
@@ -33,6 +34,17 @@ export default function App() {
   });
   const { session, profile } = useAuthSession();
   const isAuthenticated = Boolean(session);
+
+  useEffect(() => {
+    if (!session || !profile?.active) {
+      resetEngineSettings();
+      return;
+    }
+
+    void refreshUserEngineSettings(session.user.id).catch((error) => {
+      console.error("Impossible de charger les réglages personnels du moteur :", error);
+    });
+  }, [session?.user.id, profile?.active]);
 
   const {
     enabledHeroIds,
