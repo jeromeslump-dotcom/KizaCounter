@@ -16,10 +16,22 @@ export default function CombatForm({
   onClose,
 }: CombatFormProps) {
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
 
   async function handleResult(won: boolean) {
     if (saving) return;
-    if (enemies.length === 0 || myHeroes.length === 0) return;
+
+    setError("");
+
+    if (enemies.length !== 5) {
+      setError("Sélectionnez exactement 5 héros ennemis.");
+      return;
+    }
+
+    if (myHeroes.length !== 5) {
+      setError("Sélectionnez exactement 5 héros dans votre équipe.");
+      return;
+    }
 
     setSaving(true);
 
@@ -29,6 +41,13 @@ export default function CombatForm({
         my_heroes: myHeroes.map((hero) => hero.id),
         won,
       });
+    } catch (saveError) {
+      console.error("Impossible d'enregistrer le résultat du combat :", saveError);
+      setError(
+        saveError instanceof Error
+          ? saveError.message
+          : "Impossible d'enregistrer le résultat du combat."
+      );
     } finally {
       setSaving(false);
     }
@@ -61,6 +80,12 @@ export default function CombatForm({
           👎 Défaite
         </button>
       </div>
+
+      {error && (
+        <p role="alert" className="ui-error mt-2 text-center text-xs">
+          {error}
+        </p>
+      )}
 
       {onClose && (
         <button
