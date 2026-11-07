@@ -41,6 +41,7 @@ export default function useCombatSelection({
   const [enemyIds, setEnemyIds] = useState<string[]>([]);
   const [teamIds, setTeamIds] = useState<string[]>([]);
   const [showCounterModal, setShowCounterModal] = useState(false);
+  const [engineSettingsRevision, setEngineSettingsRevision] = useState(0);
   const [recommendedIds, setRecommendedIds] = useState<string[]>([]);
   const [alternativeIds, setAlternativeIds] = useState<string[]>([]);
   const [recommendationSource, setRecommendationSource] =
@@ -52,6 +53,14 @@ export default function useCombatSelection({
   const [alternativeCore4History, setAlternativeCore4History] =
     useState<Core4HistoryStats | null>(null);
   const openedEnemyKeyRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    const handleSettingsChanged = () => {
+      setEngineSettingsRevision((current) => current + 1);
+    };
+    window.addEventListener("engine-settings-changed", handleSettingsChanged);
+    return () => window.removeEventListener("engine-settings-changed", handleSettingsChanged);
+  }, []);
 
   const heroesById = useMemo(
     () => new Map(heroes.map((hero) => [hero.id, hero])),
@@ -173,7 +182,7 @@ export default function useCombatSelection({
       setTeamIds(finalRecommendation.map((hero: Hero) => hero.id));
       setShowCounterModal(true);
     },
-    [enabledHeroes, enabledHeroIds, heroes, combats]
+    [enabledHeroes, enabledHeroIds, heroes, combats, engineSettingsRevision]
   );
 
   useEffect(() => {
@@ -206,13 +215,13 @@ export default function useCombatSelection({
     }
 
     const enemyKey = [...enemyIds].sort().join("|");
-    const recommendationKey = `${enemyKey}::${combatHistoryKey}::${enabledHeroKey}`;
+    const recommendationKey = `${enemyKey}::${combatHistoryKey}::${enabledHeroKey}::${engineSettingsRevision}`;
 
     if (openedEnemyKeyRef.current === recommendationKey) return;
 
     openedEnemyKeyRef.current = recommendationKey;
     openCounterModal(enemyIds);
-  }, [enemyIds, combatHistoryKey, enabledHeroKey, openCounterModal]);
+  }, [enemyIds, combatHistoryKey, enabledHeroKey, engineSettingsRevision, openCounterModal]);
 
   const selectRecommendedTeam = useCallback(
     (ids: string[]) => {
