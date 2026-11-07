@@ -330,7 +330,14 @@ export default function CombatHistory({
                   >
                     <option value="">Tous les utilisateurs</option>
                     {userIds.map((userId) => (
-                      <option key={userId} value={userId}>
+                      <option
+                        key={userId}
+                        value={userId}
+                        style={{
+                          backgroundColor: "var(--ui-panel)",
+                          color: "var(--ui-text-primary)",
+                        }}
+                      >
                         {getUserName(userId)}
                       </option>
                     ))}
